@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 檢查用戶是否已有該方案的有效訂閱
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: existingSubscription, error: subError } = await supabase
       .from('subscriptions')
       .select('*')

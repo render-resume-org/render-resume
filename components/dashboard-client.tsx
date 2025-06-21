@@ -6,13 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { FileText, Plus, Upload, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function DashboardClient() {
   const { user } = useAuth();
+  const router = useRouter();
   
   // 檢查用戶是否為 Pro 計劃
   const isProUser = user?.currentPlan?.type?.toLowerCase() === 'pro';
   
+  const handleCreateResume = () => {
+    if (isProUser) {
+      // Pro 用戶可以直接進入創建流程
+      router.push('/upload');
+    } else {
+      // 非 Pro 用戶顯示升級提示
+      toast.info('🌟 此功能需要 Pro 計劃才能使用', {
+        description: '升級到 Pro 計劃即可開始創建專業履歷！',
+        duration: 4000,
+        action: {
+          label: '了解更多',
+          onClick: () => router.push('/settings')
+        }
+      });
+    }
+  };
 
   return (
     <>
@@ -21,24 +40,26 @@ export function DashboardClient() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card className="transition-shadow cursor-pointer">
-          {/* <Link href="/upload"> */}
-            <CardHeader>
-              <div className="flex items-center space-x-2">
-                <Plus className="h-6 w-6 text-cyan-600" />
-                <CardTitle className="text-lg">創建新履歷</CardTitle>
-              </div>
-              <CardDescription>
-                上傳您的作品並讓 AI 生成專業履歷
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {/* <Button disabled className=> */}
-              <Button disabled={!isProUser} variant='outline' className={cn("w-full", isProUser && "bg-cyan-600 hover:bg-cyan-700 text-white hover:text-white")}>
-                開始創建
-                <Upload className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          {/* </Link> */}
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Plus className="h-6 w-6 text-cyan-600" />
+              <CardTitle className="text-lg">創建新履歷</CardTitle>
+            </div>
+            <CardDescription>
+              上傳您的作品並讓 AI 生成專業履歷
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={handleCreateResume}
+              disabled={!isProUser} 
+              variant='outline' 
+              className={cn("w-full", isProUser && "bg-cyan-600 hover:bg-cyan-700 text-white hover:text-white")}
+            >
+              開始創建
+              <Upload className="ml-2 h-4 w-4" />
+            </Button>
+          </CardContent>
         </Card>
 
         <Card className="transition-shadow">
