@@ -1,11 +1,19 @@
 "use client";
 
+import { useAuth } from "@/components/hooks/use-auth";
 import { LogoutRedirectHandler } from "@/components/logout-redirect-handler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Plus, User } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { FileText, Plus, Upload, User } from "lucide-react";
 
 export function DashboardClient() {
+  const { user } = useAuth();
+  
+  // 檢查用戶是否為 Pro 計劃
+  const isProUser = user?.currentPlan?.type?.toLowerCase() === 'pro';
+  
+
   return (
     <>
       <LogoutRedirectHandler />
@@ -24,11 +32,10 @@ export function DashboardClient() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {/* <Button disabled className="w-full bg-cyan-600 hover:bg-cyan-700"> */}
-              <Button disabled variant='outline' className="w-full">
-                {/* 開始創建 */}
-                即將推出
-                {/* <Upload className="ml-2 h-4 w-4" /> */}
+              {/* <Button disabled className=> */}
+              <Button disabled={!isProUser} variant='outline' className={cn("w-full", isProUser && "bg-cyan-600 hover:bg-cyan-700 text-white hover:text-white")}>
+                開始創建
+                <Upload className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           {/* </Link> */}
