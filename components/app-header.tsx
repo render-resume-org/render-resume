@@ -61,7 +61,7 @@ const AppHeader = () => {
       <div className="container mx-auto px-3 sm:px-4 py-3">
         <div className="flex items-center justify-between min-w-0">
           {/* Brand Logo & Name */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+          <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-lg sm:text-2xl">✨</span>
             </div>
