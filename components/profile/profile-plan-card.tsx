@@ -25,6 +25,17 @@ export function ProfilePlanCard({ profileUser, isOwnProfile }: ProfilePlanCardPr
     return new Date(expireAt) < new Date();
   };
 
+  // Default free plan configuration
+  const defaultFreePlan = {
+    type: 'free' as const,
+    title: '免費方案',
+    daily_usage: 3,
+    expire_at: null
+  };
+
+  // Use current plan or default to free plan
+  const displayPlan = profileUser.currentPlan || defaultFreePlan;
+
   return (
     <Card>
       <CardHeader>
@@ -37,40 +48,38 @@ export function ProfilePlanCard({ profileUser, isOwnProfile }: ProfilePlanCardPr
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {profileUser.currentPlan ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <ProBadge planType={profileUser.currentPlan.type} />
-                <p>  
-                {profileUser.currentPlan.title}   
-                </p>
-                {isPlanExpired(profileUser.currentPlan.expire_at) && (
-                  <Badge variant="destructive">已到期</Badge>
-                )}
-              </div>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <Zap className="h-4 w-4 mr-1" />
-                每日 {profileUser.currentPlan.daily_usage || 0} 次額度
-              </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <ProBadge planType={displayPlan.type} />
+              <p>  
+                {displayPlan.title}   
+              </p>
+              {displayPlan.expire_at && isPlanExpired(displayPlan.expire_at) && (
+                <Badge variant="destructive">已到期</Badge>
+              )}
             </div>
-            
-            {profileUser.currentPlan.expire_at && (
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="h-4 w-4 mr-2" />
-                到期日：{formatDate(profileUser.currentPlan.expire_at)}
-              </div>
-            )}
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <Zap className="h-4 w-4 mr-1" />
+              每日 {displayPlan.daily_usage || 0} 次額度
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-            <Crown className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>{isOwnProfile ? "您目前沒有任何訂閱方案" : "該用戶沒有訂閱方案"}</p>
-            {isOwnProfile && (
-              <p className="text-sm">前往設定頁面兌換序號來獲取方案</p>
-            )}
-          </div>
-        )}
+          
+          {displayPlan.expire_at && (
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <Calendar className="h-4 w-4 mr-2" />
+              到期日：{formatDate(displayPlan.expire_at)}
+            </div>
+          )}
+
+          {!profileUser.currentPlan && isOwnProfile && (
+            <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                前往設定頁面兌換序號來升級您的方案
+              </p>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

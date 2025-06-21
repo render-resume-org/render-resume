@@ -313,9 +313,6 @@ export default function SettingsPage() {
                       <Calendar className="h-4 w-4 mr-2 text-cyan-600" />
                       永久有效
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      免費方案，無需兌換序號
-                    </div>
                   </div>
                 </CardContent>
               </Card>
