@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { ProBadge } from "@/components/ui/pro-badge";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,7 +14,7 @@ const AppHeader = () => {
   const pathname = usePathname();
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+  console.log(user);
   // 計算進度
   const getProgress = () => {
     const progressMap: { [key: string]: number } = {
@@ -74,10 +75,12 @@ const AppHeader = () => {
             </div>
           </Link>
 
-          {/* Progress Section - Hidden on mobile, shown on tablet+ */}
+          
+
+          {/* Desktop Progress Section */}
           {progress > 0 && (
-            <div className="hidden md:flex flex-1 max-w-sm lg:max-w-md mx-4 lg:mx-8 min-w-0">
-              <div className="w-full min-w-0">
+            <div className="hidden md:flex flex-1 items-center justify-center max-w-md mx-8 min-w-0">
+              <div className="w-full">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                     {stepName}
@@ -101,7 +104,11 @@ const AppHeader = () => {
             {loading ? (
               <div className="w-6 h-6 border-2 border-gray-300 border-t-cyan-600 rounded-full animate-spin"></div>
             ) : isAuthenticated && user ? (
-              <UserDropdown />
+                <>
+                  {/* Desktop Pro Badge */}
+                  <ProBadge planType={user?.currentPlan?.type} className="hidden md:flex" />
+                  <UserDropdown />
+                </>
             ) : (
               <div className="flex items-center space-x-2 flex-shrink-0">
                 <Button asChild size="sm" variant="outline">
@@ -163,9 +170,46 @@ const AppHeader = () => {
               </div>
             ) : isAuthenticated && user ? (
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 px-2">
-                  <UserDropdown />
+                {/* User Info Display */}
+                <div className="flex items-center justify-between px-2">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-medium text-sm">
+                        {(user.display_name || user.email?.split('@')[0] || 'U')
+                          .split(' ')
+                          .map(word => word[0])
+                          .join('')
+                          .toUpperCase()
+                          .slice(0, 2)}
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {user.display_name || user.email?.split('@')[0] || 'User'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Mobile Pro Badge */}
+                  <ProBadge planType={user?.currentPlan?.type} className="flex-shrink-0" />
                 </div>
+
+                {/* Navigation Links */}
+                <div className="space-y-2 px-2">
+                  <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+                    <Link href={`/profile/${user.id}`} onClick={() => setIsMobileMenuOpen(false)}>
+                      個人資料
+                    </Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="sm" className="w-full justify-start">
+                    <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)}>
+                      設定
+                    </Link>
+                  </Button>
+                </div>
+
                 <Button
                   variant="outline"
                   size="sm"

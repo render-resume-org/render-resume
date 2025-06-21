@@ -36,7 +36,7 @@ export function UserDropdown() {
       .slice(0, 2);
   };
 
-  const displayName = user.display_name || user.email?.split('@')[0] || 'User';
+  const displayName = user.display_name || '';
   const initials = getInitials(displayName);
 
   return (

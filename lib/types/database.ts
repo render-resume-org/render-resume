@@ -36,6 +36,78 @@ export type Database = {
         }
         Relationships: []
       }
+      plans: {
+        Row: {
+          code: string | null
+          created_at: string
+          daily_usage: number
+          duration_days: number | null
+          id: number
+          title: string | null
+          type: string | null
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          daily_usage?: number
+          duration_days?: number | null
+          id?: number
+          title?: string | null
+          type?: string | null
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          daily_usage?: number
+          duration_days?: number | null
+          id?: number
+          title?: string | null
+          type?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expire_at: string | null
+          id: number
+          is_active: boolean
+          plan_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expire_at?: string | null
+          id?: number
+          is_active?: boolean
+          plan_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expire_at?: string | null
+          id?: number
+          is_active?: boolean
+          plan_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -43,6 +115,7 @@ export type Database = {
           display_name: string | null
           email: string | null
           id: string
+          updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -50,6 +123,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -57,6 +131,7 @@ export type Database = {
           display_name?: string | null
           email?: string | null
           id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

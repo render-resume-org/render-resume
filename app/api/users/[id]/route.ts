@@ -20,12 +20,43 @@ export async function GET(
     
     // 如果查看自己的資料，直接返回當前用戶資料
     if (targetUserId === currentUser.id) {
+      // 獲取用戶的當前方案
+      const { data: subscriptions } = await supabase
+        .from('subscriptions')
+        .select(`
+          *,
+          plans:plan_id (*)
+        `)
+        .eq('user_id', currentUser.id)
+        .eq('is_active', true);
+
+      // 找到當前有效的最高級方案
+      const now = new Date().toISOString();
+      const activeSubscriptions = subscriptions?.filter(sub => 
+        !sub.expire_at || sub.expire_at > now
+      ) || [];
+
+      const currentPlan = activeSubscriptions.length > 0 
+        ? activeSubscriptions.reduce((best, current) => {
+            const currentDailyUsage = current.plans?.daily_usage || 0;
+            const bestDailyUsage = best.plans?.daily_usage || 0;
+            return currentDailyUsage > bestDailyUsage ? current : best;
+          })
+        : null;
+
       return NextResponse.json({
         id: currentUser.id,
         email: currentUser.email,
         display_name: currentUser.user_metadata?.display_name,
         avatar_url: currentUser.user_metadata?.avatar_url,
         created_at: currentUser.created_at,
+        currentPlan: currentPlan ? {
+          id: currentPlan.plans?.id,
+          title: currentPlan.plans?.title,
+          type: currentPlan.plans?.type,
+          daily_usage: currentPlan.plans?.daily_usage,
+          expire_at: currentPlan.expire_at,
+        } : null,
       });
     }
 
@@ -46,6 +77,29 @@ export async function GET(
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    // 獲取目標用戶的當前方案（管理員查看）
+    const { data: subscriptions } = await supabase
+      .from('subscriptions')
+      .select(`
+        *,
+        plans:plan_id (*)
+      `)
+      .eq('user_id', targetUserId)
+      .eq('is_active', true);
+
+    const now = new Date().toISOString();
+    const activeSubscriptions = subscriptions?.filter(sub => 
+      !sub.expire_at || sub.expire_at > now
+    ) || [];
+
+    const currentPlan = activeSubscriptions.length > 0 
+      ? activeSubscriptions.reduce((best, current) => {
+          const currentDailyUsage = current.plans?.daily_usage || 0;
+          const bestDailyUsage = best.plans?.daily_usage || 0;
+          return currentDailyUsage > bestDailyUsage ? current : best;
+        })
+      : null;
+
     // 返回目標用戶的公開資料
     return NextResponse.json({
       id: targetUser.id,
@@ -53,10 +107,115 @@ export async function GET(
       display_name: targetUser.display_name,
       avatar_url: targetUser.avatar_url,
       created_at: targetUser.created_at,
+      currentPlan: currentPlan ? {
+        id: currentPlan.plans?.id,
+        title: currentPlan.plans?.title,
+        type: currentPlan.plans?.type,
+        daily_usage: currentPlan.plans?.daily_usage,
+        expire_at: currentPlan.expire_at,
+      } : null,
     });
 
   } catch (error) {
     console.error('Error fetching user:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const supabase = await createClient();
+    
+    // 獲取當前用戶
+    const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !currentUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const targetUserId = params.id;
+    
+    // 只允許用戶更新自己的資料
+    if (targetUserId !== currentUser.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // 解析請求體
+    const body = await request.json();
+    const { display_name } = body;
+
+    // 驗證輸入
+    if (typeof display_name !== 'string') {
+      return NextResponse.json({ error: 'Invalid display_name' }, { status: 400 });
+    }
+
+    // 更新用戶資料到 users 表
+    const { data: updatedUser, error: updateError } = await supabase
+      .from('users')
+      .update({
+        display_name: display_name.trim() || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', currentUser.id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating user:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update profile' },
+        { status: 500 }
+      );
+    }
+
+    // 獲取更新後的用戶方案信息
+    const { data: subscriptions } = await supabase
+      .from('subscriptions')
+      .select(`
+        *,
+        plans:plan_id (*)
+      `)
+      .eq('user_id', currentUser.id)
+      .eq('is_active', true);
+
+    const now = new Date().toISOString();
+    const activeSubscriptions = subscriptions?.filter(sub => 
+      !sub.expire_at || sub.expire_at > now
+    ) || [];
+
+    const currentPlan = activeSubscriptions.length > 0 
+      ? activeSubscriptions.reduce((best, current) => {
+          const currentDailyUsage = current.plans?.daily_usage || 0;
+          const bestDailyUsage = best.plans?.daily_usage || 0;
+          return currentDailyUsage > bestDailyUsage ? current : best;
+        })
+      : null;
+
+    // 返回更新後的用戶資料
+    return NextResponse.json({
+      id: updatedUser.id,
+      email: updatedUser.email,
+      display_name: updatedUser.display_name,
+      avatar_url: updatedUser.avatar_url,
+      created_at: updatedUser.created_at,
+      currentPlan: currentPlan ? {
+        id: currentPlan.plans?.id,
+        title: currentPlan.plans?.title,
+        type: currentPlan.plans?.type,
+        daily_usage: currentPlan.plans?.daily_usage,
+        expire_at: currentPlan.expire_at,
+      } : null,
+    });
+
+  } catch (error) {
+    console.error('Error updating user profile:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

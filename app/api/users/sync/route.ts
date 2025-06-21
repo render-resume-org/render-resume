@@ -59,11 +59,11 @@ export async function POST() {
       userData = newUser;
     } else {
       // Update existing user with latest data from auth
-      const displayName = authUser.user_metadata?.full_name || 
+      const displayName = existingUser.display_name ||
+                         authUser.user_metadata?.full_name || 
                          authUser.user_metadata?.name || 
-                         existingUser.display_name ||
                          authUser.email?.split('@')[0] || 
-                         'User';
+                         '未命名的用戶';
       
       const avatarUrl = authUser.user_metadata?.avatar_url || 
                        authUser.user_metadata?.picture || 
@@ -88,7 +88,43 @@ export async function POST() {
       userData = updatedUser;
     }
 
-    return NextResponse.json({ user: userData });
+    // Get user's current plan
+    const { data: subscriptions } = await supabase
+      .from('subscriptions')
+      .select(`
+        *,
+        plans:plan_id (*)
+      `)
+      .eq('user_id', authUser.id)
+      .eq('is_active', true);
+
+    // Find the current valid highest tier plan
+    const now = new Date().toISOString();
+    const activeSubscriptions = subscriptions?.filter(sub => 
+      !sub.expire_at || sub.expire_at > now
+    ) || [];
+
+    const currentPlan = activeSubscriptions.length > 0 
+      ? activeSubscriptions.reduce((best, current) => {
+          const currentDailyUsage = current.plans?.daily_usage || 0;
+          const bestDailyUsage = best.plans?.daily_usage || 0;
+          return currentDailyUsage > bestDailyUsage ? current : best;
+        })
+      : null;
+
+    // Return user data with current plan
+    const userWithPlan = {
+      ...userData,
+      currentPlan: currentPlan ? {
+        id: currentPlan.plans?.id,
+        title: currentPlan.plans?.title,
+        type: currentPlan.plans?.type,
+        daily_usage: currentPlan.plans?.daily_usage,
+        expire_at: currentPlan.expire_at,
+      } : null,
+    };
+
+    return NextResponse.json({ user: userWithPlan });
   } catch (error) {
     console.error('Error syncing user:', error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

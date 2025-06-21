@@ -10,6 +10,13 @@ interface ExtendedUser extends User {
   display_name?: string;
   avatar_url?: string;
   email?: string;
+  currentPlan?: {
+    id: number;
+    title: string;
+    type: string;
+    daily_usage: number;
+    expire_at: string | null;
+  } | null;
 }
 
 interface AuthState {
@@ -41,7 +48,8 @@ export function useAuth() {
           ...authUser, 
           display_name: dbUser.display_name,
           avatar_url: dbUser.avatar_url,
-          email: dbUser.email
+          email: dbUser.email,
+          currentPlan: dbUser.currentPlan
         };
       } else {
         console.error('Failed to sync user data:', await response.text());
@@ -52,6 +60,27 @@ export function useAuth() {
       return authUser as ExtendedUser;
     }
   }, []);
+
+  // Function to refresh user plan data
+  const refreshUserPlan = useCallback(async () => {
+    if (!authState.user) return;
+
+    try {
+      const response = await fetch(`/api/users/${authState.user.id}`);
+      if (response.ok) {
+        const userData = await response.json();
+        setAuthState(prev => ({
+          ...prev,
+          user: prev.user ? {
+            ...prev.user,
+            currentPlan: userData.currentPlan
+          } : null,
+        }));
+      }
+    } catch (error) {
+      console.error('Error refreshing user plan:', error);
+    }
+  }, [authState.user]);
 
   useEffect(() => {
     // 獲取初始認證狀態
@@ -268,6 +297,56 @@ export function useAuth() {
     }
   };
 
+  // 更新用戶資料
+  const updateProfile = async (data: { display_name: string }) => {
+    try {
+      if (!authState.user) {
+        throw new Error('用戶未登入');
+      }
+
+      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      
+      const response = await fetch(`/api/users/${authState.user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '更新個人資料失敗');
+      }
+      
+      const updatedUser = await response.json();
+      
+      // 更新本地認證狀態
+      setAuthState(prev => ({
+        ...prev,
+        user: prev.user ? {
+          ...prev.user,
+          display_name: updatedUser.display_name,
+          currentPlan: updatedUser.currentPlan
+        } : null,
+        loading: false,
+      }));
+      
+      console.log('✅ [Auth] Profile updated successfully');
+      return updatedUser;
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : '更新個人資料失敗，請重試';
+      
+      setAuthState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  };
+
   // 登出
   const signOut = async () => {
     try {
@@ -341,10 +420,12 @@ export function useAuth() {
     signInWithEmail,
     signInWithGoogle,
     signUpWithEmail,
+    updateProfile,
     signOut,
     resetPassword,
     clearError,
     redirectToDashboard,
     redirectToHome,
+    refreshUserPlan,
   };
 } 
