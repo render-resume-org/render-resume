@@ -1,5 +1,5 @@
 {
-  "name": "wiz-resume",
+  "name": "render-resume",
   "description": "AI-powered resume and portfolio generator",
   "private": true,
   "scripts": {

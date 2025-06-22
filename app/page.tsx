@@ -108,12 +108,14 @@ export default function Home() {
             </div>
           </div>
           
-          <h1 className="mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-            讓 AI 為您打造
-            <span className="text-cyan-600 dark:text-cyan-400">
-              專業履歷
-            </span>
-          </h1>
+          <div className="flex w-full justify-center items-center">
+            <h1 className="text-nowrap mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+              讓 AI 為您打造
+              <span className="text-cyan-600 dark:text-cyan-400">
+                專業履歷
+              </span>
+            </h1>
+          </div>
           
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             基於 Fortune 500 企業標準的 AI 履歷分析系統，採用六維度評估模型，

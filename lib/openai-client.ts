@@ -94,7 +94,6 @@ export const ResumeAnalysisSchema = z.object({
         description: z.string().describe("評分描述"),
         comment: z.string().describe("AI評語"),
         icon: z.string().describe("圖示表情符號"),
-        suggestions: z.array(z.string()).describe("改進建議")
     })).describe("技術履歷細節完整度評分列表")
 });
 
@@ -308,7 +307,7 @@ export class OpenAIClient {
         this.visionModel = new ChatOpenAI({
             apiKey: options.apiKey,
             temperature: this.config.temperature,
-            modelName: "gpt-4o-mini", // 使用支援 Vision 的模型
+            modelName: "gpt-4.1-mini", // 使用支援 Vision 的模型
         });
 
         // Initialize structured output models with LangChain native validation
@@ -517,7 +516,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
 - achievements: 成就列表
 - achievements_summary: 成就摘要
 - missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions）
-- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）
+- scores: 評分列表（每個評分包含 category, grade, description, comment, icon）
 
 特別注意：
 1. 對於圖片中的履歷或作品集，請盡可能保留所有可見細節

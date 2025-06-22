@@ -15,7 +15,7 @@ interface PlanBadgeProps {
 
 export function ProBadge({ planType, className = "", size = 'md', userPlan }: PlanBadgeProps) {
   const [clickCount, setClickCount] = useState(0);
-
+ 
   const getPlanBadgeColor = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'pro':

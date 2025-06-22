@@ -49,7 +49,7 @@ export default function ResultsPage() {
   // Helper function to extract all skills
   const allSkills = React.useMemo(() => {
     if (!analysisResult) return [];
-    const skills: string[] = [];
+    const skills: string[] = analysisResult.expertise;
     analysisResult.projects.forEach(p => {
       if (p.technologies) skills.push(...p.technologies);
     });
