@@ -227,7 +227,10 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <ProBadge planType={currentPlan.plans?.type} />
+                    <ProBadge 
+                      planType={currentPlan.plans?.type} 
+                      userPlan={currentPlan?.plans?.type || 'free'} 
+                    />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {currentPlan.plans?.title || '未知方案'}
                     </span>
@@ -257,7 +260,10 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <ProBadge planType={freePlan.type} />
+                    <ProBadge 
+                      planType={freePlan.type} 
+                      userPlan="free"
+                    />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {freePlan.title}
                     </span>
@@ -299,7 +305,10 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{freePlan.title}</CardTitle>
                     <div className="flex items-center space-x-2">
-                      <ProBadge planType={freePlan.type} />
+                      <ProBadge 
+                        planType={freePlan.type} 
+                        userPlan={currentPlan?.plans?.type || 'free'} 
+                      />
                     </div>
                   </div>
                 </CardHeader>
@@ -324,7 +333,10 @@ export default function SettingsPage() {
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{plan.title}</CardTitle>
                       <div className="flex items-center space-x-2">
-                        <ProBadge planType={plan.type} />
+                        <ProBadge 
+                          planType={plan.type} 
+                          userPlan={currentPlan?.plans?.type || 'free'} 
+                        />
                       </div>
                     </div>
                   </CardHeader>
@@ -371,7 +383,10 @@ export default function SettingsPage() {
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
                     <div className="flex items-center space-x-3">
-                      <ProBadge planType={subscription.plans?.type} />
+                      <ProBadge 
+                        planType={subscription.plans?.type} 
+                        userPlan={currentPlan?.plans?.type || 'free'} 
+                      />
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
                         {subscription.plans?.title || '未知方案'}
                       </span>

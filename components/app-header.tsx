@@ -106,7 +106,11 @@ const AppHeader = () => {
             ) : isAuthenticated && user ? (
                 <>
                   {/* Desktop Pro Badge */}
-                  <ProBadge planType={user?.currentPlan?.type} className="hidden md:flex" />
+                  <ProBadge 
+                    planType={user?.currentPlan?.type} 
+                    userPlan={user?.currentPlan?.type} 
+                    className="hidden md:flex" 
+                  />
                   <UserDropdown />
                 </>
             ) : (
@@ -193,7 +197,11 @@ const AppHeader = () => {
                     </div>
                   </div>
                   {/* Mobile Pro Badge */}
-                  <ProBadge planType={user?.currentPlan?.type} className="flex-shrink-0" />
+                  <ProBadge 
+                    planType={user?.currentPlan?.type} 
+                    userPlan={user?.currentPlan?.type} 
+                    className="flex-shrink-0" 
+                  />
                 </div>
 
                 {/* Navigation Links */}

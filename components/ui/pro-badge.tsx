@@ -10,9 +10,10 @@ interface PlanBadgeProps {
   planType?: string;
   className?: string;
   size?: 'sm' | 'md' | 'lg';
+  userPlan?: string;
 }
 
-export function ProBadge({ planType, className = "", size = 'md' }: PlanBadgeProps) {
+export function ProBadge({ planType, className = "", size = 'md', userPlan }: PlanBadgeProps) {
   const [clickCount, setClickCount] = useState(0);
 
   const getPlanBadgeColor = (type: string) => {
@@ -65,6 +66,37 @@ export function ProBadge({ planType, className = "", size = 'md' }: PlanBadgePro
     return null;
   };
 
+  const getCrossPlanMessage = (badgeType: string, userPlanType: string, count: number) => {
+    const badgeLower = badgeType?.toLowerCase();
+    const userPlanLower = userPlanType?.toLowerCase();
+
+    // Free 用戶點擊 Pro badge
+    if (userPlanLower === 'free' && badgeLower === 'pro') {
+      const messages = [
+        '✨ 看起來很閃亮吧？考慮升級？',
+        '🌟 這個金光閃閃的徽章可以是你的！',
+        '💎 Pro 徽章在向你招手呢～',
+        '🚀 想要體驗 Pro 的魔法嗎？',
+        '👑 皇冠就在眼前，要不要戴上？'
+      ];
+      return messages[count % messages.length];
+    }
+
+    // Pro 用戶點擊 Free badge
+    if (userPlanLower === 'pro' && badgeLower === 'free') {
+      const messages = [
+        '🤔 你都有 Pro 了還想著 Free plan？',
+        '😏 懷念免費的日子嗎？',
+        '🎭 Pro 會員體驗平民生活？',
+        '💭 回憶當年免費使用的美好時光？',
+        '🙃 已經是 Pro 了還要點 Free？你真有趣！'
+      ];
+      return messages[count % messages.length];
+    }
+
+    return null;
+  };
+
   const getPlanConfig = (type: string) => {
     switch (type?.toLowerCase()) {
       case 'pro':
@@ -103,6 +135,17 @@ export function ProBadge({ planType, className = "", size = 'md' }: PlanBadgePro
   const handleClick = () => {
     const newCount = clickCount + 1;
     setClickCount(newCount);
+
+    // 檢查是否為跨方案點擊（用戶方案與徽章類型不同）
+    const crossPlanMessage = userPlan ? getCrossPlanMessage(planType, userPlan, newCount) : null;
+    
+    if (crossPlanMessage) {
+      toast.success(crossPlanMessage, {
+        duration: 4000,
+        position: 'top-center',
+      });
+      return;
+    }
 
     // Check for easter egg messages
     const easterEggMessage = getEasterEggMessage(planType, newCount);

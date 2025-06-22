@@ -51,7 +51,10 @@ export function ProfilePlanCard({ profileUser, isOwnProfile }: ProfilePlanCardPr
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <ProBadge planType={displayPlan.type} />
+              <ProBadge 
+                planType={displayPlan.type} 
+                userPlan={profileUser.currentPlan?.type || 'free'} 
+              />
               <p>  
                 {displayPlan.title}   
               </p>
