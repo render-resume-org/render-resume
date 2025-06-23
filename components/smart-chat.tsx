@@ -4,135 +4,94 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
-import { AnalysisScore, ChatMessage, SmartQuestion, fetchSmartQuestions, generateAIResponse } from "@/lib/mock-data";
+import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Send, User } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Check, Edit3, Send, User, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// 聊天消息類型
+export interface ChatMessage {
+  id: string;
+  type: 'ai' | 'user';
+  content: string;
+  timestamp: Date;
+  encouragement?: string;
+}
+
+// 用戶回答和對應問題的狀態
+export interface ChatState {
+  question: string;
+  userResponse: string;
+  questionIndex: number;
+}
 
 interface SmartChatProps {
-  analysisScores: AnalysisScore[];
-  onComplete: (chatHistory: ChatMessage[]) => void;
+  analysisResult: ResumeAnalysisResult;
+  onComplete: (chatHistory: ChatMessage[], chatStates: ChatState[]) => void;
   onSkip: () => void;
 }
 
-// 問題模板 - 可以輕鬆替換為 API 調用
-const QUESTION_TEMPLATES = {
-  // 工作經驗相關問題
-  work_experience: [
-    "請詳細描述您在 [公司名稱] 擔任 [職位] 期間的主要職責和成就？",
-    "您在工作中遇到過什麼挑戰，是如何解決的？能分享具體的例子嗎？",
-    "您有沒有帶領團隊或跨部門協作的經驗？具體是什麼情況？",
-    "在您的工作經歷中，有哪些量化的成果可以分享？比如提升效率、節省成本等。"
-  ],
-  
-  // 技能專長相關問題
-  skills: [
-    "您最擅長的技術棧是什麼？在實際項目中是如何應用的？",
-    "您有哪些認證或證書可以證明您的專業能力？",
-    "您是如何持續學習和更新技術知識的？最近學習了什麼新技術？",
-    "除了技術技能，您認為自己在軟技能方面有什麼優勢？"
-  ],
-  
-  // 項目作品相關問題
-  projects: [
-    "請介紹您最自豪的一個項目，包括技術架構、您的角色和最終成果。",
-    "這個項目中您遇到了什麼技術難題？是如何解決的？",
-    "項目的用戶規模和影響力如何？有具體的數據嗎？",
-    "您在這個項目中學到了什麼？對您的職業發展有什麼幫助？"
-  ],
-  
-  // 個人發展相關問題
-  personal_development: [
-    "您的職業目標是什麼？希望在未來 3-5 年達到什麼樣的職位？",
-    "您認為自己的核心競爭力是什麼？與其他候選人相比有什麼優勢？",
-    "您如何平衡工作和個人成長？有什麼學習計劃嗎？",
-    "您對目標公司和職位有什麼了解？為什麼想要這個機會？"
-  ],
-  
-  // 成果驗證相關問題
-  achievements: [
-    "您有作品集或 GitHub 可以展示您的能力嗎？",
-    "您有沒有獲得過同事、主管或客戶的正面評價？",
-    "您參與過哪些有影響力的項目或活動？",
-    "您有沒有發表過文章、演講或參與開源項目的經驗？"
-  ]
-};
-
-// 預設 AI 回應模板
+// AI 鼓勵話語模板 - 年輕活潑但專業的語調
 const AI_RESPONSE_TEMPLATES = [
-  "很棒的分享！這個經驗非常有價值，讓我們繼續深入了解。",
-  "感謝您的詳細說明，這些資訊對履歷優化很有幫助。",
-  "這是一個很好的例子，能展現您的專業能力。",
-  "您的經驗很豐富，我們可以進一步優化表達方式。",
-  "非常好！這樣的具體數據會讓履歷更有吸引力。"
+  "太棒了！這個經驗聽起來很有價值呢～ 💪",
+  "哇，這個回答很棒！我已經更了解你的背景了 ✨",
+  "很好很好！這些細節對履歷優化超有幫助的 🎯",
+  "收到收到！你的經驗真的很豐富耶 🚀",
+  "讚！這樣的具體描述會讓履歷更亮眼 ⭐",
+  "了解了！這個經歷聽起來很精彩 🎉",
+  "很棒的分享！這些資訊對我們很有用 👍",
+  "Perfect！這正是我需要知道的資訊 💯"
 ];
 
-// 獲取隨機問題模板
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getRandomQuestionTemplate = (category?: string): string => {
-  const templates = QUESTION_TEMPLATES[category as keyof typeof QUESTION_TEMPLATES] || QUESTION_TEMPLATES.personal_development;
-  return templates[Math.floor(Math.random() * templates.length)];
-};
-
 // 獲取隨機 AI 回應
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getRandomAIResponse = (): string => {
   return AI_RESPONSE_TEMPLATES[Math.floor(Math.random() * AI_RESPONSE_TEMPLATES.length)];
 };
 
-export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartChatProps) {
+export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentInput, setCurrentInput] = useState('');
-  const [currentQuestion, setCurrentQuestion] = useState<SmartQuestion | null>(null);
-  const [availableQuestions, setAvailableQuestions] = useState<SmartQuestion[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [questionsAsked, setQuestionsAsked] = useState(0);
-  const [messageCounter, setMessageCounter] = useState(0);
+  const [chatStates, setChatStates] = useState<ChatState[]>([]);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const messageCounterRef = useRef(0);
 
-  const maxQuestions = 5; // 最多問5個問題
+  // 從分析結果中獲取 follow_ups 問題
+  const followUpQuestions = useMemo(() => analysisResult.missing_content?.follow_ups || [], [analysisResult]);
 
   const generateUniqueId = useCallback((prefix: string) => {
-    setMessageCounter(prev => prev + 1);
-    return `${prefix}-${Date.now()}-${messageCounter}`;
-  }, [messageCounter]);
+    messageCounterRef.current += 1;
+    return `${prefix}-${Date.now()}-${messageCounterRef.current}`;
+  }, []);
 
-  const initializeChat = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const questions = await fetchSmartQuestions(analysisScores);
-      setAvailableQuestions(questions);
-      
-      if (questions.length > 0) {
-        const firstQuestion = questions[0];
-        setCurrentQuestion(firstQuestion);
-        
-        // 添加AI的開場白和第一個問題
-        const welcomeMessage: ChatMessage = {
-          id: generateUniqueId('ai-welcome'),
-          type: 'ai',
-          content: `您好！我是您的AI履歷顧問。基於分析結果，我發現有幾個地方可以進一步優化。讓我問您一些問題來幫助您完善履歷內容。`,
-          timestamp: new Date()
-        };
-
-        const questionMessage: ChatMessage = {
-          id: generateUniqueId('ai-question'),
-          type: 'ai',
-          content: firstQuestion.question,
-          timestamp: new Date()
-        };
-
-        setMessages([welcomeMessage, questionMessage]);
-        setQuestionsAsked(1);
-      }
-    } catch (error) {
-      console.error('Failed to initialize chat:', error);
-    } finally {
-      setIsLoading(false);
+  const initializeChat = useCallback(() => {
+    if (followUpQuestions.length === 0) {
+      return;
     }
-  }, [analysisScores, generateUniqueId]);
+
+    // 添加AI的開場白和第一個問題
+    const welcomeMessage: ChatMessage = {
+      id: generateUniqueId('ai-welcome'),
+      type: 'ai',
+      content: `嗨！我是你的 AI 履歷小助手 🤖\n\n剛剛分析了你的履歷，發現有幾個地方可以更完整一些！讓我問你幾個問題來幫你優化內容吧～`,
+      timestamp: new Date()
+    };
+
+    const firstQuestionMessage: ChatMessage = {
+      id: generateUniqueId('ai-question'),
+      type: 'ai',
+      content: followUpQuestions[0],
+      timestamp: new Date()
+    };
+
+    setMessages([welcomeMessage, firstQuestionMessage]);
+  }, [followUpQuestions, generateUniqueId]);
 
   useEffect(() => {
     initializeChat();
@@ -148,8 +107,71 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
     }
   }, [messages]);
 
+  // 開始編輯訊息
+  const handleStartEdit = (messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditingContent(content);
+    setTimeout(() => {
+      if (editTextareaRef.current) {
+        editTextareaRef.current.focus();
+        editTextareaRef.current.setSelectionRange(content.length, content.length);
+      }
+    }, 100);
+  };
+
+  // 取消編輯
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditingContent('');
+  };
+
+  // 確認編輯
+  const handleConfirmEdit = () => {
+    if (!editingContent.trim() || !editingMessageId) return;
+
+    // 更新訊息內容
+    setMessages(prev => prev.map(msg => 
+      msg.id === editingMessageId 
+        ? { ...msg, content: editingContent.trim(), timestamp: new Date() }
+        : msg
+    ));
+
+    // 同時更新對應的 chatStates
+    setChatStates(prev => prev.map(state => {
+      const correspondingMessage = messages.find(msg => 
+        msg.id === editingMessageId && msg.type === 'user'
+      );
+      if (correspondingMessage) {
+        // 找到對應的問題索引來更新正確的 chatState
+        const messageIndex = messages.findIndex(msg => msg.id === editingMessageId);
+        const questionsBefore = messages.slice(0, messageIndex).filter(msg => 
+          msg.type === 'ai' && msg.content !== messages[0]?.content // 排除歡迎訊息
+        ).length - 1; // 減去歡迎後的第一個問題
+        
+        if (state.questionIndex === questionsBefore) {
+          return { ...state, userResponse: editingContent.trim() };
+        }
+      }
+      return state;
+    }));
+
+    setEditingMessageId(null);
+    setEditingContent('');
+  };
+
+  // 編輯時的按鍵處理
+  const handleEditKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleConfirmEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!currentInput.trim() || !currentQuestion || isLoading) return;
+    if (!currentInput.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
       id: generateUniqueId('user'),
@@ -159,6 +181,15 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
     };
 
     setMessages(prev => [...prev, userMessage]);
+
+    // 記錄當前的問答狀態
+    const newChatState: ChatState = {
+      question: followUpQuestions[currentQuestionIndex],
+      userResponse: currentInput.trim(),
+      questionIndex: currentQuestionIndex
+    };
+    setChatStates(prev => [...prev, newChatState]);
+
     setCurrentInput('');
     setIsLoading(true);
 
@@ -168,50 +199,57 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
     }
 
     try {
-      const response = await generateAIResponse(currentInput, currentQuestion);
+      // 模擬 0.3 秒延遲
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // 添加AI的鼓勵回應
       const encouragementMessage: ChatMessage = {
         id: generateUniqueId('ai-encouragement'),
         type: 'ai',
-        content: response.encouragement,
-        timestamp: new Date(),
-        encouragement: response.encouragement
+        content: getRandomAIResponse(),
+        timestamp: new Date()
       };
 
       setMessages(prev => [...prev, encouragementMessage]);
 
       // 檢查是否還有問題要問
-      if (questionsAsked < maxQuestions && response.nextQuestion) {
+      const nextQuestionIndex = currentQuestionIndex + 1;
+      if (nextQuestionIndex < followUpQuestions.length) {
+        // 再延遲 0.3 秒後問下一個問題
         setTimeout(() => {
           const nextQuestionMessage: ChatMessage = {
             id: generateUniqueId('ai-question'),
             type: 'ai',
-            content: response.nextQuestion!.question,
+            content: followUpQuestions[nextQuestionIndex],
             timestamp: new Date()
           };
 
           setMessages(prev => [...prev, nextQuestionMessage]);
-          setCurrentQuestion(response.nextQuestion!);
-          setQuestionsAsked(prev => prev + 1);
-        }, 1000);
+          setCurrentQuestionIndex(nextQuestionIndex);
+          
+          // 自動 focus 到輸入框，提升用戶體驗
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.focus();
+            }
+          }, 100);
+        }, 300);
       } else {
         // 結束對話
         setTimeout(() => {
           const endMessage: ChatMessage = {
             id: generateUniqueId('ai-end'),
             type: 'ai',
-            content: '謝謝您的詳細回答！這些資訊對優化您的履歷非常有幫助。現在讓我們看看優化後的建議。',
+            content: '太棒了！謝謝你的詳細回答 🎉\n\n這些資訊對優化你的履歷超有幫助的！現在讓我們來看看根據你的回答生成的優化建議吧～',
             timestamp: new Date()
           };
 
           setMessages(prev => {
             const finalMessages = [...prev, endMessage];
-            setTimeout(() => onComplete(finalMessages), 1500);
+            setTimeout(() => onComplete(finalMessages, [...chatStates, newChatState]), 3000);
             return finalMessages;
           });
-          setCurrentQuestion(null);
-        }, 1000);
+        }, 300);
       }
     } catch (error) {
       console.error('Failed to generate AI response:', error);
@@ -278,7 +316,7 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
     }
   };
 
-  if (availableQuestions.length === 0 && !isLoading) {
+  if (followUpQuestions.length === 0 && !isLoading) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
@@ -308,7 +346,7 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
             AI 智慧問答
           </div>
           <div className="text-sm text-gray-500">
-            {questionsAsked}/{maxQuestions}
+            {currentQuestionIndex + 1}/{followUpQuestions.length}
           </div>
         </CardTitle>
         <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
@@ -350,13 +388,59 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                         )}
                       >
-                        <p className="text-sm whitespace-pre-wrap chat-message-content">{message.content}</p>
-                        <p className="text-xs opacity-70 mt-1">
-                          {message.timestamp.toLocaleTimeString('zh-TW', { 
-                            hour: '2-digit', 
-                            minute: '2-digit' 
-                          })}
-                        </p>
+                        {editingMessageId === message.id ? (
+                          // 編輯模式
+                          <div className="space-y-2">
+                            <Textarea
+                              ref={editTextareaRef}
+                              value={editingContent}
+                              onChange={(e) => setEditingContent(e.target.value)}
+                              onKeyPress={handleEditKeyPress}
+                              className="min-h-[60px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                              placeholder="編輯您的回答..."
+                            />
+                            <div className="flex space-x-2 justify-end">
+                              <Button
+                                size="sm"
+                                onClick={handleCancelEdit}
+                                className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={handleConfirmEdit}
+                                disabled={!editingContent.trim()}
+                                className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          // 正常顯示模式
+                          <div className="group">
+                            <div className="flex items-start justify-between">
+                              <p className="text-sm whitespace-pre-wrap chat-message-content flex-1">{message.content}</p>
+                              {message.type === 'user' && !isLoading && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => handleStartEdit(message.id, message.content)}
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 h-6 w-6 p-0 text-white/70 hover:text-white hover:bg-cyan-700"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
+                            <p className="text-xs opacity-70 mt-1">
+                              {message.timestamp.toLocaleTimeString('zh-TW', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -401,28 +485,26 @@ export default function SmartChat({ analysisScores, onComplete, onSkip }: SmartC
         </div>
 
         {/* 輸入區域 */}
-        {currentQuestion && (
-          <div className="flex space-x-2 items-end">
-            <Textarea
-              ref={textareaRef}
-              value={currentInput}
-              onChange={handleTextareaChange}
-              onKeyPress={handleKeyPress}
-              placeholder="輸入您的回答... (Shift+Enter 換行，Enter 發送)"
-              disabled={isLoading}
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-              rows={1}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!currentInput.trim() || isLoading}
-              size="icon"
-              className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
+        <div className="flex space-x-2 items-end">
+          <Textarea
+            ref={textareaRef}
+            value={currentInput}
+            onChange={handleTextareaChange}
+            onKeyPress={handleKeyPress}
+            placeholder="輸入您的回答... (Shift+Enter 換行，Enter 發送)"
+            disabled={isLoading}
+            className="flex-1 min-h-[40px] max-h-[120px] resize-none"
+            rows={1}
+          />
+          <Button
+            onClick={handleSendMessage}
+            disabled={!currentInput.trim() || isLoading}
+            size="icon"
+            className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

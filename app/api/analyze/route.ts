@@ -1,9 +1,28 @@
+import { requireProUser } from '@/lib/auth/server';
 import type { DocumentUpload } from '@/lib/openai-client-native';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES, validateFileType } from '@/lib/openai-client-native';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
     console.log('🚀 [API] POST /api/analyze - Request received (using Native OpenAI Client)');
+    
+    // 驗證用戶是否為 Pro 用戶
+    console.log('🔐 [API] Checking Pro user authentication');
+    const authResult = await requireProUser();
+    
+    if (!authResult.isAuthenticated || !authResult.isProUser) {
+        console.error('❌ [API] Access denied:', authResult.error);
+        return NextResponse.json(
+            { 
+                error: authResult.error || '此功能僅限 Pro 用戶使用',
+                requiresProPlan: !authResult.isProUser,
+                requiresAuth: !authResult.isAuthenticated
+            },
+            { status: authResult.isAuthenticated ? 403 : 401 }
+        );
+    }
+    
+    console.log('✅ [API] Pro user authenticated:', authResult.user?.email);
     
     try {
         const contentType = request.headers.get('content-type') || '';
@@ -12,7 +31,7 @@ export async function POST(request: NextRequest) {
         // 處理文件上傳 (multipart/form-data)
         if (contentType.includes('multipart/form-data')) {
             console.log('📁 [API] Handling file upload request');
-            return await handleFileUpload(request);
+            return await handleFileUpload(request, authResult.user!);
         }
         
         console.log('📝 [API] Handling JSON request');
@@ -85,8 +104,8 @@ export async function POST(request: NextRequest) {
 }
 
 // 處理文件上傳的函數
-async function handleFileUpload(request: NextRequest) {
-    console.log('📁 [API] Starting file upload handling');
+async function handleFileUpload(request: NextRequest, user: { id: string; email: string }) {
+    console.log('📁 [API] Starting file upload handling for user:', user.email);
     
     try {
         const formData = await request.formData();
@@ -101,7 +120,8 @@ async function handleFileUpload(request: NextRequest) {
             fileNames: files.map(f => f.name),
             fileSizes: files.map(f => f.size),
             additionalText: additionalText ? 'provided' : 'none',
-            useVision
+            useVision,
+            userId: user.id
         });
 
         if (files.length === 0) {
@@ -197,7 +217,8 @@ async function handleFileUpload(request: NextRequest) {
                 filesProcessed: files.length,
                 fileNames: files.map(f => f.name),
                 useVision,
-                totalSize: files.reduce((sum, file) => sum + file.size, 0)
+                totalSize: files.reduce((sum, file) => sum + file.size, 0),
+                userId: user.id
             }
         });
 

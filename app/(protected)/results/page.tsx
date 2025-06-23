@@ -205,6 +205,14 @@ export default function ResultsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleGoToSmartChat = () => {
+    // 確保分析結果已保存到 sessionStorage
+    if (analysisResult) {
+      sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
+    }
+    router.push('/smart-chat');
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
@@ -263,28 +271,83 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
+          {/* 進度指示器 */}
+          <div className="max-w-4xl mx-auto mb-8">
+            <Card className="bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-cyan-700 dark:text-cyan-400">
+                  優化流程
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="flex items-center space-x-4 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
+                      ✓
+                    </div>
+                    <span className="text-gray-600 dark:text-gray-300">履歷分析</span>
+                  </div>
+                  <div className="flex-1 h-px bg-cyan-300 dark:bg-cyan-700"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 text-gray-500 rounded-full flex items-center justify-center text-xs">
+                      2
+                    </div>
+                    <span className="text-gray-500 dark:text-gray-400">AI 問答</span>
+                  </div>
+                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 text-gray-500 rounded-full flex items-center justify-center text-xs">
+                      3
+                    </div>
+                    <span className="text-gray-500 dark:text-gray-400">優化建議</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           {/* 分析評分組件 */}
           <div className="mb-12">
             <AnalysisScores scores={analysisScores} />
           </div>
 
           {/* Bottom Actions */}
-          <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
             <Button 
               variant="outline" 
               onClick={handleBackToResults}
-              className="flex items-center"
+              className="flex items-center order-1 md:order-none"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               返回辨識結果
             </Button>
             
-            <Button 
-              onClick={handleNewAnalysis}
-              className="bg-cyan-600 hover:bg-cyan-700 text-white"
-            >
-              開始新的分析
-            </Button>
+            <div className="flex flex-col md:flex-row gap-4 order-2 md:order-none">
+              {/* 檢查是否有 follow_ups 問題來決定是否顯示 Smart Chat 按鈕 */}
+              {analysisResult?.missing_content?.follow_ups && analysisResult.missing_content.follow_ups.length > 0 ? (
+                <Button 
+                  onClick={handleGoToSmartChat}
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center"
+                >
+                  <span className="text-lg mr-2">🤖</span>
+                  AI 智慧問答
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => router.push('/suggestions')}
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center"
+                >
+                  <span className="text-lg mr-2">✨</span>
+                  查看優化建議
+                </Button>
+              )}
+              <Button 
+                onClick={handleNewAnalysis}
+                variant="outline"
+              >
+                開始新的分析
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -711,6 +774,28 @@ export default function ResultsPage() {
               <Eye className="h-4 w-4 mr-2" />
               查看分析評分
             </Button>
+            
+            {/* 智慧導航：如果有 follow_ups 問題，顯示 Smart Chat 按鈕；否則直接顯示建議按鈕 */}
+            {analysisResult?.missing_content?.follow_ups && analysisResult.missing_content.follow_ups.length > 0 ? (
+              <Button 
+                onClick={handleGoToSmartChat}
+                variant="outline"
+                className="flex items-center border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-950/30"
+              >
+                <span className="text-lg mr-2">🤖</span>
+                AI 智慧問答
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => router.push('/suggestions')}
+                variant="outline"
+                className="flex items-center border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-950/30"
+              >
+                <span className="text-lg mr-2">✨</span>
+                優化建議
+              </Button>
+            )}
+            
             <Button 
               onClick={handleNewAnalysis}
               variant="outline"

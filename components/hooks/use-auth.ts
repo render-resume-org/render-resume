@@ -10,6 +10,7 @@ interface ExtendedUser extends User {
   display_name?: string;
   avatar_url?: string;
   email?: string;
+  welcome_email_sent?: boolean;
   currentPlan?: {
     id: number;
     title: string;
@@ -49,6 +50,7 @@ export function useAuth() {
           display_name: dbUser.display_name,
           avatar_url: dbUser.avatar_url,
           email: dbUser.email,
+          welcome_email_sent: dbUser.welcome_email_sent,
           currentPlan: dbUser.currentPlan
         };
       } else {
@@ -73,6 +75,7 @@ export function useAuth() {
           ...prev,
           user: prev.user ? {
             ...prev.user,
+            welcome_email_sent: userData.welcome_email_sent,
             currentPlan: userData.currentPlan
           } : null,
         }));
@@ -152,7 +155,11 @@ export function useAuth() {
           const timeDifference = now.getTime() - userCreatedAt.getTime();
           const isNewUser = timeDifference < 60000; // 如果創建時間在1分鐘內，視為新用戶
           
-          if (isNewUser) {
+          // 同步用戶資料以獲取 welcome_email_sent 狀態
+          const syncedUser = await syncUserData(session.user);
+          
+          // 只有在新用戶且尚未發送歡迎郵件時才發送
+          if (isNewUser && !syncedUser.welcome_email_sent) {
             try {
               const userName = session.user.user_metadata?.full_name || 
                              session.user.user_metadata?.name || 
@@ -171,8 +178,21 @@ export function useAuth() {
               
               if (response.ok) {
                 console.log('✅ [Auth] Waitlist welcome email sent for new user');
+                // 更新本地狀態以反映歡迎郵件已發送
+                setAuthState(prev => ({
+                  ...prev,
+                  user: prev.user ? {
+                    ...prev.user,
+                    welcome_email_sent: true
+                  } : null,
+                }));
               } else {
-                console.warn('⚠️ [Auth] Failed to send waitlist welcome email for new user:', await response.text());
+                const responseData = await response.json();
+                if (responseData.alreadySent) {
+                  console.log('ℹ️ [Auth] Welcome email already sent for user');
+                } else {
+                  console.warn('⚠️ [Auth] Failed to send waitlist welcome email for new user:', responseData.error);
+                }
               }
             } catch (emailError) {
               console.error('❌ [Auth] Error sending waitlist welcome email for new user:', emailError);
@@ -276,7 +296,12 @@ export function useAuth() {
         if (response.ok) {
           console.log('✅ [Auth] Waitlist welcome email sent successfully');
         } else {
-          console.warn('⚠️ [Auth] Failed to send waitlist welcome email:', await response.text());
+          const responseData = await response.json();
+          if (responseData.alreadySent) {
+            console.log('ℹ️ [Auth] Welcome email already sent for user');
+          } else {
+            console.warn('⚠️ [Auth] Failed to send waitlist welcome email:', responseData.error);
+          }
         }
       } catch (emailError) {
         // 即使發送郵件失敗，也不應該影響註冊流程
@@ -325,6 +350,7 @@ export function useAuth() {
         user: prev.user ? {
           ...prev.user,
           display_name: updatedUser.display_name,
+          welcome_email_sent: updatedUser.welcome_email_sent,
           currentPlan: updatedUser.currentPlan
         } : null,
         loading: false,

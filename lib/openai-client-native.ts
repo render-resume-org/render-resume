@@ -82,7 +82,8 @@ export const ResumeAnalysisSchema = z.object({
         critical_missing: z.array(z.string()).describe("關鍵缺失項目"),
         recommended_additions: z.array(z.string()).describe("建議補充內容"),
         impact_analysis: z.string().describe("缺失內容對整體評估的影響分析"),
-        priority_suggestions: z.array(z.string()).describe("優先補強建議")
+        priority_suggestions: z.array(z.string()).describe("優先補強建議"),
+        follow_ups: z.array(z.string()).describe("互動式後續問題，協助補齊缺失資料")
     }).describe("缺失內容分析"),
     scores: z.array(z.object({
         category: z.string().describe("評分類別"),
@@ -446,7 +447,7 @@ export class NativeOpenAIClient {
 - education_summary: 教育背景摘要
 - achievements: 成就列表
 - achievements_summary: 成就摘要
-- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions）
+- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）
 - scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）
 
 **重要提醒 - 必須包含所有 6 個評分類別**：
@@ -471,6 +472,7 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
 6. 評分的 comment 欄位必須嚴格遵循 CoT 推理格式，包含【推理過程】、【最終評分】、【改進建議】三個部分
 7. 對於完全無法提取內容的項目，仍要給予評分與回饋，但評分為 F
 8. **必須確保 scores 陣列包含上述所有 6 個類別，不可遺漏任何一個**
+9. **missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」**
 
 **強制 F 評分規則**：
 - 如果「技術深度與廣度」類別完全無法從履歷中提取到任何技能、專案技術棧或工作中使用的技術，必須給予 F 評分
@@ -574,6 +576,7 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
                         missingContent.critical_missing = stringToArray(missingContent.critical_missing);
                         missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
                         missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
+                        missingContent.follow_ups = stringToArray(missingContent.follow_ups);
                         
                         console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
                     }
@@ -699,11 +702,13 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
                                 recommended_additions: string[];
                                 impact_analysis: string;
                                 priority_suggestions: string[];
+                                follow_ups: string[];
                             }) || {
                                 critical_missing: ['完整的履歷內容'],
                                 recommended_additions: ['詳細的工作經驗', '專案描述', '技能列表'],
                                 impact_analysis: '缺乏關鍵資訊影響整體評估',
-                                priority_suggestions: ['補充工作經驗詳情', '加強專案描述']
+                                priority_suggestions: ['補充工作經驗詳情', '加強專案描述'],
+                                follow_ups: ['請提供更多相關資料']
                             },
                             scores: Array.isArray(processedObj.scores) ? (processedObj.scores as Array<{
                                 category: string;
@@ -1005,7 +1010,7 @@ ${additionalText || "無"}
 - education_summary: 教育背景摘要
 - achievements: 成就列表
 - achievements_summary: 成就摘要
-- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions）
+- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）
 - scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）
 
 **重要提醒 - 必須包含所有 6 個評分類別**：
@@ -1047,6 +1052,7 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
 6. 評分的 comment 欄位必須嚴格遵循 CoT 推理格式，包含【推理過程】、【最終評分】、【改進建議】三個部分
 7. 對於完全無法提取內容的項目，仍要給予評分與回饋，但評分為 F
 8. projects 和 work_experiences 都必須包含 technologies 欄位，並且必須是字串陣列
+9. **missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」**
 
 **強制 F 評分規則**：
 - 如果「技術深度與廣度」類別完全無法從履歷中提取到任何技能、專案技術棧或工作中使用的技術，必須給予 F 評分
@@ -1158,6 +1164,7 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
                         missingContent.critical_missing = stringToArray(missingContent.critical_missing);
                         missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
                         missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
+                        missingContent.follow_ups = stringToArray(missingContent.follow_ups);
                         
                         console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
                     }
@@ -1224,7 +1231,8 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
                                 critical_missing: ['履歷資訊不完整'],
                                 recommended_additions: ['建議補充更多資訊'],
                                 impact_analysis: '資訊不足，無法進行完整分析',
-                                priority_suggestions: ['請提供更詳細的履歷資訊']
+                                priority_suggestions: ['請提供更詳細的履歷資訊'],
+                                follow_ups: ['請提供更多相關資料']
                             },
                             scores: []
                         };

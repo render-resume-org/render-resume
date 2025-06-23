@@ -1,24 +1,39 @@
 "use client";
 
+import { ProUserGuard } from "@/components/auth/pro-user-guard";
 import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, ShieldAlert } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface ProtectedLayoutProps {
   children: React.ReactNode;
 }
 
+// Define routes that require pro user access
+const PRO_ROUTES = [
+  '/upload',
+  '/analyze',
+  '/smart-chat',
+  '/suggestions',
+  '/preview',
+  // Add more pro routes here as needed
+];
+
 export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   const { loading, isAuthenticated } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [countdown, setCountdown] = useState(3);
   const [showUnauthenticated, setShowUnauthenticated] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Check if current route requires pro access
+  const isProRoute = PRO_ROUTES.some(route => pathname.startsWith(route));
 
   // 處理導航的 useEffect
   useEffect(() => {
@@ -174,6 +189,21 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
     );
   }
 
-  // 如果用戶已登入，顯示受保護的內容
-  return <>{children}</>;
+  // 如果用戶已登入，檢查是否需要 Pro 權限
+  if (isAuthenticated) {
+    // 如果是 Pro 路由，使用 Pro 用戶保護
+    if (isProRoute) {
+      return (
+        <ProUserGuard fallbackPath="/dashboard">
+          {children}
+        </ProUserGuard>
+      );
+    }
+    
+    // 一般保護路由，直接顯示內容
+    return <>{children}</>;
+  }
+
+  // Fallback - 這裡不應該到達
+  return null;
 }

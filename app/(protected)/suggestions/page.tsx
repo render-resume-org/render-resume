@@ -241,53 +241,7 @@ export default function SuggestionsPage() {
           </p>
         </div>
 
-        {/* 進度指示器 */}
-        <div className="mb-8">
-          <Card className="bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-cyan-700 dark:text-cyan-400">
-                優化流程
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                    ✓
-                  </div>
-                  <span className="text-gray-600 dark:text-gray-300">履歷分析</span>
-                </div>
-                <div className="flex-1 h-px bg-green-300 dark:bg-green-700"></div>
-                <div className="flex items-center space-x-2">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                    chatHistory.length > 0 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-gray-300 dark:bg-gray-600 text-gray-500'
-                  }`}>
-                    {chatHistory.length > 0 ? '✓' : '2'}
-                  </div>
-                  <span className={chatHistory.length > 0 
-                    ? 'text-gray-600 dark:text-gray-300' 
-                    : 'text-gray-500 dark:text-gray-400'
-                  }>
-                    AI 問答
-                  </span>
-                </div>
-                <div className={`flex-1 h-px ${
-                  chatHistory.length > 0 
-                    ? 'bg-cyan-300 dark:bg-cyan-700' 
-                    : 'bg-gray-300 dark:bg-gray-600'
-                }`}></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-xs">
-                    3
-                  </div>
-                  <span className="text-cyan-600 dark:text-cyan-400 font-medium">優化建議</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+       
 
         {/* Chat Summary */}
         {chatHistory.length > 0 && (

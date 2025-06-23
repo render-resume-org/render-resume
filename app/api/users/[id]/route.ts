@@ -20,6 +20,13 @@ export async function GET(
     
     // 如果查看自己的資料，直接返回當前用戶資料
     if (targetUserId === currentUser.id) {
+      // 從 users 表獲取用戶資料
+      const { data: dbUser, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', currentUser.id)
+        .single();
+
       // 獲取用戶的當前方案
       const { data: subscriptions } = await supabase
         .from('subscriptions')
@@ -46,10 +53,11 @@ export async function GET(
 
       return NextResponse.json({
         id: currentUser.id,
-        email: currentUser.email,
-        display_name: currentUser.user_metadata?.display_name,
-        avatar_url: currentUser.user_metadata?.avatar_url,
-        created_at: currentUser.created_at,
+        email: dbUser?.email || currentUser.email,
+        display_name: dbUser?.display_name || currentUser.user_metadata?.display_name,
+        avatar_url: dbUser?.avatar_url || currentUser.user_metadata?.avatar_url,
+        created_at: dbUser?.created_at || currentUser.created_at,
+        welcome_email_sent: dbUser?.welcome_email_sent || false,
         currentPlan: currentPlan ? {
           id: currentPlan.plans?.id,
           title: currentPlan.plans?.title,
@@ -107,6 +115,7 @@ export async function GET(
       display_name: targetUser.display_name,
       avatar_url: targetUser.avatar_url,
       created_at: targetUser.created_at,
+      welcome_email_sent: targetUser.welcome_email_sent,
       currentPlan: currentPlan ? {
         id: currentPlan.plans?.id,
         title: currentPlan.plans?.title,
@@ -205,6 +214,7 @@ export async function PUT(
       display_name: updatedUser.display_name,
       avatar_url: updatedUser.avatar_url,
       created_at: updatedUser.created_at,
+      welcome_email_sent: updatedUser.welcome_email_sent,
       currentPlan: currentPlan ? {
         id: currentPlan.plans?.id,
         title: currentPlan.plans?.title,

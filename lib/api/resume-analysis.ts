@@ -36,6 +36,22 @@ export async function analyzeResume(options: ResumeAnalysisOptions): Promise<Res
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            
+            // Handle specific authentication and authorization errors
+            if (response.status === 401) {
+                throw new Error(errorData.requiresAuth ? 
+                    '請先登入才能使用此功能' : 
+                    (errorData.error || '身份驗證失敗，請重新登入')
+                );
+            }
+            
+            if (response.status === 403) {
+                throw new Error(errorData.requiresProPlan ? 
+                    '此功能僅限 Pro 會員使用，請升級您的方案後重試' : 
+                    (errorData.error || '權限不足')
+                );
+            }
+            
             throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
         }
 
@@ -103,6 +119,26 @@ export async function analyzeDocuments(options: {
             console.error('❌ [Frontend API] Response not ok:', response.status, response.statusText);
             const errorData = await response.json().catch(() => ({ error: '請求失敗' }));
             console.error('❌ [Frontend API] Error data:', errorData);
+            
+            // Handle specific authentication and authorization errors
+            if (response.status === 401) {
+                return {
+                    success: false,
+                    error: errorData.requiresAuth ? 
+                        '請先登入才能使用此功能' : 
+                        (errorData.error || '身份驗證失敗，請重新登入')
+                };
+            }
+            
+            if (response.status === 403) {
+                return {
+                    success: false,
+                    error: errorData.requiresProPlan ? 
+                        '此功能僅限 Pro 會員使用，請升級您的方案後重試' : 
+                        (errorData.error || '權限不足')
+                };
+            }
+            
             return {
                 success: false,
                 error: errorData.error || `請求失敗 (${response.status})`
@@ -167,6 +203,22 @@ export async function customPromptAnalysis(options: CustomPromptOptions): Promis
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            
+            // Handle specific authentication and authorization errors
+            if (response.status === 401) {
+                throw new Error(errorData.requiresAuth ? 
+                    '請先登入才能使用此功能' : 
+                    (errorData.error || '身份驗證失敗，請重新登入')
+                );
+            }
+            
+            if (response.status === 403) {
+                throw new Error(errorData.requiresProPlan ? 
+                    '此功能僅限 Pro 會員使用，請升級您的方案後重試' : 
+                    (errorData.error || '權限不足')
+                );
+            }
+            
             throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
         }
 

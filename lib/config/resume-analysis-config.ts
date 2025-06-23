@@ -627,7 +627,7 @@ export interface AIConfig {
 }
 
 export const DEFAULT_AI_CONFIG: AIConfig = {
-    modelName: "gpt-4.1-mini",
+    modelName: "gpt-4o-mini",
     temperature: 0.2,
     maxConcurrency: 3
 };

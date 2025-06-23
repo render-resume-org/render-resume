@@ -1,40 +1,49 @@
 "use client";
 
-import SmartChat from "@/components/smart-chat";
+import SmartChat, { ChatMessage, ChatState } from "@/components/smart-chat";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AnalysisScore, ChatMessage, fetchAnalysisScores } from "@/lib/mock-data";
+import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function SmartChatPage() {
-  const [analysisScores, setAnalysisScores] = useState<AnalysisScore[]>([]);
+  const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    loadAnalysisScores();
+    loadAnalysisResult();
   }, []);
 
-  const loadAnalysisScores = async () => {
+  const loadAnalysisResult = async () => {
     setIsLoading(true);
     try {
-      const scores = await fetchAnalysisScores();
-      setAnalysisScores(scores);
+      // 從 sessionStorage 讀取分析結果
+      const savedResult = sessionStorage.getItem('analysisResult');
+      if (savedResult) {
+        const result = JSON.parse(savedResult) as ResumeAnalysisResult;
+        setAnalysisResult(result);
+      } else {
+        // 如果沒有分析結果，跳轉回分析頁面
+        router.push('/');
+        return;
+      }
     } catch (error) {
-      console.error('Failed to load analysis scores:', error);
+      console.error('Failed to load analysis result:', error);
+      router.push('/');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleChatComplete = (history: ChatMessage[]) => {
+  const handleChatComplete = (history: ChatMessage[], chatStates: ChatState[]) => {
     setIsCompleted(true);
     
-    // 將聊天記錄存儲到 localStorage 以便在建議頁面使用
+    // 將聊天記錄和問答狀態存儲到 localStorage 以便在建議頁面使用
     localStorage.setItem('chatHistory', JSON.stringify(history));
+    localStorage.setItem('chatStates', JSON.stringify(chatStates));
     
     // 延遲跳轉，讓用戶看到完成狀態
     setTimeout(() => {
@@ -62,6 +71,31 @@ export default function SmartChatPage() {
           <p className="text-gray-600 dark:text-gray-300">
             正在載入您的分析結果
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  // 沒有分析結果或沒有問題時的狀態
+  if (!analysisResult || !analysisResult.missing_content?.follow_ups?.length) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mb-6">
+            <span className="text-6xl">🎉</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            您的履歷已經很完整了！
+          </h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            AI 分析顯示您的履歷內容已經相當完善，無需額外的問答優化。
+          </p>
+          <Button
+            onClick={handleSkipToSuggestions}
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+          >
+            查看優化建議
+          </Button>
         </div>
       </div>
     );
@@ -107,44 +141,9 @@ export default function SmartChatPage() {
           </p>
         </div>
 
-        {/* 進度指示器 */}
-        <div className="max-w-2xl mx-auto mb-8">
-          <Card className="bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-cyan-700 dark:text-cyan-400">
-                優化流程
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                    ✓
-                  </div>
-                  <span className="text-gray-600 dark:text-gray-300">履歷分析</span>
-                </div>
-                <div className="flex-1 h-px bg-cyan-300 dark:bg-cyan-700"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-cyan-500 text-white rounded-full flex items-center justify-center text-xs">
-                    2
-                  </div>
-                  <span className="text-cyan-600 dark:text-cyan-400 font-medium">AI 問答</span>
-                </div>
-                <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 text-gray-500 rounded-full flex items-center justify-center text-xs">
-                    3
-                  </div>
-                  <span className="text-gray-500 dark:text-gray-400">優化建議</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* 智慧問答組件 */}
         <SmartChat 
-          analysisScores={analysisScores}
+          analysisResult={analysisResult}
           onComplete={handleChatComplete}
           onSkip={handleSkipToSuggestions}
         />

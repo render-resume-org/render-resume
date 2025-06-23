@@ -567,18 +567,16 @@ export function AnalysisScores({ scores }: AnalysisScoresProps) {
             <Button 
               onClick={handleStartChat}
               className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
-              disabled
             >
               <span className="text-lg mr-2">🤖</span>
-              開始 AI 問答優化（建置中）
+              開始 AI 問答優化
             </Button>
             <Button 
               variant="outline" 
               onClick={handleSkipToSuggestions}
               className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-              disabled
             >
-              跳過問答，直接查看建議（建置中）
+              跳過問答，直接查看建議
             </Button>
           </div>
 

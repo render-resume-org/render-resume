@@ -18,12 +18,14 @@ const AppHeader = () => {
   // 計算進度
   const getProgress = () => {
     const progressMap: { [key: string]: number } = {
-      '/': 0,
-      '/upload': 25,
-      '/analyze': 50,
-      '/suggestions': 75,
+      '/': -1,
+      '/dashboard': -1,
+      '/upload': 0,
+      '/analyze': 20,
+      '/results': 40,
+      '/smart-chat': 60,
+      '/suggestions': 80,
       '/preview': 100,
-      '/smart-qa': 75
     };
     return progressMap[pathname] || 0;
   };
@@ -33,9 +35,10 @@ const AppHeader = () => {
       '/': '歡迎',
       '/upload': '上傳作品',
       '/analyze': '分析中',
-      '/suggestions': '優化建議',
-      '/preview': '預覽完成',
-      '/smart-qa': '智慧問答'
+      '/results': '分析完成',
+      '/smart-chat': '智慧問答',
+      '/suggestions': '優化建議（建置中）',
+      '/preview': '履歷生成（建置中）',
     };
     return stepMap[pathname] || '處理中';
   };
@@ -78,7 +81,7 @@ const AppHeader = () => {
           
 
           {/* Desktop Progress Section */}
-          {progress > 0 && (
+          {progress >= 0 && (
             <div className="hidden md:flex flex-1 items-center justify-center max-w-md mx-8 min-w-0">
               <div className="w-full">
                 <div className="flex items-center justify-between mb-1">
@@ -146,7 +149,7 @@ const AppHeader = () => {
         </div>
 
         {/* Mobile Progress Section */}
-        {progress > 0 && (
+        {progress >= 0 && (
           <div className="mt-3 md:hidden">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">

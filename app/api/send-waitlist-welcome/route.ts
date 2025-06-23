@@ -1,4 +1,5 @@
 import { getEmailTemplate, getReactEmailTemplate } from '@/lib/email-templates';
+import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
@@ -63,6 +64,15 @@ export async function POST(request: NextRequest) {
   console.log('🎉 [Send Waitlist Welcome] API called');
   
   try {
+    const supabase = await createClient();
+    
+    // Get the authenticated user
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !authUser) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body: SendWaitlistWelcomeRequest = await request.json();
     const { email, userName } = body;
     
@@ -81,6 +91,38 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid email format' },
         { status: 400 }
       );
+    }
+
+    if (authUser.email !== email) {
+      return NextResponse.json(
+        { error: 'Permission denied' },
+        { status: 403 }
+      );
+    }
+    
+    // Check if user already has welcome email sent
+    const { data: existingUser, error: userError } = await supabase
+      .from('users')
+      .select('welcome_email_sent')
+      .eq('id', authUser.id)
+      .single();
+    
+    if (userError && userError.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('Error checking user welcome email status:', userError);
+      return NextResponse.json(
+        { error: 'Failed to check user status' },
+        { status: 500 }
+      );
+    }
+    
+    // If user exists and already received welcome email, don't send again
+    if (existingUser && existingUser.welcome_email_sent) {
+      console.log('⚠️ [Send Waitlist Welcome] Welcome email already sent for user:', authUser.id);
+      return NextResponse.json({
+        success: true,
+        message: 'Welcome email already sent',
+        alreadySent: true
+      }, { status: 200 });
     }
     
     console.log('📧 [Send Waitlist Welcome] Processing request for:', email);
@@ -114,6 +156,19 @@ export async function POST(request: NextRequest) {
       emailTemplate.text,
       reactTemplate || undefined
     );
+    
+    // Update the welcome_email_sent field after successful email sending
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ welcome_email_sent: true })
+      .eq('id', authUser.id);
+    
+    if (updateError) {
+      console.error('⚠️ [Send Waitlist Welcome] Failed to update welcome_email_sent flag:', updateError);
+      // Don't fail the request if email was sent successfully but database update failed
+    } else {
+      console.log('✅ [Send Waitlist Welcome] Updated welcome_email_sent flag for user:', authUser.id);
+    }
     
     console.log('✅ [Send Waitlist Welcome] Email sent successfully:', {
       email,

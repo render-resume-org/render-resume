@@ -43,6 +43,7 @@ export async function POST() {
         display_name: displayName,
         avatar_url: avatarUrl,
         email: authUser.email,
+        welcome_email_sent: false, // Default to false for new users
       };
 
       const { data: newUser, error: insertError } = await supabase

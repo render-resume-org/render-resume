@@ -45,6 +45,7 @@ export interface MissingContent {
     recommended_additions: string[];
     impact_analysis: string;
     priority_suggestions: string[];
+    follow_ups: string[];
 }
 
 export interface ResumeAnalysisResult {
