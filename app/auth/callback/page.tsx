@@ -108,6 +108,15 @@ function AuthCallbackContent() {
             <p className="text-gray-600 dark:text-gray-300">
               正在重定向到您的儀表板...
             </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              如果系統沒有自動導向，請
+              <a 
+                href="/dashboard" 
+                className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 underline ml-1"
+              >
+                點擊連結跳轉
+              </a>
+            </p>
           </div>
         )}
 

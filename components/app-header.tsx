@@ -6,7 +6,7 @@ import { ProBadge } from "@/components/ui/pro-badge";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserDropdown } from "./user-dropdown";
 
@@ -14,12 +14,18 @@ const AppHeader = () => {
   const pathname = usePathname();
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  
+  // Prevent hydration mismatch by only rendering auth-dependent content after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
   console.log(user);
+  
   // 計算進度
   const getProgress = () => {
     const progressMap: { [key: string]: number } = {
-      '/': -1,
-      '/dashboard': -1,
       '/upload': 0,
       '/analyze': 20,
       '/results': 40,
@@ -27,7 +33,7 @@ const AppHeader = () => {
       '/suggestions': 80,
       '/preview': 100,
     };
-    return progressMap[pathname] || 0;
+    return progressMap[pathname] || -1;
   };
 
   const getStepName = () => {
@@ -104,7 +110,7 @@ const AppHeader = () => {
 
           {/* Desktop Auth Section & Theme Switcher */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
-            {loading ? (
+            {!mounted || loading ? (
               <div className="w-6 h-6 border-2 border-gray-300 border-t-cyan-600 rounded-full animate-spin"></div>
             ) : isAuthenticated && user ? (
                 <>
@@ -156,7 +162,7 @@ const AppHeader = () => {
                 {stepName}
               </span>
               <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-                {progress}%
+                {Math.round(progress)}%
               </span>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -171,7 +177,7 @@ const AppHeader = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="mt-4 md:hidden border-t border-gray-200 dark:border-gray-700 pt-4">
-            {loading ? (
+            {!mounted || loading ? (
               <div className="flex justify-center py-4">
                 <div className="w-6 h-6 border-2 border-gray-300 border-t-cyan-600 rounded-full animate-spin"></div>
               </div>

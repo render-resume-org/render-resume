@@ -56,7 +56,7 @@ export default function SmartChatPage() {
   };
 
   const handlePrevious = () => {
-    router.push('/analysis-results');
+    router.push('/results');
   };
 
   // 載入中狀態

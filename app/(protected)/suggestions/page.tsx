@@ -201,7 +201,7 @@ export default function SuggestionsPage() {
     if (chatHistory.length > 0) {
       router.push('/smart-chat');
     } else {
-      router.push('/analysis-results');
+      router.push('/results');
     }
   };
 
