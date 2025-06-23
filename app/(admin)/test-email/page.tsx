@@ -7,6 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
+// 關鍵！禁用靜態生成和維持 Edge Runtime
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 interface TestResult {
   type: 'html' | 'text' | 'json' | 'test' | 'error';
   content: string;
