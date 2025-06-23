@@ -36,11 +36,6 @@ export default function Footer() {
                     產品願景
                 </Link>
                 </li>
-              <li>
-                <Link href="/about#author" className="text-gray-400 hover:text-cyan-400 transition-colors">
-                  開發團隊
-                </Link>
-              </li>
             </ul>
           </div>
 

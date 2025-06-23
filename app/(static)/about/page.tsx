@@ -25,33 +25,6 @@ export default function AboutPage() {
     }
   ];
 
-  const teamMembers = [
-    {
-      name: "Ruby Ku",
-      role: "創辦人 & 技術總監",
-      background: "台灣大學資訊管理學系",
-      expertise: "AI 產品開發、全端工程",
-      description: "深耕 AI 領域多年，致力於讓科技成為每個人職涯發展的助力",
-      icon: "👩‍💻"
-    },
-    {
-      name: "AI Agents",
-      role: "核心技術團隊",
-      background: "來自全球網路資料的訓練集",
-      expertise: "自然語言生成",
-      description: "快速開發、迭代產品，交付團隊任務",
-      icon: "🤖"
-    },
-    {
-      name: "HR 顧問團隊",
-      role: "專業顧問",
-      background: "Fortune 500 企業 HR 經驗",
-      expertise: "人才評估、履歷審查",
-      description: "15年+ 專業經驗，確保分析標準與業界需求同步",
-      icon: "👔"
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <div className="max-w-4xl mx-auto flex p-4 py-8">
@@ -121,61 +94,6 @@ export default function AboutPage() {
                   —— 這就是我們存在的理由
                 </span>
               </p>
-            </div>
-          </section>
-
-          {/* Team Section */}
-          <section id="author" className="mb-16">
-            <div className="text-center mb-8">
-              <div className="flex justify-center mb-4">
-                <div className="h-16 w-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">👥</span>
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                開發團隊
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                由技術專家、AI 研究員和 HR 專業人士組成的跨領域團隊，
-                致力於打造最專業的 AI 履歷分析平台。
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {teamMembers.map((member, index) => (
-                <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col md:flex-row md:items-center">
-                    <div className="flex items-center mb-4 md:mb-0 md:mr-6">
-                      <div className="h-16 w-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mr-4 text-2xl">
-                        {member.icon}
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                          {member.name}
-                        </h3>
-                        <p className="text-cyan-600 dark:text-cyan-400 font-semibold">
-                          {member.role}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                        <div>
-                          <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">背景</span>
-                          <p className="text-gray-700 dark:text-gray-300">{member.background}</p>
-                        </div>
-                        <div>
-                          <span className="text-sm font-semibold text-gray-500 dark:text-gray-400">專長</span>
-                          <p className="text-gray-700 dark:text-gray-300">{member.expertise}</p>
-                        </div>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 italic">
-                        {member.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
 
