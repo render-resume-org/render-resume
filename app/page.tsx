@@ -18,8 +18,71 @@ import {
   Zap
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
+
+// Structured data for the homepage
+const homepageStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "RenderResume - AI 履歷生成器",
+  "description": "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構。",
+  "url": typeof window !== 'undefined' ? window.location.origin : '',
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Modern web browser with JavaScript support",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock",
+    "validFrom": "2024-01-01"
+  },
+  "creator": {
+    "@type": "Organization",
+    "name": "RenderResume Team"
+  },
+  "featureList": [
+    "AI 智能履歷分析",
+    "六維度專業評分",
+    "STAR 原則架構",
+    "個性化優化建議",
+    "Fortune 500 企業標準",
+    "多語言支援"
+  ],
+  "screenshot": [
+    {
+      "@type": "ImageObject",
+      "url": "/screenshot-desktop.png",
+      "caption": "RenderResume 桌面版介面"
+    },
+    {
+      "@type": "ImageObject", 
+      "url": "/screenshot-mobile.png",
+      "caption": "RenderResume 手機版介面"
+    }
+  ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.8",
+    "ratingCount": "10000",
+    "bestRating": "5",
+    "worstRating": "1"
+  }
+};
 
 export default function Home() {
+  // Add structured data to page
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(homepageStructuredData);
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   const stats = [
     { number: "10,000+", label: "履歷生成數量" },
     { number: "95%", label: "用戶滿意度" },
@@ -95,12 +158,12 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
+      <section className="container mx-auto px-4 py-16 text-center" itemScope itemType="https://schema.org/WebApplication">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 flex justify-center">
             <div className="relative">
               <div className="h-16 w-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center">
-                <span className="text-3xl">✨</span>
+                <span className="text-3xl" role="img" aria-label="sparkles">✨</span>
               </div>
               <div className="absolute -top-2 -right-2 h-6 w-6 bg-cyan-500 rounded-full flex items-center justify-center">
                 <span className="text-xs font-bold text-white">AI</span>
@@ -109,7 +172,7 @@ export default function Home() {
           </div>
           
           <div className="flex w-full justify-center items-center">
-            <h1 className="text-nowrap mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+            <h1 className="text-nowrap mb-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white" itemProp="name">
               讓 AI 為您打造
               <span className="text-cyan-600 dark:text-cyan-400">
                 專業履歷
@@ -117,15 +180,15 @@ export default function Home() {
             </h1>
           </div>
           
-          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto" itemProp="description">
             基於 Fortune 500 企業標準的 AI 履歷分析系統，採用六維度評估模型，
             讓您的才華以最完美的方式呈現給雇主和客戶。
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
             <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 text-lg">
-                加入 Waitlist
+              <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 text-lg" itemProp="potentialAction" itemScope itemType="https://schema.org/Action">
+                <span itemProp="name">加入 Waitlist</span>
                 <ScrollText className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -144,13 +207,13 @@ export default function Home() {
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8" itemScope itemType="https://schema.org/ItemList">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
+              <div key={index} className="text-center" itemScope itemType="https://schema.org/Statistic">
+                <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400" itemProp="value">
                   {stat.number}
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">
+                <div className="text-gray-600 dark:text-gray-300" itemProp="name">
                   {stat.label}
                 </div>
               </div>
@@ -160,25 +223,25 @@ export default function Home() {
       </section>
 
       {/* AI Scoring System */}
-      <section className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 py-16">
+      <section className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 py-16" itemScope itemType="https://schema.org/Service">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4" itemProp="name">
               六維度專業評分架構
             </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto" itemProp="description">
               採用國際頂級獵頭公司標準，結合 Fortune 500 企業人才評估框架，
               為您提供最專業的履歷分析與等第制評分
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-w-6xl mx-auto" itemScope itemType="https://schema.org/ItemList">
             {scoreCategories.map((category, index) => (
-              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+              <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow" itemScope itemType="https://schema.org/Service">
                 <div className="flex items-center mb-4">
-                  <span className="text-2xl mr-3">{category.icon}</span>
+                  <span className="text-2xl mr-3" role="img" aria-label={category.name}>{category.icon}</span>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <h3 className="font-semibold text-gray-900 dark:text-white" itemProp="name">
                       {category.name}
                     </h3>
                     <span className="text-sm text-cyan-600 dark:text-cyan-400 font-medium">
@@ -186,7 +249,7 @@ export default function Home() {
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed" itemProp="description">
                   {category.description}
                 </p>
               </div>

@@ -1,0 +1,82 @@
+{
+  "name": "RenderResume - AI 履歷生成器",
+  "short_name": "RenderResume",
+  "description": "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0891b2",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "categories": ["productivity", "business", "career", "ai", "tools"],
+  "screenshots": [
+    {
+      "src": "/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "RenderResume Desktop Interface"
+    },
+    {
+      "src": "/screenshot-narrow.png", 
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "RenderResume Mobile Interface"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512", 
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "features": [
+    "AI-powered resume analysis",
+    "STAR methodology framework", 
+    "Six-dimensional professional scoring",
+    "Real-time optimization suggestions",
+    "Multi-format export",
+    "Dark mode support"
+  ],
+  "shortcuts": [
+    {
+      "name": "創建履歷",
+      "short_name": "創建",
+      "description": "開始創建新的履歷",
+      "url": "/upload",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "查看結果",
+      "short_name": "結果", 
+      "description": "查看履歷分析結果",
+      "url": "/results",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
+    },
+    {
+      "name": "常見問題",
+      "short_name": "FAQ",
+      "description": "查看常見問題解答", 
+      "url": "/faq",
+      "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
+    }
+  ]
+} 
+ 

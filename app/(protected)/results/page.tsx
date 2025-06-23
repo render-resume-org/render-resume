@@ -271,41 +271,6 @@ export default function ResultsPage() {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
-          {/* 進度指示器 */}
-          <div className="max-w-4xl mx-auto mb-8">
-            <Card className="bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-cyan-700 dark:text-cyan-400">
-                  優化流程
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center space-x-4 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">
-                      ✓
-                    </div>
-                    <span className="text-gray-600 dark:text-gray-300">履歷分析</span>
-                  </div>
-                  <div className="flex-1 h-px bg-cyan-300 dark:bg-cyan-700"></div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 text-gray-500 rounded-full flex items-center justify-center text-xs">
-                      2
-                    </div>
-                    <span className="text-gray-500 dark:text-gray-400">AI 問答</span>
-                  </div>
-                  <div className="flex-1 h-px bg-gray-300 dark:bg-gray-600"></div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-6 h-6 bg-gray-300 dark:bg-gray-600 text-gray-500 rounded-full flex items-center justify-center text-xs">
-                      3
-                    </div>
-                    <span className="text-gray-500 dark:text-gray-400">優化建議</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* 分析評分組件 */}
           <div className="mb-12">
             <AnalysisScores scores={analysisScores} />

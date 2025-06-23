@@ -1,18 +1,50 @@
 "use client";
 
 import {
-  ChevronDown,
-  ChevronUp,
-  CreditCard,
-  FileText,
-  HelpCircle,
-  Search,
-  Shield,
-  Users,
-  Zap
+    ChevronDown,
+    ChevronUp,
+    CreditCard,
+    FileText,
+    HelpCircle,
+    Search,
+    Shield,
+    Users,
+    Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
+// JSON-LD structured data for FAQ
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "什麼是 RenderResume？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "RenderResume 是一個基於 AI 技術的履歷生成和優化平台，採用 Fortune 500 企業標準的六維度評估模型，幫助求職者創建專業履歷。"
+      }
+    },
+    {
+      "@type": "Question", 
+      "name": "什麼是六維度評分系統？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "六維度評分系統包括：技術深度與廣度(25%)、項目複雜度與影響力(25%)、專業經驗完整度(20%)、教育背景匹配度(15%)、成果與驗證(10%)、整體專業形象(5%)。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什麼是 STAR 原則？", 
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "STAR 原則是國際認可的履歷撰寫方法論，包括 Situation(情境描述)、Task(任務界定)、Action(行動策略)、Result(成果量化)四個部分。"
+      }
+    }
+  ]
+};
 
 export default function FAQPage() {
   const [openItems, setOpenItems] = useState<number[]>([]);
@@ -67,10 +99,6 @@ export default function FAQPage() {
           question: "STAR 原則重組是什麼？",
           answer: "STAR 原則是國際認可的經驗描述方法，由 Amazon、Google 等頂級科技公司廣泛採用：Situation（情境）- 描述工作背景；Task（任務）- 說明具體任務；Action（行動）- 詳述採取的行動；Result（結果）- 量化成果與影響。此方法最初由行為面試專家開發，現已成為 Fortune 500 企業和頂級獵頭公司的標準評估框架。我們的 AI 會幫您將工作經驗重新組織成 STAR 格式，讓履歷更有說服力。"
         },
-        {
-          question: "分析結果準確嗎？",
-          answer: "我們的 AI 模型基於大量真實履歷數據訓練，並參考國際頂級獵頭公司和 Fortune 500 企業的評估標準。雖然無法保證 100% 準確，但能提供非常有價值的參考意見和改進方向。建議將結果作為優化履歷的指引，而非絕對標準。"
-        }
       ]
     },
     {
@@ -189,183 +217,191 @@ export default function FAQPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto flex p-4 py-8">
-        <Link
-          href="/"
-          className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
-        >
-          返回首頁
-        </Link>
-      </div>
-
-      <main className="container mx-auto px-4 pb-12 max-w-4xl">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            常見問題
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-            快速找到您需要的答案，讓使用更加順暢
-          </p>
+    <>
+      {/* JSON-LD structured data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <div className="max-w-4xl mx-auto flex p-4 py-8">
+          <Link
+            href="/"
+            className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
+          >
+            返回首頁
+          </Link>
         </div>
 
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="搜尋問題..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-            />
+        <main className="container mx-auto px-4 pb-12 max-w-4xl">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              常見問題
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              快速找到您需要的答案，讓使用更加順暢
+            </p>
           </div>
-        </div>
 
-        {/* Search Results */}
-        {filteredFaqs && (
+          {/* Search Bar */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-              搜尋結果 ({filteredFaqs.length} 個結果)
-            </h2>
-            <div className="space-y-4">
-              {filteredFaqs.map((faq) => (
-                <div key={faq.globalIndex} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                  <button
-                    onClick={() => toggleItem(faq.globalIndex)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                  >
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {faq.question}
-                      </h3>
-                      <span className="text-sm text-cyan-600 dark:text-cyan-400">
-                        {faq.category}
-                      </span>
-                    </div>
-                    {openItems.includes(faq.globalIndex) ? (
-                      <ChevronUp className="h-5 w-5 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-gray-500" />
-                    )}
-                  </button>
-                  
-                  {openItems.includes(faq.globalIndex) && (
-                    <div className="px-6 pb-4">
-                      <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                          {faq.answer}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="relative max-w-md mx-auto">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="搜尋問題..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              />
             </div>
           </div>
-        )}
 
-        {/* Category Sections */}
-        {!searchQuery && (
-          <div className="space-y-8">
-            {faqCategories.map((category, categoryIndex) => (
-              <section key={categoryIndex}>
-                <div className="flex items-center mb-6">
-                  <div className={`h-12 w-12 rounded-lg flex items-center justify-center mr-4 ${getColorClasses(category.color)}`}>
-                    <category.icon className="h-6 w-6" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {category.title}
-                  </h2>
-                </div>
-                
-                <div className="space-y-4">
-                  {category.faqs.map((faq, faqIndex) => {
-                    const globalIndex = categoryIndex * 1000 + faqIndex;
-                    return (
-                      <div key={faqIndex} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-                        <button
-                          onClick={() => toggleItem(globalIndex)}
-                          className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
-                        >
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white pr-4">
-                            {faq.question}
-                          </h3>
-                          {openItems.includes(globalIndex) ? (
-                            <ChevronUp className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                          ) : (
-                            <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
-                          )}
-                        </button>
-                        
-                        {openItems.includes(globalIndex) && (
-                          <div className="px-6 pb-4">
-                            <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-                              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                                {faq.answer}
-                              </p>
-                            </div>
-                          </div>
-                        )}
+          {/* Search Results */}
+          {filteredFaqs && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                搜尋結果 ({filteredFaqs.length} 個結果)
+              </h2>
+              <div className="space-y-4">
+                {filteredFaqs.map((faq) => (
+                  <div key={faq.globalIndex} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => toggleItem(faq.globalIndex)}
+                      className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                          {faq.question}
+                        </h3>
+                        <span className="text-sm text-cyan-600 dark:text-cyan-400">
+                          {faq.category}
+                        </span>
                       </div>
-                    );
-                  })}
-                </div>
-              </section>
-            ))}
-          </div>
-        )}
+                      {openItems.includes(faq.globalIndex) ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                    </button>
+                    
+                    {openItems.includes(faq.globalIndex) && (
+                      <div className="px-6 pb-4">
+                        <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                            {faq.answer}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {/* Contact Section */}
-        <section className="mt-16 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            還有其他問題？
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            找不到您要的答案嗎？我們的客服團隊隨時為您提供協助
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:info@render-resume.com"
-              className="inline-flex items-center justify-center px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
-            >
-              聯絡客服
-            </a>
-            <a 
-              href="https://forms.gle/XdYUd8wRrqS5WJw59"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-3 border border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 rounded-lg transition-colors"
-            >
-              提交意見
-            </a>
-          </div>
-        </section>
+          {/* Category Sections */}
+          {!searchQuery && (
+            <div className="space-y-8">
+              {faqCategories.map((category, categoryIndex) => (
+                <section key={categoryIndex}>
+                  <div className="flex items-center mb-6">
+                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center mr-4 ${getColorClasses(category.color)}`}>
+                      <category.icon className="h-6 w-6" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {category.title}
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {category.faqs.map((faq, faqIndex) => {
+                      const globalIndex = categoryIndex * 1000 + faqIndex;
+                      return (
+                        <div key={faqIndex} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                          <button
+                            onClick={() => toggleItem(globalIndex)}
+                            className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg"
+                          >
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white pr-4">
+                              {faq.question}
+                            </h3>
+                            {openItems.includes(globalIndex) ? (
+                              <ChevronUp className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                            ) : (
+                              <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
+                            )}
+                          </button>
+                          
+                          {openItems.includes(globalIndex) && (
+                            <div className="px-6 pb-4">
+                              <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                  {faq.answer}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
 
-        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-          <div className="flex flex-col sm:flex-row gap-4 text-center">
-            <Link
-              href="/about"
-              className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-            >
-              關於我們
-            </Link>
-            <Link
-              href="/help"
-              className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-            >
-              使用說明
-            </Link>
-            <Link
-              href="/privacy"
-              className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-            >
-              隱私權政策
-            </Link>
+          {/* Contact Section */}
+          <section className="mt-16 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 rounded-lg p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+              還有其他問題？
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              找不到您要的答案嗎？我們的客服團隊隨時為您提供協助
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a 
+                href="mailto:info@render-resume.com"
+                className="inline-flex items-center justify-center px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
+              >
+                聯絡客服
+              </a>
+              <a 
+                href="https://forms.gle/XdYUd8wRrqS5WJw59"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-6 py-3 border border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 rounded-lg transition-colors"
+              >
+                提交意見
+              </a>
+            </div>
+          </section>
+
+          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+            <div className="flex flex-col sm:flex-row gap-4 text-center">
+              <Link
+                href="/about"
+                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
+              >
+                關於我們
+              </Link>
+              <Link
+                href="/help"
+                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
+              >
+                使用說明
+              </Link>
+              <Link
+                href="/privacy"
+                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
+              >
+                隱私權政策
+              </Link>
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </>
   );
 } 
