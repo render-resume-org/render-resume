@@ -4,9 +4,6 @@ import { Resend } from 'resend';
 
 export const runtime = "edge";
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Types based on Supabase Auth Hook documentation
 interface User {
   id: string;
@@ -119,6 +116,9 @@ async function sendEmail(to: string, subject: string, html: string, text: string
   if (!fromEmail) {
     throw new Error('FROM_EMAIL environment variable is required');
   }
+  
+  // Initialize Resend with the API key
+  const resend = new Resend(resendApiKey);
   
   console.log('📧 [Send Email] Sending via Resend to:', to);
   
