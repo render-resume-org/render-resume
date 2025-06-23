@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+export const runtime = "edge";
+
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 

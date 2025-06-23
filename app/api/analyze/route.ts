@@ -3,6 +3,8 @@ import type { DocumentUpload } from '@/lib/openai-client-native';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES, validateFileType } from '@/lib/openai-client-native';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = "edge";
+
 export async function POST(request: NextRequest) {
     console.log('🚀 [API] POST /api/analyze - Request received (using Native OpenAI Client)');
     

@@ -1,0 +1,8 @@
+name = "render-resume"
+compatibility_date = "2025-06-23"
+
+[env.production]
+compatibility_date = "2025-06-23"
+
+[env.preview]
+compatibility_date = "2025-06-23" 

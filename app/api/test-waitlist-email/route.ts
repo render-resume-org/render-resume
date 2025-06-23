@@ -1,6 +1,8 @@
 import { getEmailTemplate, getReactEmailTemplate } from '@/lib/email-templates';
 import { NextRequest, NextResponse } from 'next/server';
 
+export const runtime = "edge";
+
 interface EmailResult {
   success?: boolean;
   message?: string;

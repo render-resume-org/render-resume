@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = "edge";
+
 // Define the static routes that should be included in the sitemap
 const staticRoutes = [
   '',  // Homepage
