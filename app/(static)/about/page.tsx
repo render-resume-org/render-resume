@@ -43,9 +43,6 @@ export default function AboutPage() {
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               關於 RenderResume
             </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              讓科技業求職者們，用最短的時間和最少的心力，呈現自己的最大價值，找到理想工作
-            </p>
           </div>
 
           {/* Vision Section */}
@@ -88,7 +85,7 @@ export default function AboutPage() {
                 我們的使命
               </h3>
               <p className="text-lg text-gray-700 dark:text-gray-300 text-center leading-relaxed">
-                「讓科技業的求職小白，包含大學畢業生，也能呈現自己的最大價值，找到理想工作」
+                「讓科技業求職者們，用最短的時間和最少的心力，呈現自己的最大價值，找到理想工作」
                 <br />
                 <span className="text-cyan-600 dark:text-cyan-400 font-semibold mt-2 block">
                   —— 這就是我們存在的理由
