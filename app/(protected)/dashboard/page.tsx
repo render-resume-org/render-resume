@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { Announcements } from "@/components/announcements";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getActiveAnnouncements } from "@/lib/actions/announcements";

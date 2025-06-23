@@ -1,5 +1,4 @@
 import { getEmailTemplate, getReactEmailTemplate } from '@/lib/email-templates';
-import { createHash, timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
@@ -62,23 +61,45 @@ interface SendEmailHookPayload {
   email_data: EmailData;
 }
 
-// Webhook signature verification
-function verifyWebhookSignature(
+// Webhook signature verification using Web Crypto API (Edge Runtime compatible)
+async function verifyWebhookSignature(
   payload: string,
   signature: string,
   secret: string
-): boolean {
+): Promise<boolean> {
   try {
-    const expectedSignature = createHash('sha256')
-      .update(payload + secret)
-      .digest('hex');
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    
+    const expectedSignature = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      encoder.encode(payload + secret)
+    );
+    
+    const expectedHex = Array.from(new Uint8Array(expectedSignature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
     
     const providedSignature = signature.replace('sha256=', '');
     
-    return timingSafeEqual(
-      Buffer.from(expectedSignature),
-      Buffer.from(providedSignature)
-    );
+    // Constant-time comparison
+    if (expectedHex.length !== providedSignature.length) {
+      return false;
+    }
+    
+    let result = 0;
+    for (let i = 0; i < expectedHex.length; i++) {
+      result |= expectedHex.charCodeAt(i) ^ providedSignature.charCodeAt(i);
+    }
+    
+    return result === 0;
   } catch (error) {
     console.error('Error verifying webhook signature:', error);
     return false;
@@ -167,7 +188,7 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
+    if (!await verifyWebhookSignature(rawBody, signature, webhookSecret)) {
       console.error('❌ [Send Email Hook] Invalid webhook signature');
       return NextResponse.json(
         { error: 'Invalid webhook signature' },

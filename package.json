@@ -12,7 +12,7 @@
     "lint": "next lint",
     "pages:build": "next build && npx @cloudflare/next-on-pages",
     "preview": "npx @cloudflare/next-on-pages preview",
-    "deploy": "npx wrangler pages deploy .vercel/output/static --project-name=render-resume"
+    "deploy": "npx wrangler pages deploy"
   },
   "dependencies": {
     "@langchain/core": "^0.3.58",
