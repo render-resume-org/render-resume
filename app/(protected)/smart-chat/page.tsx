@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export default function SmartChatPage() {
   const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
@@ -13,11 +13,7 @@ export default function SmartChatPage() {
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    loadAnalysisResult();
-  }, []);
-
-  const loadAnalysisResult = async () => {
+  const loadAnalysisResult = useCallback(async () => {
     setIsLoading(true);
     try {
       // 從 sessionStorage 讀取分析結果
@@ -36,7 +32,11 @@ export default function SmartChatPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    loadAnalysisResult();
+  }, [loadAnalysisResult]);
 
   const handleChatComplete = (history: ChatMessage[], chatStates: ChatState[]) => {
     setIsCompleted(true);

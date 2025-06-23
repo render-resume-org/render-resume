@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@/components/hooks/use-auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,8 +9,30 @@ import { Textarea } from "@/components/ui/textarea";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Edit3, Send, User, X } from "lucide-react";
+import { Check, Edit3, Send, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// 用戶頭像組件
+interface UserAvatarProps {
+  user: {
+    avatar_url?: string;
+    display_name?: string;
+    email?: string;
+  } | null;
+}
+
+const UserAvatar = ({ user }: UserAvatarProps) => {
+  const initial = user?.display_name?.[0] || user?.email?.[0] || 'U';
+  
+  return (
+    <Avatar className="w-8 h-8">
+      <AvatarImage src={user?.avatar_url} alt={user?.display_name || user?.email || "User"} />
+      <AvatarFallback className="bg-cyan-100 text-cyan-600 dark:bg-cyan-900 dark:text-cyan-400 text-sm font-medium">
+        {initial.toUpperCase()}
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 // 聊天消息類型
 export interface ChatMessage {
@@ -50,6 +74,7 @@ const getRandomAIResponse = (): string => {
 };
 
 export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartChatProps) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentInput, setCurrentInput] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -376,12 +401,13 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                     <div
                       className={cn(`flex items-start space-x-2 max-w-[80%] min-w-0`, message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}
                     >
-                      <div className={cn(`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center`, message.type === 'user'
-                          ? 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900 dark:text-cyan-400'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                      )}>
-                        {message.type === 'user' ? <User className="h-4 w-4" /> : <span className="text-lg">🤖</span>}
-                      </div>
+                      {message.type === 'user' ? (
+                        <UserAvatar user={user} />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          <span className="text-lg">🤖</span>
+                        </div>
+                      )}
                       <div
                         className={cn(`rounded-lg px-4 py-2 min-w-0 flex-1`, message.type === 'user'
                             ? 'bg-cyan-600 text-white'

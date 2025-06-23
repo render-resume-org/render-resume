@@ -21,7 +21,7 @@ export async function GET(
     // 如果查看自己的資料，直接返回當前用戶資料
     if (targetUserId === currentUser.id) {
       // 從 users 表獲取用戶資料
-      const { data: dbUser, error: userError } = await supabase
+      const { data: dbUser } = await supabase
         .from('users')
         .select('*')
         .eq('id', currentUser.id)
