@@ -44,7 +44,7 @@ export default function AboutPage() {
               關於 RenderResume
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              讓科技業的求職小白，包含大學畢業生，也能呈現自己的最大價值，找到理想工作
+              讓科技業求職者們，用最短的時間和最少的心力，呈現自己的最大價值，找到理想工作
             </p>
           </div>
 
