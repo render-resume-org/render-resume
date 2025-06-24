@@ -4,14 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import {
   AlertCircle,
   CheckCircle,
-  Download,
-  FileText,
-  Lightbulb,
-  MessageSquare,
-  Search,
-  Star,
-  Target,
-  Upload
+  MessageSquare
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -34,94 +27,6 @@ export default function HelpPage() {
   ];
 
   const currentGrade = gradeScale[gradeValue[0]];
-
-  const steps = [
-    {
-      step: 1,
-      icon: Upload,
-      title: "上傳履歷",
-      description: "支援 PDF、圖片格式，或直接貼上履歷內容",
-      details: [
-        "檔案大小限制：10MB 以內",
-        "支援中英文履歷",
-        "自動偵測格式並提取內容",
-        "隱私保護：測試版僅用於分析且不儲存，正式版將提供安全儲存"
-      ]
-    },
-    {
-      step: 2,
-      icon: Search,
-      title: "AI 分析",
-      description: "系統會根據六維度模型進行深度分析",
-      details: [
-        "技術深度與廣度分析",
-        "項目複雜度與影響力評估",
-        "專業經驗完整度檢視",
-        "教育背景匹配度評分",
-        "成果與驗證識別",
-        "整體專業形象評估"
-      ]
-    },
-    {
-      step: 3,
-      icon: FileText,
-      title: "檢視報告",
-      description: "獲得詳細的分析報告和改進建議",
-      details: [
-        "總體評分（A+ 到 F 等級）",
-        "各維度詳細評分",
-        "STAR 原則重組建議",
-        "具體改進方向",
-        "範例與對比說明"
-      ]
-    },
-    {
-      step: 4,
-      icon: Download,
-      title: "下載優化版",
-      description: "下載經過 AI 優化的履歷版本",
-      details: [
-        "多種專業範本選擇",
-        "格式自動調整",
-        "內容結構優化",
-        "支援 PDF/Word 格式匯出"
-      ]
-    }
-  ];
-
-  const features = [
-    {
-      icon: Star,
-      title: "六維度評分系統",
-      description: "基於國際標準的全面評估",
-      tips: [
-        "每個維度都有詳細的評分標準",
-        "參考 Fortune 500 企業要求",
-        "提供業界基準對比"
-      ]
-    },
-    {
-      icon: Target,
-      title: "STAR 原則重組",
-      description: "工作經驗的結構化呈現",
-      tips: [
-        "Situation: 清楚描述工作情境",
-        "Task: 明確定義任務目標",
-        "Action: 詳述具體行動策略",
-        "Result: 量化成果與影響"
-      ]
-    },
-    {
-      icon: Lightbulb,
-      title: "個人化建議",
-      description: "針對性的優化建議",
-      tips: [
-        "根據目標職位調整重點",
-        "突出核心競爭優勢",
-        "提供具體改進範例"
-      ]
-    }
-  ];
 
   const faqs = [
     {
@@ -165,86 +70,115 @@ export default function HelpPage() {
             </p>
           </div>
 
-          {/* Quick Start */}
+          {/* Operation Guide */}
           <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-              快速開始
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+              操作說明
             </h2>
             
             <div className="space-y-8">
-              {steps.map((step, index) => (
-                <div key={index} className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col md:flex-row md:items-start">
-                    <div className="flex items-center mb-4 md:mb-0 md:mr-6">
-                      <div className="h-16 w-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center mr-4">
-                        <step.icon className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-cyan-600 dark:text-cyan-400">
-                          步驟 {step.step}
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                          {step.title}
-                        </h3>
-                      </div>
-                    </div>
-                    
-                    <div className="flex-1">
-                      <p className="text-gray-700 dark:text-gray-300 mb-4">
-                        {step.description}
-                      </p>
-                      <ul className="space-y-2">
-                        {step.details.map((detail, detailIndex) => (
-                          <li key={detailIndex} className="flex items-start">
-                            <CheckCircle className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {detail}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Key Features */}
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-              核心功能說明
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-              {features.map((feature, index) => (
-                <div key={index} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="h-12 w-12 bg-white dark:bg-gray-700 rounded-lg flex items-center justify-center mr-4 shadow-sm">
-                      <feature.icon className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {feature.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        {feature.description}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <ul className="space-y-2 ml-16">
-                    {feature.tips.map((tip, tipIndex) => (
-                      <li key={tipIndex} className="flex items-start">
-                        <Lightbulb className="h-4 w-4 text-yellow-500 mr-2 flex-shrink-0 mt-1" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300">
-                          {tip}
-                        </span>
-                      </li>
-                    ))}
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  步驟 1：上傳作品文件
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>支援的檔案格式：</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>PDF 格式文件（履歷、作品集、專案文件）</li>
+                    <li>圖片格式（JPG、JPEG、PNG）- 截圖、設計稿等</li>
+                    <li>直接輸入文字內容描述您的作品或專案</li>
                   </ul>
+                  <p className="mt-3">
+                    <strong>上傳方式：</strong>點擊選擇檔案、拖拽檔案至上傳區域，或直接貼上文字內容。
+                  </p>
+                  <p>
+                    <strong>注意事項：</strong>確保文件清晰可讀，建議檔案大小不超過 10MB。
+                  </p>
                 </div>
-              ))}
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  步驟 2：內容辨識與分析
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>系統將自動進行：</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>使用 AI 技術解析上傳的文件內容</li>
+                    <li>提取關鍵信息：技術技能、專案經驗、成就等</li>
+                    <li>識別專業背景和能力領域</li>
+                    <li>分析內容的完整性和專業度</li>
+                  </ul>
+                  <p className="mt-3">
+                    此階段通常需要 30-60 秒，系統會顯示分析進度。
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  步驟 3：專業評分
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>獲得詳細的評分報告：</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li><strong>總體評分：</strong>F 到 A+ 的等第制評分</li>
+                    <li><strong>六大維度分析：</strong>技術深度、專案影響力、專業經驗、教育背景、成果驗證、整體形象</li>
+                    <li><strong>詳細評語：</strong>針對每個維度的具體分析和建議</li>
+                    <li><strong>改進建議：</strong>具體的優化方向和實用技巧</li>
+                  </ul>
+                  <p className="mt-3">
+                    評分基於業界標準和大量真實案例數據分析。
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  步驟 4：智能問答對話
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>AI 會主動詢問補充資料：</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>AI 分析後發現的資訊缺漏或不明確之處</li>
+                    <li>針對特定技能或專案經驗的進一步詳情</li>
+                    <li>重要成就或數據的具體量化資訊</li>
+                    <li>教育背景、工作經歷的完整性確認</li>
+                  </ul>
+                  <p className="mt-3">
+                    透過問答互動，AI 能獲得更完整的資訊，提供更精準的評估和建議。
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  步驟 5：生成專業預覽
+                </h3>
+                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                  <p>獲得完整的專業展示：</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li><strong>優化建議預覽：</strong>根據分析結果生成的改進版本</li>
+                    <li><strong>專業排版：</strong>美觀且符合業界標準的格式</li>
+                    <li><strong>可分享連結：</strong>生成專屬連結供雇主或合作夥伴查看</li>
+                    <li><strong>下載功能：</strong>匯出 PDF 格式的完整報告</li>
+                  </ul>
+                  <p className="mt-3">
+                    預覽版本可作為正式求職或專案展示的參考範本。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">💡 專業提示</h4>
+              <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <li>• 建議上傳多種類型的作品文件以獲得更全面的分析</li>
+                <li>• 在步驟 4 的問答環節中積極提問，獲得更具針對性的建議</li>
+                <li>• 可以多次使用服務來追蹤改進進度</li>
+                <li>• 生成的預覽可作為與專業人士討論的基礎</li>
+                <li>• 建議定期更新作品內容，保持與最新成就同步</li>
+              </ul>
             </div>
           </section>
 

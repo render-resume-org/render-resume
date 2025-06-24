@@ -5,18 +5,14 @@ import { Button } from "@/components/ui/button";
 import {
   BarChart3,
   Brain,
-  CheckCircle,
-  Eye,
-  FileText,
   MessageSquare,
   ScrollText,
-  Shield,
   Star,
-  Target,
   TrendingUp,
   Upload,
   Zap
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
 
@@ -128,32 +124,121 @@ export default function Home() {
     }
   ];
 
-  const keyFeatures = [
+  // Core features data
+  const coreFeatures = [
     {
+      id: 1,
       icon: Brain,
       title: "AI 智能解析",
-      description: "基於 Fortune 500 企業標準，採用國際頂級獵頭公司六維度評估模型",
-      highlights: ["STAR 原則分析", "多元資料整合", "深度內容提取"]
+      subtitle: "上傳即分析，深度挖掘職涯亮點！",
+      description: [
+        "還在為如何展現自己的專業能力煩惱嗎？上傳履歷、作品集甚至專案報告書，",
+        "AI 馬上為你深度分析技術、項目複雜度和職業成就，給你最專業的履歷優化建議！",
+        "不論是技術項目還是管理經驗，瞬間變身履歷達人！"
+      ],
+      imageSrc: "/images/analyze.png",
+      imageAlt: "AI 智能解析界面展示",
+      layout: "imageRight"
     },
     {
+      id: 2,
+      icon: Upload,
+      title: "智能辨識結果",
+      subtitle: "精準識別，自動分類專業技能！",
+      description: [
+        "上傳文件後不知道 AI 看懂了什麼？別擔心！",
+        "系統會清楚展示辨識結果，讓你看到 AI 如何理解你的專業背景，",
+        "從技術棧到項目成果，每個細節都透明呈現，確保分析準確無誤！"
+      ],
+      imageSrc: "/images/recognize.png",
+      imageAlt: "智能辨識結果展示",
+      layout: "imageLeft"
+    },
+    {
+      id: 3,
+      icon: BarChart3,
+      title: "六維度專業評分",
+      subtitle: "深度分析，精準定位職場競爭力！",
+      description: [
+        "想知道自己的履歷在 HR 眼中到底幾分嗎？不用再猜測了！",
+        "基於 Fortune 500 企業標準，從技術深度、項目影響力、專業經驗等六維度評分，",
+        "A+ 到 F 的等第評分，讓你清楚知道改進方向，精準提升競爭力！"
+      ],
+      imageSrc: "/images/grade.png",
+      imageAlt: "六維度評分雷達圖展示",
+      layout: "imageRight"
+    },
+    {
+      id: 4,
+      icon: MessageSquare,
+      title: "智能問答優化",
+      subtitle: "對話互動，挖掘更多履歷亮點！",
+      description: [
+        "擔心遺漏了重要的經歷或技能嗎？別怕！",
+        "AI 會透過智能問答，針對你的背景提出精準問題，引導你補充有價值的細節，",
+        "確保每一個履歷亮點都不被埋沒！就像有專業顧問在身邊一對一指導！"
+      ],
+      imageSrc: "/images/chat.png",
+      imageAlt: "AI 智能問答界面展示",
+      layout: "imageLeft"
+    },
+    {
+      id: 5,
       icon: Star,
-      title: "STAR 原則架構",
-      description: "採用國際認可的 STAR 方法論，系統性重組您的工作經歷與成就",
-      highlights: ["Situation: 情境描述", "Task: 任務界定", "Action: 行動策略", "Result: 成果量化"]
+      title: "STAR 原則重構",
+      subtitle: "一鍵套版，高效佈局，讓經歷說話更有力！",
+      description: [
+        "是不是常常覺得工作經歷寫得平淡無奇，無法突出自己的價值？",
+        "AI 採用國際認可的 STAR 方法論，自動將你的經歷重構為：情境描述 → 任務界定 → 行動策略 → 成果量化，",
+        "一鍵套版，節省寶貴時間！讓每一段經歷都有說服力，HR 一眼就能看見你的價值！"
+      ],
+      imageSrc: "/images/preview.png",
+      imageAlt: "STAR 原則重構展示",
+      layout: "imageRight"
     },
-    {
-      icon: Target,
-      title: "個性化優化建議",
-      description: "Chain of Thought 推理提供具體可執行的改進方案",
-      highlights: ["STAR 方法重組", "技術亮點突出", "量化成果展示"]
-    },
-    {
-      icon: Shield,
-      title: "專業權威認證",
-      description: "15年人才評估經驗，對標國際標準的履歷分析框架",
-      highlights: ["頂級 HR 標準", "業界基準對齊", "建設性導向"]
-    }
   ];
+
+  // Feature card component
+  const FeatureCard = ({ feature }: { feature: typeof coreFeatures[0] }) => {
+    const isImageRight = feature.layout === "imageRight";
+    
+    return (
+      <div className="mb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Content Section */}
+          <div className={`space-y-6 ${isImageRight ? 'lg:order-1' : 'lg:order-2'}`}>
+            <div className="flex items-center space-x-3">
+              <feature.icon className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                {feature.title}
+              </h3>
+            </div>
+            <h4 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+              {feature.subtitle}
+            </h4>
+            {feature.description.map((paragraph, index) => (
+              <p key={index} className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+          
+          {/* Image Section */}
+          <div className={`flex justify-center ${isImageRight ? 'lg:order-2' : 'lg:order-1'}`}>
+            <div className="rounded-lg overflow-hidden shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+              <Image 
+                src={feature.imageSrc}
+                alt={feature.imageAlt}
+                width={500}
+                height={300}
+                className="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
@@ -256,145 +341,28 @@ export default function Home() {
             ))}
           </div>
 
-          <div id="grading-levels" className="mt-12 text-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700 max-w-2xl mx-auto">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                等第制評分系統
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-4">
-                我們採用等第制評分，從 F 級到 A+ 級共 11 個層次，
-                為您的履歷提供精確的專業評估。
-              </p>
-              <div className="text-center">
-                <Link href="/help">
-                  <Button variant="link" className="">
-                    📊 查看詳細評分說明
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
+         
         </div>
       </section>
 
-      {/* Key Features */}
+     
+
+      {/* Core Features with Images */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              系統核心亮點
+              ✨ 核心功能介紹
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              領先業界的 AI 技術，為您提供最專業的履歷分析服務
+              AI 技術驅動，讓履歷分析更智能、更專業！
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {keyFeatures.map((feature, index) => (
-              <div key={index} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <feature.icon className="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      {feature.description}
-                    </p>
-                    <div className="space-y-2">
-                      {feature.highlights.map((highlight, idx) => (
-                        <div key={idx} className="flex items-center space-x-2">
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="text-sm text-gray-600 dark:text-gray-300">
-                            {highlight}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* How it works */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              如何運作
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300">
-              簡單六步驟，獲得專業級履歷分析與優化建議
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="space-y-8">
-              {[
-                {
-                  step: "01",
-                  title: "註冊帳戶",
-                  description: "創建免費帳戶，開始您的 AI 履歷生成之旅",
-                  icon: FileText
-                },
-                {
-                  step: "02",
-                  title: "上傳作品",
-                  description: "拖拽上傳作品說明文件、截圖或簡短文字說明",
-                  icon: Upload
-                },
-                {
-                  step: "03", 
-                  title: "AI智能解析",
-                  description: "AI 自動分析您的作品內容，採用 STAR 原則識別技能和成就",
-                  icon: Brain
-                },
-                {
-                  step: "04",
-                  title: "六維度評分",
-                  description: "基於國際標準進行六維度專業評估，提供 A+ 到 F 的等第制評分",
-                  icon: BarChart3
-                },
-                {
-                  step: "05",
-                  title: "智慧問答與優化",
-                  description: "AI 問答收集補充信息，並提供個性化優化建議",
-                  icon: MessageSquare
-                },
-                {
-                  step: "06",
-                  title: "預覽下載",
-                  description: "預覽最終結果，下載專業的履歷和作品集",
-                  icon: Eye
-                }
-              ].map((item, index) => (
-                <div key={index} className="flex items-start space-x-6">
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-12 h-12 bg-cyan-600 text-white rounded-full font-bold">
-                      {item.step}
-                    </div>
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex items-center space-x-3 mb-2">
-                      <item.icon className="h-6 w-6 text-cyan-600 dark:text-cyan-400" />
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        {item.title}
-                      </h3>
-                    </div>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Render all features using the modular component */}
+          {coreFeatures.map((feature) => (
+            <FeatureCard key={feature.id} feature={feature} />
+          ))}
         </div>
       </section>
 
