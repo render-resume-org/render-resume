@@ -16,6 +16,9 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 export default function HelpPage() {
   const [gradeValue, setGradeValue] = useState([7]); // 預設為 B+ (index 7)
 

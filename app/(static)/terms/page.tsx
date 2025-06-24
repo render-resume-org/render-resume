@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
