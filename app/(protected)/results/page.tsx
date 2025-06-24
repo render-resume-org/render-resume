@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AnalysisScore, LetterGrade, ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import {
-  ArrowLeft,
-  Award,
-  BarChart3,
-  Briefcase,
-  Code,
-  Download,
-  Eye,
-  FileText,
-  GraduationCap,
-  Share2,
-  User
+    ArrowLeft,
+    Award,
+    BarChart3,
+    Briefcase,
+    Code,
+    Download,
+    Eye,
+    FileText,
+    GraduationCap,
+    Share2,
+    User
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';

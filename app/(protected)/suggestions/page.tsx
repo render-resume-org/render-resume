@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatMessage } from "@/lib/mock-data";
 import {
-  AlertTriangle,
-  ArrowLeft,
-  ArrowRight,
-  Lightbulb,
-  Star,
-  TrendingUp
+    AlertTriangle,
+    ArrowLeft,
+    ArrowRight,
+    Lightbulb,
+    Star,
+    TrendingUp
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';

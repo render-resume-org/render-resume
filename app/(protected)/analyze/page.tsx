@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { analyzeDocuments } from "@/lib/api/resume-analysis";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import {
-  ArrowRight,
-  Award,
-  Bot,
-  Briefcase,
-  Code,
-  FileText,
-  GraduationCap
+    ArrowRight,
+    Award,
+    Bot,
+    Briefcase,
+    Code,
+    FileText,
+    GraduationCap
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
