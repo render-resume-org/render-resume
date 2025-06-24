@@ -1,5 +1,9 @@
 "use client";
 
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";

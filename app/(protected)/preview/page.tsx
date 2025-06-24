@@ -1,24 +1,28 @@
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Award,
-  Briefcase,
-  Calendar,
-  Code,
-  Download,
-  Edit,
-  FileText,
-  Globe,
-  GraduationCap,
-  Mail,
-  MapPin,
-  Phone,
-  Printer,
-  Share2,
-  Star,
-  UserCircle
+    Award,
+    Briefcase,
+    Calendar,
+    Code,
+    Download,
+    Edit,
+    FileText,
+    Globe,
+    GraduationCap,
+    Mail,
+    MapPin,
+    Phone,
+    Printer,
+    Share2,
+    Star,
+    UserCircle
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

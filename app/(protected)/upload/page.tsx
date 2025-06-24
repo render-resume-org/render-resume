@@ -1,5 +1,9 @@
 "use client";
 
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { useFileUpload } from "@/components/hooks/use-file-upload";
 import { Button } from "@/components/ui/button";
 import { AdditionalTextInput } from "@/components/upload/additional-text-input";

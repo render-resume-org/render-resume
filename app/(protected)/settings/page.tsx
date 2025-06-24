@@ -1,5 +1,9 @@
 "use client";
 
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { useAuth } from "@/components/hooks/use-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -281,7 +285,7 @@ export default function SettingsPage() {
                 
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    💡 您目前使用的是免費方案。使用序號兌換來升級到更高級的方案，享受更多功能和額度！
+                    �� 您目前使用的是免費方案。使用序號兌換來升級到更高級的方案，享受更多功能和額度！
                   </p>
                 </div>
               </div>

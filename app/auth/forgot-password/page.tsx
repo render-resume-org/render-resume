@@ -1,3 +1,7 @@
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { AuthRedirectHandler } from "@/components/auth-redirect-handler";
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
 import Link from "next/link";

@@ -1,21 +1,25 @@
 "use client";
 
+// 關鍵！禁用靜態生成，因為 layout 包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import {
-  BarChart3,
-  Brain,
-  CheckCircle,
-  Eye,
-  FileText,
-  MessageSquare,
-  ScrollText,
-  Shield,
-  Star,
-  Target,
-  TrendingUp,
-  Upload,
-  Zap
+    BarChart3,
+    Brain,
+    CheckCircle,
+    Eye,
+    FileText,
+    MessageSquare,
+    ScrollText,
+    Shield,
+    Star,
+    Target,
+    TrendingUp,
+    Upload,
+    Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";

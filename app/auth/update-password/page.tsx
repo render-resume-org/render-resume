@@ -1,3 +1,7 @@
+// 關鍵！禁用靜態生成，因為包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 import { UpdatePasswordForm } from "@/components/update-password-form";
 
 export default function Page() {
