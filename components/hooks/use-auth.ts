@@ -149,21 +149,38 @@ export function useAuth() {
         
         // 如果是新用戶註冊（包括 Google OAuth），發送歡迎郵件
         if (event === 'SIGNED_IN' && session?.user?.email) {
-          // 檢查是否為新用戶（可以通過檢查 created_at 是否與當前時間接近來判斷）
+          // 同步用戶資料以獲取最新的 welcome_email_sent 狀態
+          const syncedUser = await syncUserData(session.user);
+          
+          // 更精確的新用戶檢測邏輯
           const userCreatedAt = new Date(session.user.created_at);
           const now = new Date();
           const timeDifference = now.getTime() - userCreatedAt.getTime();
-          const isNewUser = timeDifference < 60000; // 如果創建時間在1分鐘內，視為新用戶
           
-          // 同步用戶資料以獲取 welcome_email_sent 狀態
-          const syncedUser = await syncUserData(session.user);
+          // 判斷是否為新用戶：
+          // 1. 創建時間在 2 分鐘內
+          // 2. 且尚未發送歡迎郵件
+          const isRecentlyCreated = timeDifference < 120000; // 2 分鐘內
+          const hasNotSentWelcomeEmail = !syncedUser.welcome_email_sent;
+          const isNewUser = isRecentlyCreated && hasNotSentWelcomeEmail;
           
-          // 只有在新用戶且尚未發送歡迎郵件時才發送
-          if (isNewUser && !syncedUser.welcome_email_sent) {
+          console.log('🔍 [Auth] New user check:', {
+            userCreatedAt: userCreatedAt.toISOString(),
+            timeDifference: `${Math.round(timeDifference / 1000)}s`,
+            isRecentlyCreated,
+            hasNotSentWelcomeEmail,
+            isNewUser,
+            email: session.user.email
+          });
+          
+          // 只有在確定是新用戶且尚未發送歡迎郵件時才發送
+          if (isNewUser) {
             try {
               const userName = session.user.user_metadata?.full_name || 
                              session.user.user_metadata?.name || 
                              session.user.email.split('@')[0];
+              
+              console.log('📧 [Auth] Sending welcome email for new user:', session.user.email);
               
               const response = await fetch('/api/send-waitlist-welcome', {
                 method: 'POST',
@@ -176,27 +193,30 @@ export function useAuth() {
                 }),
               });
               
+              const responseData = await response.json();
+              
               if (response.ok) {
-                console.log('✅ [Auth] Waitlist welcome email sent for new user');
-                // 更新本地狀態以反映歡迎郵件已發送
-                setAuthState(prev => ({
-                  ...prev,
-                  user: prev.user ? {
-                    ...prev.user,
-                    welcome_email_sent: true
-                  } : null,
-                }));
-              } else {
-                const responseData = await response.json();
                 if (responseData.alreadySent) {
                   console.log('ℹ️ [Auth] Welcome email already sent for user');
                 } else {
-                  console.warn('⚠️ [Auth] Failed to send waitlist welcome email for new user:', responseData.error);
+                  console.log('✅ [Auth] Waitlist welcome email sent for new user');
+                  // 更新本地狀態以反映歡迎郵件已發送
+                  setAuthState(prev => ({
+                    ...prev,
+                    user: prev.user ? {
+                      ...prev.user,
+                      welcome_email_sent: true
+                    } : null,
+                  }));
                 }
+              } else {
+                console.warn('⚠️ [Auth] Failed to send waitlist welcome email for new user:', responseData.error);
               }
             } catch (emailError) {
               console.error('❌ [Auth] Error sending waitlist welcome email for new user:', emailError);
             }
+          } else {
+            console.log('ℹ️ [Auth] Skipping welcome email - not a new user or already sent');
           }
         }
       }
@@ -278,35 +298,7 @@ export function useAuth() {
       
       console.log('✅ [Auth] Email sign up successful');
       
-      // 發送 Wait List 歡迎郵件
-      try {
-        const userName = email.split('@')[0]; // 從電子郵件提取用戶名
-        
-        const response = await fetch('/api/send-waitlist-welcome', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email,
-            userName,
-          }),
-        });
-        
-        if (response.ok) {
-          console.log('✅ [Auth] Waitlist welcome email sent successfully');
-        } else {
-          const responseData = await response.json();
-          if (responseData.alreadySent) {
-            console.log('ℹ️ [Auth] Welcome email already sent for user');
-          } else {
-            console.warn('⚠️ [Auth] Failed to send waitlist welcome email:', responseData.error);
-          }
-        }
-      } catch (emailError) {
-        // 即使發送郵件失敗，也不應該影響註冊流程
-        console.error('❌ [Auth] Error sending waitlist welcome email:', emailError);
-      }
+      // 歡迎郵件將由 onAuthStateChange 統一處理，確保只發送一次
       
     } catch (error) {
       const errorMessage = error instanceof AuthError 
