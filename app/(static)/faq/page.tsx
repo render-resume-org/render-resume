@@ -14,6 +14,10 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 
+// 關鍵！禁用靜態生成，因為 layout 包含 Supabase 相關組件
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 // JSON-LD structured data for FAQ
 const faqJsonLd = {
   "@context": "https://schema.org",
