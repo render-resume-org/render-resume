@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Progress } from "@/components/ui/progress";
 import { AnalysisScore, LetterGrade } from "@/lib/types/resume-analysis";
 import { cn } from "@/lib/utils";
-import html2canvas from "html2canvas";
 import { Check, Copy, Download, Eye, Share2, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -196,6 +195,9 @@ export function AnalysisScores({ scores }: AnalysisScoresProps) {
     
     setIsGeneratingImage(true);
     try {
+      // 動態導入 html2canvas 以避免 Edge Runtime 建置錯誤
+      const html2canvas = (await import('html2canvas')).default;
+      
       // 暫時移動元素到可見位置進行截圖
       const element = shareCardRef.current;
       const originalStyle = {
@@ -236,7 +238,8 @@ export function AnalysisScores({ scores }: AnalysisScoresProps) {
       setPreviewImageUrl(imageUrl);
       setShowPreviewDialog(true);
       
-    } catch {
+    } catch (error) {
+      console.error('Image generation error:', error);
       toast.error('圖片生成失敗', {
         description: '無法生成分享圖片，請稍後再試',
         duration: 3000,
