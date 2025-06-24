@@ -12,6 +12,31 @@ const nextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
   },
 
+  // Webpack configuration
+  webpack: (config, { isServer, nextRuntime }) => {
+    // Exclude html2canvas from Edge Runtime builds
+    if (nextRuntime === 'edge') {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'html2canvas': false,
+      };
+    }
+
+    // Fallback for Node.js modules in client-side bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        http: false,
+        https: false,
+        url: false,
+        canvas: false,
+      };
+    }
+
+    return config;
+  },
+
   // Headers for SEO and security
   async headers() {
     return [
