@@ -20,7 +20,7 @@ npm install @langchain/core @langchain/openai langchain zod
 OPENAI_API_KEY=your_openai_api_key_here
 
 # 可選配置
-# OPENAI_MODEL=gpt-4o-mini
+# OPENAI_MODEL=gpt-4.1-mini
 # OPENAI_TEMPERATURE=0.3
 ```
 

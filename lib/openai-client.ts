@@ -308,7 +308,7 @@ export class OpenAIClient {
         this.visionModel = new ChatOpenAI({
             apiKey: options.apiKey,
             temperature: this.config.temperature,
-            modelName: "gpt-4o-mini", // 使用支援 Vision 的模型
+            modelName: "gpt-4.1-mini", // 使用支援 Vision 的模型
         });
 
         // Initialize structured output models with LangChain native validation
@@ -542,7 +542,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
             ['PDF', 'IMAGES'].includes(this.getFileType(doc.fileName) || '')
         );
 
-        console.log(`🤖 [OpenAI Client] Using model: ${useVisionModel ? 'Vision (gpt-4o-mini)' : 'Chat (gpt-4o-mini)'}`);
+        console.log(`🤖 [OpenAI Client] Using model: ${useVisionModel ? 'Vision (gpt-4.1-mini)' : 'Chat (gpt-4.1-mini)'}`);
 
         try {
             console.log('🚀 [OpenAI Client] Attempting LangChain structured output...');

@@ -83,10 +83,10 @@ export function DashboardClient() {
           <CardHeader>
             <div className="flex items-center space-x-2">
               <User className="h-6 w-6 text-cyan-600" />
-              <CardTitle className="text-lg">個人資料</CardTitle>
+              <CardTitle className="text-lg">職缺搜尋</CardTitle>
             </div>
             <CardDescription>
-              管理您的帳戶設定和偏好
+              為您推薦最適合的職缺
             </CardDescription>
           </CardHeader>
           <CardContent>
