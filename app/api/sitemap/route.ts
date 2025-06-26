@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "https://render-resume.com";
+const defaultUrl = "https://render-resume.com"
 
 // Static pages that should be included in the sitemap
 const staticPages = [

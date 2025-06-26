@@ -7,9 +7,7 @@ import "./globals.css";
 
 import { Analytics } from "@vercel/analytics/next";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const defaultUrl = 'https://render-resume.com'
 
 // Enhanced metadata for SEO and AI Agent Optimization
 export const metadata: Metadata = {
