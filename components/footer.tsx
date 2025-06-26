@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="h-8 w-8 bg-cyan-600 rounded-full flex items-center justify-center mr-3">
                 <span className="text-lg font-bold">✨</span>
               </div>
-              <span className="text-xl font-bold">AI 履歷分析系統</span>
+              <span className="text-xl font-bold">RenderResume｜AI 履歷生成器</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
               基於 Fortune 500 企業標準的專業履歷分析平台，採用六維度評估模型和 STAR 原則，
