@@ -1,0 +1,42 @@
+# Robots.txt for RenderResume - AI 履歷生成器
+# https://render-resume.com
+
+# Allow all web crawlers to access the site
+User-agent: *
+Allow: /
+
+# Block access to sensitive or private areas
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /.well-known/
+Disallow: /auth/callback*
+Disallow: /dashboard/private*
+
+# Block access to development and testing files
+Disallow: /test/
+Disallow: /staging/
+Disallow: /.env*
+Disallow: /config/
+
+# Allow important pages for SEO
+Allow: /auth/sign-up
+Allow: /auth/sign-in
+Allow: /features
+Allow: /pricing
+Allow: /faq
+Allow: /blog
+Allow: /examples
+Allow: /templates
+
+# Crawl delay (optional - uncomment if needed)
+# Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://render-resume.com/sitemap.xml
+Sitemap: https://render-resume.com/api/sitemap
+
+# Additional sitemaps for different content types
+Sitemap: https://render-resume.com/sitemap-blog.xml
+Sitemap: https://render-resume.com/sitemap-templates.xml 

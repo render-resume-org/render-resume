@@ -1,68 +1,93 @@
 import { NextResponse } from 'next/server';
 
-// Define the static routes that should be included in the sitemap
-const staticRoutes = [
-  '',  // Homepage
-  '/auth/login',
-  '/auth/sign-up',
-  '/faq',
-  '/help',
-  '/about',
-  '/privacy',
-  '/terms',
+const defaultUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : "https://render-resume.com";
+
+// Static pages that should be included in the sitemap
+const staticPages = [
+  {
+    url: '',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'daily' as const,
+    priority: 1.0,
+  },
+  {
+    url: '/auth/sign-up',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  },
+  {
+    url: '/auth/login',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  },
+  {
+    url: '/faq',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  },
+  {
+    url: '/about',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  },
+  {
+    url: '/privacy',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'monthly' as const,
+    priority: 0.4,
+  },
+  {
+    url: '/terms',
+    lastModified: new Date('2025-06-26'),
+    changeFrequency: 'monthly' as const,
+    priority: 0.4,
+  },
 ];
 
-// Define protected routes (these will have lower priority and different change frequency)
-const protectedRoutes = [
-  '/dashboard',
-  '/upload',
-  '/analyze',
-  '/results',
-  '/preview',
-  '/suggestions',
-  '/smart-chat',
-  '/profile',
-  '/settings',
-];
+function generateSitemapXML(pages: typeof staticPages): string {
+  const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>';
+  const urlsetOpen = '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+  const urlsetClose = '</urlset>';
+
+  const urls = pages.map(page => {
+    return `
+    <url>
+      <loc>${defaultUrl}${page.url}</loc>
+      <lastmod>${page.lastModified.toISOString()}</lastmod>
+      <changefreq>${page.changeFrequency}</changefreq>
+      <priority>${page.priority}</priority>
+    </url>`;
+  }).join('');
+
+  return `${xmlHeader}
+${urlsetOpen}${urls}
+${urlsetClose}`;
+}
 
 export async function GET() {
-  const baseUrl = process.env.VERCEL_URL 
-    ? `https://${process.env.VERCEL_URL}` 
-    : 'http://localhost:3000';
-  
-  const currentDate = new Date().toISOString();
+  try {
+    // In a real application, you might want to fetch dynamic content here
+    // For example, blog posts, user-generated content, etc.
+    const allPages = [...staticPages];
 
-  const staticSitemapEntries = staticRoutes.map(route => ({
-    url: `${baseUrl}${route}`,
-    lastModified: currentDate,
-    changeFrequency: route === '' ? 'daily' : 'weekly',
-    priority: route === '' ? 1.0 : 0.8,
-  }));
+    const sitemapXML = generateSitemapXML(allPages);
 
-  const protectedSitemapEntries = protectedRoutes.map(route => ({
-    url: `${baseUrl}${route}`,
-    lastModified: currentDate,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }));
-
-  const allEntries = [...staticSitemapEntries, ...protectedSitemapEntries];
-
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allEntries.map(entry => `  <url>
-    <loc>${entry.url}</loc>
-    <lastmod>${entry.lastModified}</lastmod>
-    <changefreq>${entry.changeFrequency}</changefreq>
-    <priority>${entry.priority}</priority>
-  </url>`).join('\n')}
-</urlset>`;
-
-  return new NextResponse(sitemap, {
-    headers: {
-      'Content-Type': 'application/xml',
-      'Cache-Control': 'public, max-age=86400, stale-while-revalidate=43200', // 24h cache, 12h stale
-    },
-  });
+    return new NextResponse(sitemapXML, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600', // Cache for 1 hour
+      },
+    });
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 } 
  
