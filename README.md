@@ -157,8 +157,8 @@ render-resume/
 
 ### 📞 聯絡資訊
 
-- 專案連結: [https://github.com/your-username/render-resume](https://github.com/your-username/render-resume)
-- 問題回報: [GitHub Issues](https://github.com/your-username/render-resume/issues)
+- 專案連結: [https://github.com/ruby0322/render-resume](https://github.com/ruby0322/render-resume)
+- 問題回報: [GitHub Issues](https://github.com/ruby0322/render-resume/issues)
 
 ---
 

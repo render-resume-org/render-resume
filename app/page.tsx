@@ -80,9 +80,9 @@ export default function Home() {
   }, []);
 
   const stats = [
-    { number: "10,000+", label: "履歷生成數量" },
-    { number: "95%", label: "用戶滿意度" },
-    { number: "3分鐘", label: "平均生成時間" }
+    { number: "6 維度", label: "評分標準" },
+    { number: "3 分鐘", label: "生成時間" },
+    { number: "+N%", label: "面試機率" },
   ];
 
   const scoreCategories = [
@@ -247,10 +247,10 @@ export default function Home() {
         <div className="mx-auto max-w-4xl">
           <div className="mb-8 flex justify-center">
             <div className="relative">
-              <div className="h-16 w-16 bg-cyan-100 dark:bg-cyan-900 rounded-full flex items-center justify-center">
+              <div className="h-16 w-16  rounded-full flex items-center justify-center">
                 <span className="text-3xl" role="img" aria-label="sparkles">✨</span>
               </div>
-              <div className="absolute -top-2 -right-2 h-6 w-6 bg-cyan-500 rounded-full flex items-center justify-center">
+              <div className="absolute -top-2 -right-2 h-6 w-6 bg-cyan-400 rounded-full flex items-center justify-center">
                 <span className="text-xs font-bold text-white">AI</span>
               </div>
             </div>
@@ -266,8 +266,8 @@ export default function Home() {
           </div>
           
           <p className="mb-8 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto" itemProp="description">
-            基於 Fortune 500 企業標準的 AI 履歷分析系統，採用六維度評估模型，
-            讓您的才華以最完美的方式呈現給雇主和客戶。
+            基於 Fortune 500 企業標準的 AI 履歷分析系統，採用六維度評估模型、STAR 原則重構，
+            讓您的價值以最完美的方式呈現給雇主和客戶。
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -277,22 +277,16 @@ export default function Home() {
                 <ScrollText className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            {/* <Link href="/auth/login">
-              <Button variant="outline" size="lg" className="px-8 py-3 text-lg border-cyan-200 text-cyan-700 hover:bg-cyan-50 dark:border-cyan-800 dark:text-cyan-300 dark:hover:bg-cyan-950">
-                已有帳戶？登入
-                <Eye className="ml-2 h-5 w-5" />
-              </Button>
-            </Link> */}
           </div>
 
           <div className="bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800 rounded-lg p-4 mb-8">
             <p className="text-sm text-cyan-700 dark:text-cyan-300">
-              💎 <strong>搶先體驗：</strong>註冊即可加入 Waitlist，搶先使用基於國際標準的 AI 履歷分析系統！
+              💎 <strong>搶先體驗：</strong>註冊即可加入 RenderResume Waitlist，搶先使用測試版！
             </p>
           </div>
 
           {/* Stats */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8" itemScope itemType="https://schema.org/ItemList">
+          <div className="mt-16 grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8" itemScope itemType="https://schema.org/ItemList">
             {stats.map((stat, index) => (
               <div key={index} className="text-center" itemScope itemType="https://schema.org/Statistic">
                 <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400" itemProp="value">

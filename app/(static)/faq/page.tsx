@@ -1,15 +1,15 @@
 "use client";
 
 import {
-    ChevronDown,
-    ChevronUp,
-    CreditCard,
-    FileText,
-    HelpCircle,
-    Search,
-    Shield,
-    Users,
-    Zap
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  FileText,
+  HelpCircle,
+  Search,
+  Shield,
+  Users,
+  Zap
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -65,8 +65,8 @@ export default function FAQPage() {
       color: "blue",
       faqs: [
         {
-          question: "如何開始使用 AI 履歷分析？",
-          answer: "非常簡單！只需要四個步驟：1) 註冊並登入帳戶 2) 上傳您的履歷檔案（支援 PDF、Word 格式）或直接貼上履歷內容 3) 等待 AI 分析完成（通常 1-3 分鐘）4) 查看詳細的分析報告和改進建議。"
+          question: "如何開始使用 RenderResume？",
+          answer: "非常簡單！只需要四個步驟：1) 註冊並登入帳戶後，在首頁點擊「開始創建」 2) 上傳您的履歷檔案（支援 PDF、圖片格式）或直接貼上履歷內容 3) 等待 AI 分析完成（通常 45-60 秒）4) 查看詳細的分析報告和改進建議。5) 在 AI 智慧問答中，補齊履歷中未提及的資訊，讓您的履歷更加完整。6) 輸出 PDF 履歷，或複製連結分享給雇主。"
         },
         {
           question: "支援哪些履歷格式？",
@@ -74,11 +74,11 @@ export default function FAQPage() {
         },
         {
           question: "分析需要多長時間？",
-          answer: "大部分履歷在 1-3 分鐘內完成分析。複雜的履歷或系統繁忙時可能需要稍長時間，但通常不會超過 5 分鐘。您可以在分析頁面看到即時進度。"
+          answer: "大部分履歷在 45-60 秒內完成分析。複雜的履歷或系統繁忙時可能需要稍長時間，但通常不會超過 1.5 分鐘。您可以在分析頁面看到即時進度。"
         },
         {
           question: "可以分析英文履歷嗎？",
-          answer: "當然可以！我們的 AI 系統支援中英文雙語履歷分析，評分標準會根據語言和目標市場自動調整，確保分析結果的準確性。"
+          answer: "當然可以！我們的 AI 系統支援多語言履歷分析！但中英文履歷分析結果較佳。"
         }
       ]
     },
@@ -131,7 +131,7 @@ export default function FAQPage() {
         },
         {
           question: "分析卡在某個步驟怎麼辦？",
-          answer: "如果分析進度停滯超過 10 分鐘，請嘗試：1) 重新整理頁面 2) 重新上傳履歷 3) 檢查網路連線 4) 嘗試使用不同瀏覽器。如果問題仍然存在，請聯繫我們的技術支援團隊。"
+          answer: "如果分析進度停滯超過 3 分鐘，請嘗試：1) 重新整理頁面 2) 重新上傳履歷 3) 檢查網路連線 4) 嘗試使用不同瀏覽器。如果問題仍然存在，請聯繫我們的技術支援團隊。"
         },
         {
           question: "支援哪些瀏覽器？",
@@ -173,11 +173,11 @@ export default function FAQPage() {
       faqs: [
         {
           question: "使用費用如何計算？",
-          answer: "目前我們提供免費的 Waitlist 搶先體驗服務。正式版本將推出多種方案：免費方案、Pro 方案。具體方案內容將在正式上線後公布。"
+          answer: "測試版將提供免費的 Waitlist 搶先體驗服務。正式版本將推出多種方案：免費方案、Pro 方案。具體方案內容將在正式上線後公布。"
         },
         {
           question: "有免費試用嗎？",
-          answer: "是的！註冊即可免費體驗完整的履歷分析功能。Waitlist 期間享受完全免費的服務，讓您充分體驗我們的 AI 分析能力。"
+          answer: "是的！註冊即可免費體驗完整的履歷分析功能。測試期間享受完全免費的服務，讓您充分體驗我們的 AI 分析能力。"
         },
         {
           question: "支援哪些付款方式？",
