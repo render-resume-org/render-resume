@@ -94,6 +94,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const [messageCount, setMessageCount] = useState(0);
   const [cannedOptions, setCannedOptions] = useState<string[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const suggestionsScrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messageCounterRef = useRef(0);
 
@@ -139,6 +140,32 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
       }
     }
   }, [messages]);
+
+  // 新增：當有新建議時，自動滾動建議面板到底部
+  useEffect(() => {
+    if (suggestionsScrollAreaRef.current && suggestions.length > 0) {
+      const scrollContainer = suggestionsScrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
+  }, [suggestions]);
+
+  // 新增：自動調整 textarea 高度的函數
+  const adjustTextareaHeight = useCallback((value: string) => {
+    if (textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      
+      // 計算內容高度
+      const lineHeight = 24; // 假設行高為 24px
+      const lines = value.split('\n').length;
+      const contentHeight = Math.max(40, lines * lineHeight); // 最小 40px
+      const maxHeight = 120;
+      
+      textarea.style.height = Math.min(contentHeight, maxHeight) + 'px';
+    }
+  }, []);
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || currentInput.trim();
@@ -248,12 +275,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentInput(e.target.value);
-    
-    // 自動調整高度
-    const textarea = e.target;
-    textarea.style.height = 'auto';
-    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    const value = e.target.value;
+    setCurrentInput(value);
+    adjustTextareaHeight(value);
   };
 
   const handleComplete = () => {
@@ -271,6 +295,10 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
 
 我想問：`;
     setCurrentInput(quoteMessage);
+    
+    // 自動調整高度
+    adjustTextareaHeight(quoteMessage);
+    
     if (textareaRef.current) {
       textareaRef.current.focus();
       // 將光標移到最後
@@ -349,7 +377,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                   </p>
                 </CardHeader>
                 <CardContent>
-                  <ScrollArea className="h-[400px]">
+                  <ScrollArea className="h-[400px]" ref={suggestionsScrollAreaRef}>
                     <div className="space-y-3">
                       <AnimatePresence mode="popLayout">
                         {suggestions.map((suggestion) => (

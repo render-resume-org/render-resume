@@ -3,7 +3,6 @@
 import SmartChat, { ChatMessage, SuggestionRecord } from "@/components/smart-chat";
 import { Button } from "@/components/ui/button";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -56,10 +55,6 @@ export default function SmartChatPage() {
     localStorage.removeItem('chatHistory');
     localStorage.removeItem('chatSuggestions');
     router.push('/suggestions');
-  };
-
-  const handlePrevious = () => {
-    router.push('/results');
   };
 
   // 載入中狀態
@@ -139,27 +134,6 @@ export default function SmartChatPage() {
           onComplete={handleChatComplete}
           onSkip={handleSkipToSuggestions}
         />
-
-        {/* Navigation */}
-        <div className="flex justify-between mt-8 max-w-2xl mx-auto">
-          <Button
-            variant="outline"
-            onClick={handlePrevious}
-            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>返回分析結果</span>
-          </Button>
-          
-          <Button
-            variant="outline"
-            onClick={handleSkipToSuggestions}
-            className="flex items-center space-x-2 border-cyan-500 text-cyan-600 hover:bg-cyan-50 dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-950/30"
-          >
-            <span>跳過問答</span>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
   );

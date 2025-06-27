@@ -399,12 +399,6 @@ export default function Home() {
                   <ScrollText className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              {/* <Link href="/auth/login">
-                <Button variant="outline" size="lg" className="px-8 py-3 text-lg border-white/30 text-white hover:bg-white/10">
-                  已有帳戶？登入
-                  <Eye className="ml-2 h-5 w-5" />
-                </Button>
-              </Link> */}
             </div>
 
             <p className="text-sm mt-6 opacity-80">
