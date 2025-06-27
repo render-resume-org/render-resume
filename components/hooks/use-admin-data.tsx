@@ -1,7 +1,7 @@
 "use client";
 
 import { Database } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export type UserWithSubscription = Database["public"]["Tables"]["users"]["Row"] & {
@@ -58,7 +58,7 @@ export function useAdminData(options: UseAdminDataOptions = {}) {
     filter = 'all'
   } = options;
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -88,7 +88,7 @@ export function useAdminData(options: UseAdminDataOptions = {}) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, limit, search, filter]);
 
   const deleteUser = async (userId: string) => {
     try {
@@ -144,7 +144,7 @@ export function useAdminData(options: UseAdminDataOptions = {}) {
   // 當選項改變時重新獲取數據
   useEffect(() => {
     fetchUsers();
-  }, [page, limit, search, filter]);
+  }, [fetchUsers]);
 
   return {
     users,

@@ -317,7 +317,7 @@ export default function AnalyzePage() {
                 isProcessing ? 'ring-2 ring-cyan-500 bg-cyan-50 dark:bg-cyan-950/30' :
                 isCompleted ? 'bg-green-50 dark:bg-green-950/30' : ''
               }`}>
-                <CardContent className="p-4">
+                <CardContent className="px-4">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-full ${
                       isProcessing ? 'bg-cyan-100 dark:bg-cyan-900/50' :

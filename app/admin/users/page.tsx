@@ -36,6 +36,13 @@ const getInitials = (name: string) => {
   return name.split(' ').map(n => n[0]).join('').toUpperCase();
 };
 
+interface Plan {
+  id: string;
+  title: string;
+  type: string;
+  price: number;
+}
+
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<"all" | "active" | "paid" | "free">("all");
@@ -45,7 +52,7 @@ export default function UsersPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [selectedPlan, setSelectedPlan] = useState("");
   const [subscriptionDuration, setSubscriptionDuration] = useState("30");
   const [isSubscriptionLoading, setIsSubscriptionLoading] = useState(false);

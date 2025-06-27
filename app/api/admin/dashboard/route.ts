@@ -4,6 +4,15 @@ import { NextResponse } from "next/server";
 // 管理員 ID 列表
 const ADMINS = ['049512f1-9b80-4848-9df3-03adcc8f61c9'];
 
+interface SubscriptionWithPlan {
+  id: string;
+  is_active: boolean;
+  expire_at: string | null;
+  plans: {
+    type: string;
+  }[] | null;
+}
+
 // 檢查管理員權限的輔助函數
 async function checkAdminAuth() {
   const supabase = await createClient();
@@ -79,10 +88,10 @@ export async function GET() {
     ).length;
 
     // 計算訂閱統計
-    const subscriptions = subscriptionsResult.data || [];
+    const subscriptions = subscriptionsResult.data as unknown as SubscriptionWithPlan[] || [];
     const activeSubscriptions = subscriptions.filter(sub => sub.is_active).length;
-    const premiumUsers = subscriptions.filter(sub => 
-      sub.is_active && sub.plans?.type !== 'free'
+    const premiumUsers = subscriptions.filter((sub: SubscriptionWithPlan) => 
+      sub.is_active && sub.plans && sub.plans.length > 0 && sub.plans[0].type !== 'free'
     ).length;
 
     // 計算公告統計

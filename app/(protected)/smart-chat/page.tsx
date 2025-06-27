@@ -1,6 +1,6 @@
 "use client";
 
-import SmartChat, { ChatMessage, ChatState } from "@/components/smart-chat";
+import SmartChat, { ChatMessage, SuggestionRecord } from "@/components/smart-chat";
 import { Button } from "@/components/ui/button";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -38,12 +38,12 @@ export default function SmartChatPage() {
     loadAnalysisResult();
   }, [loadAnalysisResult]);
 
-  const handleChatComplete = (history: ChatMessage[], chatStates: ChatState[]) => {
+  const handleChatComplete = (history: ChatMessage[], suggestions: SuggestionRecord[]) => {
     setIsCompleted(true);
     
-    // 將聊天記錄和問答狀態存儲到 localStorage 以便在建議頁面使用
+    // 將聊天記錄和建議存儲到 localStorage 以便在建議頁面使用
     localStorage.setItem('chatHistory', JSON.stringify(history));
-    localStorage.setItem('chatStates', JSON.stringify(chatStates));
+    localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
     
     // 延遲跳轉，讓用戶看到完成狀態
     setTimeout(() => {
@@ -52,6 +52,9 @@ export default function SmartChatPage() {
   };
 
   const handleSkipToSuggestions = () => {
+    // 清空之前的聊天記錄
+    localStorage.removeItem('chatHistory');
+    localStorage.removeItem('chatSuggestions');
     router.push('/suggestions');
   };
 
@@ -76,25 +79,25 @@ export default function SmartChatPage() {
     );
   }
 
-  // 沒有分析結果或沒有問題時的狀態
-  if (!analysisResult || !analysisResult.missing_content?.follow_ups?.length) {
+  // 沒有分析結果時的狀態
+  if (!analysisResult) {
     return (
       <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="mb-6">
-            <span className="text-6xl">🎉</span>
+            <span className="text-6xl">⚠️</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            您的履歷已經很完整了！
+            找不到分析結果
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            AI 分析顯示您的履歷內容已經相當完善，無需額外的問答優化。
+            請先進行履歷分析再使用智慧問答功能。
           </p>
           <Button
-            onClick={handleSkipToSuggestions}
+            onClick={() => router.push('/')}
             className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
-            查看優化建議
+            返回首頁
           </Button>
         </div>
       </div>
@@ -110,10 +113,10 @@ export default function SmartChatPage() {
             <span className="text-6xl">✅</span>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            問答優化完成！
+            智慧問答完成！
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            感謝您的詳細回答，正在為您生成個性化建議...
+            感謝您的參與，正在為您準備個性化的履歷優化建議...
           </p>
           <div className="animate-pulse">
             <div className="h-2 bg-cyan-200 rounded-full w-64 mx-auto">
@@ -128,18 +131,7 @@ export default function SmartChatPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <span className="text-5xl">🤖</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            AI 智慧問答
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            通過簡單的問答互動，幫助您補齊履歷中的關鍵信息，讓 AI 為您生成更精準的優化建議。
-          </p>
-        </div>
+
 
         {/* 智慧問答組件 */}
         <SmartChat 

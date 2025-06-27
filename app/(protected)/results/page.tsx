@@ -338,10 +338,10 @@ export default function ResultsPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col flex-wrap justify-center gap-4 mb-8">
+        <div className="flex flex-col flex-wrap items-center justify-center gap-4 mb-8">
           <Button
             onClick={handleViewAnalysisReport}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center px-6 py-3 text-lg"
+            className="w-fit bg-cyan-600 hover:bg-cyan-700 text-white flex items-center px-6 py-3 text-lg"
           >
             <BarChart3 className="h-5 w-5 mr-2" />
             查看分析評分報告
@@ -378,7 +378,7 @@ export default function ResultsPage() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <Card className="bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800">
-            <CardContent className="p-6 text-center">
+            <CardContent className="px-6 text-center">
               <GraduationCap className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-2" />
               <h3 className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                 {analysisResult.education_background.length}
@@ -388,7 +388,7 @@ export default function ResultsPage() {
           </Card>
           
           <Card className="bg-purple-50 dark:bg-purple-950/30 border-purple-200 dark:border-purple-800">
-            <CardContent className="p-6 text-center">
+            <CardContent className="px-6 text-center">
               <User className="h-8 w-8 text-purple-600 dark:text-purple-400 mx-auto mb-2" />
               <h3 className="text-2xl font-bold text-purple-700 dark:text-purple-400">
                 {analysisResult.work_experiences.length}
@@ -398,7 +398,7 @@ export default function ResultsPage() {
           </Card>
           
           <Card className="bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
-            <CardContent className="p-6 text-center">
+            <CardContent className="px-6 text-center">
               <Briefcase className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-2" />
               <h3 className="text-2xl font-bold text-green-700 dark:text-green-400">
                 {analysisResult.projects.length}
@@ -408,7 +408,7 @@ export default function ResultsPage() {
           </Card>
           
           <Card className="bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800">
-            <CardContent className="p-6 text-center">
+            <CardContent className="px-6 text-center">
               <Award className="h-8 w-8 text-orange-600 dark:text-orange-400 mx-auto mb-2" />
               <h3 className="text-2xl font-bold text-orange-700 dark:text-orange-400">
                 {analysisResult.achievements.length}
@@ -418,7 +418,7 @@ export default function ResultsPage() {
           </Card>
           
           <Card className="bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800">
-            <CardContent className="p-6 text-center">
+            <CardContent className="px-6 text-center">
               <Code className="h-8 w-8 text-cyan-600 dark:text-cyan-400 mx-auto mb-2" />
               <h3 className="text-2xl font-bold text-cyan-700 dark:text-cyan-400">
                 {allSkills.length}

@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Users
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -305,9 +306,11 @@ export default function AdminDashboard() {
               ) : (
                 recentUsers.map((user) => (
                   <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50">
-                    <img
+                    <Image
                       src={user.avatar}
                       alt={user.name}
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full"
                     />
                     <div className="flex-1 min-w-0">

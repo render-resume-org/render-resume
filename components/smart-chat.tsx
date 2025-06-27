@@ -9,8 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Edit3, Send, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AlertCircle, Copy, Lightbulb, Send, Trash2 } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // 用戶頭像組件
 interface UserAvatarProps {
@@ -40,55 +40,62 @@ export interface ChatMessage {
   type: 'ai' | 'user';
   content: string;
   timestamp: Date;
-  encouragement?: string;
+  suggestion?: {
+    title: string;
+    description: string;
+    category: string;
+  };
 }
 
-// 用戶回答和對應問題的狀態
-export interface ChatState {
-  question: string;
-  userResponse: string;
-  questionIndex: number;
+// 建議狀態類型
+export interface SuggestionRecord {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  timestamp: Date;
+}
+
+// 罐頭訊息選項
+const CANNED_MESSAGES = [
+  "你先問我！",
+  "我的專案經驗夠吸引人嗎？",
+  "我的技能描述可以怎麼改善？",
+  "工作經驗的描述有什麼問題？",
+  "如何讓我的成就更突出？",
+  "履歷格式有什麼建議？",
+  "我缺少哪些關鍵資訊？",
+  "如何量化我的工作成果？",
+  "我的履歷適合哪些職位？",
+  "如何突出我的領導能力？",
+  "我的教育背景需要補強嗎？"
+];
+
+// 隨機選擇罐頭訊息（除了第一個固定選項）
+function getRandomCannedMessages(): string[] {
+  const fixedFirst = CANNED_MESSAGES[0]; // "你先問我！"
+  const others = CANNED_MESSAGES.slice(1);
+  const shuffled = others.sort(() => Math.random() - 0.5);
+  return [fixedFirst, ...shuffled.slice(0, 3)];
 }
 
 interface SmartChatProps {
   analysisResult: ResumeAnalysisResult;
-  onComplete: (chatHistory: ChatMessage[], chatStates: ChatState[]) => void;
+  onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[]) => void;
   onSkip: () => void;
 }
-
-// AI 鼓勵話語模板 - 年輕活潑但專業的語調
-const AI_RESPONSE_TEMPLATES = [
-  "太棒了！這個經驗聽起來很有價值呢～ 💪",
-  "哇，這個回答很棒！我已經更了解你的背景了 ✨",
-  "很好很好！這些細節對履歷優化超有幫助的 🎯",
-  "收到收到！你的經驗真的很豐富耶 🚀",
-  "讚！這樣的具體描述會讓履歷更亮眼 ⭐",
-  "了解了！這個經歷聽起來很精彩 🎉",
-  "很棒的分享！這些資訊對我們很有用 👍",
-  "Perfect！這正是我需要知道的資訊 💯"
-];
-
-// 獲取隨機 AI 回應
-const getRandomAIResponse = (): string => {
-  return AI_RESPONSE_TEMPLATES[Math.floor(Math.random() * AI_RESPONSE_TEMPLATES.length)];
-};
 
 export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartChatProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionRecord[]>([]);
   const [currentInput, setCurrentInput] = useState('');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [chatStates, setChatStates] = useState<ChatState[]>([]);
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editingContent, setEditingContent] = useState('');
+  const [messageCount, setMessageCount] = useState(0);
+  const [cannedOptions, setCannedOptions] = useState<string[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const messageCounterRef = useRef(0);
-
-  // 從分析結果中獲取 follow_ups 問題
-  const followUpQuestions = useMemo(() => analysisResult.missing_content?.follow_ups || [], [analysisResult]);
 
   const generateUniqueId = useCallback((prefix: string) => {
     messageCounterRef.current += 1;
@@ -96,27 +103,28 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   }, []);
 
   const initializeChat = useCallback(() => {
-    if (followUpQuestions.length === 0) {
-      return;
-    }
-
-    // 添加AI的開場白和第一個問題
+    // 取得 follow-up 問題數量
+    const followUpCount = analysisResult?.missing_content?.follow_ups?.length || 0;
+    
     const welcomeMessage: ChatMessage = {
       id: generateUniqueId('ai-welcome'),
       type: 'ai',
-      content: `嗨！我是你的 AI 履歷小助手 🤖\n\n剛剛分析了你的履歷，發現有幾個地方可以更完整一些！讓我問你幾個問題來幫你優化內容吧～`,
+      content: `嗨！我是你的 AI 履歷優化顧問 🤖
+
+我已經仔細分析了你的履歷，並準備了 ${followUpCount > 0 ? `${followUpCount} 個深度追問問題` : '幾個專業問題'}來幫你挖掘更多亮點！
+
+你可以主動提問，或讓我基於你的履歷背景主動詢問。我會協助你深入了解專案細節、挖掘遺漏的成就，並提供具體可執行的優化建議。
+
+選擇一個開始的方式，或直接在下方輸入你的問題：`,
       timestamp: new Date()
     };
 
-    const firstQuestionMessage: ChatMessage = {
-      id: generateUniqueId('ai-question'),
-      type: 'ai',
-      content: followUpQuestions[0],
-      timestamp: new Date()
-    };
-
-    setMessages([welcomeMessage, firstQuestionMessage]);
-  }, [followUpQuestions, generateUniqueId]);
+    setMessages([welcomeMessage]);
+    setMessageCount(1);
+    
+    // 生成隨機罐頭選項
+    setCannedOptions(getRandomCannedMessages());
+  }, [generateUniqueId, analysisResult]);
 
   useEffect(() => {
     initializeChat();
@@ -132,91 +140,21 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }
   }, [messages]);
 
-  // 開始編輯訊息
-  const handleStartEdit = (messageId: string, content: string) => {
-    setEditingMessageId(messageId);
-    setEditingContent(content);
-    setTimeout(() => {
-      if (editTextareaRef.current) {
-        editTextareaRef.current.focus();
-        editTextareaRef.current.setSelectionRange(content.length, content.length);
-      }
-    }, 100);
-  };
-
-  // 取消編輯
-  const handleCancelEdit = () => {
-    setEditingMessageId(null);
-    setEditingContent('');
-  };
-
-  // 確認編輯
-  const handleConfirmEdit = () => {
-    if (!editingContent.trim() || !editingMessageId) return;
-
-    // 更新訊息內容
-    setMessages(prev => prev.map(msg => 
-      msg.id === editingMessageId 
-        ? { ...msg, content: editingContent.trim(), timestamp: new Date() }
-        : msg
-    ));
-
-    // 同時更新對應的 chatStates
-    setChatStates(prev => prev.map(state => {
-      const correspondingMessage = messages.find(msg => 
-        msg.id === editingMessageId && msg.type === 'user'
-      );
-      if (correspondingMessage) {
-        // 找到對應的問題索引來更新正確的 chatState
-        const messageIndex = messages.findIndex(msg => msg.id === editingMessageId);
-        const questionsBefore = messages.slice(0, messageIndex).filter(msg => 
-          msg.type === 'ai' && msg.content !== messages[0]?.content // 排除歡迎訊息
-        ).length - 1; // 減去歡迎後的第一個問題
-        
-        if (state.questionIndex === questionsBefore) {
-          return { ...state, userResponse: editingContent.trim() };
-        }
-      }
-      return state;
-    }));
-
-    setEditingMessageId(null);
-    setEditingContent('');
-  };
-
-  // 編輯時的按鍵處理
-  const handleEditKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleConfirmEdit();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      handleCancelEdit();
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!currentInput.trim() || isLoading) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || currentInput.trim();
+    if (!textToSend || isLoading || messageCount >= 30) return;
 
     const userMessage: ChatMessage = {
       id: generateUniqueId('user'),
       type: 'user',
-      content: currentInput.trim(),
+      content: textToSend,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
-
-    // 記錄當前的問答狀態
-    const newChatState: ChatState = {
-      question: followUpQuestions[currentQuestionIndex],
-      userResponse: currentInput.trim(),
-      questionIndex: currentQuestionIndex
-    };
-    setChatStates(prev => [...prev, newChatState]);
-
     setCurrentInput('');
     setIsLoading(true);
+    setMessageCount(prev => prev + 1);
 
     // 重置 textarea 高度
     if (textareaRef.current) {
@@ -224,60 +162,79 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }
 
     try {
-      // 模擬 0.3 秒延遲
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 添加AI的鼓勵回應
-      const encouragementMessage: ChatMessage = {
-        id: generateUniqueId('ai-encouragement'),
+      // 準備發送給 API 的訊息
+      const apiMessages = [...messages, userMessage].map(msg => ({
+        type: msg.type,
+        content: msg.content,
+        timestamp: msg.timestamp
+      }));
+
+      const response = await fetch('/api/smart-chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: apiMessages,
+          analysisResult
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || '請求失敗');
+      }
+
+      const { message, suggestion } = result.data;
+
+      // 添加 AI 回應
+      const aiMessage: ChatMessage = {
+        id: generateUniqueId('ai'),
         type: 'ai',
-        content: getRandomAIResponse(),
+        content: message,
+        timestamp: new Date(),
+        suggestion
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      setMessageCount(prev => prev + 1);
+
+      // 如果有建議，記錄到建議列表
+      if (suggestion) {
+        const suggestionRecord: SuggestionRecord = {
+          id: generateUniqueId('suggestion'),
+          title: suggestion.title,
+          description: suggestion.description,
+          category: suggestion.category,
+          timestamp: new Date()
+        };
+        setSuggestions(prev => [...prev, suggestionRecord]);
+      }
+
+      // 自動 focus 到輸入框
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 100);
+
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      
+      const errorMessage: ChatMessage = {
+        id: generateUniqueId('ai-error'),
+        type: 'ai',
+        content: '抱歉，發生了一些問題。請稍後再試。',
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, encouragementMessage]);
-
-      // 檢查是否還有問題要問
-      const nextQuestionIndex = currentQuestionIndex + 1;
-      if (nextQuestionIndex < followUpQuestions.length) {
-        // 再延遲 0.3 秒後問下一個問題
-        setTimeout(() => {
-          const nextQuestionMessage: ChatMessage = {
-            id: generateUniqueId('ai-question'),
-            type: 'ai',
-            content: followUpQuestions[nextQuestionIndex],
-            timestamp: new Date()
-          };
-
-          setMessages(prev => [...prev, nextQuestionMessage]);
-          setCurrentQuestionIndex(nextQuestionIndex);
-          
-          // 自動 focus 到輸入框，提升用戶體驗
-          setTimeout(() => {
-            if (textareaRef.current) {
-              textareaRef.current.focus();
-            }
-          }, 100);
-        }, 300);
-      } else {
-        // 結束對話
-        setTimeout(() => {
-          const endMessage: ChatMessage = {
-            id: generateUniqueId('ai-end'),
-            type: 'ai',
-            content: '太棒了！謝謝你的詳細回答 🎉\n\n這些資訊對優化你的履歷超有幫助的！現在讓我們來看看根據你的回答生成的優化建議吧～',
-            timestamp: new Date()
-          };
-
-          setMessages(prev => {
-            const finalMessages = [...prev, endMessage];
-            setTimeout(() => onComplete(finalMessages, [...chatStates, newChatState]), 3000);
-            return finalMessages;
-          });
-        }, 300);
-      }
-    } catch (error) {
-      console.error('Failed to generate AI response:', error);
+      setMessages(prev => [...prev, errorMessage]);
+      setMessageCount(prev => prev + 1);
     } finally {
       setIsLoading(false);
     }
@@ -299,8 +256,30 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
   };
 
-  const handleSkip = () => {
-    onSkip();
+  const handleComplete = () => {
+    onComplete(messages, suggestions);
+  };
+
+  const removeSuggestion = (suggestionId: string) => {
+    setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
+  };
+
+  const quoteSuggestion = (suggestion: SuggestionRecord) => {
+    const quoteMessage = `關於「${suggestion.title}」這個建議，我想進一步了解：
+
+原建議：${suggestion.description}
+
+我想問：`;
+    setCurrentInput(quoteMessage);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+      // 將光標移到最後
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.setSelectionRange(quoteMessage.length, quoteMessage.length);
+        }
+      }, 0);
+    }
   };
 
   // 消息動畫變體
@@ -341,197 +320,290 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }
   };
 
-  if (followUpQuestions.length === 0 && !isLoading) {
-    return (
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <span className="text-2xl mr-2">🤖</span>
-            智慧問答
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
-            您的履歷分析結果都很不錯！無需額外的問答優化。
-          </p>
-          <Button onClick={onSkip} className="bg-cyan-600 hover:bg-cyan-700 text-white">
-            繼續查看建議
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleCannedMessage = (message: string) => {
+    handleSendMessage(message);
+  };
 
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <span className="text-2xl mr-2">🤖</span>
-            AI 智慧問答
-          </div>
-          <div className="text-sm text-gray-500">
-            {currentQuestionIndex + 1}/{followUpQuestions.length}
-          </div>
-        </CardTitle>
-        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-300">
-          <span>幫助您完善履歷內容</span>
-          <Button variant="ghost" size="sm" onClick={handleSkip}>
-            跳過問答
-          </Button>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* 聊天區域 */}
-        <div className="h-[400px] border rounded-lg overflow-hidden">
-          <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
-            <div className="w-full space-y-4">
-              <AnimatePresence mode="popLayout">
-                {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    variants={messageVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    layout
-                    className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
-                  >
-                    <div
-                      className={cn(`flex items-start space-x-2 max-w-[80%] min-w-0`, message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}
-                    >
-                      {message.type === 'user' ? (
-                        <UserAvatar user={user} />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                          <span className="text-lg">🤖</span>
-                        </div>
-                      )}
-                      <div
-                        className={cn(`rounded-lg px-4 py-2 min-w-0 flex-1`, message.type === 'user'
-                            ? 'bg-cyan-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                        )}
-                      >
-                        {editingMessageId === message.id ? (
-                          // 編輯模式
-                          <div className="space-y-2">
-                            <Textarea
-                              ref={editTextareaRef}
-                              value={editingContent}
-                              onChange={(e) => setEditingContent(e.target.value)}
-                              onKeyPress={handleEditKeyPress}
-                              className="min-h-[60px] bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                              placeholder="編輯您的回答..."
-                            />
-                            <div className="flex space-x-2 justify-end">
-                              <Button
-                                size="sm"
-                                onClick={handleCancelEdit}
-                                className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                onClick={handleConfirmEdit}
-                                disabled={!editingContent.trim()}
-                                className="h-7 px-2 text-xs bg-cyan-600 hover:bg-cyan-700"
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          // 正常顯示模式
-                          <div className="group">
-                            <div className="flex items-start justify-between">
-                              <p className="text-sm whitespace-pre-wrap chat-message-content flex-1">{message.content}</p>
-                              {message.type === 'user' && !isLoading && (
+    <div className="space-y-6">
+      {/* 新的兩欄布局 */}
+      <div className="max-w-7xl mx-auto flex items-start justify-center gap-6">
+        {/* 左側建議面板 */}
+        <AnimatePresence>
+          {suggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: -50, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -50, scale: 0.95 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="w-[25rem] max-w-[85vw]"
+            >
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Lightbulb className="h-5 w-5 mr-2 text-cyan-600" />
+                    AI 建議記錄 ({suggestions.length})
+                  </CardTitle>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    對話中產生的履歷優化建議
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      <AnimatePresence mode="popLayout">
+                        {suggestions.map((suggestion) => (
+                          <motion.div
+                            key={suggestion.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            layout
+                            transition={{ duration: 0.2, ease: "easeOut" }}
+                            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm pr-2 leading-relaxed">
+                                {suggestion.title}
+                              </h4>
+                              <div className="flex items-center space-x-1 flex-shrink-0">
                                 <Button
-                                  size="sm"
                                   variant="ghost"
-                                  onClick={() => handleStartEdit(message.id, message.content)}
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity ml-2 h-6 w-6 p-0 text-white/70 hover:text-white hover:bg-cyan-700"
+                                  size="sm"
+                                  onClick={() => quoteSuggestion(suggestion)}
+                                  className="h-6 w-6 p-0 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                                  title="引用此建議進行深入討論"
                                 >
-                                  <Edit3 className="h-3 w-3" />
+                                  <Copy className="h-3 w-3" />
                                 </Button>
-                              )}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeSuggestion(suggestion.id)}
+                                  className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                  title="刪除此建議"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
-                            <p className="text-xs opacity-70 mt-1">
-                              {message.timestamp.toLocaleTimeString('zh-TW', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
+                            <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 break-words leading-relaxed">
+                              {suggestion.description}
                             </p>
+                            <div className="flex items-center justify-between">
+                              <span className="inline-block text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                                {suggestion.category}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {suggestion.timestamp.toLocaleTimeString('zh-TW', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </span>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                    </div>
+                  </ScrollArea>
+                  
+                  {/* 完成對話按鈕 */}
+                  {(suggestions.length > 0 || messageCount >= 20) && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="pt-4 border-t mt-4"
+                    >
+                      <Button 
+                        onClick={handleComplete}
+                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
+                        size="sm"
+                      >
+                        完成對話 ({suggestions.length} 個建議)
+                      </Button>
+                    </motion.div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* 右側聊天區域 */}
+        <div className="max-w-[85vw] w-[45rem] h-full">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-2xl mr-2">🤖</span>
+                  AI 智慧問答
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm text-gray-500">
+                    {messageCount}/30 則對話
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    跳過問答
+                  </Button>
+                </div>
+              </CardTitle>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                自由詢問履歷相關問題，AI 會記錄並提供具體建議
+              </div>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              {/* 聊天區域 */}
+              <div className="h-[400px] border rounded-lg overflow-hidden">
+                <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
+                  <div className="w-full space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {messages.map((message) => (
+                        <motion.div
+                          key={message.id}
+                          variants={messageVariants}
+                          initial="hidden"
+                          animate="visible"
+                          exit="exit"
+                          layout
+                          className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
+                        >
+                          <div className={cn("flex items-start space-x-2 max-w-[85%]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
+                            {message.type === 'user' ? (
+                              <UserAvatar user={user} />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                <span className="text-lg">🤖</span>
+                              </div>
+                            )}
+                            <div
+                              className={cn(`rounded-lg px-4 py-2 w-fit max-w-full`, message.type === 'user'
+                                  ? 'bg-cyan-600 text-white'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                              )}
+                            >
+                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                              <p className="text-xs opacity-70 mt-1">
+                                {message.timestamp.toLocaleTimeString('zh-TW', { 
+                                  hour: '2-digit', 
+                                  minute: '2-digit' 
+                                })}
+                              </p>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              
-              {isLoading && (
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    
+                    {isLoading && (
+                      <motion.div
+                        variants={loadingVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="flex justify-start"
+                      >
+                        <div className="flex items-start space-x-2">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                            <span className="text-lg">🤖</span>
+                          </div>
+                          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+                            <div className="flex space-x-1">
+                              <motion.div 
+                                className="w-2 h-2 bg-gray-400 rounded-full"
+                                animate={{ y: [0, -8, 0] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                              />
+                              <motion.div 
+                                className="w-2 h-2 bg-gray-400 rounded-full"
+                                animate={{ y: [0, -8, 0] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
+                              />
+                              <motion.div 
+                                className="w-2 h-2 bg-gray-400 rounded-full"
+                                animate={{ y: [0, -8, 0] }}
+                                transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+
+              {/* 罐頭訊息選項 */}
+              {cannedOptions.length > 0 && (
                 <motion.div
-                  variants={loadingVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="flex justify-start"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-2"
                 >
-                  <div className="flex items-start space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <span className="text-lg">🤖</span>
-                    </div>
-                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
-                      <div className="flex space-x-1">
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                        />
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
-                        />
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                        />
-                      </div>
-                    </div>
+                  <div className="flex flex-wrap gap-2">
+                    {cannedOptions.map((option, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.1, duration: 0.2 }}
+                      >
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCannedMessage(option)}
+                          className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+                        >
+                          {option}
+                        </Button>
+                      </motion.div>
+                    ))}
                   </div>
                 </motion.div>
               )}
-            </div>
-          </ScrollArea>
-        </div>
 
-        {/* 輸入區域 */}
-        <div className="flex space-x-2 items-end">
-          <Textarea
-            ref={textareaRef}
-            value={currentInput}
-            onChange={handleTextareaChange}
-            onKeyPress={handleKeyPress}
-            placeholder="輸入您的回答... (Shift+Enter 換行，Enter 發送)"
-            disabled={isLoading}
-            className="flex-1 min-h-[40px] max-h-[120px] resize-none"
-            rows={1}
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!currentInput.trim() || isLoading}
-            size="icon"
-            className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+              {/* 對話限制提醒 */}
+              <AnimatePresence>
+                {messageCount >= 25 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
+                  >
+                    <AlertCircle className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm text-amber-800 dark:text-amber-200">
+                      {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* 輸入區域 */}
+              <div className="flex space-x-2 items-end">
+                <Textarea
+                  ref={textareaRef}
+                  value={currentInput}
+                  onChange={handleTextareaChange}
+                  onKeyPress={handleKeyPress}
+                  placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題... (Shift+Enter 換行，Enter 發送)"}
+                  disabled={isLoading || messageCount >= 30}
+                  className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500"
+                  rows={1}
+                />
+                <Button
+                  onClick={() => handleSendMessage()}
+                  disabled={!currentInput.trim() || isLoading || messageCount >= 30}
+                  size="icon"
+                  className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 transition-colors disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 } 

@@ -44,6 +44,16 @@ interface AdminStats {
   freeUsers: number;
 }
 
+interface UserWithSubscriptionData {
+  id: string;
+  subscriptions?: Array<{
+    is_active: boolean;
+    plans?: Array<{
+      type: string;
+    }> | null;
+  }> | null;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
@@ -93,7 +103,7 @@ export async function GET(request: NextRequest) {
     // 轉換數據格式
     const transformedUsers: UserWithSubscription[] = (usersData || []).map((user) => {
       const subscription = user.subscriptions?.[0];
-      const plan = subscription?.plans;
+      const plan = subscription?.plans?.[0];
 
       return {
         ...user,
@@ -129,9 +139,11 @@ export async function GET(request: NextRequest) {
       (user) => user.subscriptions?.[0]?.is_active
     ).length || 0;
     const paidUsers = allUsers?.filter(
-      (user) =>
-        user.subscriptions?.[0]?.is_active && 
-        user.subscriptions?.[0]?.plans?.type !== "free"
+      (user: UserWithSubscriptionData) => {
+        const subscription = user.subscriptions?.[0];
+        const plan = subscription?.plans?.[0];
+        return subscription?.is_active && plan?.type !== "free";
+      }
     ).length || 0;
     const freeUsers = totalUsers - paidUsers;
 
