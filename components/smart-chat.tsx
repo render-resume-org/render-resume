@@ -354,137 +354,316 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
 
   return (
     <div className="space-y-6">
-      {/* 新的兩欄布局 */}
-      <div className="max-w-7xl mx-auto flex items-start justify-center gap-6">
-        {/* 左側建議面板 */}
-        <AnimatePresence>
-          {suggestions.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: -50, scale: 0.95 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -50, scale: 0.95 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="w-[25rem] max-w-[85vw]"
-            >
-              <Card className="sticky top-4">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Lightbulb className="h-5 w-5 mr-2 text-cyan-600" />
-                    AI 建議記錄 ({suggestions.length})
-                  </CardTitle>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    對話中產生的履歷優化建議
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]" ref={suggestionsScrollAreaRef}>
-                    <div className="space-y-3">
-                      <AnimatePresence mode="popLayout">
-                        {suggestions.map((suggestion) => (
-                          <motion.div
-                            key={suggestion.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            layout
-                            transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm pr-2 leading-relaxed">
-                                {suggestion.title}
-                              </h4>
-                              <div className="flex items-center space-x-1 flex-shrink-0">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => quoteSuggestion(suggestion)}
-                                  className="h-6 w-6 p-0 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
-                                  title="引用此建議進行深入討論"
-                                >
-                                  <Copy className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => removeSuggestion(suggestion.id)}
-                                  className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                  title="刪除此建議"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
+      {/* 響應式布局 - 大螢幕兩欄，小螢幕堆疊 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* 大螢幕：左右兩欄布局 */}
+        <div className="hidden lg:flex items-start justify-center gap-6">
+          {/* 左側建議面板 */}
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -50, scale: 0.95 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -50, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="w-[25rem] max-w-[85vw]"
+              >
+                <Card className="sticky top-4">
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Lightbulb className="h-5 w-5 mr-2 text-cyan-600" />
+                      AI 建議記錄 ({suggestions.length})
+                    </CardTitle>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">
+                      對話中產生的履歷優化建議
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]" ref={suggestionsScrollAreaRef}>
+                      <div className="space-y-3">
+                        <AnimatePresence mode="popLayout">
+                          {suggestions.map((suggestion) => (
+                            <motion.div
+                              key={suggestion.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              layout
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                              className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm pr-2 leading-relaxed">
+                                  {suggestion.title}
+                                </h4>
+                                <div className="flex items-center space-x-1 flex-shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => quoteSuggestion(suggestion)}
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                                    title="引用此建議進行深入討論"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeSuggestion(suggestion.id)}
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    title="刪除此建議"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                            <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 break-words leading-relaxed">
-                              {suggestion.description}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <span className="inline-block text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
-                                {suggestion.category}
-                              </span>
-                              <span className="text-xs text-gray-400">
-                                {suggestion.timestamp.toLocaleTimeString('zh-TW', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </span>
+                              <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 break-words leading-relaxed">
+                                {suggestion.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="inline-block text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                                  {suggestion.category}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {suggestion.timestamp.toLocaleTimeString('zh-TW', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </ScrollArea>
+                    
+                    {/* 完成對話按鈕 */}
+                    {(suggestions.length > 0 || messageCount >= 20) && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="pt-4 border-t mt-4"
+                      >
+                        <Button 
+                          onClick={handleComplete}
+                          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
+                          size="sm"
+                        >
+                          完成對話 ({suggestions.length} 個建議)
+                        </Button>
+                      </motion.div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* 右側聊天區域 */}
+          <div className="w-[45rem] h-full">
+            <Card className="h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <span className="text-2xl mr-2">🤖</span>
+                    AI 智慧問答
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div className="text-sm text-gray-500">
+                      {messageCount}/30 則對話
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                      跳過問答
+                    </Button>
+                  </div>
+                </CardTitle>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  自由詢問履歷相關問題，AI 會記錄並提供具體建議
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                {/* 聊天區域 */}
+                <div className="h-[400px] border rounded-lg overflow-hidden">
+                  <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
+                    <div className="w-full space-y-4">
+                      <AnimatePresence mode="popLayout">
+                        {messages.map((message) => (
+                          <motion.div
+                            key={message.id}
+                            variants={messageVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            layout
+                            className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
+                          >
+                            <div className={cn("flex items-start space-x-2 max-w-[85%]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
+                              {message.type === 'user' ? (
+                                <UserAvatar user={user} />
+                              ) : (
+                                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                  <span className="text-lg">🤖</span>
+                                </div>
+                              )}
+                              <div
+                                className={cn(`rounded-lg px-4 py-2 w-fit max-w-full`, message.type === 'user'
+                                    ? 'bg-cyan-600 text-white'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                                )}
+                              >
+                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                                <p className="text-xs opacity-70 mt-1">
+                                  {message.timestamp.toLocaleTimeString('zh-TW', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </p>
+                              </div>
                             </div>
                           </motion.div>
                         ))}
                       </AnimatePresence>
+                      
+                      {isLoading && (
+                        <motion.div
+                          variants={loadingVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="flex justify-start"
+                        >
+                          <div className="flex items-start space-x-2">
+                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                              <span className="text-lg">🤖</span>
+                            </div>
+                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+                              <div className="flex space-x-1">
+                                <motion.div 
+                                  className="w-2 h-2 bg-gray-400 rounded-full"
+                                  animate={{ y: [0, -8, 0] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                                />
+                                <motion.div 
+                                  className="w-2 h-2 bg-gray-400 rounded-full"
+                                  animate={{ y: [0, -8, 0] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
+                                />
+                                <motion.div 
+                                  className="w-2 h-2 bg-gray-400 rounded-full"
+                                  animate={{ y: [0, -8, 0] }}
+                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
                     </div>
                   </ScrollArea>
-                  
-                  {/* 完成對話按鈕 */}
-                  {(suggestions.length > 0 || messageCount >= 20) && (
-                    <motion.div 
-                      initial={{ opacity: 0, y: 10 }}
+                </div>
+
+                {/* 罐頭訊息選項 */}
+                {cannedOptions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-2"
+                  >
+                    <div className="flex flex-wrap gap-2">
+                      {cannedOptions.map((option, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: index * 0.1, duration: 0.2 }}
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCannedMessage(option)}
+                            className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+                          >
+                            {option}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 對話限制提醒 */}
+                <AnimatePresence>
+                  {messageCount >= 25 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="pt-4 border-t mt-4"
+                      exit={{ opacity: 0, y: -20 }}
+                      className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
                     >
-                      <Button 
-                        onClick={handleComplete}
-                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
-                        size="sm"
-                      >
-                        完成對話 ({suggestions.length} 個建議)
-                      </Button>
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <span className="text-sm text-amber-800 dark:text-amber-200">
+                        {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
+                      </span>
                     </motion.div>
                   )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </AnimatePresence>
 
-        {/* 右側聊天區域 */}
-        <div className="max-w-[85vw] w-[45rem] h-full">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="text-2xl mr-2">🤖</span>
-                  AI 智慧問答
+                {/* 輸入區域 */}
+                <div className="flex space-x-2 items-end">
+                  <Textarea
+                    ref={textareaRef}
+                    value={currentInput}
+                    onChange={handleTextareaChange}
+                    onKeyPress={handleKeyPress}
+                    placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題... (Shift+Enter 換行，Enter 發送)"}
+                    disabled={isLoading || messageCount >= 30}
+                    className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500"
+                    rows={1}
+                  />
+                  <Button
+                    onClick={() => handleSendMessage()}
+                    disabled={!currentInput.trim() || isLoading || messageCount >= 30}
+                    size="icon"
+                    className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 transition-colors disabled:opacity-50"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm text-gray-500">
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* 小螢幕：單欄堆疊布局 */}
+        <div className="lg:hidden space-y-6">
+          {/* 聊天區域（優先顯示） */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center">
+                  <span className="text-xl sm:text-2xl mr-2">🤖</span>
+                  <span className="text-lg sm:text-xl">AI 智慧問答</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-end sm:space-x-4 gap-2">
+                  <div className="text-xs sm:text-sm text-gray-500">
                     {messageCount}/30 則對話
                   </div>
-                  <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-xs sm:text-sm">
                     跳過問答
                   </Button>
                 </div>
               </CardTitle>
-              <div className="text-sm text-gray-600 dark:text-gray-300">
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
                 自由詢問履歷相關問題，AI 會記錄並提供具體建議
               </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
               {/* 聊天區域 */}
-              <div className="h-[400px] border rounded-lg overflow-hidden">
-                <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
-                  <div className="w-full space-y-4">
+              <div className="h-[300px] sm:h-[400px] border rounded-lg overflow-hidden">
+                <ScrollArea className="w-full h-full p-2 sm:p-4" ref={scrollAreaRef}>
+                  <div className="w-full space-y-3 sm:space-y-4">
                     <AnimatePresence mode="popLayout">
                       {messages.map((message) => (
                         <motion.div
@@ -496,21 +675,21 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                           layout
                           className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
                         >
-                          <div className={cn("flex items-start space-x-2 max-w-[85%]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
+                          <div className={cn("flex items-start space-x-2 max-w-[90%] sm:max-w-[85%]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
                             {message.type === 'user' ? (
                               <UserAvatar user={user} />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                                <span className="text-lg">🤖</span>
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                                <span className="text-sm sm:text-lg">🤖</span>
                               </div>
                             )}
                             <div
-                              className={cn(`rounded-lg px-4 py-2 w-fit max-w-full`, message.type === 'user'
+                              className={cn(`rounded-lg px-3 py-2 sm:px-4 sm:py-2 w-fit max-w-full`, message.type === 'user'
                                   ? 'bg-cyan-600 text-white'
                                   : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                               )}
                             >
-                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                              <p className="text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                               <p className="text-xs opacity-70 mt-1">
                                 {message.timestamp.toLocaleTimeString('zh-TW', { 
                                   hour: '2-digit', 
@@ -531,10 +710,10 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                         className="flex justify-start"
                       >
                         <div className="flex items-start space-x-2">
-                          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                            <span className="text-lg">🤖</span>
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                            <span className="text-sm sm:text-lg">🤖</span>
                           </div>
-                          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+                          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 sm:px-4 sm:py-2">
                             <div className="flex space-x-1">
                               <motion.div 
                                 className="w-2 h-2 bg-gray-400 rounded-full"
@@ -568,7 +747,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                   transition={{ duration: 0.3 }}
                   className="space-y-2"
                 >
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1 sm:gap-2">
                     {cannedOptions.map((option, index) => (
                       <motion.div
                         key={index}
@@ -600,7 +779,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                     className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
                   >
                     <AlertCircle className="h-4 w-4 text-amber-600" />
-                    <span className="text-sm text-amber-800 dark:text-amber-200">
+                    <span className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
                       {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
                     </span>
                   </motion.div>
@@ -614,9 +793,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                   value={currentInput}
                   onChange={handleTextareaChange}
                   onKeyPress={handleKeyPress}
-                  placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題... (Shift+Enter 換行，Enter 發送)"}
+                  placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題..."}
                   disabled={isLoading || messageCount >= 30}
-                  className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500"
+                  className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500 text-sm"
                   rows={1}
                 />
                 <Button
@@ -630,6 +809,106 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
               </div>
             </CardContent>
           </Card>
+
+          {/* 建議面板（小螢幕時放在下方） */}
+          <AnimatePresence>
+            {suggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center text-base sm:text-lg">
+                      <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-cyan-600" />
+                      AI 建議記錄 ({suggestions.length})
+                    </CardTitle>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                      對話中產生的履歷優化建議
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[300px] sm:h-[400px]" ref={suggestionsScrollAreaRef}>
+                      <div className="space-y-3">
+                        <AnimatePresence mode="popLayout">
+                          {suggestions.map((suggestion) => (
+                            <motion.div
+                              key={suggestion.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -20 }}
+                              layout
+                              transition={{ duration: 0.2, ease: "easeOut" }}
+                              className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-xs sm:text-sm pr-2 leading-relaxed">
+                                  {suggestion.title}
+                                </h4>
+                                <div className="flex items-center space-x-1 flex-shrink-0">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => quoteSuggestion(suggestion)}
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                                    title="引用此建議進行深入討論"
+                                  >
+                                    <Copy className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => removeSuggestion(suggestion.id)}
+                                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                    title="刪除此建議"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 break-words leading-relaxed">
+                                {suggestion.description}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <span className="inline-block text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
+                                  {suggestion.category}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {suggestion.timestamp.toLocaleTimeString('zh-TW', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </span>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </ScrollArea>
+                    
+                    {/* 完成對話按鈕 */}
+                    {(suggestions.length > 0 || messageCount >= 20) && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="pt-4 border-t mt-4"
+                      >
+                        <Button 
+                          onClick={handleComplete}
+                          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
+                          size="sm"
+                        >
+                          完成對話 ({suggestions.length} 個建議)
+                        </Button>
+                      </motion.div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
