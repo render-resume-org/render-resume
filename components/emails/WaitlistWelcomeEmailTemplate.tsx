@@ -13,10 +13,10 @@ export const WaitlistWelcomeEmailTemplate: React.FC<WaitlistWelcomeEmailTemplate
 }) => {
   return (
     <BaseEmailTemplate
-      preview="🎉 歡迎加入 Render Resume Waitlist！搶先體驗 AI 履歷分析"
+      preview="🎉 歡迎加入 RenderResume Waitlist！搶先體驗 AI 履歷分析"
     >
       <Section style={emailStyles.header}>
-        <Text style={emailStyles.logo}>🎯 Render Resume</Text>
+        <Text style={emailStyles.logo}>RenderResume</Text>
         <Heading style={emailStyles.headerTitle}>🎉 歡迎加入 Waitlist！</Heading>
         <Text style={emailStyles.headerSubtitle}>
           您已成功加入我們的搶先體驗名單，讓我們一起創造更好的履歷體驗！
