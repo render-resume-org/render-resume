@@ -1,24 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
+import { checkAdminAuth } from "@/lib/utils/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
-
-// 管理員 ID 列表
-const ADMINS = ['049512f1-9b80-4848-9df3-03adcc8f61c9'];
-
-// 檢查管理員權限的輔助函數
-async function checkAdminAuth() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    return { error: "未授權", status: 401 };
-  }
-
-  if (!ADMINS.includes(user.id)) {
-    return { error: "權限不足", status: 403 };
-  }
-
-  return { user, supabase };
-}
 
 // 用戶類型定義
 interface UserWithSubscription {
@@ -57,7 +38,7 @@ interface UserWithSubscriptionData {
 export async function GET(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
@@ -191,7 +172,7 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
@@ -226,7 +207,7 @@ export async function DELETE(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
