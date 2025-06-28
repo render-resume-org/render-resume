@@ -15,6 +15,7 @@ export interface ChatResponse {
     description: string;
     category: string;
   };
+  quickResponses: string[];
 }
 
 interface RequestBody {
@@ -82,6 +83,12 @@ function parseAIResponse(completion: string): ChatResponse {
       console.log('ℹ️ [Parser] No suggestion field present');
     }
     
+    // 驗證 quickResponses 欄位格式
+    if (!Array.isArray(parsed.quickResponses)) {
+      console.warn('⚠️ [Parser] Missing or invalid quickResponses field, providing default');
+      parsed.quickResponses = ['告訴我更多', '下一個問題', '需要具體建議'];
+    }
+    
     return parsed;
   } catch (error) {
     // 如果 JSON 解析失敗，嘗試提取 message 內容
@@ -97,7 +104,10 @@ function parseAIResponse(completion: string): ChatResponse {
         .replace(/\\t/g, '\t')
         .replace(/\\\\/g, '\\');
       console.log('✅ [Parser] Extracted message from malformed JSON');
-      return { message };
+      return { 
+        message,
+        quickResponses: ['告訴我更多', '下一個問題', '需要具體建議']
+      };
     }
     
     // 最後的備用方案
@@ -178,7 +188,10 @@ export async function POST(request: NextRequest) {
       console.log('✅ [API] Successfully parsed AI response');
     } catch (parseError) {
       console.warn('⚠️ [API] JSON parsing failed, using fallback:', parseError);
-      chatResponse = { message: completion };
+      chatResponse = { 
+        message: completion,
+        quickResponses: ['告訴我更多', '下一個問題', '需要具體建議']
+      };
     }
 
     console.log('✅ [API] Smart chat response generated');
@@ -522,13 +535,77 @@ ${duplicateCheckPrompt}
     "title": "建議標題",
     "description": "建議詳細描述",
     "category": "建議類別"
-  }
+  },
+  "quickResponses": ["快速回復選項1", "快速回復選項2", "快速回復選項3"]
 }
 \`\`\`
+
+## 🎯 快速回復選項 (quickResponses) 重要指導
+
+### 核心原則：提供具體內容，而非抽象方向
+quickResponses 必須根據你的問題和用戶的履歷背景，提供**具體的答案選項**，讓用戶可以直接點擊回應。
+
+### ❌ 錯誤示例（抽象方向）
+如果你問：「在團隊中扮演什麼角色？」
+- ❌ 錯誤：["告訴我更多", "下一個問題", "需要具體建議"]
+- ❌ 錯誤：["團隊合作經驗", "領導能力", "技術指導"]
+
+### ✅ 正確示例（具體內容）
+如果你問：「在團隊中扮演什麼角色？」
+基於履歷中的技術背景，應提供：
+- ✅ 正確：["技術 Lead", "前端開發工程師", "全端工程師"]
+- ✅ 正確：["PM/產品經理", "UI/UX 設計師", "DevOps 工程師"]
+
+### 📋 quickResponses 生成策略
+
+#### 1. 基於問題類型提供對應答案
+- **角色問題** → 提供具體職位/角色選項
+- **技術問題** → 提供具體技術/工具選項  
+- **數量問題** → 提供具體數字範圍選項
+- **時間問題** → 提供具體時間範圍選項
+- **成果問題** → 提供典型成果類型選項
+
+#### 2. 結合履歷背景推測選項
+根據用戶的履歷分析結果，推測最可能的答案：
+- 如果履歷顯示前端技能 → 提供前端相關選項
+- 如果履歷顯示管理經驗 → 提供管理相關選項
+- 如果履歷顯示特定公司 → 提供該領域相關選項
+
+#### 3. 具體範例對照表
+
+| 問題類型 | 履歷背景 | 正確 quickResponses |
+|---------|---------|-------------------|
+| "團隊規模多大？" | 軟體開發 | ["2-3人", "4-8人", "10人以上"] |
+| "主要負責什麼？" | 前端工程師 | ["UI開發", "架構設計", "團隊協調"] |
+| "使用什麼技術？" | React專案 | ["React+Redux", "TypeScript", "Node.js"] |
+| "工作多久？" | 近期經驗 | ["半年-1年", "1-2年", "2年以上"] |
+| "成果如何？" | 效能優化 | ["提升30%", "提升50%", "提升70%以上"] |
+| "在什麼公司？" | 科技業 | ["新創公司", "中型企業", "大型科技公司"] |
+
+#### 4. 特殊情況處理
+- **開放式問題**：提供最常見的3種答案類型
+- **是非問題**：提供 ["是的", "沒有", "部分是"]
+- **選擇問題**：直接提供選項內容
+- **數量問題**：提供合理的數字區間
+
+#### 5. 避免的內容
+- ❌ 不要提供meta回答：["需要更多資訊", "讓我想想", "這很複雜"]
+- ❌ 不要提供抽象概念：["專業能力", "軟實力", "技術深度"]
+
+### 🎯 實際執行檢查清單
+在生成 quickResponses 前，必須確認：
+- ✅ 每個選項都是對我問題的直接、具體回答嗎？
+- ✅ 選項是否基於用戶的履歷背景推測的合理答案？
+- ✅ 用戶看到這些選項能立即理解並選擇嗎？
+- ✅ 選項是否涵蓋了最可能的答案範圍？
+- ✅ 每個選項都在15字以內嗎？
 
 **重要事項：**
 - 只有當你提供具體的履歷改善建議時才填寫 suggestion 欄位。反之如果你的訊息內容已經提供結論性的建議，則必須填寫 suggestion 欄位
 - 如果只是追問問題或一般對話，suggestion 欄位應為 null
+- **quickResponses 是必填欄位**：每次回應都必須提供 3 個快速回復選項
+- quickResponses 每個選項不超過 15 字，內容必須基於對話內容和履歷背景，提供具體答案而非抽象方向
+- quickResponses 選項應該是對你問題的直接、具體回答，讓用戶可以直接點擊選擇
 - suggestion 必須是可執行的、具體的履歷改善建議
 - 當你判斷已獲得足夠資訊時，或被迫進入下一題，應該主動提供建議並記錄到 suggestion
 - 避免重複提供相同的建議

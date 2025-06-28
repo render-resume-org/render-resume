@@ -126,8 +126,6 @@ export default function SmartChatPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4">
-
-
         {/* 智慧問答組件 */}
         <SmartChat 
           analysisResult={analysisResult}

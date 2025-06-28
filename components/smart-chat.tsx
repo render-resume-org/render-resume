@@ -45,6 +45,7 @@ export interface ChatMessage {
     description: string;
     category: string;
   };
+  quickResponses?: string[];
 }
 
 // 建議狀態類型
@@ -59,6 +60,7 @@ export interface SuggestionRecord {
 // 罐頭訊息選項
 const CANNED_MESSAGES = [
   "你先問我！",
+  '下一題！',
   "我的專案經驗夠吸引人嗎？",
   "我的技能描述可以怎麼改善？",
   "工作經驗的描述有什麼問題？",
@@ -71,10 +73,10 @@ const CANNED_MESSAGES = [
   "我的教育背景需要補強嗎？"
 ];
 
-// 隨機選擇罐頭訊息（除了第一個固定選項）
+// 隨機選擇罐頭訊息（作為備用選項）
 function getRandomCannedMessages(): string[] {
   const fixedFirst = CANNED_MESSAGES[0]; // "你先問我！"
-  const others = CANNED_MESSAGES.slice(1);
+  const others = CANNED_MESSAGES.slice(2);
   const shuffled = others.sort(() => Math.random() - 0.5);
   return [fixedFirst, ...shuffled.slice(0, 3)];
 }
@@ -302,7 +304,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         throw new Error(result.error || '請求失敗');
       }
 
-      const { message, suggestion } = result.data;
+      const { message, suggestion, quickResponses } = result.data;
 
       // 添加 AI 回應
       const aiMessage: ChatMessage = {
@@ -310,11 +312,21 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         type: 'ai',
         content: message,
         timestamp: new Date(),
-        suggestion
+        suggestion,
+        quickResponses
       };
 
       setMessages(prev => [...prev, aiMessage]);
       setMessageCount(prev => prev + 1);
+
+      // 更新快速回復選項
+      if (quickResponses && Array.isArray(quickResponses)) {
+        // 如果是第一次真正的 AI 回應（messageCount === 2，即用戶發送了第一條訊息後的 AI 回應）
+        setCannedOptions(['下一題！', ...quickResponses]);
+      } else {
+        // 如果 API 沒有返回 quickResponses，使用備用選項
+        setCannedOptions(getRandomCannedMessages());
+      }
 
       // 如果有建議，記錄到建議列表
       if (suggestion) {
@@ -669,34 +681,60 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         </div>
 
                 {/* 罐頭訊息選項 */}
-                {cannedOptions.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-2"
-                  >
-                    <div className="flex flex-wrap gap-2">
-                      {cannedOptions.map((option, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: index * 0.1, duration: 0.2 }}
-                        >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleCannedMessage(option)}
-                            className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+                <AnimatePresence mode="popLayout">
+                  {cannedOptions.length > 0 && (
+                    <motion.div
+                      key={cannedOptions.join('-')}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ 
+                        duration: 0.3, 
+                        ease: "easeOut"
+                      }}
+                      className="space-y-2 min-h-[2.5rem]"
+                    >
+                      <div className="flex flex-wrap gap-1 sm:gap-2">
+                        {cannedOptions.map((option, index) => (
+                          <motion.div
+                            key={`${option}-${index}`}
+                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                            transition={{ 
+                              delay: index === 0 ? 0 : index * 0.15, 
+                              duration: 0.4,
+                              ease: [0.25, 0.46, 0.45, 0.94] // 自定義 easing 函數
+                            }}
+                            layout
                           >
-                            {option}
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleCannedMessage(option)}
+                              className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+                              asChild
+                            >
+                              <motion.button
+                                whileTap={{ 
+                                  scale: 0.95,
+                                  transition: { duration: 0.1 }
+                                }}
+                                transition={{ 
+                                  type: "spring", 
+                                  stiffness: 400, 
+                                  damping: 17 
+                                }}
+                              >
+                                {option}
+                              </motion.button>
+                            </Button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* 對話限制提醒 */}
                 <AnimatePresence>
@@ -849,34 +887,60 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
               </div>
 
               {/* 罐頭訊息選項 */}
-              {cannedOptions.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="space-y-2"
-                >
-                  <div className="flex flex-wrap gap-1 sm:gap-2">
-                    {cannedOptions.map((option, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1, duration: 0.2 }}
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCannedMessage(option)}
-                          className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+              <AnimatePresence mode="popLayout">
+                {cannedOptions.length > 0 && (
+                  <motion.div
+                    key={cannedOptions.join('-')}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      duration: 0.3, 
+                      ease: "easeOut"
+                    }}
+                    className="space-y-2 min-h-[2.5rem]"
+                  >
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
+                      {cannedOptions.map((option, index) => (
+                        <motion.div
+                          key={`${option}-${index}`}
+                          initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                          transition={{ 
+                            delay: index === 0 ? 0 : index * 0.15, 
+                            duration: 0.4,
+                            ease: [0.25, 0.46, 0.45, 0.94] // 自定義 easing 函數
+                          }}
+                          layout
                         >
-                          {option}
-                        </Button>
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCannedMessage(option)}
+                            className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+                            asChild
+                          >
+                            <motion.button
+                              whileTap={{ 
+                                scale: 0.95,
+                                transition: { duration: 0.1 }
+                              }}
+                              transition={{ 
+                                type: "spring", 
+                                stiffness: 400, 
+                                damping: 17 
+                              }}
+                            >
+                              {option}
+                            </motion.button>
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* 對話限制提醒 */}
               <AnimatePresence>
