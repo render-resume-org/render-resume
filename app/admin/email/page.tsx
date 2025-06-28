@@ -467,6 +467,11 @@ export default function EmailPage() {
                 }
                 rows={10}
               />
+              <p className="text-sm text-gray-500 mt-2">
+                提示：系統會自動在郵件開頭加上「親愛的 [收件人姓名]，您好！」
+                <br />
+                姓名會根據每位使用者的 Display Name 自動調整（若無則使用 Email 帳號名稱）
+              </p>
             </div>
 
             {/* 即時預覽開關 */}
@@ -540,6 +545,17 @@ export default function EmailPage() {
               <CardDescription>主旨: {customSubject}</CardDescription>
             </CardHeader>
             <CardContent>
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>預覽說明：</strong>
+                  <ul className="mt-2 ml-4 list-disc text-sm">
+                    <li>預覽中的收件人名稱為範例（{users[0]?.display_name || users[0]?.email?.split('@')[0] || "測試用戶"}）</li>
+                    <li>實際發送時，系統會自動替換為每位收件人的名稱</li>
+                    <li>名稱優先使用 Display Name，若無則使用 Email 帳號名稱</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
               <div className="border rounded-lg overflow-hidden">
                 <iframe
                   srcDoc={previewHtml}
@@ -561,6 +577,17 @@ export default function EmailPage() {
               <CardDescription>主旨: {customSubject}</CardDescription>
             </CardHeader>
             <CardContent>
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>預覽說明：</strong>
+                  <ul className="mt-2 ml-4 list-disc text-sm">
+                    <li>預覽中的收件人名稱為範例（{users[0]?.display_name || users[0]?.email?.split('@')[0] || "測試用戶"}）</li>
+                    <li>實際發送時，系統會自動替換為每位收件人的名稱</li>
+                    <li>名稱優先使用 Display Name，若無則使用 Email 帳號名稱</li>
+                  </ul>
+                </AlertDescription>
+              </Alert>
               <div className="border rounded-lg overflow-hidden">
                 <iframe
                   srcDoc={previewHtml}
