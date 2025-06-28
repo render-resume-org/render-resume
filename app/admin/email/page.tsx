@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Mail, Users, Send, Eye, AlertCircle } from "lucide-react";
+import { Loader2, Mail, Users, Send, Eye, AlertCircle, X } from "lucide-react";
 
 interface User {
   id: string;
@@ -571,12 +571,24 @@ export default function EmailPage() {
       {/* 預覽對話框（手動預覽時使用） */}
       {previewMode && !showRealtimePreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <Card className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
-            <CardHeader>
-              <CardTitle>郵件預覽</CardTitle>
-              <CardDescription>主旨: {customSubject}</CardDescription>
+          <Card className="w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <CardHeader className="flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>郵件預覽</CardTitle>
+                  <CardDescription>主旨: {customSubject}</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setPreviewMode(false)}
+                  className="ml-auto"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 overflow-y-auto">
               <Alert className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
@@ -596,7 +608,7 @@ export default function EmailPage() {
                 />
               </div>
             </CardContent>
-            <div className="p-6 pt-0">
+            <div className="flex-shrink-0 p-6 pt-0 flex justify-end space-x-2 border-t">
               <Button onClick={() => setPreviewMode(false)}>關閉預覽</Button>
             </div>
           </Card>
