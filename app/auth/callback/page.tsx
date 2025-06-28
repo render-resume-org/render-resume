@@ -7,8 +7,7 @@ import { Suspense, useEffect, useState } from "react";
 function AuthCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [error, setError] = useState<string>('');
+  const [status, setStatus] = useState<'loading' | 'success'>('loading');
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -24,8 +23,8 @@ function AuthCallbackContent() {
           
           if (error) {
             console.error('❌ [Auth Callback] Exchange error:', error);
-            setError(error.message);
-            setStatus('error');
+            // 即使有錯誤也直接導向到登入頁面，不顯示錯誤頁面
+            router.push('/auth/login');
             return;
           }
 
@@ -33,14 +32,14 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Session established:', data.session.user.email);
             setStatus('success');
             
-            // 減少延遲時間，更快速的重定向
+            // 使用 router.push 進行導向
             setTimeout(() => {
-              router.replace('/dashboard'); // 使用 replace 而不是 push
-            }, 800); // 從 1500ms 減少到 800ms
+              router.push('/dashboard');
+            }, 1000);
           } else {
             console.log('⚠️ [Auth Callback] No session in exchange response');
-            setError('無法建立認證會話');
-            setStatus('error');
+            // 沒有 session 也直接導向到登入頁面
+            router.push('/auth/login');
           }
         } else {
           // 如果沒有代碼，檢查現有 session
@@ -48,8 +47,7 @@ function AuthCallbackContent() {
           
           if (error) {
             console.error('❌ [Auth Callback] Session error:', error);
-            setError(error.message);
-            setStatus('error');
+            router.push('/auth/login');
             return;
           }
 
@@ -58,27 +56,22 @@ function AuthCallbackContent() {
             setStatus('success');
             
             setTimeout(() => {
-              router.replace('/dashboard'); // 使用 replace 而不是 push
-            }, 800); // 從 1500ms 減少到 800ms
+              router.push('/dashboard');
+            }, 1000);
           } else {
             console.log('⚠️ [Auth Callback] No code and no session');
-            setError('未找到有效的認證信息');
-            setStatus('error');
+            router.push('/auth/login');
           }
         }
       } catch (err) {
         console.error('❌ [Auth Callback] Unexpected error:', err);
-        setError(err instanceof Error ? err.message : '認證過程中發生未知錯誤');
-        setStatus('error');
+        // 發生任何錯誤都直接導向到登入頁面
+        router.push('/auth/login');
       }
     };
 
     handleAuthCallback();
   }, [router, searchParams]);
-
-  const handleRetry = () => {
-    router.push('/auth/login');
-  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
@@ -108,37 +101,17 @@ function AuthCallbackContent() {
             <p className="text-gray-600 dark:text-gray-300">
               正在重定向到您的儀表板...
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              如果系統沒有自動導向，請
+            <div className="mt-6">
               <a 
                 href="/dashboard" 
-                className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 underline ml-1"
+                className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
               >
-                點擊連結跳轉
+                手動前往儀表板
               </a>
-            </p>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="space-y-4">
-            <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mx-auto">
-              <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              認證失敗
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              {error || '登入過程中發生錯誤，請重試'}
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              如果頁面沒有自動跳轉，請點擊上方按鈕
             </p>
-            <button
-              onClick={handleRetry}
-              className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2 rounded-lg transition-colors"
-            >
-              重新登入
-            </button>
           </div>
         )}
       </div>

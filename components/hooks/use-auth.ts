@@ -390,6 +390,45 @@ export function useAuth() {
         error: null,
       });
       
+      // 清除本地 session 存储
+      try {
+        // 清除 localStorage 中的認證相關數據
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (
+            key.startsWith('supabase.') || 
+            key.startsWith('sb-') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')
+          )) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        // 清除 sessionStorage 中的認證相關數據
+        const sessionKeysToRemove = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (
+            key.startsWith('supabase.') || 
+            key.startsWith('sb-') || 
+            key.includes('auth') ||
+            key.includes('session') ||
+            key.includes('token')
+          )) {
+            sessionKeysToRemove.push(key);
+          }
+        }
+        sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
+        
+        console.log('🧹 [Auth] Local storage cleared');
+      } catch (storageError) {
+        console.warn('⚠️ [Auth] Error clearing local storage:', storageError);
+      }
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;

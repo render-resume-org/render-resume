@@ -89,7 +89,7 @@ export const WaitlistWelcomeEmailTemplate: React.FC<WaitlistWelcomeEmailTemplate
         </Text>
         <Text style={{ ...emailStyles.footerText, marginTop: '20px' }}>
           有任何問題嗎？回覆此電子郵件或造訪我們的{' '}
-          <Link target='_blank' href='https://www.render-resume.com/support' style={emailStyles.link}>
+          <Link target='_blank' href='https://www.render-resume.com/help' style={emailStyles.link}>
             支援中心
           </Link>。我們很樂意為您提供協助！
         </Text>
