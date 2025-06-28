@@ -97,6 +97,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const suggestionsScrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messageCounterRef = useRef(0);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const generateUniqueId = useCallback((prefix: string) => {
     messageCounterRef.current += 1;
@@ -127,29 +128,64 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     setCannedOptions(getRandomCannedMessages());
   }, [generateUniqueId, analysisResult]);
 
+  // 簡化的自動滾動函數
+  const scrollToBottom = useCallback((scrollAreaRef: React.RefObject<HTMLDivElement | null>, smooth: boolean = false) => {
+    // 優先使用 scrollIntoView
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: smooth ? 'smooth' : 'auto',
+        block: 'end'
+      });
+      return;
+    }
+    
+    // 備用方案：直接滾動容器
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]');
+      const target = viewport || scrollAreaRef.current;
+      
+      if (smooth) {
+        target.scrollTo({
+          top: target.scrollHeight,
+          behavior: 'smooth'
+        });
+      } else {
+        target.scrollTop = target.scrollHeight;
+      }
+    }
+  }, []);
+
   useEffect(() => {
     initializeChat();
   }, [initializeChat]);
 
   useEffect(() => {
     // 自動滾動到底部
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    }
-  }, [messages]);
+    setTimeout(() => {
+      scrollToBottom(scrollAreaRef, false);
+    }, 50);
+    
+    // 額外的延遲確保動畫完成
+    setTimeout(() => {
+      scrollToBottom(scrollAreaRef, false);
+    }, 200);
+  }, [messages, scrollToBottom]);
 
-  // 新增：當有新建議時，自動滾動建議面板到底部
+  // 當有新建議時，自動滾動建議面板到底部
   useEffect(() => {
-    if (suggestionsScrollAreaRef.current && suggestions.length > 0) {
-      const scrollContainer = suggestionsScrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
+    if (suggestions.length > 0) {
+      scrollToBottom(suggestionsScrollAreaRef, true);
     }
-  }, [suggestions]);
+  }, [suggestions, scrollToBottom]);
+
+  // 當載入狀態改變時，確保滾動到底部（顯示載入動畫）
+  useEffect(() => {
+    if (isLoading) {
+      setTimeout(() => {
+        scrollToBottom(scrollAreaRef, false);
+      }, 100);
+    }
+  }, [isLoading, scrollToBottom]);
 
   // 新增：自動調整 textarea 高度的函數
   const adjustTextareaHeight = useCallback((value: string) => {
@@ -182,6 +218,11 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     setCurrentInput('');
     setIsLoading(true);
     setMessageCount(prev => prev + 1);
+
+    // 立即滾動到底部顯示用戶訊息
+    setTimeout(() => {
+      scrollToBottom(scrollAreaRef, false);
+    }, 50);
 
     // 重置 textarea 高度
     if (textareaRef.current) {
@@ -243,12 +284,17 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         setSuggestions(prev => [...prev, suggestionRecord]);
       }
 
+      // 確保滾動到底部（在狀態更新後）
+      setTimeout(() => {
+        scrollToBottom(scrollAreaRef, false);
+      }, 100);
+
       // 自動 focus 到輸入框
       setTimeout(() => {
         if (textareaRef.current) {
           textareaRef.current.focus();
         }
-      }, 100);
+      }, 150);
 
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -262,6 +308,11 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
 
       setMessages(prev => [...prev, errorMessage]);
       setMessageCount(prev => prev + 1);
+      
+      // 確保滾動到底部（錯誤訊息後）
+      setTimeout(() => {
+        scrollToBottom(scrollAreaRef, false);
+      }, 100);
     } finally {
       setIsLoading(false);
     }
@@ -559,6 +610,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                         </motion.div>
                       )}
                     </div>
+                    
+                    {/* 隱藏的底部標記元素，用於滾動定位 */}
+                    <div ref={messagesEndRef} className="h-0" />
                   </ScrollArea>
                 </div>
 
@@ -736,6 +790,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                       </motion.div>
                     )}
                   </div>
+                  
+                  {/* 隱藏的底部標記元素，用於滾動定位（小螢幕版本共用同一個 ref） */}
+                  <div className="h-0" />
                 </ScrollArea>
               </div>
 
