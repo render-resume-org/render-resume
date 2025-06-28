@@ -12,11 +12,11 @@ export function AuthRedirectHandler() {
     if (!loading && isAuthenticated && !hasRedirected.current) {
       hasRedirected.current = true;
       
-      // 延遲重定向，確保認證狀態完全穩定
+      // 減少延遲，確保認證狀態完全穩定
       const timer = setTimeout(() => {
         console.log('🔄 [AuthRedirectHandler] Redirecting authenticated user to dashboard');
         redirectToDashboard();
-      }, 100);
+      }, 50); // 從 100ms 減少到 50ms
       
       return () => clearTimeout(timer);
     }

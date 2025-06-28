@@ -123,9 +123,21 @@ export function useAuth() {
       async (event, session) => {
         console.log('🔐 [Auth] State changed:', event, session?.user?.email);
         
+        if (event === 'SIGNED_OUT') {
+          // 登出時完全清理狀態
+          console.log('👋 [Auth] User signed out, clearing state');
+          setAuthState({
+            user: null,
+            loading: false,
+            error: null,
+          });
+          return;
+        }
+        
         if (session?.user) {
           // Sync user data with database for sign in events
           if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            console.log('✅ [Auth] Syncing user data for event:', event);
             const syncedUser = await syncUserData(session.user);
             setAuthState({
               user: syncedUser,
@@ -139,7 +151,8 @@ export function useAuth() {
               error: null,
             });
           }
-        } else {
+        } else if (event !== 'INITIAL_SESSION') {
+          // 只有在非初始 session 檢查時才清理狀態
           setAuthState({
             user: null,
             loading: false,
@@ -370,11 +383,29 @@ export function useAuth() {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
+      // 清除所有本地狀態
+      setAuthState({
+        user: null,
+        loading: true,
+        error: null,
+      });
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
       
+      // 確保完全清理認證狀態
+      setAuthState({
+        user: null,
+        loading: false,
+        error: null,
+      });
+      
       console.log('👋 [Auth] Sign out successful');
+      
+      // 立即重定向到登入頁面
+      router.push('/auth/login');
+      
     } catch (error) {
       const errorMessage = error instanceof AuthError 
         ? error.message 
@@ -423,11 +454,12 @@ export function useAuth() {
 
   // 手動重定向方法
   const redirectToDashboard = () => {
-    router.push('/dashboard');
+    // 使用 replace 而不是 push，避免在歷史記錄中留下重定向頁面
+    router.replace('/dashboard');
   };
 
   const redirectToHome = () => {
-    router.push('/');
+    router.replace('/');
   };
 
   return {

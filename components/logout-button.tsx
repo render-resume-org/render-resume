@@ -1,17 +1,19 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
+import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 
 export function LogoutButton() {
-  const router = useRouter();
+  const { signOut } = useAuth();
 
-  const logout = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/auth/login");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      // 讓 use-auth hook 處理重定向
+    } catch (error) {
+      console.error('登出失敗:', error);
+    }
   };
 
-  return <Button onClick={logout}>Logout</Button>;
+  return <Button onClick={handleLogout}>Logout</Button>;
 }

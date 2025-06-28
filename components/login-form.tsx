@@ -42,10 +42,11 @@ export function LoginForm({
   // 當用戶登入成功時自動重定向
   useEffect(() => {
     if (isAuthenticated) {
-      // 短暫延遲確保UI顯示成功狀態
+      // 減少延遲時間，更快速的重定向
       const timer = setTimeout(() => {
+        console.log('🔄 [LoginForm] Redirecting to dashboard');
         redirectToDashboard();
-      }, 1500);
+      }, 800); // 從 1500ms 減少到 800ms
       
       return () => clearTimeout(timer);
     }

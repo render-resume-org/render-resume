@@ -43,13 +43,14 @@ export function SignUpForm({
     }
   }, [email, password, repeatPassword, clearError, error, localError]);
 
-  // 當用戶認證成功時自動重定向（適用於Google OAuth或已經驗證的email註冊）
+  // 當用戶註冊成功時自動重定向
   useEffect(() => {
     if (isAuthenticated) {
-      // 短暫延遲確保UI顯示成功狀態
+      // 減少延遲時間，更快速的重定向
       const timer = setTimeout(() => {
+        console.log('🔄 [SignUpForm] Redirecting to dashboard');
         redirectToDashboard();
-      }, 1500);
+      }, 800); // 從 1500ms 減少到 800ms
       
       return () => clearTimeout(timer);
     }

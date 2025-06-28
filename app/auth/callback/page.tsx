@@ -33,10 +33,10 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Session established:', data.session.user.email);
             setStatus('success');
             
-            // 短暫延遲後重定向到儀表板
+            // 減少延遲時間，更快速的重定向
             setTimeout(() => {
-              router.push('/dashboard');
-            }, 1500);
+              router.replace('/dashboard'); // 使用 replace 而不是 push
+            }, 800); // 從 1500ms 減少到 800ms
           } else {
             console.log('⚠️ [Auth Callback] No session in exchange response');
             setError('無法建立認證會話');
@@ -58,8 +58,8 @@ function AuthCallbackContent() {
             setStatus('success');
             
             setTimeout(() => {
-              router.push('/dashboard');
-            }, 1500);
+              router.replace('/dashboard'); // 使用 replace 而不是 push
+            }, 800); // 從 1500ms 減少到 800ms
           } else {
             console.log('⚠️ [Auth Callback] No code and no session');
             setError('未找到有效的認證信息');
