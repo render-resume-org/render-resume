@@ -331,13 +331,19 @@ async function sendSingleEmail(
   }
 }
 
+interface EmailResult {
+  email: string;
+  success: boolean;
+  error?: string;
+}
+
 // 批量發送郵件（使用延遲避免 rate limit）
 async function sendBatchEmails(
   recipients: Recipient[],
   templateId: string,
   subject: string,
   content: string
-): Promise<{ successCount: number; failedCount: number; details: any[] }> {
+): Promise<{ successCount: number; failedCount: number; details: EmailResult[] }> {
   const results = [];
   let successCount = 0;
   let failedCount = 0;
