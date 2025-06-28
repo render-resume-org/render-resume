@@ -109,6 +109,48 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     return `${prefix}-${Date.now()}-${messageCounterRef.current}`;
   }, []);
 
+  // 調試函數：檢查滾動容器的狀態
+  const debugScrollState = useCallback(() => {
+    const isMobile = window.innerWidth < 1024;
+    const currentRef = isMobile ? scrollAreaRefMobile : scrollAreaRef;
+    const currentEndRef = isMobile ? messagesEndRefMobile : messagesEndRef;
+    
+    console.log('=== SCROLL DEBUG ===');
+    console.log('Screen width:', window.innerWidth, 'isMobile:', isMobile);
+    console.log('ScrollArea ref exists:', !!currentRef.current);
+    console.log('MessagesEnd ref exists:', !!currentEndRef.current);
+    
+    if (currentRef.current) {
+      const viewport = currentRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+      console.log('Viewport found:', !!viewport);
+      
+      if (viewport) {
+        console.log('Viewport scrollHeight:', viewport.scrollHeight);
+        console.log('Viewport clientHeight:', viewport.clientHeight);
+        console.log('Viewport scrollTop:', viewport.scrollTop);
+        console.log('Max scroll:', viewport.scrollHeight - viewport.clientHeight);
+        console.log('Is at bottom:', viewport.scrollTop >= (viewport.scrollHeight - viewport.clientHeight - 10));
+      }
+    }
+    
+    if (currentEndRef.current) {
+      const rect = currentEndRef.current.getBoundingClientRect();
+      console.log('MessagesEnd position:', rect);
+    }
+    
+    console.log('Messages count:', messages.length);
+    console.log('Suggestions count:', suggestions.length);
+    console.log('===================');
+  }, [scrollAreaRef, scrollAreaRefMobile, messagesEndRef, messagesEndRefMobile, messages.length, suggestions.length]);
+
+  // 暴露調試函數到 window 對象（僅開發環境）
+  useEffect(() => {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      (window as any).debugScrollState = debugScrollState;
+      console.log('💡 Scroll debug function available: window.debugScrollState()');
+    }
+  }, [debugScrollState]);
+
   const initializeChat = useCallback(() => {
     // 取得 follow-up 問題數量
     const followUpCount = analysisResult?.missing_content?.follow_ups?.length || 0;
@@ -133,38 +175,69 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     setCannedOptions(getRandomCannedMessages());
   }, [generateUniqueId, analysisResult]);
 
-  // 改進的自動滾動函數
+  // 改進的自動滾動函數 - 專門針對 Radix UI ScrollArea
   const scrollToBottom = useCallback((scrollAreaRef: React.RefObject<HTMLDivElement | null>, messagesEndRef: React.RefObject<HTMLDivElement | null> | null, smooth: boolean = false) => {
-    // 優先使用 scrollIntoView
+    console.log('[ScrollToBottom] Attempting to scroll, refs:', {
+      scrollAreaRef: !!scrollAreaRef.current,
+      messagesEndRef: !!messagesEndRef?.current,
+      smooth
+    });
+
+    if (!scrollAreaRef.current) {
+      console.warn('[ScrollToBottom] No scrollAreaRef available');
+      return;
+    }
+
+    // 查找 Radix UI ScrollArea 的 viewport
+    const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]') as HTMLElement;
+    
+    if (!viewport) {
+      console.warn('[ScrollToBottom] No viewport found in ScrollArea');
+      return;
+    }
+
+    console.log('[ScrollToBottom] Found viewport:', viewport, 'scrollHeight:', viewport.scrollHeight, 'clientHeight:', viewport.clientHeight);
+
+    // 方法1: 優先使用 messagesEndRef 的 scrollIntoView
     if (messagesEndRef?.current) {
       try {
+        console.log('[ScrollToBottom] Trying scrollIntoView on messagesEndRef');
         messagesEndRef.current.scrollIntoView({ 
           behavior: smooth ? 'smooth' : 'auto',
-          block: 'end'
+          block: 'end',
+          inline: 'nearest'
         });
+        console.log('[ScrollToBottom] scrollIntoView successful');
         return;
       } catch (error) {
-        console.warn('scrollIntoView failed:', error);
+        console.warn('[ScrollToBottom] scrollIntoView failed:', error);
       }
     }
     
-    // 備用方案：直接滾動容器
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]');
-      const target = viewport || scrollAreaRef.current;
+    // 方法2: 直接設置 viewport 的 scrollTop
+    try {
+      const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+      console.log('[ScrollToBottom] Setting scrollTop to:', maxScroll);
       
-      try {
-        if (smooth) {
-          target.scrollTo({
-            top: target.scrollHeight,
-            behavior: 'smooth'
-          });
-        } else {
-          target.scrollTop = target.scrollHeight;
-        }
-      } catch (error) {
-        console.warn('scrollTo failed:', error);
+      if (smooth) {
+        viewport.scrollTo({
+          top: maxScroll,
+          behavior: 'smooth'
+        });
+      } else {
+        viewport.scrollTop = maxScroll;
       }
+      
+      console.log('[ScrollToBottom] Manual scroll completed, actual scrollTop:', viewport.scrollTop);
+      
+      // 使用 requestAnimationFrame 確保滾動
+      requestAnimationFrame(() => {
+        viewport.scrollTop = maxScroll;
+        console.log('[ScrollToBottom] RAF scroll, final scrollTop:', viewport.scrollTop);
+      });
+      
+    } catch (error) {
+      console.warn('[ScrollToBottom] Manual scroll failed:', error);
     }
   }, []);
 
@@ -173,7 +246,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     // 檢查當前是否為手機版視窗
     const isMobile = window.innerWidth < 1024; // lg 斷點
     
-    console.log(`[SmartScroll] Screen width: ${window.innerWidth}, isMobile: ${isMobile}`);
+    console.log(`[SmartScroll] Screen width: ${window.innerWidth}, isMobile: ${isMobile}, suggestions: ${suggestions.length}`);
     
     if (isMobile) {
       // 手機版滾動
@@ -183,8 +256,16 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
       // 桌面版滾動
       console.log('[SmartScroll] Using desktop scroll');
       scrollToBottom(scrollAreaRef, messagesEndRef, smooth);
+      
+      // 桌面版額外確保 - 建議面板可能影響布局
+      if (suggestions.length > 0) {
+        console.log('[SmartScroll] Desktop with suggestions - additional scroll attempts');
+        setTimeout(() => {
+          scrollToBottom(scrollAreaRef, messagesEndRef, false);
+        }, 100);
+      }
     }
-  }, [scrollToBottom]);
+  }, [scrollToBottom, suggestions.length]);
 
   // 當載入完成時自動 focus 到輸入框
   useEffect(() => {
@@ -237,23 +318,48 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   }, [smartScrollToBottom]);
 
   useEffect(() => {
-    // 自動滾動到底部
-    setTimeout(() => {
+    // 使用 requestAnimationFrame 確保在 DOM 更新後滾動
+    requestAnimationFrame(() => {
       smartScrollToBottom(false);
-    }, 50);
-    
-    // 額外的延遲確保動畫完成
-    setTimeout(() => {
-      smartScrollToBottom(false);
-    }, 200);
+      
+      // 額外的延遲確保動畫完成
+      setTimeout(() => {
+        smartScrollToBottom(false);
+      }, 100);
+      
+      // 最後確保滾動
+      setTimeout(() => {
+        smartScrollToBottom(false);
+      }, 300);
+    });
   }, [messages, smartScrollToBottom]);
 
-  // 當有新建議時，自動滾動建議面板到底部
+  // 當有新建議時，自動滾動建議面板到底部，並確保主聊天區域也滾動
   useEffect(() => {
     if (suggestions.length > 0) {
-      scrollToBottom(suggestionsScrollAreaRef, null, true);
+      console.log('[Suggestions Effect] New suggestions count:', suggestions.length);
+      
+      // 滾動建議面板到底部
+      requestAnimationFrame(() => {
+        scrollToBottom(suggestionsScrollAreaRef, null, true);
+      });
+      
+      // 同時確保主聊天區域滾動到底部（新建議可能影響布局）
+      requestAnimationFrame(() => {
+        smartScrollToBottom(false);
+      });
+      
+      // 建議面板動畫期間確保滾動
+      setTimeout(() => {
+        smartScrollToBottom(false);
+      }, 200);
+      
+      // 建議面板動畫完成後最終確保
+      setTimeout(() => {
+        smartScrollToBottom(false);
+      }, 500);
     }
-  }, [suggestions, scrollToBottom]);
+  }, [suggestions, scrollToBottom, smartScrollToBottom]);
 
   // 當載入狀態改變時，確保滾動到底部（顯示載入動畫）
   useEffect(() => {
@@ -379,12 +485,45 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
             timestamp: new Date()
           };
         setSuggestions(prev => [...prev, suggestionRecord]);
+        
+        // 新增建議時的滾動策略
+        console.log('[Suggestion Added] Starting scroll sequence');
+        
+        // 立即嘗試滾動
+        requestAnimationFrame(() => {
+          smartScrollToBottom(false);
+        });
+        
+        // 建議面板動畫期間的滾動
+        setTimeout(() => {
+          console.log('[Suggestion Added] Mid-animation scroll');
+          smartScrollToBottom(false);
+        }, 200);
+        
+        // 建議面板動畫完成後的滾動
+        setTimeout(() => {
+          console.log('[Suggestion Added] Post-animation scroll');
+          smartScrollToBottom(false);
+        }, 400);
+        
+        // 桌面版額外確保（建議面板可能改變布局）
+        if (window.innerWidth >= 1024) {
+          setTimeout(() => {
+            console.log('[Desktop] Layout adjustment scroll');
+            smartScrollToBottom(false);
+          }, 600);
+        }
       }
           
       // 確保滾動到底部（在狀態更新後）
-          setTimeout(() => {
+      requestAnimationFrame(() => {
         smartScrollToBottom(false);
-          }, 100);
+        
+        // 額外確保滾動
+        setTimeout(() => {
+          smartScrollToBottom(false);
+        }, 100);
+      });
 
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -400,9 +539,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
       setMessageCount(prev => prev + 1);
       
       // 確保滾動到底部（錯誤訊息後）
-      setTimeout(() => {
+      requestAnimationFrame(() => {
         smartScrollToBottom(false);
-      }, 100);
+      });
     } finally {
       setIsLoading(false);
     }
