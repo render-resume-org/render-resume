@@ -184,7 +184,7 @@ export default function SettingsPage() {
           <CardContent>
             <div className="flex gap-4">
               <div className="flex-1">
-                <Label htmlFor="redeem-code">兌換序號</Label>
+                <Label htmlFor="redeem-code"></Label>
                 <Input
                   id="redeem-code"
                   value={redeemCode}
@@ -301,7 +301,7 @@ export default function SettingsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {/* 顯示免費方案 */}
               <Card className={getPlanCardStyle(freePlan.id, freePlan.type)}>
-                <CardHeader className="pb-3">
+                <CardHeader className="">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{freePlan.title}</CardTitle>
                     <div className="flex items-center space-x-2">
@@ -329,7 +329,7 @@ export default function SettingsPage() {
               {/* 其他方案 */}
               {allPlans.map((plan) => (
                 <Card key={plan.id} className={getPlanCardStyle(plan.id, plan.type)}>
-                  <CardHeader className="pb-3">
+                  <CardHeader className="">
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{plan.title}</CardTitle>
                       <div className="flex items-center space-x-2">

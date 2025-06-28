@@ -291,16 +291,16 @@ export default function RootLayout({
         <link rel="prefetch" href="/faq" />
         <link rel="prefetch" href="/auth/sign-up" />
       </head>
-      <body className={`${geistSans.className} antialiased w-full overflow-x-hidden`}>
+      <body className={`${geistSans.className} antialiased w-full overflow-x-hidden h-screen`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="w-full overflow-x-hidden">
+          <div className="w-full h-full flex flex-col overflow-x-hidden">
             <AppHeader />
-            <main className="w-full overflow-x-hidden">
+            <main className="flex-1 w-full overflow-x-hidden overflow-y-auto min-h-0">
               {children}
             </main>
           </div>

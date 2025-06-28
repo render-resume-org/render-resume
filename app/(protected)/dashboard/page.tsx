@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   const announcements = await getActiveAnnouncements();
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="bg-white dark:bg-gray-900">
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
