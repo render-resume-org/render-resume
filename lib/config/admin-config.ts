@@ -25,9 +25,10 @@ export function isAdmin(userId: string): boolean {
   return ADMIN_CONFIG.ADMIN_IDS.includes(userId);
 }
 
-export function hasPermission(userId: string, _permission: string): boolean {
+export function hasPermission(userId: string, permission: string): boolean {
   // For now, all admins have all permissions
   // This can be extended to support role-based permissions
-  // The _permission parameter is prefixed with underscore to indicate it's intentionally unused
+  // TODO: Implement permission checking using the permission parameter
+  void permission; // Acknowledge parameter until permission system is implemented
   return isAdmin(userId);
 }
