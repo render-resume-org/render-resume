@@ -4,10 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 // 用戶類型定義
 interface UserWithSubscription {
   id: string;
-  name: string | null;
+  display_name: string | null;
   email: string;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
   subscription?: {
     plan_title: string;
     plan_type: string;
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     // 搜索過濾
     if (search) {
-      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
+      query = query.or(`display_name.ilike.%${search}%,email.ilike.%${search}%`);
     }
 
     // 分頁

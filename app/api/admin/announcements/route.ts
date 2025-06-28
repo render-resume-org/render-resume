@@ -54,8 +54,7 @@ export async function POST(request: NextRequest) {
         title,
         content,
         type: type || 'info',
-        is_active: is_active ?? true,
-        author: user.name || user.email
+        is_active: is_active ?? true
       })
       .select()
       .single();
@@ -98,8 +97,7 @@ export async function PUT(request: NextRequest) {
         title,
         content,
         type,
-        is_active,
-        updated_at: new Date().toISOString()
+        is_active
       })
       .eq('id', id)
       .select()

@@ -87,8 +87,7 @@ export async function POST(request: NextRequest) {
         .from('subscriptions')
         .update({
           plan_id: planId,
-          expire_at: expireAt.toISOString(),
-          updated_at: new Date().toISOString()
+          expire_at: expireAt.toISOString()
         })
         .eq('id', existingSubscription.id);
 
@@ -103,9 +102,7 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_id: planId,
           is_active: true,
-          expire_at: expireAt.toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          expire_at: expireAt.toISOString()
         });
 
       if (insertError) {
@@ -151,8 +148,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from('subscriptions')
       .update({ 
-        is_active: false,
-        updated_at: new Date().toISOString()
+        is_active: false
       })
       .eq('user_id', userId)
       .eq('is_active', true);
