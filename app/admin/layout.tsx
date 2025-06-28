@@ -33,6 +33,12 @@ const adminNavItems = [
     description: "管理系統公告"
   },
   {
+    title: "郵件群發",
+    href: "/admin/email",
+    icon: Mail,
+    description: "發送郵件給使用者"
+  },
+  {
     title: "系統設定",
     href: "/admin/settings",
     icon: Settings,

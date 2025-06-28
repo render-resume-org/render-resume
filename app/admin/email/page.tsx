@@ -77,6 +77,7 @@ export default function EmailPage() {
   const [customContent, setCustomContent] = useState("");
   const [previewMode, setPreviewMode] = useState(false);
   const [previewHtml, setPreviewHtml] = useState("");
+  const [showRealtimePreview, setShowRealtimePreview] = useState(false);
   const [stats, setStats] = useState({
     totalUsers: 0,
     selectedCount: 0
@@ -111,6 +112,34 @@ export default function EmailPage() {
     });
   }, [users, selectedUsers]);
 
+  // 即時預覽效果
+  useEffect(() => {
+    if (showRealtimePreview && customSubject) {
+      const timer = setTimeout(async () => {
+        try {
+          const response = await fetch("/api/admin/email/preview", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              templateId: selectedTemplate,
+              subject: customSubject,
+              content: customContent,
+              sampleUser: users[0] || { email: "user@example.com", display_name: "測試用戶" }
+            })
+          });
+
+          if (response.ok) {
+            const { html } = await response.json();
+            setPreviewHtml(html);
+          }
+        } catch (error) {
+          console.error("即時預覽失敗:", error);
+        }
+      }, 500); // 延遲 500ms 避免頻繁更新
+      return () => clearTimeout(timer);
+    }
+  }, [customSubject, customContent, selectedTemplate, showRealtimePreview, users]);
+
   const handleSelectAll = () => {
     if (selectedUsers.length === filteredUsers.length) {
       setSelectedUsers([]);
@@ -130,11 +159,14 @@ export default function EmailPage() {
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplate(templateId);
     const template = EMAIL_TEMPLATES.find(t => t.id === templateId);
-    if (template && template.id !== "custom") {
-      setCustomSubject(template.subject);
-    } else if (template?.id === "custom") {
-      setCustomSubject("");
-      setCustomContent("");
+    if (template) {
+      if (template.id === "custom") {
+        setCustomSubject("");
+        setCustomContent("");
+      } else {
+        setCustomSubject(template.subject);
+        // 保留現有內容，讓使用者可以自訂
+      }
     }
   };
 
@@ -173,8 +205,9 @@ export default function EmailPage() {
       return;
     }
 
+    // 自訂模板必須有內容
     if (selectedTemplate === "custom" && !customContent) {
-      toast.error("請輸入郵件內容");
+      toast.error("自訂郵件必須輸入內容");
       return;
     }
 
@@ -410,23 +443,43 @@ export default function EmailPage() {
                 value={customSubject}
                 onChange={(e) => setCustomSubject(e.target.value)}
                 placeholder="輸入郵件主旨"
-                disabled={selectedTemplate !== "custom" && currentTemplate?.id !== "custom"}
               />
             </div>
 
-            {/* 自訂內容（僅在選擇自訂模板時顯示） */}
-            {selectedTemplate === "custom" && (
-              <div className="space-y-2">
-                <Label htmlFor="content">郵件內容</Label>
-                <Textarea
-                  id="content"
-                  value={customContent}
-                  onChange={(e) => setCustomContent(e.target.value)}
-                  placeholder="輸入郵件內容（支援 HTML）"
-                  rows={10}
-                />
-              </div>
-            )}
+            {/* 郵件內容 */}
+            <div className="space-y-2">
+              <Label htmlFor="content">
+                郵件內容
+                {selectedTemplate !== "custom" && (
+                  <span className="text-sm text-gray-500 ml-2">
+                    （可自訂模板內容）
+                  </span>
+                )}
+              </Label>
+              <Textarea
+                id="content"
+                value={customContent}
+                onChange={(e) => setCustomContent(e.target.value)}
+                placeholder={
+                  selectedTemplate === "custom" 
+                    ? "輸入郵件內容（支援 HTML）" 
+                    : "輸入自訂內容來替換預設模板內容（支援 HTML），留空使用預設內容"
+                }
+                rows={10}
+              />
+            </div>
+
+            {/* 即時預覽開關 */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="realtime-preview"
+                checked={showRealtimePreview}
+                onCheckedChange={(checked) => setShowRealtimePreview(checked as boolean)}
+              />
+              <Label htmlFor="realtime-preview" className="cursor-pointer">
+                啟用即時預覽
+              </Label>
+            </div>
 
             {/* 模板說明 */}
             {selectedTemplate !== "custom" && currentTemplate && (
@@ -475,8 +528,32 @@ export default function EmailPage() {
         </Card>
       </div>
 
-      {/* 預覽對話框 */}
-      {previewMode && (
+      {/* 即時預覽面板 */}
+      {showRealtimePreview && previewHtml && (
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <Eye className="inline-block mr-2 w-5 h-5" />
+                郵件預覽
+              </CardTitle>
+              <CardDescription>主旨: {customSubject}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <iframe
+                  srcDoc={previewHtml}
+                  className="w-full h-[600px] border-0"
+                  title="Email Preview"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* 預覽對話框（手動預覽時使用） */}
+      {previewMode && !showRealtimePreview && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <Card className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
             <CardHeader>
