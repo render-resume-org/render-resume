@@ -7,10 +7,28 @@ import {
 
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
+    modelName?: string;
+    temperature?: number;
+    systemPrompt?: string;
+    maxConcurrency?: number;
+    maxTokens?: number;
+    topP?: number;
+    frequencyPenalty?: number;
+    presencePenalty?: number;
+    seed?: number;
+}
+
+// 內部使用的完整配置接口，確保必要欄位存在
+interface InternalAIConfig {
     modelName: string;
     temperature: number;
     systemPrompt: string;
     maxConcurrency?: number;
+    maxTokens?: number;
+    topP?: number;
+    frequencyPenalty?: number;
+    presencePenalty?: number;
+    seed?: number;
 }
 
 // 支援的文檔類型
@@ -154,7 +172,7 @@ interface OpenAIChatCompletionResponse {
 }
 
 export interface NativeOpenAIClientOptions {
-    apiKey: string;
+    apiKey?: string;
     config?: AIConfig;
     baseURL?: string;
 }
@@ -189,37 +207,46 @@ function getSimpleJsonSchema(): Record<string, unknown> {
  */
 export class NativeOpenAIClient {
     private apiKey: string;
-    private config: AIConfig;
+    private config: InternalAIConfig;
     private baseURL: string;
     private jsonSchema: Record<string, unknown>;
 
-    constructor(options: NativeOpenAIClientOptions) {
+    constructor(options: NativeOpenAIClientOptions = {}) {
         console.log('🤖 [Native OpenAI Client] Initializing with options:', {
-            modelName: options.config?.modelName || DEFAULT_CONFIG.modelName,
-            temperature: options.config?.temperature || DEFAULT_CONFIG.temperature,
+            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
+            temperature: options.config?.temperature || DEFAULT_AI_CONFIG.temperature,
             hasSystemPrompt: !!(options.config?.systemPrompt),
             dynamicPrompt: !options.config?.systemPrompt,
             baseURL: options.baseURL || 'https://api.openai.com/v1'
         });
 
-        this.apiKey = options.apiKey;
+        // 確保 apiKey 有值，如果沒有提供則從環境變數取得
+        this.apiKey = options.apiKey || process.env.OPENAI_API_KEY || '';
+        if (!this.apiKey) {
+            console.warn('⚠️ [Native OpenAI Client] No API key provided, client may not function properly');
+        }
+        
         this.baseURL = options.baseURL || 'https://api.openai.com/v1';
         
-        // 使用提供的配置或預設配置，並動態生成 system prompt
-        this.config = {
-            ...DEFAULT_CONFIG,
-            ...options.config
-        };
+        // 使用提供的配置或預設配置，並確保必要欄位存在
+        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt(SCORE_CATEGORIES);
         
-        // 如果沒有提供 systemPrompt，則動態生成
-        if (!options.config?.systemPrompt) {
-            this.config.systemPrompt = generateSystemPrompt(SCORE_CATEGORIES);
-        }
+        this.config = {
+            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
+            temperature: options.config?.temperature ?? DEFAULT_AI_CONFIG.temperature ?? 0.2,
+            systemPrompt: systemPrompt,
+            maxConcurrency: options.config?.maxConcurrency ?? DEFAULT_AI_CONFIG.maxConcurrency,
+            maxTokens: options.config?.maxTokens,
+            topP: options.config?.topP,
+            frequencyPenalty: options.config?.frequencyPenalty,
+            presencePenalty: options.config?.presencePenalty,
+            seed: options.config?.seed
+        };
 
         console.log('📋 [Native OpenAI Client] Final config:', {
             modelName: this.config.modelName,
             temperature: this.config.temperature,
-            promptLength: this.config.systemPrompt?.length || 0
+            promptLength: this.config.systemPrompt.length
         });
 
         // Pre-generate JSON schema for structured output
@@ -1288,8 +1315,24 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
 }
 
 // 便利函數：快速創建客戶端實例
-export function createNativeOpenAIClient(apiKey: string, config?: AIConfig): NativeOpenAIClient {
-    return new NativeOpenAIClient({ apiKey, config });
+export function createNativeOpenAIClient(options?: NativeOpenAIClientOptions): NativeOpenAIClient;
+export function createNativeOpenAIClient(apiKey?: string, config?: AIConfig, baseURL?: string): NativeOpenAIClient;
+export function createNativeOpenAIClient(
+    optionsOrApiKey?: NativeOpenAIClientOptions | string,
+    config?: AIConfig,
+    baseURL?: string
+): NativeOpenAIClient {
+    // 如果第一個參數是字符串，則使用舊的函數簽名（向後兼容）
+    if (typeof optionsOrApiKey === 'string') {
+        return new NativeOpenAIClient({
+            apiKey: optionsOrApiKey,
+            config,
+            baseURL
+        });
+    }
+    
+    // 否則使用新的選項對象簽名
+    return new NativeOpenAIClient(optionsOrApiKey);
 }
 
 // 文件處理工具函數
@@ -1306,4 +1349,50 @@ export function validateFileType(fileName: string): boolean {
     return Object.values(SUPPORTED_FILE_TYPES).some(types => 
         (types as readonly string[]).includes(extension)
     );
-} 
+}
+
+/* 
+使用範例：
+
+// 1. 完全使用預設配置（最簡單）
+const client1 = createNativeOpenAIClient();
+
+// 2. 只提供 API key，其他使用預設配置
+const client2 = createNativeOpenAIClient('your-api-key');
+
+// 3. 使用選項對象方式（推薦）
+const client3 = createNativeOpenAIClient({
+    apiKey: 'your-api-key',
+    config: {
+        modelName: 'gpt-4',
+        temperature: 0.3
+    },
+    baseURL: 'https://api.openai.com/v1'
+});
+
+// 4. 只覆蓋部分配置
+const client4 = createNativeOpenAIClient({
+    config: {
+        temperature: 0.1  // 只改變溫度，其他使用預設值
+    }
+});
+
+// 5. 向後兼容的舊式調用
+const client5 = createNativeOpenAIClient('api-key', { modelName: 'gpt-3.5-turbo' });
+
+// 6. 完全自定義配置
+const client6 = createNativeOpenAIClient({
+    apiKey: 'your-api-key',
+    config: {
+        modelName: 'gpt-4',
+        temperature: 0.2,
+        systemPrompt: 'Custom system prompt',
+        maxTokens: 4000,
+        topP: 0.9,
+        frequencyPenalty: 0.1,
+        presencePenalty: 0.1,
+        seed: 42
+    },
+    baseURL: 'https://your-custom-endpoint.com/v1'
+});
+*/ 

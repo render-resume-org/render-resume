@@ -11,6 +11,14 @@ import {
 
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
+    modelName?: string;
+    temperature?: number;
+    systemPrompt?: string;
+    maxConcurrency?: number;
+}
+
+// 內部使用的完整配置接口，確保必要欄位存在
+interface InternalAIConfig {
     modelName: string;
     temperature: number;
     systemPrompt: string;
@@ -101,7 +109,7 @@ export const ResumeAnalysisSchema = z.object({
 export type ResumeAnalysisResult = z.infer<typeof ResumeAnalysisSchema>;
 
 export interface OpenAIClientOptions {
-    apiKey: string;
+    apiKey?: string;
     config?: AIConfig;
 }
 
@@ -267,46 +275,51 @@ export class OpenAIClient {
     private visionModel: ChatOpenAI;
     private structuredChatModel: Runnable; // LangChain structured output model
     private structuredVisionModel: Runnable; // LangChain structured output model
-    private config: AIConfig;
+    private config: InternalAIConfig;
     private jsonParser: JsonOutputParser;
 
-    constructor(options: OpenAIClientOptions) {
+    constructor(options: OpenAIClientOptions = {}) {
         console.log('🤖 [OpenAI Client] Initializing with options:', {
-            modelName: options.config?.modelName || DEFAULT_CONFIG.modelName,
-            temperature: options.config?.temperature || DEFAULT_CONFIG.temperature,
+            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
+            temperature: options.config?.temperature || DEFAULT_AI_CONFIG.temperature,
             hasSystemPrompt: !!(options.config?.systemPrompt),
             dynamicPrompt: !options.config?.systemPrompt
         });
 
-        // 使用提供的配置或預設配置，並動態生成 system prompt
-        this.config = {
-            ...DEFAULT_CONFIG,
-            ...options.config
-        };
-        
-        // 如果沒有提供 systemPrompt，則動態生成
-        if (!options.config?.systemPrompt) {
-            this.config.systemPrompt = generateSystemPrompt(SCORE_CATEGORIES);
+        // 確保 apiKey 有值，如果沒有提供則從環境變數取得
+        const apiKey = options.apiKey || process.env.OPENAI_API_KEY || '';
+        if (!apiKey) {
+            console.warn('⚠️ [OpenAI Client] No API key provided, client may not function properly');
         }
+
+        // 使用提供的配置或預設配置，並確保必要欄位存在
+        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt(SCORE_CATEGORIES);
+        
+        this.config = {
+            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
+            temperature: options.config?.temperature ?? DEFAULT_AI_CONFIG.temperature ?? 0.2,
+            systemPrompt: systemPrompt,
+            maxConcurrency: options.config?.maxConcurrency ?? DEFAULT_AI_CONFIG.maxConcurrency
+        };
 
         console.log('📋 [OpenAI Client] Final config:', {
             modelName: this.config.modelName,
             temperature: this.config.temperature,
-            promptLength: this.config.systemPrompt?.length || 0
+            promptLength: this.config.systemPrompt.length
         });
         
         // Initialize JSON parser for LangChain structured output
         this.jsonParser = new JsonOutputParser();
         
         this.chatModel = new ChatOpenAI({
-            apiKey: options.apiKey,
+            apiKey: apiKey,
             temperature: this.config.temperature,
             modelName: this.config.modelName,
         });
 
         // Vision 模型用於處理圖片和 PDF
         this.visionModel = new ChatOpenAI({
-            apiKey: options.apiKey,
+            apiKey: apiKey,
             temperature: this.config.temperature,
             modelName: "gpt-4.1-mini", // 使用支援 Vision 的模型
         });
@@ -788,8 +801,22 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
 }
 
 // 便利函數：快速創建客戶端實例
-export function createOpenAIClient(apiKey: string, config?: AIConfig): OpenAIClient {
-    return new OpenAIClient({ apiKey, config });
+export function createOpenAIClient(options?: OpenAIClientOptions): OpenAIClient;
+export function createOpenAIClient(apiKey?: string, config?: AIConfig): OpenAIClient;
+export function createOpenAIClient(
+    optionsOrApiKey?: OpenAIClientOptions | string,
+    config?: AIConfig
+): OpenAIClient {
+    // 如果第一個參數是字符串，則使用舊的函數簽名（向後兼容）
+    if (typeof optionsOrApiKey === 'string') {
+        return new OpenAIClient({
+            apiKey: optionsOrApiKey,
+            config
+        });
+    }
+    
+    // 否則使用新的選項對象簽名
+    return new OpenAIClient(optionsOrApiKey);
 }
 
 // 文件處理工具函數
@@ -807,4 +834,44 @@ export function validateFileType(fileName: string): boolean {
     return Object.values(SUPPORTED_FILE_TYPES).some(types => 
         (types as readonly string[]).includes(extension)
     );
-} 
+}
+
+/* 
+使用範例：
+
+// 1. 完全使用預設配置（最簡單）
+const client1 = createOpenAIClient();
+
+// 2. 只提供 API key，其他使用預設配置
+const client2 = createOpenAIClient('your-api-key');
+
+// 3. 使用選項對象方式（推薦）
+const client3 = createOpenAIClient({
+    apiKey: 'your-api-key',
+    config: {
+        modelName: 'gpt-4',
+        temperature: 0.3
+    }
+});
+
+// 4. 只覆蓋部分配置
+const client4 = createOpenAIClient({
+    config: {
+        temperature: 0.1  // 只改變溫度，其他使用預設值
+    }
+});
+
+// 5. 向後兼容的舊式調用
+const client5 = createOpenAIClient('api-key', { modelName: 'gpt-3.5-turbo' });
+
+// 6. 完全自定義配置
+const client6 = createOpenAIClient({
+    apiKey: 'your-api-key',
+    config: {
+        modelName: 'gpt-4',
+        temperature: 0.2,
+        systemPrompt: 'Custom system prompt',
+        maxConcurrency: 5
+    }
+});
+*/ 

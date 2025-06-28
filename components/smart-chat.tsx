@@ -96,6 +96,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const suggestionsScrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRefMobile = useRef<HTMLTextAreaElement>(null);
   const messageCounterRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -107,7 +108,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const initializeChat = useCallback(() => {
     // 取得 follow-up 問題數量
     const followUpCount = analysisResult?.missing_content?.follow_ups?.length || 0;
-    
+
     const welcomeMessage: ChatMessage = {
       id: generateUniqueId('ai-welcome'),
       type: 'ai',
@@ -155,6 +156,39 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }
   }, []);
 
+  // 當載入完成時自動 focus 到輸入框
+  useEffect(() => {
+    if (!isLoading && messageCount > 1) {
+      // 使用 requestAnimationFrame 確保在下一個渲染循環中 focus
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          // 檢查哪個 textarea 是可見的並 focus
+          const desktopTextarea = textareaRef.current;
+          const mobileTextarea = textareaRefMobile.current;
+          
+          let targetTextarea = null;
+          
+          // 檢查大螢幕版本是否可見
+          if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
+            targetTextarea = desktopTextarea;
+          }
+          // 檢查小螢幕版本是否可見
+          else if (mobileTextarea && window.getComputedStyle(mobileTextarea.closest('.lg\\:hidden') || mobileTextarea).display !== 'none') {
+            targetTextarea = mobileTextarea;
+          }
+          
+          if (targetTextarea && 
+              !targetTextarea.disabled && 
+              messageCount < 30 &&
+              document.activeElement !== targetTextarea) {
+            console.log('Auto focusing to textarea:', targetTextarea === desktopTextarea ? 'desktop' : 'mobile');
+            targetTextarea.focus();
+          }
+        }, 100);
+      });
+    }
+  }, [isLoading, messageCount]);
+
   useEffect(() => {
     initializeChat();
   }, [initializeChat]);
@@ -183,24 +217,27 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     if (isLoading) {
       setTimeout(() => {
         scrollToBottom(scrollAreaRef, false);
-      }, 100);
+    }, 100);
     }
   }, [isLoading, scrollToBottom]);
 
   // 新增：自動調整 textarea 高度的函數
   const adjustTextareaHeight = useCallback((value: string) => {
-    if (textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.style.height = 'auto';
-      
-      // 計算內容高度
-      const lineHeight = 24; // 假設行高為 24px
-      const lines = value.split('\n').length;
-      const contentHeight = Math.max(40, lines * lineHeight); // 最小 40px
-      const maxHeight = 120;
-      
-      textarea.style.height = Math.min(contentHeight, maxHeight) + 'px';
-    }
+    const textareas = [textareaRef.current, textareaRefMobile.current].filter(Boolean);
+    
+    textareas.forEach(textarea => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+        
+        // 計算內容高度
+        const lineHeight = 24; // 假設行高為 24px
+        const lines = value.split('\n').length;
+        const contentHeight = Math.max(40, lines * lineHeight); // 最小 40px
+        const maxHeight = 120;
+        
+        textarea.style.height = Math.min(contentHeight, maxHeight) + 'px';
+      }
+    });
   }, []);
 
   const handleSendMessage = async (messageText?: string) => {
@@ -225,9 +262,11 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }, 50);
 
     // 重置 textarea 高度
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-    }
+    [textareaRef.current, textareaRefMobile.current].forEach(textarea => {
+      if (textarea) {
+        textarea.style.height = 'auto';
+      }
+    });
 
     try {
       // 準備發送給 API 的訊息
@@ -244,7 +283,12 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         },
         body: JSON.stringify({
           messages: apiMessages,
-          analysisResult
+          analysisResult,
+          suggestions: suggestions.map(s => ({
+            title: s.title,
+            description: s.description,
+            category: s.category
+          }))
         }),
       });
 
@@ -279,32 +323,25 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
           title: suggestion.title,
           description: suggestion.description,
           category: suggestion.category,
-          timestamp: new Date()
-        };
+            timestamp: new Date()
+          };
         setSuggestions(prev => [...prev, suggestionRecord]);
       }
-
+          
       // 確保滾動到底部（在狀態更新後）
-      setTimeout(() => {
+          setTimeout(() => {
         scrollToBottom(scrollAreaRef, false);
-      }, 100);
-
-      // 自動 focus 到輸入框
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-        }
-      }, 150);
+          }, 100);
 
     } catch (error) {
       console.error('Failed to send message:', error);
       
       const errorMessage: ChatMessage = {
         id: generateUniqueId('ai-error'),
-        type: 'ai',
+            type: 'ai',
         content: '抱歉，發生了一些問題。請稍後再試。',
-        timestamp: new Date()
-      };
+            timestamp: new Date()
+          };
 
       setMessages(prev => [...prev, errorMessage]);
       setMessageCount(prev => prev + 1);
@@ -350,12 +387,27 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     // 自動調整高度
     adjustTextareaHeight(quoteMessage);
     
-    if (textareaRef.current) {
-      textareaRef.current.focus();
+    // Focus 到當前可見的 textarea
+    const desktopTextarea = textareaRef.current;
+    const mobileTextarea = textareaRefMobile.current;
+    
+    let targetTextarea = null;
+    
+    // 檢查大螢幕版本是否可見
+    if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
+      targetTextarea = desktopTextarea;
+    }
+    // 檢查小螢幕版本是否可見
+    else if (mobileTextarea) {
+      targetTextarea = mobileTextarea;
+    }
+    
+    if (targetTextarea) {
+      targetTextarea.focus();
       // 將光標移到最後
       setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.setSelectionRange(quoteMessage.length, quoteMessage.length);
+        if (targetTextarea) {
+          targetTextarea.setSelectionRange(quoteMessage.length, quoteMessage.length);
         }
       }, 0);
     }
@@ -403,7 +455,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     handleSendMessage(message);
   };
 
-  return (
+    return (
     <div className="space-y-6">
       {/* 響應式布局 - 大螢幕兩欄，小螢幕堆疊 */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -420,15 +472,15 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                 className="w-[25rem] max-w-[85vw]"
               >
                 <Card className="sticky top-4">
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
+        <CardHeader>
+          <CardTitle className="flex items-center">
                       <Lightbulb className="h-5 w-5 mr-2 text-cyan-600" />
                       AI 建議記錄 ({suggestions.length})
-                    </CardTitle>
+          </CardTitle>
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                       對話中產生的履歷優化建議
                     </p>
-                  </CardHeader>
+        </CardHeader>
                   <CardContent>
                     <ScrollArea className="h-[400px]" ref={suggestionsScrollAreaRef}>
                       <div className="space-y-3">
@@ -501,11 +553,11 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                           size="sm"
                         >
                           完成對話 ({suggestions.length} 個建議)
-                        </Button>
+          </Button>
                       </motion.div>
                     )}
-                  </CardContent>
-                </Card>
+        </CardContent>
+      </Card>
               </motion.div>
             )}
           </AnimatePresence>
@@ -513,108 +565,108 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
           {/* 右側聊天區域 */}
           <div className="w-[45rem] h-full">
             <Card className="h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <span className="text-2xl mr-2">🤖</span>
-                    AI 智慧問答
-                  </div>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <span className="text-2xl mr-2">🤖</span>
+            AI 智慧問答
+          </div>
                   <div className="flex items-center space-x-4">
-                    <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500">
                       {messageCount}/30 則對話
-                    </div>
+          </div>
                     <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                      跳過問答
-                    </Button>
+            跳過問答
+          </Button>
                   </div>
                 </CardTitle>
                 <div className="text-sm text-gray-600 dark:text-gray-300">
                   自由詢問履歷相關問題，AI 會記錄並提供具體建議
-                </div>
-              </CardHeader>
+        </div>
+      </CardHeader>
 
-              <CardContent className="space-y-4">
-                {/* 聊天區域 */}
-                <div className="h-[400px] border rounded-lg overflow-hidden">
-                  <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
-                    <div className="w-full space-y-4">
-                      <AnimatePresence mode="popLayout">
-                        {messages.map((message) => (
-                          <motion.div
-                            key={message.id}
-                            variants={messageVariants}
-                            initial="hidden"
-                            animate="visible"
-                            exit="exit"
-                            layout
-                            className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
-                          >
+      <CardContent className="space-y-4">
+        {/* 聊天區域 */}
+        <div className="h-[400px] border rounded-lg overflow-hidden">
+          <ScrollArea className="w-full h-full p-4" ref={scrollAreaRef}>
+            <div className="w-full space-y-4">
+              <AnimatePresence mode="popLayout">
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    variants={messageVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    layout
+                    className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
+                  >
                             <div className={cn("flex items-start space-x-2 max-w-[85%]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
-                              {message.type === 'user' ? (
-                                <UserAvatar user={user} />
-                              ) : (
+                      {message.type === 'user' ? (
+                        <UserAvatar user={user} />
+                      ) : (
                                 <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                                  <span className="text-lg">🤖</span>
-                                </div>
-                              )}
-                              <div
+                          <span className="text-lg">🤖</span>
+                        </div>
+                      )}
+                      <div
                                 className={cn(`rounded-lg px-4 py-2 w-fit max-w-full`, message.type === 'user'
-                                    ? 'bg-cyan-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                                )}
+                            ? 'bg-cyan-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                        )}
                               >
                                 <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                                <p className="text-xs opacity-70 mt-1">
-                                  {message.timestamp.toLocaleTimeString('zh-TW', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                      
-                      {isLoading && (
-                        <motion.div
-                          variants={loadingVariants}
-                          initial="hidden"
-                          animate="visible"
-                          className="flex justify-start"
-                        >
-                          <div className="flex items-start space-x-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                              <span className="text-lg">🤖</span>
-                            </div>
-                            <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
-                              <div className="flex space-x-1">
-                                <motion.div 
-                                  className="w-2 h-2 bg-gray-400 rounded-full"
-                                  animate={{ y: [0, -8, 0] }}
-                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                                />
-                                <motion.div 
-                                  className="w-2 h-2 bg-gray-400 rounded-full"
-                                  animate={{ y: [0, -8, 0] }}
-                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
-                                />
-                                <motion.div 
-                                  className="w-2 h-2 bg-gray-400 rounded-full"
-                                  animate={{ y: [0, -8, 0] }}
-                                  transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
+                            <p className="text-xs opacity-70 mt-1">
+                              {message.timestamp.toLocaleTimeString('zh-TW', { 
+                                hour: '2-digit', 
+                                minute: '2-digit' 
+                              })}
+                            </p>
+                      </div>
                     </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {isLoading && (
+                <motion.div
+                  variants={loadingVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="flex justify-start"
+                >
+                  <div className="flex items-start space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                      <span className="text-lg">🤖</span>
+                    </div>
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
+                      <div className="flex space-x-1">
+                        <motion.div 
+                          className="w-2 h-2 bg-gray-400 rounded-full"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+                        />
+                        <motion.div 
+                          className="w-2 h-2 bg-gray-400 rounded-full"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
+                        />
+                        <motion.div 
+                          className="w-2 h-2 bg-gray-400 rounded-full"
+                          animate={{ y: [0, -8, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
                     
                     {/* 隱藏的底部標記元素，用於滾動定位 */}
                     <div ref={messagesEndRef} className="h-0" />
-                  </ScrollArea>
-                </div>
+          </ScrollArea>
+        </div>
 
                 {/* 罐頭訊息選項 */}
                 {cannedOptions.length > 0 && (
@@ -663,13 +715,13 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                   )}
                 </AnimatePresence>
 
-                {/* 輸入區域 */}
-                <div className="flex space-x-2 items-end">
-                  <Textarea
-                    ref={textareaRef}
-                    value={currentInput}
-                    onChange={handleTextareaChange}
-                    onKeyPress={handleKeyPress}
+        {/* 輸入區域 */}
+        <div className="flex space-x-2 items-end">
+          <Textarea
+            ref={textareaRef}
+            value={currentInput}
+            onChange={handleTextareaChange}
+            onKeyPress={handleKeyPress}
                     placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題... (Shift+Enter 換行，Enter 發送)"}
                     disabled={isLoading || messageCount >= 30}
                     className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500"
@@ -846,26 +898,26 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
               {/* 輸入區域 */}
               <div className="flex space-x-2 items-end">
                 <Textarea
-                  ref={textareaRef}
+                  ref={textareaRefMobile}
                   value={currentInput}
                   onChange={handleTextareaChange}
                   onKeyPress={handleKeyPress}
                   placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題..."}
                   disabled={isLoading || messageCount >= 30}
                   className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500 text-sm"
-                  rows={1}
-                />
-                <Button
+            rows={1}
+          />
+          <Button
                   onClick={() => handleSendMessage()}
                   disabled={!currentInput.trim() || isLoading || messageCount >= 30}
-                  size="icon"
+            size="icon"
                   className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 transition-colors disabled:opacity-50"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
 
           {/* 建議面板（小螢幕時放在下方） */}
           <AnimatePresence>
