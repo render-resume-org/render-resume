@@ -84,7 +84,7 @@ function getRandomCannedMessages(): string[] {
 interface SmartChatProps {
   analysisResult: ResumeAnalysisResult;
   onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[]) => void;
-  onSkip: () => void;
+  onSkip: (suggestions: SuggestionRecord[]) => void;
 }
 
 export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartChatProps) {
@@ -146,7 +146,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   // 暴露調試函數到 window 對象（僅開發環境）
   useEffect(() => {
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      (window as any).debugScrollState = debugScrollState;
+      (window as { debugScrollState?: () => void }).debugScrollState = debugScrollState;
       console.log('💡 Scroll debug function available: window.debugScrollState()');
     }
   }, [debugScrollState]);
@@ -767,7 +767,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
           <div className="text-sm text-gray-500">
                       {messageCount}/30 則對話
           </div>
-                    <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <Button variant="ghost" size="sm" onClick={() => onSkip(suggestions)} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
             跳過問答
           </Button>
                   </div>
@@ -973,7 +973,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                   <div className="text-xs sm:text-sm text-gray-500">
                     {messageCount}/30 則對話
                   </div>
-                  <Button variant="ghost" size="sm" onClick={onSkip} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-xs sm:text-sm">
+                  <Button variant="ghost" size="sm" onClick={() => onSkip(suggestions)} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-xs sm:text-sm">
                     跳過問答
                   </Button>
                 </div>

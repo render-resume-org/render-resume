@@ -50,10 +50,18 @@ export default function SmartChatPage() {
     }, 2000);
   };
 
-  const handleSkipToSuggestions = () => {
-    // 清空之前的聊天記錄
+  const handleSkipToSuggestions = (suggestions: SuggestionRecord[]) => {
+    // 保存跳過時已收集的建議
+    if (suggestions.length > 0) {
+      localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
+      console.log(`跳過問答時保存了 ${suggestions.length} 個建議`);
+    } else {
+      localStorage.removeItem('chatSuggestions');
+    }
+    
+    // 清空聊天記錄（跳過時不保存對話記錄）
     localStorage.removeItem('chatHistory');
-    localStorage.removeItem('chatSuggestions');
+    
     router.push('/suggestions');
   };
 
@@ -102,10 +110,12 @@ export default function SmartChatPage() {
   // 問答完成狀態
   if (isCompleted) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mb-6">
-            <span className="text-6xl">✅</span>
+      <div className="h-full bg-white dark:bg-gray-900 flex items-center justify-center overflow-hidden">
+        <div className="text-center max-w-md mx-auto px-4">
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <span className="text-4xl">✅</span>
+            </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             智慧問答完成！
@@ -113,9 +123,11 @@ export default function SmartChatPage() {
           <p className="text-gray-600 dark:text-gray-300 mb-6">
             感謝您的參與，正在為您準備個性化的履歷優化建議...
           </p>
-          <div className="animate-pulse">
-            <div className="h-2 bg-cyan-200 rounded-full w-64 mx-auto">
-              <div className="h-2 bg-cyan-600 rounded-full w-full animate-pulse"></div>
+          <div className="flex justify-center">
+            <div className="animate-pulse">
+              <div className="h-2 bg-cyan-200 dark:bg-cyan-800 rounded-full w-64">
+                <div className="h-2 bg-cyan-600 rounded-full w-full animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
