@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    const { user, supabase } = authResult;
+    const { supabase } = authResult;
     const body = await request.json();
 
     const { title, content, type, is_active } = body;
