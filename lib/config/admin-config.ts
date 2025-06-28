@@ -2,7 +2,7 @@
 // TODO: Move to environment variables in production
 export const ADMIN_CONFIG = {
   // Admin user IDs - should be moved to environment variables
-  ADMIN_IDS: ['049512f1-9b80-4848-9df3-03adcc8f61c9'],
+  ADMIN_IDS: ['049512f1-9b80-4848-9df3-03adcc8f61c9'] as readonly string[],
   
   // Admin permissions
   PERMISSIONS: {
@@ -22,11 +22,12 @@ export const ADMIN_CONFIG = {
 } as const;
 
 export function isAdmin(userId: string): boolean {
-  return ADMIN_CONFIG.ADMIN_IDS.includes(userId as any);
+  return ADMIN_CONFIG.ADMIN_IDS.includes(userId);
 }
 
-export function hasPermission(userId: string, permission: string): boolean {
+export function hasPermission(userId: string, _permission: string): boolean {
   // For now, all admins have all permissions
   // This can be extended to support role-based permissions
+  // The _permission parameter is prefixed with underscore to indicate it's intentionally unused
   return isAdmin(userId);
 }

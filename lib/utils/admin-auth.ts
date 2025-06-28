@@ -8,7 +8,7 @@ export interface AdminAuthResult {
     email: string;
     name: string;
   };
-  supabase: any;
+  supabase: Awaited<ReturnType<typeof createClient>>;
 }
 
 export interface AdminAuthError {
