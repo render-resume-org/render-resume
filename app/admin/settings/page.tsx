@@ -87,12 +87,31 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 
   const handleSave = async () => {
-    setSaving(true);
-    // 這裡應該調用 API 保存設定
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      setSaving(true);
+      
+      // TODO: 實作 API 端點來保存系統設定
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || '保存設定失敗');
+      }
+
       // 顯示成功消息
-    }, 1000);
+      console.log('設定已成功保存');
+    } catch (error) {
+      console.error('保存設定失敗:', error);
+      // 顯示錯誤消息
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateSettings = (category: keyof SystemSettings, key: string, value: string | number | boolean) => {

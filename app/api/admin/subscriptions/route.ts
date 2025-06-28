@@ -1,30 +1,11 @@
-import { createClient } from "@/lib/supabase/server";
+import { checkAdminAuth } from "@/lib/utils/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
-
-// 管理員 ID 列表
-const ADMINS = ['049512f1-9b80-4848-9df3-03adcc8f61c9'];
-
-// 檢查管理員權限的輔助函數
-async function checkAdminAuth() {
-  const supabase = await createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  
-  if (authError || !user) {
-    return { error: "未授權", status: 401 };
-  }
-
-  if (!ADMINS.includes(user.id)) {
-    return { error: "權限不足", status: 403 };
-  }
-
-  return { user, supabase };
-}
 
 // 獲取所有可用的訂閱方案
 export async function GET() {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
@@ -54,7 +35,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
@@ -106,8 +87,7 @@ export async function POST(request: NextRequest) {
         .from('subscriptions')
         .update({
           plan_id: planId,
-          expire_at: expireAt.toISOString(),
-          updated_at: new Date().toISOString()
+          expire_at: expireAt.toISOString()
         })
         .eq('id', existingSubscription.id);
 
@@ -122,9 +102,7 @@ export async function POST(request: NextRequest) {
           user_id: userId,
           plan_id: planId,
           is_active: true,
-          expire_at: expireAt.toISOString(),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          expire_at: expireAt.toISOString()
         });
 
       if (insertError) {
@@ -155,7 +133,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const authResult = await checkAdminAuth();
-    if ('error' in authResult) {
+    if (!authResult.success) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
@@ -170,8 +148,7 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase
       .from('subscriptions')
       .update({ 
-        is_active: false,
-        updated_at: new Date().toISOString()
+        is_active: false
       })
       .eq('user_id', userId)
       .eq('is_active', true);
