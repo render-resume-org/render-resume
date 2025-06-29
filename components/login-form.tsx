@@ -3,11 +3,11 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,16 +39,11 @@ export function LoginForm({
     }
   }, [email, password, clearError, error]);
 
-  // 當用戶登入成功時自動重定向
+  // 當用戶登入成功時顯示成功畫面並立即重定向
   useEffect(() => {
     if (isAuthenticated) {
-      // 減少延遲時間，更快速的重定向
-      const timer = setTimeout(() => {
-        console.log('🔄 [LoginForm] Redirecting to dashboard');
-        redirectToDashboard();
-      }, 800); // 從 1500ms 減少到 800ms
-      
-      return () => clearTimeout(timer);
+      console.log('🔄 [LoginForm] Redirecting to dashboard immediately');
+      redirectToDashboard();
     }
   }, [isAuthenticated, redirectToDashboard]);
 
@@ -202,7 +197,7 @@ export function LoginForm({
               >
                 {loading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                     登入中...
                   </>
                 ) : (
@@ -210,34 +205,13 @@ export function LoginForm({
                 )}
               </Button>
             </div>
-
-            {/* Sign Up Link */}
-            <div className="mt-4 text-center text-sm">
-              還沒有帳戶？{" "}
-              <Link
-                href="/auth/sign-up"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                立即註冊
-              </Link>
-            </div>
-
-            {/* Terms and Privacy Links */}
-            <div className="mt-3 text-center text-xs space-x-4">
-              <Link
-                href="/terms"
-                className="text-gray-500 hover:text-cyan-600 underline underline-offset-4"
-              >
-                服務條款
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-gray-500 hover:text-cyan-600 underline underline-offset-4"
-              >
-                隱私權政策
-              </Link>
-            </div>
           </form>
+          <div className="mt-4 text-center text-sm">
+            還沒有帳戶？{" "}
+            <Link href="/auth/sign-up" className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4">
+              註冊
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>

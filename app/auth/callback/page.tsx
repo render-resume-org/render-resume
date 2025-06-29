@@ -23,7 +23,6 @@ function AuthCallbackContent() {
           
           if (error) {
             console.error('❌ [Auth Callback] Exchange error:', error);
-            // 即使有錯誤也直接導向到登入頁面，不顯示錯誤頁面
             router.push('/auth/login');
             return;
           }
@@ -32,13 +31,10 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Session established:', data.session.user.email);
             setStatus('success');
             
-            // 使用 router.push 進行導向
-            setTimeout(() => {
-              router.push('/dashboard');
-            }, 1000);
+            // 立即跳转，不延迟
+            router.push('/dashboard');
           } else {
             console.log('⚠️ [Auth Callback] No session in exchange response');
-            // 沒有 session 也直接導向到登入頁面
             router.push('/auth/login');
           }
         } else {
@@ -55,9 +51,8 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Existing session found:', data.session.user.email);
             setStatus('success');
             
-            setTimeout(() => {
-              router.push('/dashboard');
-            }, 1000);
+            // 立即跳转，不延迟  
+            router.push('/dashboard');
           } else {
             console.log('⚠️ [Auth Callback] No code and no session');
             router.push('/auth/login');
@@ -65,7 +60,6 @@ function AuthCallbackContent() {
         }
       } catch (err) {
         console.error('❌ [Auth Callback] Unexpected error:', err);
-        // 發生任何錯誤都直接導向到登入頁面
         router.push('/auth/login');
       }
     };
@@ -74,7 +68,7 @@ function AuthCallbackContent() {
   }, [router, searchParams]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+    <div className="h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 flex items-center justify-center px-4 overflow-hidden">
       <div className="max-w-md w-full text-center">
         {status === 'loading' && (
           <div className="space-y-4">
@@ -121,7 +115,7 @@ function AuthCallbackContent() {
 
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center px-4">
+    <div className="h-[calc(100vh-5rem)] bg-white dark:bg-gray-900 flex items-center justify-center px-4 overflow-hidden">
       <div className="max-w-md w-full text-center">
         <div className="space-y-4">
           <div className="w-16 h-16 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin mx-auto"></div>

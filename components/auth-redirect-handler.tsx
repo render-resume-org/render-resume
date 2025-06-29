@@ -8,17 +8,11 @@ export function AuthRedirectHandler() {
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // 如果用戶已經登入且不在載入狀態，重定向到儀表板
+    // 如果用戶已經登入且不在載入狀態，立即重定向到儀表板
     if (!loading && isAuthenticated && !hasRedirected.current) {
       hasRedirected.current = true;
-      
-      // 減少延遲，確保認證狀態完全穩定
-      const timer = setTimeout(() => {
-        console.log('🔄 [AuthRedirectHandler] Redirecting authenticated user to dashboard');
-        redirectToDashboard();
-      }, 50); // 從 100ms 減少到 50ms
-      
-      return () => clearTimeout(timer);
+      console.log('🔄 [AuthRedirectHandler] Redirecting authenticated user to dashboard immediately');
+      redirectToDashboard();
     }
   }, [isAuthenticated, loading, redirectToDashboard]);
 
