@@ -16,6 +16,11 @@ export interface ChatResponse {
     category: string;
   };
   quickResponses: string[];
+  excerpt?: {
+    title: string;
+    content: string;
+    source: string;
+  };
 }
 
 interface RequestBody {
@@ -87,6 +92,20 @@ function parseAIResponse(completion: string): ChatResponse {
     if (!Array.isArray(parsed.quickResponses)) {
       console.warn('⚠️ [Parser] Missing or invalid quickResponses field, providing default');
       parsed.quickResponses = ['告訴我更多', '下一個問題', '需要具體建議'];
+    }
+    
+    // 驗證 excerpt 欄位格式（如果存在）
+    if (parsed.excerpt !== null && parsed.excerpt !== undefined) {
+      if (typeof parsed.excerpt !== 'object' || 
+          typeof parsed.excerpt.title !== 'string' ||
+          typeof parsed.excerpt.content !== 'string' ||
+          typeof parsed.excerpt.source !== 'string') {
+        console.warn('⚠️ [Parser] Invalid excerpt field structure');
+        throw new Error('Invalid excerpt field');
+      }
+      console.log('✅ [Parser] Excerpt field validated');
+    } else {
+      console.log('ℹ️ [Parser] No excerpt field present');
     }
     
     return parsed;
@@ -495,7 +514,6 @@ ${duplicateCheckPrompt}
 ## 📤 回應格式要求
 
 你必須以 JSON 格式回應，包含以下欄位：
-\`\`\`json
 {
   "message": "你的回覆訊息",
   "suggestion": {
@@ -503,9 +521,76 @@ ${duplicateCheckPrompt}
     "description": "建議詳細描述",
     "category": "建議類別"
   },
-  "quickResponses": ["快速回復選項1", "快速回復選項2", "快速回復選項3"]
+  "quickResponses": ["快速回復選項1", "快速回復選項2", "快速回復選項3"],
+  "excerpt": {
+    "title": "履歷段落標題",
+    "content": "履歷具體內容",
+    "source": "資料來源分類"
+  }
 }
-\`\`\`
+
+## 📋 履歷摘錄 (excerpt) 功能指導
+
+### 使用時機 - 重要：僅限第一次引用
+excerpt 欄位應在以下情況使用，且**每個履歷段落只能摘錄一次**：
+- ✅ **第一次**針對特定履歷經歷、專案或技能提出具體追問時
+- ✅ **第一次**詢問用戶補充某個履歷項目的細節時
+- ✅ **第一次**基於履歷內容進行深度討論時
+
+### 摘錄內容來源
+根據用戶履歷分析結果，從以下來源摘錄相關內容：
+
+#### 工作經驗 (source: "工作經驗")
+- 摘錄格式：公司名稱、職位、時間、主要職責描述
+- 範例：title: "ABC科技 - 前端工程師", content: "2021年3月 - 2023年8月\\n負責React專案開發，管理3人前端團隊，主導電商平台重構專案", source: "工作經驗"
+
+#### 專案經驗 (source: "專案經驗")  
+- 摘錄格式：專案名稱、描述、使用技術
+- 範例：title: "電商平台重構專案", content: "重新設計整個前端架構，使用React、TypeScript、Redux進行開發，提升系統效能30%", source: "專案經驗"
+
+#### 技能專長 (source: "技能專長")
+- 摘錄格式：技能類別和具體技術
+- 範例：title: "前端開發技能", content: "React, Vue.js, TypeScript, JavaScript, HTML5, CSS3, Webpack, Redux", source: "技能專長"
+
+#### 教育背景 (source: "教育背景")
+- 摘錄格式：學校、學位、科系
+- 範例：title: "台灣大學資訊工程學系", content: "國立台灣大學 學士學位 資訊工程學系 2017-2021", source: "教育背景"
+
+### 摘錄規則與限制
+
+#### 必須遵守的規則：
+1. **唯一性原則**：每個履歷段落（同一個公司、專案、技能組）只能被摘錄一次
+2. **首次引用原則**：只有在第一次討論該段落時才使用 excerpt
+3. **相關性原則**：摘錄內容必須與你的問題或討論直接相關
+4. **完整性原則**：摘錄應包含該段落的核心資訊，不要截斷重要內容
+
+#### 何時不使用 excerpt：
+- ❌ 已經摘錄過的履歷段落（重複討論時）
+- ❌ 與當前問題無關的履歷內容
+- ❌ 一般性對話或總結性建議時
+- ❌ 用戶主動提供新資訊，而非基於履歷內容追問時
+
+### 摘錄格式要求
+- **title**: 簡潔明確的段落標題（15字以內）
+- **content**: 履歷中的實際內容，使用 \\n 來表示換行
+- **source**: 固定使用以下分類之一："工作經驗"、"專案經驗"、"技能專長"、"教育背景"
+
+### 實際使用範例
+
+#### ✅ 正確使用情境
+當第一次討論某個履歷項目時，應該包含 excerpt 摘錄相關內容。
+例如：message: "看到你在ABC科技擔任前端工程師，這個職位的主要挑戰是什麼？"，同時提供該工作經驗的摘錄。
+
+#### ❌ 錯誤使用情境  
+當重複討論已經摘錄過的履歷項目時，不應再次使用 excerpt。
+例如：message: "剛才你提到React專案很有挑戰性，能具體說說技術細節嗎？"，此時 excerpt 應為 null。
+
+### 檢查清單
+在決定是否使用 excerpt 前，請確認：
+- ✅ 這是我第一次討論這個履歷段落嗎？
+- ✅ 我的問題是基於履歷內容而不是用戶新提供的資訊嗎？  
+- ✅ 摘錄的內容與我的問題直接相關嗎？
+- ✅ 我有準確地從履歷分析結果中摘錄內容嗎？
 
 ## 🎯 快速回復選項 (quickResponses) 重要指導
 

@@ -46,6 +46,12 @@ export interface ChatMessage {
     category: string;
   };
   quickResponses?: string[];
+  excerpt?: {
+    title: string;
+    content: string;
+    source: string; // e.g., "工作經驗", "專案經驗", "技能"
+  };
+  excerptId?: string; // 用於追蹤 excerpt 的唯一 ID
 }
 
 // 建議狀態類型
@@ -95,6 +101,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const [isLoading, setIsLoading] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
   const [cannedOptions, setCannedOptions] = useState<string[]>([]);
+  const [visibleExcerptIds, setVisibleExcerptIds] = useState<string[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const scrollAreaRefMobile = useRef<HTMLDivElement>(null);
   const suggestionsScrollAreaRef = useRef<HTMLDivElement>(null);
@@ -108,6 +115,182 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     messageCounterRef.current += 1;
     return `${prefix}-${Date.now()}-${messageCounterRef.current}`;
   }, []);
+
+  // 文本向量化和相似度計算（基礎函數）
+  const tokenize = useCallback((text: string): string[] => {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s\u4e00-\u9fff]/g, ' ') // 保留中文、英文、數字
+      .split(/\s+/)
+      .filter(token => token.length > 0);
+  }, []);
+
+  const getTextVector = useCallback((text: string): Map<string, number> => {
+    const tokens = tokenize(text);
+    const vector = new Map<string, number>();
+    
+    tokens.forEach(token => {
+      vector.set(token, (vector.get(token) || 0) + 1);
+    });
+    
+    return vector;
+  }, [tokenize]);
+
+  const calculateCosineSimilarity = useCallback((vec1: Map<string, number>, vec2: Map<string, number>): number => {
+    const allKeys = new Set([...vec1.keys(), ...vec2.keys()]);
+    
+    let dotProduct = 0;
+    let norm1 = 0;
+    let norm2 = 0;
+    
+    allKeys.forEach(key => {
+      const val1 = vec1.get(key) || 0;
+      const val2 = vec2.get(key) || 0;
+      
+      dotProduct += val1 * val2;
+      norm1 += val1 * val1;
+      norm2 += val2 * val2;
+    });
+    
+    if (norm1 === 0 || norm2 === 0) return 0;
+    
+    return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+  }, []);
+
+  // 生成 excerpt 的唯一標識符
+  const getExcerptKey = useCallback((excerpt: { title: string; content: string; source: string }) => {
+    return `${excerpt.source}:${excerpt.title}:${excerpt.content}`;
+  }, []);
+
+
+
+  const getSuggestionText = useCallback((suggestion: { title: string; description: string }) => {
+    return `${suggestion.title} ${suggestion.description}`;
+  }, []);
+
+
+
+  const isSimilarSuggestion = useCallback((newSuggestion: { title: string; description: string }): boolean => {
+    const newText = getSuggestionText(newSuggestion);
+    const newVector = getTextVector(newText);
+    
+    for (const existingSuggestion of suggestions) {
+      const existingText = getSuggestionText(existingSuggestion);
+      const existingVector = getTextVector(existingText);
+      
+      const similarity = calculateCosineSimilarity(newVector, existingVector);
+      
+      console.log(`📊 [Suggestion Similarity] New: "${newSuggestion.title}" vs Existing: "${existingSuggestion.title}" = ${(similarity * 100).toFixed(1)}%`);
+      
+      if (similarity >= 0.90) {
+        console.log(`🚫 [Suggestion Similarity] Blocking similar suggestion (${(similarity * 100).toFixed(1)}% similarity)`);
+        return true; // 相似度過高，不新增
+      }
+    }
+    
+    return false; // 沒有高相似度建議，可以新增
+  }, [suggestions, getSuggestionText, getTextVector, calculateCosineSimilarity]);
+
+  // 檢查 excerpt 相似度
+  const isExcerptSimilar = useCallback((newExcerpt: { title: string; content: string; source: string }): boolean => {
+    // 檢查所有已顯示的 excerpts
+    const displayedExcerpts = messages
+      .filter(msg => msg.excerpt && msg.excerptId && visibleExcerptIds.includes(msg.excerptId))
+      .map(msg => msg.excerpt!);
+    
+    for (const existingExcerpt of displayedExcerpts) {
+      // 計算標題相似度
+      const titleSimilarity = calculateStringSimilarity(newExcerpt.title, existingExcerpt.title);
+      
+      // 計算內容相似度（取前50個字符比較）
+      const newContentPreview = newExcerpt.content.substring(0, 50);
+      const existingContentPreview = existingExcerpt.content.substring(0, 50);
+      const contentSimilarity = calculateStringSimilarity(newContentPreview, existingContentPreview);
+      
+      // 如果標題相似度超過 80% 或內容相似度超過 90%，視為相似
+      const isHighSimilarity = titleSimilarity >= 0.80 || contentSimilarity >= 0.90;
+      
+      console.log(`📊 [Excerpt Similarity] New: "${newExcerpt.title}" vs Existing: "${existingExcerpt.title}" - Title: ${(titleSimilarity * 100).toFixed(1)}%, Content: ${(contentSimilarity * 100).toFixed(1)}%`);
+      
+      if (isHighSimilarity) {
+        console.log(`🚫 [Excerpt Similarity] Blocking similar excerpt (Title: ${(titleSimilarity * 100).toFixed(1)}%, Content: ${(contentSimilarity * 100).toFixed(1)}%)`);
+        return true; // 相似度過高，不顯示
+      }
+    }
+    
+    return false; // 沒有高相似度摘錄，可以顯示
+  }, [messages, visibleExcerptIds]);
+
+  // 簡單的字符串相似度計算（Levenshtein distance）
+  const calculateStringSimilarity = useCallback((str1: string, str2: string): number => {
+    if (str1 === str2) return 1;
+    if (str1.length === 0 || str2.length === 0) return 0;
+    
+    const matrix: number[][] = [];
+    
+    // 初始化矩陣
+    for (let i = 0; i <= str1.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str2.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    // 計算編輯距離
+    for (let i = 1; i <= str1.length; i++) {
+      for (let j = 1; j <= str2.length; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,     // 刪除
+          matrix[i][j - 1] + 1,     // 插入
+          matrix[i - 1][j - 1] + cost // 替換
+        );
+      }
+    }
+    
+    const distance = matrix[str1.length][str2.length];
+    const maxLength = Math.max(str1.length, str2.length);
+    
+    return 1 - (distance / maxLength);
+  }, []);
+
+  // 處理 excerpt 並決定是否應該顯示，返回 excerptId
+  const processExcerpt = useCallback((excerpt: { title: string; content: string; source: string }) => {
+    const excerptKey = getExcerptKey(excerpt);
+    
+    // 檢查是否已經有相同內容的 excerpt 在顯示列表中
+    const existingMessages = messages.filter(msg => 
+      msg.excerpt && 
+      getExcerptKey(msg.excerpt) === excerptKey &&
+      msg.excerptId &&
+      visibleExcerptIds.includes(msg.excerptId)
+    );
+    
+    if (existingMessages.length > 0) {
+      // 已經有相同的 excerpt 在顯示，返回 null 表示不顯示
+      console.log(`🚫 [Excerpt Blocked] Exact duplicate detected: "${excerpt.title}"`);
+      return null;
+    }
+    
+    // 檢查相似度
+    if (isExcerptSimilar(excerpt)) {
+      console.log(`🚫 [Excerpt Blocked] Similar excerpt detected, not displaying: "${excerpt.title}"`);
+      return null;
+    }
+    
+    // 第一次出現且無高相似度，生成新的 ID 並加入顯示列表
+    console.log(`✅ [Excerpt Added] New unique excerpt: "${excerpt.title}"`);
+    const newExcerptId = generateUniqueId('excerpt');
+    setVisibleExcerptIds(prev => [...prev, newExcerptId]);
+    return newExcerptId;
+  }, [messages, visibleExcerptIds, getExcerptKey, generateUniqueId, isExcerptSimilar]);
+
+  // 檢查 excerpt 是否應該顯示
+  const shouldShowExcerpt = useCallback((excerptId?: string) => {
+    return excerptId ? visibleExcerptIds.includes(excerptId) : false;
+  }, [visibleExcerptIds]);
+
+
 
   // 調試函數：檢查滾動容器的狀態
   const debugScrollState = useCallback(() => {
@@ -146,10 +329,27 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   // 暴露調試函數到 window 對象（僅開發環境）
   useEffect(() => {
     if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-      (window as { debugScrollState?: () => void }).debugScrollState = debugScrollState;
-      console.log('💡 Scroll debug function available: window.debugScrollState()');
+      (window as { 
+        debugScrollState?: () => void;
+        testSimilarity?: (text1: string, text2: string) => void;
+      }).debugScrollState = debugScrollState;
+      
+      (window as { 
+        debugScrollState?: () => void;
+        testSimilarity?: (text1: string, text2: string) => void;
+      }).testSimilarity = (text1: string, text2: string) => {
+        const vec1 = getTextVector(text1);
+        const vec2 = getTextVector(text2);
+        const similarity = calculateCosineSimilarity(vec1, vec2);
+        console.log(`📊 Similarity between "${text1}" and "${text2}": ${(similarity * 100).toFixed(1)}%`);
+        return similarity;
+      };
+      
+      console.log('💡 Debug functions available:');
+      console.log('  - window.debugScrollState()');
+      console.log('  - window.testSimilarity("text1", "text2")');
     }
-  }, [debugScrollState]);
+  }, [debugScrollState, getTextVector, calculateCosineSimilarity]);
 
   const initializeChat = useCallback(() => {
     // 取得 follow-up 問題數量
@@ -451,7 +651,13 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         throw new Error(result.error || '請求失敗');
       }
 
-      const { message, suggestion, quickResponses } = result.data;
+      const { message, suggestion, quickResponses, excerpt } = result.data;
+
+      // 處理 excerpt，決定是否顯示並生成 ID
+      let excerptId: string | undefined;
+      if (excerpt) {
+        excerptId = processExcerpt(excerpt) || undefined;
+      }
 
       // 添加 AI 回應
       const aiMessage: ChatMessage = {
@@ -460,7 +666,9 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         content: message,
         timestamp: new Date(),
         suggestion,
-        quickResponses
+        quickResponses,
+        excerpt,
+        excerptId
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -475,44 +683,52 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
         setCannedOptions(getRandomCannedMessages());
       }
 
-      // 如果有建議，記錄到建議列表
+      // 如果有建議，檢查相似度後記錄到建議列表
       if (suggestion) {
-        const suggestionRecord: SuggestionRecord = {
-          id: generateUniqueId('suggestion'),
-          title: suggestion.title,
-          description: suggestion.description,
-          category: suggestion.category,
+        // 檢查是否與現有建議相似度過高
+        if (isSimilarSuggestion(suggestion)) {
+          console.log(`🚫 [Suggestion Blocked] Similar suggestion detected, not adding: "${suggestion.title}"`);
+        } else {
+          console.log(`✅ [Suggestion Added] New unique suggestion: "${suggestion.title}"`);
+          const suggestionRecord: SuggestionRecord = {
+            id: generateUniqueId('suggestion'),
+            title: suggestion.title,
+            description: suggestion.description,
+            category: suggestion.category,
             timestamp: new Date()
           };
-        setSuggestions(prev => [...prev, suggestionRecord]);
-        
-        // 新增建議時的滾動策略
-        console.log('[Suggestion Added] Starting scroll sequence');
-        
-        // 立即嘗試滾動
-        requestAnimationFrame(() => {
-          smartScrollToBottom(false);
-        });
-        
-        // 建議面板動畫期間的滾動
-        setTimeout(() => {
-          console.log('[Suggestion Added] Mid-animation scroll');
-          smartScrollToBottom(false);
-        }, 200);
-        
-        // 建議面板動畫完成後的滾動
-        setTimeout(() => {
-          console.log('[Suggestion Added] Post-animation scroll');
-          smartScrollToBottom(false);
-        }, 400);
-        
-        // 桌面版額外確保（建議面板可能改變布局）
-        if (window.innerWidth >= 1024) {
-          setTimeout(() => {
-            console.log('[Desktop] Layout adjustment scroll');
+          setSuggestions(prev => [...prev, suggestionRecord]);
+          
+          // 新增建議時的滾動策略
+          console.log('[Suggestion Added] Starting scroll sequence');
+          
+          // 立即嘗試滾動
+          requestAnimationFrame(() => {
             smartScrollToBottom(false);
-          }, 600);
+          });
+          
+          // 建議面板動畫期間的滾動
+          setTimeout(() => {
+            console.log('[Suggestion Added] Mid-animation scroll');
+            smartScrollToBottom(false);
+          }, 200);
+          
+          // 建議面板動畫完成後的滾動
+          setTimeout(() => {
+            console.log('[Suggestion Added] Post-animation scroll');
+            smartScrollToBottom(false);
+          }, 400);
+          
+          // 桌面版額外確保（建議面板可能改變布局）
+          if (window.innerWidth >= 1024) {
+            setTimeout(() => {
+              console.log('[Desktop] Layout adjustment scroll');
+              smartScrollToBottom(false);
+            }, 600);
+          }
         }
+              } else {
+        console.log('ℹ️ [Suggestion] No suggestion provided by AI');
       }
           
       // 確保滾動到底部（在狀態更新後）
@@ -801,19 +1017,40 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                           <span className="text-lg">🤖</span>
                         </div>
                       )}
-                      <div
-                                className={cn(`rounded-lg px-4 py-2 w-fit max-w-full`, message.type === 'user'
+                      <div className="w-fit max-w-full space-y-2">
+                        {/* 履歷摘錄卡片 */}
+                        {message.excerpt && message.type === 'ai' && shouldShowExcerpt(message.excerptId) && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 max-w-md">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                              <span className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                                {message.excerpt.source}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                              {message.excerpt.title}
+                            </h4>
+                            <p className="text-xs text-blue-800 dark:text-blue-200 whitespace-pre-wrap break-words leading-relaxed">
+                              {message.excerpt.content}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {/* 主要消息內容 */}
+                        <div
+                          className={cn(`rounded-lg px-4 py-2`, message.type === 'user'
                             ? 'bg-cyan-600 text-white'
                             : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                        )}
-                              >
-                                <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                            <p className="text-xs opacity-70 mt-1">
-                              {message.timestamp.toLocaleTimeString('zh-TW', { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
-                              })}
-                            </p>
+                          )}
+                        >
+                          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                          <p className="text-xs opacity-70 mt-1">
+                            {message.timestamp.toLocaleTimeString('zh-TW', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -1007,19 +1244,40 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                                 <span className="text-sm sm:text-lg">🤖</span>
                               </div>
                             )}
-                            <div
-                              className={cn(`rounded-lg px-3 py-2 sm:px-4 sm:py-2 w-fit max-w-full`, message.type === 'user'
-                                  ? 'bg-cyan-600 text-white'
-                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                            <div className="w-fit max-w-full space-y-2">
+                              {/* 履歷摘錄卡片 */}
+                              {message.excerpt && message.type === 'ai' && shouldShowExcerpt(message.excerptId) && (
+                                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-2 sm:p-3 max-w-xs sm:max-w-md">
+                                  <div className="flex items-center space-x-2 mb-2">
+                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                                    <span className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+                                      {message.excerpt.source}
+                                    </span>
+                                  </div>
+                                  <h4 className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                                    {message.excerpt.title}
+                                  </h4>
+                                  <p className="text-xs text-blue-800 dark:text-blue-200 whitespace-pre-wrap break-words leading-relaxed">
+                                    {message.excerpt.content}
+                                  </p>
+                                </div>
                               )}
-                            >
-                              <p className="text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                              <p className="text-xs opacity-70 mt-1">
-                                {message.timestamp.toLocaleTimeString('zh-TW', { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </p>
+                              
+                              {/* 主要消息內容 */}
+                              <div
+                                className={cn(`rounded-lg px-3 py-2 sm:px-4 sm:py-2`, message.type === 'user'
+                                    ? 'bg-cyan-600 text-white'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                                )}
+                              >
+                                <p className="text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                                <p className="text-xs opacity-70 mt-1">
+                                  {message.timestamp.toLocaleTimeString('zh-TW', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </motion.div>
