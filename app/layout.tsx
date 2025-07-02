@@ -236,12 +236,6 @@ const jsonLd = {
     "Fortune 500 enterprise standards",
     "Multi-language support"
   ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.8",
-    "ratingCount": "10000",
-    "bestRating": "5"
-  }
 };
 
 export default function RootLayout({
