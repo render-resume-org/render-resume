@@ -3,11 +3,11 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -94,6 +94,15 @@ export function LoginForm({
               </h3>
               <p className="text-gray-600 dark:text-gray-300">
                 正在重定向到您的儀表板...
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                如果系統沒有自動導向，請
+                <Link 
+                  href="/dashboard" 
+                  className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 underline ml-1"
+                >
+                  點擊連結跳轉
+                </Link>
               </p>
             </div>
           </CardContent>
