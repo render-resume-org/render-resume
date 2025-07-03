@@ -51,13 +51,13 @@ export function LoginForm({
       const fallbackRedirect = setTimeout(() => {
         console.log('🔄 [LoginForm] Fallback redirect using window.location');
         window.location.href = '/dashboard';
-      }, 2000);
+      }, 1000);
       
       // 方法3: 更長的 fallback
       const ultimateFallback = setTimeout(() => {
         console.log('🔄 [LoginForm] Ultimate fallback redirect');
         window.location.replace('/dashboard');
-      }, 5000);
+      }, 2000);
       
       // 清理定時器
       return () => {
