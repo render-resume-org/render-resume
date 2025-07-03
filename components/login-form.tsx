@@ -39,11 +39,31 @@ export function LoginForm({
     }
   }, [email, password, clearError, error]);
 
-  // 當用戶登入成功時顯示成功畫面並立即重定向
+  // 當用戶登入成功時顯示成功畫面並嘗試多種重定向方式
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('🔄 [LoginForm] Redirecting to dashboard immediately');
+      console.log('🔄 [LoginForm] User authenticated, attempting redirect');
+      
+      // 方法1: 立即使用 router
       redirectToDashboard();
+      
+      // 方法2: 延遲使用 window.location (backup)
+      const fallbackRedirect = setTimeout(() => {
+        console.log('🔄 [LoginForm] Fallback redirect using window.location');
+        window.location.href = '/dashboard';
+      }, 2000);
+      
+      // 方法3: 更長的 fallback
+      const ultimateFallback = setTimeout(() => {
+        console.log('🔄 [LoginForm] Ultimate fallback redirect');
+        window.location.replace('/dashboard');
+      }, 5000);
+      
+      // 清理定時器
+      return () => {
+        clearTimeout(fallbackRedirect);
+        clearTimeout(ultimateFallback);
+      };
     }
   }, [isAuthenticated, redirectToDashboard]);
 
@@ -95,15 +115,26 @@ export function LoginForm({
               <p className="text-gray-600 dark:text-gray-300">
                 正在重定向到您的儀表板...
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                如果系統沒有自動導向，請
-                <Link 
-                  href="/dashboard" 
-                  className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 underline ml-1"
+              <div className="space-y-2">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  如果系統沒有自動導向，請點擊下方按鈕：
+                </p>
+                <button
+                  onClick={() => {
+                    console.log('🔄 [LoginForm] Manual redirect button clicked');
+                    // 嘗試多種跳轉方式
+                    try {
+                      window.location.href = '/dashboard';
+                    } catch (error) {
+                      console.error('跳轉失敗:', error);
+                      window.location.replace('/dashboard');
+                    }
+                  }}
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
-                  點擊連結跳轉
-                </Link>
-              </p>
+                  前往儀表板
+                </button>
+              </div>
             </div>
           </CardContent>
         </Card>

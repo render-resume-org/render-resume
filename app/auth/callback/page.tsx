@@ -31,8 +31,21 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Session established:', data.session.user.email);
             setStatus('success');
             
-            // 立即跳转，不延迟
+            // 多種跳轉方式
+            // 方法1: 立即使用 router
             router.push('/dashboard');
+            
+            // 方法2: 延遲使用 window.location (backup)
+            setTimeout(() => {
+              console.log('🔄 [Auth Callback] Fallback redirect using window.location');
+              window.location.href = '/dashboard';
+            }, 2000);
+            
+            // 方法3: 更長的 fallback
+            setTimeout(() => {
+              console.log('🔄 [Auth Callback] Ultimate fallback redirect');
+              window.location.replace('/dashboard');
+            }, 5000);
           } else {
             console.log('⚠️ [Auth Callback] No session in exchange response');
             router.push('/auth/login');
@@ -51,8 +64,21 @@ function AuthCallbackContent() {
             console.log('✅ [Auth Callback] Existing session found:', data.session.user.email);
             setStatus('success');
             
-            // 立即跳转，不延迟  
+            // 多種跳轉方式
+            // 方法1: 立即使用 router
             router.push('/dashboard');
+            
+            // 方法2: 延遲使用 window.location (backup)
+            setTimeout(() => {
+              console.log('🔄 [Auth Callback] Fallback redirect using window.location');
+              window.location.href = '/dashboard';
+            }, 2000);
+            
+            // 方法3: 更長的 fallback
+            setTimeout(() => {
+              console.log('🔄 [Auth Callback] Ultimate fallback redirect');
+              window.location.replace('/dashboard');
+            }, 5000);
           } else {
             console.log('⚠️ [Auth Callback] No code and no session');
             router.push('/auth/login');
@@ -96,12 +122,21 @@ function AuthCallbackContent() {
               正在重定向到您的儀表板...
             </p>
             <div className="mt-6">
-              <a 
-                href="/dashboard" 
-                className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+              <button
+                onClick={() => {
+                  console.log('🔄 [Auth Callback] Manual redirect button clicked');
+                  // 嘗試多種跳轉方式
+                  try {
+                    window.location.href = '/dashboard';
+                  } catch (error) {
+                    console.error('跳轉失敗:', error);
+                    window.location.replace('/dashboard');
+                  }
+                }}
+                className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg transition-colors font-medium cursor-pointer"
               >
                 手動前往儀表板
-              </a>
+              </button>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               如果頁面沒有自動跳轉，請點擊上方按鈕
