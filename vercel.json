@@ -1,5 +1,5 @@
 { 
-    "regions": ["sfo1", "hkg1", "hnd1"],
+    "regions": ["sfo1", "sin1", "hnd1"],
     "functions": {
         "app/api/**/*": {
             "maxDuration": 300
