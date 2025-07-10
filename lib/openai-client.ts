@@ -5,7 +5,6 @@ import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
 import {
     DEFAULT_AI_CONFIG,
-    SCORE_CATEGORIES,
     generateSystemPrompt
 } from './config/resume-analysis-config';
 
@@ -52,12 +51,24 @@ export interface FileAnalysisOptions {
 export const DEFAULT_CONFIG: AIConfig = {
     modelName: DEFAULT_AI_CONFIG.modelName,
     temperature: DEFAULT_AI_CONFIG.temperature ?? 0.1,
-    systemPrompt: generateSystemPrompt(SCORE_CATEGORIES),
+    systemPrompt: generateSystemPrompt(),
     maxConcurrency: DEFAULT_AI_CONFIG.maxConcurrency
 };
 
 // 定義回應的 Schema
 export const ResumeAnalysisSchema = z.object({
+    profile: z.object({
+        name: z.string().describe("候選人姓名").optional(),
+        title: z.string().describe("專業頭銜").optional(),
+        brief_introduction: z.string().describe("個人簡介").optional(),
+        email: z.string().describe("電子郵件").optional(),
+        phone: z.string().describe("電話號碼").optional(),
+        location: z.string().describe("所在地點").optional(),
+        linkedin: z.string().describe("LinkedIn連結").optional(),
+        github: z.string().describe("GitHub連結").optional(),
+        website: z.string().describe("個人網站").optional(),
+        portfolio: z.string().describe("作品集連結").optional()
+    }).describe("個人基本資料").optional(),
     projects: z.array(z.object({
         name: z.string().describe("項目名稱").optional(),
         description: z.string().describe("技術挑戰與解決方案").optional(),
@@ -293,7 +304,7 @@ export class OpenAIClient {
         }
 
         // 使用提供的配置或預設配置，並確保必要欄位存在
-        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt(SCORE_CATEGORIES);
+        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt();
         
         this.config = {
             modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,

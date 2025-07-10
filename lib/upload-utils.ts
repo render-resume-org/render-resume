@@ -5,6 +5,7 @@ export interface UploadedFile {
   type: 'document' | 'image' | 'pdf';
   status: 'uploading' | 'completed' | 'error' | 'converting';
   convertedImages?: string[];
+  serviceType?: 'create' | 'optimize';
 }
 
 export interface FileData {
@@ -55,17 +56,22 @@ export function clearUploadSession(): void {
   sessionStorage.removeItem('uploadedFiles');
   sessionStorage.removeItem('additionalText');
   sessionStorage.removeItem('analysisResult');
+  sessionStorage.removeItem('serviceType');
 }
 
-export function saveToSession(files: FileData[], additionalText: string): void {
+export function saveToSession(files: FileData[], additionalText: string, serviceType?: 'create' | 'optimize'): void {
   console.log('💾 [Upload Utils] Storing data in sessionStorage');
   sessionStorage.setItem('uploadedFiles', JSON.stringify(files));
   sessionStorage.setItem('additionalText', additionalText);
+  if (serviceType) {
+    sessionStorage.setItem('serviceType', serviceType);
+  }
   
   console.log('📊 [Upload Utils] SessionStorage data stored:', {
     uploadedFilesSize: JSON.stringify(files).length,
     additionalTextSize: additionalText.length,
-    totalFilesForModel: files.length
+    totalFilesForModel: files.length,
+    serviceType
   });
 }
 
@@ -89,27 +95,29 @@ export async function processFilesForAnalysis(uploadedFiles: UploadedFile[]): Pr
   const allFilesData: FileData[] = [];
   
   for (const uf of uploadedFiles) {
-    if (uf.type === 'pdf' && uf.convertedImages) {
-      // PDF文件：只添加轉換後的圖片，不添加原始PDF
-      console.log(`📄 [Upload Utils] Processing PDF converted images for: ${uf.file.name} (原始PDF不會傳送給模型)`);
-      for (let i = 0; i < uf.convertedImages.length; i++) {
-        const imageBase64 = uf.convertedImages[i];
-        const convertedFileName = `${uf.file.name.replace('.pdf', '')}_第${i + 1}頁.png`;
-        console.log(`📄 [Upload Utils] Creating converted image file: "${convertedFileName}"`);
-        
-        allFilesData.push({
-          id: `${uf.id}_page_${i + 1}`,
-          name: convertedFileName,
-          type: 'image/png',
-          size: 0,
-          lastModified: uf.file.lastModified,
-          content: imageBase64,
-          isFromPdf: true,
-          originalPdfName: uf.file.name
-        });
+    if (uf.type === 'pdf') {
+      if (uf.convertedImages) {
+        // PDF was converted to images
+        console.log(`📄 [Upload Utils] Processing PDF converted images for: ${uf.file.name} (原始PDF不會傳送給模型)`);
+        for (let i = 0; i < uf.convertedImages.length; i++) {
+          const imageBase64 = uf.convertedImages[i];
+          const convertedFileName = `${uf.file.name.replace('.pdf', '')}_第${i + 1}頁.png`;
+          console.log(`📄 [Upload Utils] Creating converted image file: "${convertedFileName}"`);
+          
+          allFilesData.push({
+            id: `${uf.id}_page_${i + 1}`,
+            name: convertedFileName,
+            type: 'image/png',
+            size: 0,
+            lastModified: uf.file.lastModified,
+            content: imageBase64,
+            isFromPdf: true,
+            originalPdfName: uf.file.name
+          });
+        }
+        console.log(`✅ [Upload Utils] PDF ${uf.file.name} 轉換為 ${uf.convertedImages.length} 張圖片，原始PDF已排除`);
       }
-      console.log(`✅ [Upload Utils] PDF ${uf.file.name} 轉換為 ${uf.convertedImages.length} 張圖片，原始PDF已排除`);
-    } else if (uf.type !== 'pdf') {
+    } else {
       // 非PDF文件：正常轉換為base64
       console.log(`📄 [Upload Utils] Converting regular file: ${uf.file.name}`);
       const base64 = await fileToBase64(uf.file);

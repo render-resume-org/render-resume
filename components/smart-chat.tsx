@@ -1,38 +1,21 @@
 "use client";
 
 import { useAuth } from "@/components/hooks/use-auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, Copy, Lightbulb, Send, Trash2 } from "lucide-react";
+import { Copy, Lightbulb, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-// 用戶頭像組件
-interface UserAvatarProps {
-  user: {
-    avatar_url?: string;
-    display_name?: string;
-    email?: string;
-  } | null;
-}
-
-const UserAvatar = ({ user }: UserAvatarProps) => {
-  const initial = user?.display_name?.[0] || user?.email?.[0] || 'U';
-  
-  return (
-    <Avatar className="w-8 h-8">
-      <AvatarImage src={user?.avatar_url} alt={user?.display_name || user?.email || "User"} />
-      <AvatarFallback className="bg-cyan-100 text-cyan-600 dark:bg-cyan-900 dark:text-cyan-400 text-sm font-medium">
-        {initial.toUpperCase()}
-      </AvatarFallback>
-    </Avatar>
-  );
-};
+import CannedMessages from "./smart-chat/CannedMessages";
+import ChatInput from "./smart-chat/ChatInput";
+import ChatLimitAlert from "./smart-chat/ChatLimitAlert";
+import ChatMessageCard from "./smart-chat/ChatMessageCard";
+import LoadingMessage from "./smart-chat/LoadingMessage";
+import SuggestionList from "./smart-chat/SuggestionList";
+import UserAvatar from "./smart-chat/UserAvatar";
 
 // 聊天消息類型
 export interface ChatMessage {
@@ -157,6 +140,39 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
   }, []);
 
+  // 簡單的字符串相似度計算（Levenshtein distance）
+  const calculateStringSimilarity = useCallback((str1: string, str2: string): number => {
+    if (str1 === str2) return 1;
+    if (str1.length === 0 || str2.length === 0) return 0;
+    
+    const matrix: number[][] = [];
+    
+    // 初始化矩陣
+    for (let i = 0; i <= str1.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str2.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    // 計算編輯距離
+    for (let i = 1; i <= str1.length; i++) {
+      for (let j = 1; j <= str2.length; j++) {
+        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j] + 1,     // 刪除
+          matrix[i][j - 1] + 1,     // 插入
+          matrix[i - 1][j - 1] + cost // 替換
+        );
+      }
+    }
+    
+    const distance = matrix[str1.length][str2.length];
+    const maxLength = Math.max(str1.length, str2.length);
+    
+    return 1 - (distance / maxLength);
+  }, []);
+
   // 生成 excerpt 的唯一標識符
   const getExcerptKey = useCallback((excerpt: { title: string; content: string; source: string }) => {
     return `${excerpt.source}:${excerpt.title}:${excerpt.content}`;
@@ -219,40 +235,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     }
     
     return false; // 沒有高相似度摘錄，可以顯示
-  }, [messages, visibleExcerptIds]);
-
-  // 簡單的字符串相似度計算（Levenshtein distance）
-  const calculateStringSimilarity = useCallback((str1: string, str2: string): number => {
-    if (str1 === str2) return 1;
-    if (str1.length === 0 || str2.length === 0) return 0;
-    
-    const matrix: number[][] = [];
-    
-    // 初始化矩陣
-    for (let i = 0; i <= str1.length; i++) {
-      matrix[i] = [i];
-    }
-    for (let j = 0; j <= str2.length; j++) {
-      matrix[0][j] = j;
-    }
-    
-    // 計算編輯距離
-    for (let i = 1; i <= str1.length; i++) {
-      for (let j = 1; j <= str2.length; j++) {
-        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,     // 刪除
-          matrix[i][j - 1] + 1,     // 插入
-          matrix[i - 1][j - 1] + cost // 替換
-        );
-      }
-    }
-    
-    const distance = matrix[str1.length][str2.length];
-    const maxLength = Math.max(str1.length, str2.length);
-    
-    return 1 - (distance / maxLength);
-  }, []);
+  }, [messages, visibleExcerptIds, calculateStringSimilarity]);
 
   // 處理 excerpt 並決定是否應該顯示，返回 excerptId
   const processExcerpt = useCallback((excerpt: { title: string; content: string; source: string }) => {
@@ -676,10 +659,14 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
 
       // 更新快速回復選項
       if (quickResponses && Array.isArray(quickResponses)) {
-        // 如果是第一次真正的 AI 回應（messageCount === 2，即用戶發送了第一條訊息後的 AI 回應）
-        setCannedOptions(['下一題！', ...quickResponses]);
+        if (suggestion) {
+          // 有 suggestion 時，不顯示「下一題！」
+          setCannedOptions(['好呀！', ...quickResponses]);
+        } else {
+          // 沒有 suggestion 時，顯示「下一題！」在最前面
+          setCannedOptions(['下一題！', ...quickResponses]);
+        }
       } else {
-        // 如果 API 沒有返回 quickResponses，使用備用選項
         setCannedOptions(getRandomCannedMessages());
       }
 
@@ -1007,89 +994,13 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                     animate="visible"
                     exit="exit"
                     layout
-                    className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}
                   >
-                            <div className={cn("flex items-start space-x-2 max-w-[90vw]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
-                      {message.type === 'user' ? (
-                        <UserAvatar user={user} />
-                      ) : (
-                                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                          <span className="text-lg">🤖</span>
-                        </div>
-                      )}
-                      <div className="w-fit max-w-full space-y-2">
-                        {/* 履歷摘錄卡片 */}
-                        {message.excerpt && message.type === 'ai' && shouldShowExcerpt(message.excerptId) && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 max-w-md">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                              <span className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">
-                                {message.excerpt.source}
-                              </span>
-                            </div>
-                            <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                              {message.excerpt.title}
-                            </h4>
-                            <p className="text-xs text-blue-800 dark:text-blue-200 whitespace-pre-wrap break-words leading-relaxed">
-                              {message.excerpt.content}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {/* 主要消息內容 */}
-                        <div
-                          className={cn(`rounded-lg px-4 py-2`, message.type === 'user'
-                            ? 'bg-cyan-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-                          )}
-                        >
-                          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {message.timestamp.toLocaleTimeString('zh-TW', { 
-                              hour: '2-digit', 
-                              minute: '2-digit' 
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <ChatMessageCard message={message} shouldShowExcerpt={shouldShowExcerpt} />
                   </motion.div>
                 ))}
               </AnimatePresence>
               
-              {isLoading && (
-                <motion.div
-                  variants={loadingVariants}
-                  initial="hidden"
-                  animate="visible"
-                  className="flex justify-start"
-                >
-                  <div className="flex items-start space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                      <span className="text-lg">🤖</span>
-                    </div>
-                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-2">
-                      <div className="flex space-x-1">
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
-                        />
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.1 }}
-                        />
-                        <motion.div 
-                          className="w-2 h-2 bg-gray-400 rounded-full"
-                          animate={{ y: [0, -8, 0] }}
-                          transition={{ duration: 0.6, repeat: Infinity, delay: 0.2 }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+              {isLoading && <LoadingMessage />}
             </div>
                     
                     {/* 隱藏的底部標記元素，用於滾動定位 */}
@@ -1100,97 +1011,25 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
                 {/* 罐頭訊息選項 */}
                 <AnimatePresence mode="popLayout">
                   {cannedOptions.length > 0 && (
-                    <motion.div
-                      key={cannedOptions.join('-')}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ 
-                        duration: 0.3, 
-                        ease: "easeOut"
-                      }}
-                      className="space-y-2 min-h-[2.5rem]"
-                    >
-                      <div className="flex flex-wrap gap-1 sm:gap-2">
-                        {cannedOptions.map((option, index) => (
-                          <motion.div
-                            key={`${option}-${index}`}
-                            initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                            transition={{ 
-                              delay: index === 0 ? 0 : index * 0.15, 
-                              duration: 0.4,
-                              ease: [0.25, 0.46, 0.45, 0.94] // 自定義 easing 函數
-                            }}
-                            layout
-                          >
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleCannedMessage(option)}
-                              className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
-                              asChild
-                            >
-                              <motion.button
-                                whileTap={{ 
-                                  scale: 0.95,
-                                  transition: { duration: 0.1 }
-                                }}
-                                transition={{ 
-                                  type: "spring", 
-                                  stiffness: 400, 
-                                  damping: 17 
-                                }}
-                              >
-                                {option}
-                              </motion.button>
-                            </Button>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
+                    <CannedMessages cannedOptions={cannedOptions} onCannedMessage={handleCannedMessage} />
                   )}
                 </AnimatePresence>
 
                 {/* 對話限制提醒 */}
                 <AnimatePresence>
-                  {messageCount >= 25 && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
-                    >
-                      <AlertCircle className="h-4 w-4 text-amber-600" />
-                      <span className="text-sm text-amber-800 dark:text-amber-200">
-                        {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
-                      </span>
-                    </motion.div>
-                  )}
+                  {messageCount >= 25 && <ChatLimitAlert messageCount={messageCount} />}
                 </AnimatePresence>
 
         {/* 輸入區域 */}
-        <div className="flex space-x-2 items-end">
-          <Textarea
-            ref={textareaRef}
-            value={currentInput}
-            onChange={handleTextareaChange}
-            onKeyPress={handleKeyPress}
-                    placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題... (Shift+Enter 換行，Enter 發送)"}
-                    disabled={isLoading || messageCount >= 30}
-                    className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500"
-                    rows={1}
-                  />
-                  <Button
-                    onClick={() => handleSendMessage()}
-                    disabled={!currentInput.trim() || isLoading || messageCount >= 30}
-                    size="icon"
-                    className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 transition-colors disabled:opacity-50"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+        <ChatInput
+          value={currentInput}
+          onChange={handleTextareaChange}
+          onKeyPress={handleKeyPress}
+          onSend={handleSendMessage}
+          textareaRef={textareaRef as React.RefObject<HTMLTextAreaElement>}
+          disabled={isLoading || messageCount >= 30}
+          messageCount={messageCount}
+        />
               </CardContent>
             </Card>
           </div>
@@ -1327,197 +1166,39 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
               {/* 罐頭訊息選項 */}
               <AnimatePresence mode="popLayout">
                 {cannedOptions.length > 0 && (
-                  <motion.div
-                    key={cannedOptions.join('-')}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ 
-                      duration: 0.3, 
-                      ease: "easeOut"
-                    }}
-                    className="space-y-2 min-h-[2.5rem]"
-                  >
-                    <div className="flex flex-wrap gap-1 sm:gap-2">
-                      {cannedOptions.map((option, index) => (
-                        <motion.div
-                          key={`${option}-${index}`}
-                          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.8, y: -10 }}
-                          transition={{ 
-                            delay: index === 0 ? 0 : index * 0.15, 
-                            duration: 0.4,
-                            ease: [0.25, 0.46, 0.45, 0.94] // 自定義 easing 函數
-                          }}
-                          layout
-                        >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleCannedMessage(option)}
-                            className="text-xs hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
-                            asChild
-                          >
-                            <motion.button
-                              whileTap={{ 
-                                scale: 0.95,
-                                transition: { duration: 0.1 }
-                              }}
-                              transition={{ 
-                                type: "spring", 
-                                stiffness: 400, 
-                                damping: 17 
-                              }}
-                            >
-                              {option}
-                            </motion.button>
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
+                  <CannedMessages cannedOptions={cannedOptions} onCannedMessage={handleCannedMessage} />
                 )}
               </AnimatePresence>
 
               {/* 對話限制提醒 */}
               <AnimatePresence>
-                {messageCount >= 25 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
-                  >
-                    <AlertCircle className="h-4 w-4 text-amber-600" />
-                    <span className="text-xs sm:text-sm text-amber-800 dark:text-amber-200">
-                      {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
-                    </span>
-                  </motion.div>
-                )}
+                {messageCount >= 25 && <ChatLimitAlert messageCount={messageCount} />}
               </AnimatePresence>
 
               {/* 輸入區域 */}
-              <div className="flex space-x-2 items-end">
-                <Textarea
-                  ref={textareaRefMobile}
-                  value={currentInput}
-                  onChange={handleTextareaChange}
-                  onKeyPress={handleKeyPress}
-                  placeholder={messageCount >= 30 ? "已達到對話上限" : "問我任何履歷相關的問題..."}
-                  disabled={isLoading || messageCount >= 30}
-                  className="flex-1 min-h-[40px] max-h-[120px] resize-none transition-colors focus:border-cyan-500 focus:ring-cyan-500 text-sm"
-            rows={1}
-          />
-          <Button
-                  onClick={() => handleSendMessage()}
-                  disabled={!currentInput.trim() || isLoading || messageCount >= 30}
-            size="icon"
-                  className="flex-shrink-0 bg-cyan-600 hover:bg-cyan-700 transition-colors disabled:opacity-50"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+              <ChatInput
+                value={currentInput}
+                onChange={handleTextareaChange}
+                onKeyPress={handleKeyPress}
+                onSend={handleSendMessage}
+                textareaRef={textareaRefMobile as React.RefObject<HTMLTextAreaElement>}
+                disabled={isLoading || messageCount >= 30}
+                messageCount={messageCount}
+              />
+            </CardContent>
+          </Card>
 
           {/* 建議面板（小螢幕時放在下方） */}
           <AnimatePresence>
             {suggestions.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-base sm:text-lg">
-                      <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-cyan-600" />
-                      AI 建議記錄 ({suggestions.length})
-                    </CardTitle>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-                      對話中產生的履歷優化建議
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px] sm:h-[400px]" ref={suggestionsScrollAreaRef}>
-                      <div className="space-y-3">
-                        <AnimatePresence mode="popLayout">
-                          {suggestions.map((suggestion) => (
-                            <motion.div
-                              key={suggestion.id}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              layout
-                              transition={{ duration: 0.2, ease: "easeOut" }}
-                              className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border"
-                            >
-                              <div className="flex items-start justify-between mb-2">
-                                <h4 className="font-medium text-gray-900 dark:text-gray-100 text-xs sm:text-sm pr-2 leading-relaxed">
-                                  {suggestion.title}
-                                </h4>
-                                <div className="flex items-center space-x-1 flex-shrink-0">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => quoteSuggestion(suggestion)}
-                                    className="h-6 w-6 p-0 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
-                                    title="引用此建議進行深入討論"
-                                  >
-                                    <Copy className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => removeSuggestion(suggestion.id)}
-                                    className="h-6 w-6 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                    title="刪除此建議"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                              <p className="text-gray-600 dark:text-gray-300 text-xs mb-3 break-words leading-relaxed">
-                                {suggestion.description}
-                              </p>
-                              <div className="flex items-center justify-between">
-                                <span className="inline-block text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-1 rounded-full">
-                                  {suggestion.category}
-                                </span>
-                                <span className="text-xs text-gray-400">
-                                  {suggestion.timestamp.toLocaleTimeString('zh-TW', { 
-                                    hour: '2-digit', 
-                                    minute: '2-digit' 
-                                  })}
-                                </span>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </ScrollArea>
-                    
-                    {/* 完成對話按鈕 */}
-                    {(suggestions.length > 0 || messageCount >= 20) && (
-                      <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="pt-4 border-t mt-4"
-                      >
-                        <Button 
-                          onClick={handleComplete}
-                          className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
-                          size="sm"
-                        >
-                          完成對話 ({suggestions.length} 個建議)
-                        </Button>
-                      </motion.div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+              <SuggestionList
+                suggestions={suggestions}
+                onQuote={quoteSuggestion}
+                onRemove={removeSuggestion}
+                onComplete={handleComplete}
+                messageCount={messageCount}
+                suggestionsScrollAreaRef={suggestionsScrollAreaRef as React.RefObject<HTMLDivElement>}
+              />
             )}
           </AnimatePresence>
         </div>

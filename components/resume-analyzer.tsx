@@ -145,6 +145,85 @@ export default function ResumeAnalyzer() {
                         </div>
                     </div>
                     
+                    {/* 個人資料 */}
+                    {analysisResult.profile && (
+                        <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-gray-700 mb-3">個人資料</h4>
+                            <div className="bg-gray-50 rounded-lg p-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {analysisResult.profile.name && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">姓名: </span>
+                                            <span className="text-sm text-gray-700">{analysisResult.profile.name}</span>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.title && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">專業頭銜: </span>
+                                            <span className="text-sm text-gray-700">{analysisResult.profile.title}</span>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.email && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">電子郵件: </span>
+                                            <span className="text-sm text-gray-700">{analysisResult.profile.email}</span>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.phone && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">電話: </span>
+                                            <span className="text-sm text-gray-700">{analysisResult.profile.phone}</span>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.location && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">所在地: </span>
+                                            <span className="text-sm text-gray-700">{analysisResult.profile.location}</span>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.linkedin && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">LinkedIn: </span>
+                                            <a href={analysisResult.profile.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                {analysisResult.profile.linkedin}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.github && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">GitHub: </span>
+                                            <a href={analysisResult.profile.github} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                {analysisResult.profile.github}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.website && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">個人網站: </span>
+                                            <a href={analysisResult.profile.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                {analysisResult.profile.website}
+                                            </a>
+                                        </div>
+                                    )}
+                                    {analysisResult.profile.portfolio && (
+                                        <div>
+                                            <span className="text-sm font-medium text-gray-500">作品集: </span>
+                                            <a href={analysisResult.profile.portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                {analysisResult.profile.portfolio}
+                                            </a>
+                                        </div>
+                                    )}
+                                </div>
+                                {analysisResult.profile.brief_introduction && (
+                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                        <span className="text-sm font-medium text-gray-500">個人簡介: </span>
+                                        <p className="text-sm text-gray-700 mt-1">{analysisResult.profile.brief_introduction}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                    
                     {/* 項目分析 */}
                     <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-700 mb-3">項目分析</h4>

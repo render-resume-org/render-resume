@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import {
     DEFAULT_AI_CONFIG,
-    SCORE_CATEGORIES,
     generateSystemPrompt
 } from './config/resume-analysis-config';
 
@@ -52,18 +51,31 @@ export interface FileAnalysisOptions {
     documents: DocumentUpload[];
     additionalText?: string;
     useVision?: boolean;
+    customSystemPrompt?: string;
 }
 
 // 使用動態配置
 export const DEFAULT_CONFIG: AIConfig = {
     modelName: DEFAULT_AI_CONFIG.modelName,
     temperature: DEFAULT_AI_CONFIG.temperature ?? 0.2,
-    systemPrompt: generateSystemPrompt(SCORE_CATEGORIES),
+    systemPrompt: generateSystemPrompt(),
     maxConcurrency: DEFAULT_AI_CONFIG.maxConcurrency
 };
 
 // 定義回應的 Schema - 簡化版本，符合 OpenAI API 要求
 export const ResumeAnalysisSchema = z.object({
+    profile: z.object({
+        name: z.string().describe("候選人姓名").optional(),
+        title: z.string().describe("專業頭銜").optional(),
+        brief_introduction: z.string().describe("個人簡介").optional(),
+        email: z.string().describe("電子郵件").optional(),
+        phone: z.string().describe("電話號碼").optional(),
+        location: z.string().describe("所在地點").optional(),
+        linkedin: z.string().describe("LinkedIn連結").optional(),
+        github: z.string().describe("GitHub連結").optional(),
+        website: z.string().describe("個人網站").optional(),
+        portfolio: z.string().describe("作品集連結").optional()
+    }).describe("個人基本資料").optional(),
     projects: z.array(z.object({
         name: z.string().describe("項目名稱"),
         description: z.string().describe("技術挑戰與解決方案"),
@@ -229,7 +241,7 @@ export class NativeOpenAIClient {
         this.baseURL = options.baseURL || 'https://api.openai.com/v1';
         
         // 使用提供的配置或預設配置，並確保必要欄位存在
-        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt(SCORE_CATEGORIES);
+        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt();
         
         this.config = {
             modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
@@ -386,7 +398,7 @@ export class NativeOpenAIClient {
     async analyzeDocuments(options: FileAnalysisOptions): Promise<ResumeAnalysisResult> {
         console.log('🚀 [Native OpenAI Client] Starting document analysis with native client');
         
-        const { documents, additionalText, useVision = false } = options;
+        const { documents, additionalText, useVision = false, customSystemPrompt } = options;
         
         if (!documents || documents.length === 0) {
             throw new Error('沒有提供文件進行分析');
@@ -396,7 +408,7 @@ export class NativeOpenAIClient {
             const messages: OpenAIMessage[] = [
                 {
                     role: 'system',
-                    content: this.config.systemPrompt
+                    content: customSystemPrompt || this.config.systemPrompt
                 }
             ];
 
@@ -464,6 +476,7 @@ export class NativeOpenAIClient {
             userPrompt += `
 
 請以 JSON 格式回傳履歷分析結果，包含以下欄位：
+- profile: 個人基本資料（包含 name, title, brief_introduction, email, phone, location, linkedin, github, website, portfolio）
 - projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）
 - projects_summary: 專案摘要
 - expertise: 技能列表
@@ -1008,13 +1021,13 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
         return obj;
     }
 
-    async analyzeResume(resumeContent: string, additionalText?: string): Promise<ResumeAnalysisResult> {
+    async analyzeResume(resumeContent: string, additionalText?: string, customSystemPrompt?: string): Promise<ResumeAnalysisResult> {
         console.log('🚀 [Native OpenAI Client] Starting resume analysis');
         
         const messages: OpenAIMessage[] = [
             {
                 role: 'system',
-                content: this.config.systemPrompt
+                content: customSystemPrompt || this.config.systemPrompt
             },
             {
                 role: 'user',

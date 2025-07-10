@@ -28,6 +28,19 @@ export interface EducationBackground {
     achievements?: string[];
 }
 
+export interface Profile {
+    name?: string;
+    title?: string;
+    brief_introduction?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    linkedin?: string;
+    github?: string;
+    website?: string;
+    portfolio?: string;
+}
+
 // Define letter grade type
 export type LetterGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'F';
 
@@ -49,6 +62,7 @@ export interface MissingContent {
 }
 
 export interface ResumeAnalysisResult {
+    profile?: Profile;
     projects: Project[];
     expertise: string[];
     projects_summary: string;
@@ -88,6 +102,7 @@ export interface AnalyzePostBody {
     text?: string;
     systemPrompt?: string;
     userPrompt?: string;
+    serviceType?: 'create' | 'optimize';
 }
 
 // API 回應格式 - 新增 type 欄位區分回應類型

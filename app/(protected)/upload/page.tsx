@@ -7,10 +7,13 @@ import { UploadDropzone } from "@/components/upload/upload-dropzone";
 import { UploadTips } from "@/components/upload/upload-tips";
 import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
 import { ArrowRight } from "lucide-react";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function UploadPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [serviceType, setServiceType] = useState<'create' | 'optimize'>('create');
   
   const {
     uploadedFiles,
@@ -21,7 +24,17 @@ export default function UploadPage() {
     removeFile,
     prepareForAnalysis,
     canProceed
-  } = useFileUpload();
+  } = useFileUpload(serviceType);
+
+  useEffect(() => {
+    const type = searchParams.get('type') as 'create' | 'optimize';
+    if (type === 'create' || type === 'optimize') {
+      setServiceType(type);
+    } else {
+      // If no valid type, redirect to service selection
+      router.push('/service-selection');
+    }
+  }, [searchParams, router]);
 
   const handleNext = async () => {
     try {
@@ -34,16 +47,38 @@ export default function UploadPage() {
     }
   };
 
+  // Dynamic content based on service type
+  const getPageContent = () => {
+    if (serviceType === 'create') {
+      return {
+        title: '上傳您的作品材料',
+        description: '上傳作品截圖、專案報告書、技能證明或任何能展示您能力的材料。AI將自動分析並提取重要信息來打造您的履歷。',
+        tips: '建議上傳：作品截圖、專案文件、技能證書、作品集等展示材料'
+      };
+    } else {
+      return {
+        title: '上傳您的履歷文件',
+        description: '上傳您現有的履歷或CV文件，AI將分析內容並提供專業的優化建議和改進方案。',
+        tips: '請上傳：履歷PDF、CV文件等，建議避免包含過多圖片的文件以確保最佳分析效果'
+      };
+    }
+  };
+
+  const pageContent = getPageContent();
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            上傳您的作品
+            {pageContent.title}
           </h1>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            上傳作品說明文件、截圖或任何能展示您能力的材料。AI將自動分析並提取重要信息。
+            {pageContent.description}
+          </p>
+          <p className="text-sm text-cyan-600 dark:text-cyan-400 max-w-2xl mx-auto mt-2">
+            {pageContent.tips}
           </p>
         </div>
 
@@ -69,10 +104,10 @@ export default function UploadPage() {
         <div className="flex justify-between items-center">
           <Button 
             variant="outline" 
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/service-selection')}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
-            返回首頁
+            返回選擇
           </Button>
           
           <Button 

@@ -1,0 +1,62 @@
+import { useAuth } from "@/components/hooks/use-auth";
+import { cn } from "@/lib/utils";
+import { ChatMessage } from "../smart-chat";
+import UserAvatar from "./UserAvatar";
+
+interface ChatMessageCardProps {
+  message: ChatMessage;
+  shouldShowExcerpt: (excerptId?: string) => boolean;
+}
+
+const ChatMessageCard = ({ message, shouldShowExcerpt }: ChatMessageCardProps) => {
+  const { user } = useAuth();
+  return (
+    <div className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}>
+      <div className={cn("flex items-start space-x-2 max-w-[90vw]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
+        {message.type === 'user' ? (
+          <UserAvatar user={user} />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+            <span className="text-lg">🤖</span>
+          </div>
+        )}
+        <div className="w-fit max-w-full space-y-2">
+          {/* 履歷摘錄卡片 */}
+          {message.excerpt && message.type === 'ai' && shouldShowExcerpt(message.excerptId) && (
+            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-3 max-w-md">
+              <div className="flex items-center space-x-2 mb-2">
+                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                <span className="text-xs font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">
+                  {message.excerpt.source}
+                </span>
+              </div>
+              <h4 className="text-sm font-semibold text-orange-900 dark:text-orange-100 mb-1">
+                {message.excerpt.title}
+              </h4>
+              <p className="text-xs text-orange-800 dark:text-orange-200 whitespace-pre-wrap break-words leading-relaxed">
+                {message.excerpt.content}
+              </p>
+            </div>
+          )}
+          {/* 主要消息內容 */}
+          <div
+            className={cn(`rounded-lg px-4 py-2`, message.type === 'user'
+              ? 'bg-cyan-600 text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+            )}
+          >
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+            <p className="text-xs opacity-70 mt-1">
+              {message.timestamp.toLocaleTimeString('zh-TW', {
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatMessageCard; 

@@ -11,7 +11,7 @@ import {
 import { pdfToImg } from 'pdftoimg-js/browser';
 import { useCallback, useEffect, useState } from 'react';
 
-export function useFileUpload() {
+export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [additionalText, setAdditionalText] = useState('');
@@ -26,7 +26,8 @@ export function useFileUpload() {
       filesCount: acceptedFiles.length,
       fileNames: acceptedFiles.map(f => f.name),
       fileSizes: acceptedFiles.map(f => f.size),
-      fileTypes: acceptedFiles.map(f => f.type)
+      fileTypes: acceptedFiles.map(f => f.type),
+      serviceType
     });
 
     const newFiles: UploadedFile[] = acceptedFiles.map(file => {
@@ -37,7 +38,8 @@ export function useFileUpload() {
         file,
         type: fileType,
         status: 'uploading',
-        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined
+        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+        serviceType
       };
     });
 
@@ -45,7 +47,8 @@ export function useFileUpload() {
       id: f.id,
       name: f.file.name,
       type: f.type,
-      status: f.status
+      status: f.status,
+      serviceType: f.serviceType
     })));
 
     setUploadedFiles(prev => [...prev, ...newFiles]);
@@ -54,8 +57,8 @@ export function useFileUpload() {
     for (const uploadFile of newFiles) {
       try {
         if (uploadFile.type === 'pdf') {
-          // PDF file needs conversion
-          console.log(`🔄 [File Upload Hook] Converting PDF to images: ${uploadFile.file.name}`);
+          // PDF file - always convert to images
+          console.log(`🔄 [File Upload Hook] Converting PDF to images: ${uploadFile.file.name} (service type: ${serviceType})`);
           setUploadedFiles(prev => 
             prev.map(f => 
               f.id === uploadFile.id 
@@ -64,25 +67,7 @@ export function useFileUpload() {
             )
           );
 
-          const pdfUrl = URL.createObjectURL(uploadFile.file);
-          const convertedImages = await pdfToImg(pdfUrl, {
-            imgType: 'png',
-            scale: 2,
-            maxWidth: 4096,
-            maxHeight: 4096,
-            pages: 'all'
-          });
-          
-          URL.revokeObjectURL(pdfUrl);
-          
-          console.log(`✅ [File Upload Hook] PDF converted to ${convertedImages.length} images: ${uploadFile.file.name}`);
-          setUploadedFiles(prev => 
-            prev.map(f => 
-              f.id === uploadFile.id 
-                ? { ...f, status: 'completed', convertedImages }
-                : f
-            )
-          );
+          await processPDFToImages(uploadFile);
         } else {
           // Regular file - mark as completed
           setTimeout(() => {
@@ -107,7 +92,33 @@ export function useFileUpload() {
         );
       }
     }
-  }, []);
+  }, [serviceType]);
+
+  const processPDFToImages = async (uploadFile: UploadedFile) => {
+    const pdfUrl = URL.createObjectURL(uploadFile.file);
+    
+    try {
+      console.log(`🖼️ [File Upload Hook] Converting PDF to images: ${uploadFile.file.name}`);
+      const convertedImages = await pdfToImg(pdfUrl, {
+        imgType: 'png',
+        scale: 2,
+        maxWidth: 4096,
+        maxHeight: 4096,
+        pages: 'all'
+      });
+      
+      console.log(`✅ [File Upload Hook] PDF converted to ${convertedImages.length} images: ${uploadFile.file.name}`);
+      setUploadedFiles(prev => 
+        prev.map(f => 
+          f.id === uploadFile.id 
+            ? { ...f, status: 'completed', convertedImages }
+            : f
+        )
+      );
+    } finally {
+      URL.revokeObjectURL(pdfUrl);
+    }
+  };
 
   const removeFile = useCallback((id: string) => {
     setUploadedFiles(prev => {
@@ -124,6 +135,7 @@ export function useFileUpload() {
     console.log('📊 [File Upload Hook] Current state:', {
       uploadedFilesCount: uploadedFiles.length,
       additionalTextLength: additionalText.length,
+      serviceType,
       canProceed: uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed')
     });
     
@@ -139,14 +151,14 @@ export function useFileUpload() {
       
       const allFilesData = await processFilesForAnalysis(uploadedFiles);
       
-      console.log('📄 [File Upload Hook] All files data prepared (PDFs excluded, only converted images included):', allFilesData.map(f => ({
+      console.log('📄 [File Upload Hook] All files data prepared:', allFilesData.map(f => ({
         id: f.id,
         name: f.name,
         type: f.type,
         isFromPdf: f.isFromPdf || false
       })));
 
-      saveToSession(allFilesData, additionalText);
+      saveToSession(allFilesData, additionalText, serviceType);
       
       console.log('🏁 [File Upload Hook] File preparation process completed');
       return allFilesData;
@@ -160,7 +172,7 @@ export function useFileUpload() {
     } finally {
       setIsProcessing(false);
     }
-  }, [uploadedFiles, additionalText]);
+  }, [uploadedFiles, additionalText, serviceType]);
 
   const canProceed = uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed');
 

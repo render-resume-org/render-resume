@@ -70,8 +70,20 @@ function generateOptimizationPrompt(analysisResult: ResumeAnalysisResult, sugges
   return `你是一位資深的履歷優化專家，擁有超過15年的人力資源和職涯諮詢經驗。你需要根據AI分析結果和用戶選擇的優化建議，生成一份完整且專業的履歷。
 
 ### 原始履歷分析結果：
+
 **個人基本資訊：**
-- 從履歷內容中提取（詳見下方各項目經驗）
+${analysisResult.profile ? `
+- 姓名：${analysisResult.profile.name || '未提供'}
+- 專業頭銜：${analysisResult.profile.title || '未提供'}
+- 個人簡介：${analysisResult.profile.brief_introduction || '未提供'}
+- 電子郵件：${analysisResult.profile.email || '未提供'}
+- 電話：${analysisResult.profile.phone || '未提供'}
+- 所在地：${analysisResult.profile.location || '未提供'}
+- LinkedIn：${analysisResult.profile.linkedin || '未提供'}
+- GitHub：${analysisResult.profile.github || '未提供'}
+- 個人網站：${analysisResult.profile.website || '未提供'}
+- 作品集：${analysisResult.profile.portfolio || '未提供'}
+` : '從履歷內容中提取（詳見下方各項目經驗）'}
 
 **技術專長：**
 ${analysisResult.expertise?.join(', ') || '未識別到技術專長'}
@@ -112,14 +124,16 @@ ${index + 1}. **${suggestion.title}** (${suggestion.category})
 `).join('\n')}
 
 ### 優化要求：
-1. **內容完整性**：確保所有重要資訊都被保留並適當優化
-2. **建議整合**：將用戶選擇的建議自然地融入到履歷各個部分
-3. **專業表達**：使用專業且有說服力的語言
-4. **量化成果**：盡可能將成就量化，增加可信度
-5. **結構清晰**：確保履歷結構邏輯清晰，易於閱讀
-6. **關鍵字優化**：適當加入行業關鍵字，提高ATS通過率
+1. **個人資訊優先使用**：如果分析結果中包含個人基本資訊（profile），請優先使用這些資訊填充 personalInfo 欄位
+2. **內容完整性**：確保所有重要資訊都被保留並適當優化
+3. **建議整合**：將用戶選擇的建議自然地融入到履歷各個部分
+4. **專業表達**：使用專業且有說服力的語言
+5. **量化成果**：盡可能將成就量化，增加可信度
+6. **結構清晰**：確保履歷結構邏輯清晰，易於閱讀
+7. **關鍵字優化**：適當加入行業關鍵字，提高ATS通過率
 
 ### 格式要求：
+- 個人資料：優先使用 profile 中的資訊，確保聯絡方式完整
 - 個人摘要：2-3句話概括核心價值主張
 - 技能分類：按前端、後端、工具等分類整理
 - 工作經驗：使用動作詞開頭，突出成就
@@ -127,15 +141,25 @@ ${index + 1}. **${suggestion.title}** (${suggestion.category})
 - 教育背景：簡潔明確，突出相關課程或成績
 
 ### 特別注意：
-- 如果原始資訊不完整，請基於常理和行業標準進行合理補充
+- **個人資訊處理**：如果 profile 中有完整的個人資訊，直接使用；如果缺失某些欄位，基於常理進行合理補充
 - 確保所有時間表述一致（如：2021年6月 - 2023年12月）
 - 避免使用過於誇張的形容詞
 - 確保技術棧與實際專案經驗相符
+- 如果 profile 中有 LinkedIn、GitHub 等專業平台連結，務必保留在履歷中
 
 請生成一份完整的JSON格式履歷，包含以下結構：
 {
-  "personalInfo": { "fullName": "", "title": "", "email": "", "phone": "", "location": "", "website": "", "linkedin": "", "github": "" },
-  "summary": "",
+  "personalInfo": { 
+    "fullName": "", // 優先使用 profile.name
+    "title": "", // 優先使用 profile.title
+    "email": "", // 優先使用 profile.email
+    "phone": "", // 優先使用 profile.phone
+    "location": "", // 優先使用 profile.location
+    "website": "", // 優先使用 profile.website
+    "linkedin": "", // 優先使用 profile.linkedin
+    "github": "" // 優先使用 profile.github
+  },
+  "summary": "", // 可參考 profile.brief_introduction 作為基礎
   "skills": [{ "category": "", "items": [] }],
   "experience": [{ "title": "", "company": "", "period": "", "achievements": [] }],
   "projects": [{ "name": "", "description": "", "technologies": [], "achievements": [], "duration": "" }],

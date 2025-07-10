@@ -19,7 +19,7 @@ export function DashboardClient() {
   const handleCreateResume = () => {
     if (isProUser) {
       // Pro 用戶可以直接進入創建流程
-      router.push('/upload');
+      router.push('/service-selection');
     } else {
       // 非 Pro 用戶顯示升級提示
       toast.info('🌟 此功能需要 Pro 計劃才能使用', {

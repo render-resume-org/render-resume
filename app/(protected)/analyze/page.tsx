@@ -201,7 +201,7 @@ export default function AnalyzePage() {
 
   // Timer effect to update elapsed time
   useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+    let intervalId: ReturnType<typeof setInterval>;
     
     if (isAnalyzing && analysisStartTime) {
       intervalId = setInterval(() => {
@@ -249,7 +249,7 @@ export default function AnalyzePage() {
       }
     } else {
       // 如果沒有文件，返回上傳頁面
-      router.push('/upload');
+      router.push('/service-selection');
     }
   }, [router, startAnalysis]);
 
@@ -287,7 +287,7 @@ export default function AnalyzePage() {
           </p>
           <div className="mt-4 space-y-2">
             <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              通常平均分析時長是 45 秒左右，請耐心稍候，可以離開此頁面，但不可關閉
+              通常平均分析時長是 1.5 分鐘左右，請耐心稍候，可以離開此頁面，但不可關閉
             </p>
             {isAnalyzing && (
               <div className="flex items-center justify-center space-x-2 text-lg font-mono">
@@ -381,7 +381,7 @@ export default function AnalyzePage() {
                     重新分析
                   </Button>
                   <Button
-                    onClick={() => router.push('/upload')}
+                    onClick={() => router.push('/service-selection')}
                     variant="outline"
                     className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-950/30 flex-1"
                   >
@@ -440,7 +440,7 @@ export default function AnalyzePage() {
         <div className="flex justify-between items-center">
           <Button 
             variant="outline" 
-            onClick={() => router.push('/upload')}
+            onClick={() => router.push('/service-selection')}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             返回上傳

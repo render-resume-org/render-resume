@@ -3,32 +3,22 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Textarea } from "@/components/ui/textarea";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import {
-    Award,
-    Briefcase,
-    Calendar,
-    Code,
-    Download,
-    Edit,
-    FileText,
-    Globe,
-    GraduationCap,
-    Loader2,
-    Mail,
-    MapPin,
-    Phone,
-    Printer,
-    RefreshCw,
-    Save,
-    Settings,
-    Share2,
-    Star,
-    UserCircle
+  Award,
+  Briefcase,
+  Calendar,
+  Code,
+  Edit,
+  FileText,
+  Globe,
+  GraduationCap,
+  Mail,
+  MapPin,
+  Phone,
+  Printer,
+  Star,
+  UserCircle
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -92,14 +82,10 @@ interface OptimizedResume {
 
 export default function PreviewPage() {
   const router = useRouter();
-  const [isDownloading, setIsDownloading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [resumeData, setResumeData] = useState<OptimizedResume | null>(null);
   const [originalAnalysis, setOriginalAnalysis] = useState<ResumeAnalysisResult | null>(null);
   const [selectedSuggestions, setSelectedSuggestions] = useState<OptimizationSuggestion[]>([]);
-  const [targetRole, setTargetRole] = useState('');
-  const [targetCompany, setTargetCompany] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -161,8 +147,6 @@ export default function PreviewPage() {
         body: JSON.stringify({
           analysisResult: originalAnalysis,
           selectedSuggestions,
-          targetRole: targetRole || undefined,
-          targetCompany: targetCompany || undefined,
         }),
       });
 
@@ -186,7 +170,7 @@ export default function PreviewPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [originalAnalysis, selectedSuggestions, targetRole, targetCompany]);
+  }, [originalAnalysis, selectedSuggestions]);
 
   // 當原始分析和建議都準備好，且還沒有優化履歷時自動生成
   useEffect(() => {
@@ -194,62 +178,6 @@ export default function PreviewPage() {
       generateOptimizedResume();
     }
   }, [originalAnalysis, selectedSuggestions, resumeData, generateOptimizedResume]);
-
-  const handleRegenerate = async () => {
-    // 清除現有的優化履歷
-    sessionStorage.removeItem('optimizedResume');
-    setResumeData(null);
-    
-    // 重新生成
-    await generateOptimizedResume();
-  };
-
-  const saveResumeData = () => {
-    if (resumeData) {
-      sessionStorage.setItem('optimizedResume', JSON.stringify(resumeData));
-      setIsEditing(false);
-      alert('履歷已保存！');
-    }
-  };
-
-  const handleDownload = async (format: 'pdf' | 'docx') => {
-    if (!resumeData) {
-      alert('履歷資料未準備好，請稍後再試');
-      return;
-    }
-
-    setIsDownloading(true);
-    // 模擬下載過程
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // 這裡可以實現實際的PDF/DOCX生成和下載
-    const link = document.createElement('a');
-    link.href = '#'; // 實際應用中這裡會是生成的文件URL
-    link.download = `resume_${resumeData.personalInfo.fullName}_${Date.now()}.${format}`;
-    link.click();
-    
-    setIsDownloading(false);
-  };
-
-  const handleShare = () => {
-    if (!resumeData) {
-      alert('履歷資料未準備好，請稍後再試');
-      return;
-    }
-
-    // 實現分享功能
-    if (navigator.share) {
-      navigator.share({
-        title: `${resumeData.personalInfo.fullName}的履歷`,
-        text: '查看我的專業履歷',
-        url: window.location.href
-      });
-    } else {
-      // 複製到剪貼板
-      navigator.clipboard.writeText(window.location.href);
-      alert('履歷連結已複製到剪貼板！');
-    }
-  };
 
   // 如果正在生成履歷，顯示加載畫面
   if (isGenerating) {
@@ -288,7 +216,7 @@ export default function PreviewPage() {
               返回建議選擇
             </Button>
             <Button 
-              onClick={() => router.push('/upload')}
+              onClick={() => router.push('/service-selection')}
               variant="outline"
               className="w-full"
             >
@@ -320,187 +248,18 @@ export default function PreviewPage() {
           {/* Sidebar - Controls */}
           <div className="lg:col-span-1 space-y-6">
             
-            {/* Target Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Settings className="w-5 h-5 mr-2" />
-                  優化設定
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <Label htmlFor="targetRole">目標職位</Label>
-                  <Input
-                    id="targetRole"
-                    placeholder="例：前端工程師"
-                    value={targetRole}
-                    onChange={(e) => setTargetRole(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="targetCompany">目標公司</Label>
-                  <Input
-                    id="targetCompany"
-                    placeholder="例：Google"
-                    value={targetCompany}
-                    onChange={(e) => setTargetCompany(e.target.value)}
-                  />
-                </div>
-                <Button
-                  onClick={handleRegenerate}
-                  disabled={isGenerating}
-                  className="w-full bg-orange-600 hover:bg-orange-700"
-                >
-                  {isGenerating ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                  )}
-                  重新生成
-                </Button>
-              </CardContent>
-            </Card>
-            
-            {/* Edit Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Edit className="w-5 h-5 mr-2" />
-                  編輯履歷
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Sheet open={isEditing} onOpenChange={setIsEditing}>
-                  <SheetTrigger asChild>
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700"
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      編輯內容
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
-                    <SheetHeader>
-                      <SheetTitle>編輯履歷內容</SheetTitle>
-                    </SheetHeader>
-                    <div className="space-y-6 mt-6">
-                      {/* Personal Info */}
-                      <div>
-                        <h4 className="font-medium mb-3">個人資訊</h4>
-                        <div className="space-y-3">
-                          <div>
-                            <Label htmlFor="fullName">姓名</Label>
-                            <Input
-                              id="fullName"
-                              value={resumeData.personalInfo.fullName}
-                              onChange={(e) => setResumeData({
-                                ...resumeData,
-                                personalInfo: { ...resumeData.personalInfo, fullName: e.target.value }
-                              })}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="title">職稱</Label>
-                            <Input
-                              id="title"
-                              value={resumeData.personalInfo.title}
-                              onChange={(e) => setResumeData({
-                                ...resumeData,
-                                personalInfo: { ...resumeData.personalInfo, title: e.target.value }
-                              })}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                              id="email"
-                              value={resumeData.personalInfo.email}
-                              onChange={(e) => setResumeData({
-                                ...resumeData,
-                                personalInfo: { ...resumeData.personalInfo, email: e.target.value }
-                              })}
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="phone">電話</Label>
-                            <Input
-                              id="phone"
-                              value={resumeData.personalInfo.phone}
-                              onChange={(e) => setResumeData({
-                                ...resumeData,
-                                personalInfo: { ...resumeData.personalInfo, phone: e.target.value }
-                              })}
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Summary */}
-                      <div>
-                        <h4 className="font-medium mb-3">專業摘要</h4>
-                        <Textarea
-                          value={resumeData.summary}
-                          onChange={(e) => setResumeData({ ...resumeData, summary: e.target.value })}
-                          rows={4}
-                        />
-                      </div>
-
-                      <Button onClick={saveResumeData} className="w-full">
-                        <Save className="w-4 h-4 mr-2" />
-                        保存變更
-                      </Button>
-                    </div>
-                  </SheetContent>
-                </Sheet>
-              </CardContent>
-            </Card>
-
             {/* Download Options */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">下載選項</CardTitle>
+                <CardTitle className="text-lg">列印/下載</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
-                  onClick={() => handleDownload('pdf')}
-                  disabled={isDownloading}
-                  className="w-full bg-cyan-600 hover:bg-cyan-700"
-                >
-                  {isDownloading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  ) : (
-                    <Download className="w-4 h-4 mr-2" />
-                  )}
-                  下載 PDF
-                </Button>
-                
-                <Button 
-                  onClick={() => handleDownload('docx')}
-                  disabled={isDownloading}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  下載 Word
-                </Button>
-
-                <Button 
-                  onClick={handleShare}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  分享履歷
-                </Button>
-
-                <Button 
                   onClick={() => window.print()}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
                 >
                   <Printer className="w-4 h-4 mr-2" />
-                  列印履歷
+                  列印/下載 PDF
                 </Button>
               </CardContent>
             </Card>
@@ -558,7 +317,7 @@ export default function PreviewPage() {
 
           {/* Main Content - Resume Preview */}
           <div className="lg:col-span-3">
-            <Card className="shadow-lg">
+            <Card className="shadow-lg p-0">
               <CardContent className="p-0">
                 {/* Resume Document */}
                 <div className="bg-white dark:bg-gray-800 p-8 min-h-[1000px]" id="resume-content">
@@ -572,22 +331,40 @@ export default function PreviewPage() {
                     </h2>
                     
                     <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
-                      <div className="flex items-center">
-                        <Mail className="w-4 h-4 mr-1" />
-                        {resumeData.personalInfo.email}
-                      </div>
-                      <div className="flex items-center">
-                        <Phone className="w-4 h-4 mr-1" />
-                        {resumeData.personalInfo.phone}
-                      </div>
-                      <div className="flex items-center">
-                        <MapPin className="w-4 h-4 mr-1" />
-                        {resumeData.personalInfo.location}
-                      </div>
+                      {resumeData.personalInfo.email && (
+                        <div className="flex items-center">
+                          <Mail className="w-4 h-4 mr-1" />
+                          {resumeData.personalInfo.email}
+                        </div>
+                      )}
+                      {resumeData.personalInfo.phone && (
+                        <div className="flex items-center">
+                          <Phone className="w-4 h-4 mr-1" />
+                          {resumeData.personalInfo.phone}
+                        </div>
+                      )}
+                      {resumeData.personalInfo.location && (
+                        <div className="flex items-center">
+                          <MapPin className="w-4 h-4 mr-1" />
+                          {resumeData.personalInfo.location}
+                        </div>
+                      )}
                       {resumeData.personalInfo.website && (
                         <div className="flex items-center">
                           <Globe className="w-4 h-4 mr-1" />
                           {resumeData.personalInfo.website}
+                        </div>
+                      )}
+                      {resumeData.personalInfo.linkedin && (
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.025-3.063-1.868-3.063-1.868 0-2.154 1.459-2.154 2.967v5.7h-3v-10h2.881v1.367h.041c.401-.761 1.379-1.563 2.841-1.563 3.039 0 3.6 2.001 3.6 4.601v5.595z"/></svg>
+                          {resumeData.personalInfo.linkedin}
+                        </div>
+                      )}
+                      {resumeData.personalInfo.github && (
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.415-4.042-1.415-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.084-.729.084-.729 1.205.084 1.84 1.236 1.84 1.236 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.605-2.665-.305-5.466-1.334-5.466-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.553 3.297-1.23 3.297-1.23.653 1.653.242 2.873.119 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.803 5.624-5.475 5.921.43.371.823 1.102.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .322.216.694.825.576 4.765-1.588 8.199-6.084 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                          {resumeData.personalInfo.github}
                         </div>
                       )}
                     </div>
@@ -735,6 +512,18 @@ export default function PreviewPage() {
                       ))}
                     </div>
                   </section>
+                  {/* Footer - Made with RenderResume */}
+                  <div className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-gray-400 dark:text-gray-500 text-center select-none print:mt-8" style={{ letterSpacing: '0.04em' }}>
+                    <p>
+                      made with
+                    </p>
+                    <p className="font-semibold text-cyan-600 dark:text-cyan-400">
+                      RenderResume
+                    </p>
+                  </div>
+                  <div className="text-xs text-gray-400 w-full text-center">
+                    www.render-resume.com
+                  </div>
                 </div>
               </CardContent>
             </Card>

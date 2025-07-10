@@ -1,4 +1,5 @@
 import { requireProUser } from '@/lib/auth/server';
+import { generateServiceSpecificSystemPrompt } from '@/lib/config/resume-analysis-config';
 import type { DocumentUpload } from '@/lib/openai-client-native';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES, validateFileType } from '@/lib/openai-client-native';
 import { NextRequest, NextResponse } from 'next/server';
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         console.log('📋 [API] Request body keys:', Object.keys(body));
         
-        const { resume, text, systemPrompt, userPrompt } = body;
+        const { resume, text, systemPrompt, userPrompt, serviceType } = body;
 
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
@@ -77,8 +78,16 @@ export async function POST(request: NextRequest) {
         console.log('📄 [API] Starting standard resume analysis');
         console.log('📋 [API] Resume content length:', resume.length);
         console.log('📋 [API] Additional text:', text ? 'provided' : 'none');
+        console.log('🎯 [API] Service type:', serviceType || 'default');
         
-        const result = await client.analyzeResume(resume, text);
+        // 根據服務類型生成專屬的 system prompt
+        let customSystemPrompt: string | undefined;
+        if (serviceType === 'create' || serviceType === 'optimize') {
+            console.log(`🎯 [API] Using service-specific system prompt for: ${serviceType}`);
+            customSystemPrompt = generateServiceSpecificSystemPrompt(serviceType);
+        }
+        
+        const result = await client.analyzeResume(resume, text, customSystemPrompt);
         console.log('✅ [API] Resume analysis completed');
         
         return NextResponse.json({
@@ -114,6 +123,7 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
         const files = formData.getAll('files') as File[];
         const additionalText = formData.get('additionalText') as string;
         const useVision = formData.get('useVision') === 'true';
+        const serviceType = formData.get('serviceType') as 'create' | 'optimize' | null;
 
         console.log('📊 [API] Upload details:', {
             filesCount: files.length,
@@ -121,6 +131,7 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
             fileSizes: files.map(f => f.size),
             additionalText: additionalText ? 'provided' : 'none',
             useVision,
+            serviceType: serviceType || 'default',
             userId: user.id
         });
 
@@ -198,11 +209,19 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
         console.log('🤖 [API] Creating Native OpenAI client for document analysis');
         const client = createNativeOpenAIClient(apiKey);
         
+        // 根據服務類型生成專屬的 system prompt
+        let customSystemPrompt: string | undefined;
+        if (serviceType === 'create' || serviceType === 'optimize') {
+            console.log(`🎯 [API] Using service-specific system prompt for file upload: ${serviceType}`);
+            customSystemPrompt = generateServiceSpecificSystemPrompt(serviceType);
+        }
+        
         console.log('🚀 [API] Starting document analysis');
         const result = await client.analyzeDocuments({
             documents,
             additionalText: additionalText || undefined,
-            useVision
+            useVision,
+            customSystemPrompt
         });
         
         console.log('✅ [API] Document analysis completed successfully');
@@ -217,6 +236,7 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
                 filesProcessed: files.length,
                 fileNames: files.map(f => f.name),
                 useVision,
+                serviceType: serviceType || 'default',
                 totalSize: files.reduce((sum, file) => sum + file.size, 0),
                 userId: user.id
             }

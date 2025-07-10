@@ -21,12 +21,12 @@ const AppHeader = () => {
     setMounted(true);
   }, []);
   
-  console.log(user);
   
   // 計算進度
   const getProgress = () => {
     const progressMap: { [key: string]: number } = {
-      '/upload': 0,
+      '/service-selection': 1,
+      '/upload': 10,
       '/analyze': 20,
       '/results': 40,
       '/smart-chat': 60,
@@ -39,6 +39,7 @@ const AppHeader = () => {
   const getStepName = () => {
     const stepMap: { [key: string]: string } = {
       '/': '歡迎',
+      '/service-selection': '選擇服務',
       '/upload': '上傳作品',
       '/analyze': '分析中',
       '/results': '分析完成',
