@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // 驗證商戶 ID
-    if (merchantId !== "ruby0322") {
+    if (merchantId !== process.env.MERCHANT_ID) {
       console.error('Invalid merchant ID:', merchantId);
       return NextResponse.json({ error: 'Invalid merchant' }, { status: 400 });
     }
 
     // 如果支付成功，創建訂閱
-    if (status === 'success' || status === 'completed') {
+    if (status === 'charged') {
       console.log('Processing successful payment for user:', userId, 'plan:', planId);
 
       // 獲取方案資訊
