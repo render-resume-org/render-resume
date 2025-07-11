@@ -12,12 +12,11 @@ export async function POST(request: NextRequest) {
     const { 
       orderId, 
       merchantId, 
-      planId, 
-      userId, 
-      status, 
-      amount,
+      status,
       // 其他可能的參數
     } = body;
+
+    console.log('Payment callback received:', body);
 
     // 驗證商戶 ID
     if (merchantId !== process.env.MERCHANT_ID) {
@@ -27,35 +26,59 @@ export async function POST(request: NextRequest) {
 
     // 如果支付成功，創建訂閱
     if (status === 'charged') {
-      console.log('Processing successful payment for user:', userId, 'plan:', planId);
+      console.log('Processing successful payment for orderId:', orderId);
 
-      // 獲取方案資訊
-      const { data: plan, error: planError } = await supabase
-        .from('plans')
-        .select('*')
-        .eq('id', planId)
+      // 根據 order_id 查找訂單信息
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          plans (*)
+        `)
+        .eq('order_id', orderId)
         .single();
 
-      if (planError || !plan) {
-        console.error('Plan not found:', planId, planError);
+      if (orderError || !order) {
+        console.error('Order not found:', orderId, orderError);
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+
+      if (!order.plans) {
+        console.error('Plan not found for order:', orderId);
         return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
       }
 
+      // 更新訂單狀態為已支付
+      const { error: updateOrderError } = await supabase
+        .from('orders')
+        .update({
+          status: 'paid',
+          transaction_id: body.transactionId || body.transaction_id
+        })
+        .eq('order_id', orderId);
+
+      if (updateOrderError) {
+        console.error('Failed to update order status:', updateOrderError);
+        return NextResponse.json(
+          { error: 'Failed to update order status' },
+          { status: 500 }
+        );
+      }
+
       // 計算到期日期
-      const expireDate = plan.duration_days 
-        ? new Date(Date.now() + plan.duration_days * 24 * 60 * 60 * 1000)
+      const expireDate = order.plans.duration_days 
+        ? new Date(Date.now() + order.plans.duration_days * 24 * 60 * 60 * 1000)
         : null;
 
       // 創建訂閱記錄
       const { data: subscription, error: subscriptionError } = await supabase
         .from('subscriptions')
         .insert({
-          user_id: userId,
-          plan_id: planId,
+          user_id: order.user_id,
+          plan_id: order.plan_id,
           is_active: true,
           expire_at: expireDate ? expireDate.toISOString() : null,
-          order_id: orderId,
-          amount: amount,
+          transaction_id: body.transactionId || body.transaction_id,
         })
         .select()
         .single();
@@ -79,6 +102,22 @@ export async function POST(request: NextRequest) {
 
     // 支付失敗的處理
     console.log('Payment failed or cancelled:', status);
+    
+    // 更新訂單狀態為失敗
+    if (orderId) {
+      const { error: updateError } = await supabase
+        .from('orders')
+        .update({
+          status: 'failed',
+          transaction_id: body.transactionId || body.transaction_id
+        })
+        .eq('order_id', orderId);
+      
+      if (updateError) {
+        console.error('Failed to update order status:', updateError);
+      }
+    }
+    
     return NextResponse.json({
       success: false,
       message: 'Payment failed or cancelled',

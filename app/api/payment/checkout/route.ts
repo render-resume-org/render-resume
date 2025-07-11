@@ -39,6 +39,22 @@ export async function POST(request: NextRequest) {
     // 產生唯一訂單編號
     const orderId = `order_${Date.now()}_${user.id}`;
 
+    // 先在 orders table 創建訂單記錄
+    const { error: orderError } = await supabase
+      .from('orders')
+      .insert({
+        order_id: orderId,
+        plan_id: plan.id,
+        user_id: user.id,
+        amount: plan.price,
+        status: 'pending'
+      });
+
+    if (orderError) {
+      console.error('Failed to create order record:', orderError);
+      return NextResponse.json({ error: '建立訂單記錄失敗' }, { status: 500 });
+    }
+
     // 準備支付參數（修正參數名稱）
     const paymentData = {
       merchantId: MERCHANT_ID,
