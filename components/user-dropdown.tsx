@@ -3,12 +3,12 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
@@ -71,9 +71,9 @@ export function UserDropdown() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="flex items-center cursor-pointer">
+          <Link href="/subscription" className="flex items-center cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
-            <span>設定</span>
+            <span>訂閱</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

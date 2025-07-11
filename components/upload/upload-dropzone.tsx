@@ -1,25 +1,36 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { DROPZONE_CONFIG } from "@/lib/upload-utils";
 import { Upload } from "lucide-react";
 import { useDropzone } from 'react-dropzone';
 
 interface UploadDropzoneProps {
   onDrop: (files: File[]) => void;
+  borderActiveClass?: string;
+  bgActiveClass?: string;
+  borderHoverClass?: string;
+  iconClass?: string;
+  textActiveClass?: string;
 }
 
-export function UploadDropzone({ onDrop }: UploadDropzoneProps) {
+export function UploadDropzone({
+  onDrop,
+  borderActiveClass = '',
+  bgActiveClass = '',
+  borderHoverClass = '',
+  iconClass = '',
+  textActiveClass = '',
+}: UploadDropzoneProps) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     ...DROPZONE_CONFIG
   });
 
   return (
-    <Card className="mb-8">
+    <Card className="p-0 mb-2 border-none shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl">拖拽上傳文件</CardTitle>
-        <CardDescription>
+        <CardDescription className="text-center">
           支援圖片 (PNG, JPG, GIF, WebP) 和 PDF 文件，PDF 將自動轉換為圖片供AI分析，最大 10MB
         </CardDescription>
       </CardHeader>
@@ -28,14 +39,15 @@ export function UploadDropzone({ onDrop }: UploadDropzoneProps) {
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors cursor-pointer
             ${isDragActive 
-              ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-950' 
-              : 'border-gray-300 dark:border-gray-600 hover:border-cyan-400'
-            }`}
+              ? `${borderActiveClass} ${bgActiveClass}`
+              : 'border-gray-300 dark:border-gray-600'}
+            ${borderHoverClass}
+          `}
         >
           <input {...getInputProps()} />
-          <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <Upload className={`h-12 w-12 mx-auto mb-4 ${iconClass}`} />
           {isDragActive ? (
-            <p className="text-cyan-600 dark:text-cyan-400 text-lg">
+            <p className={`text-lg ${textActiveClass}`}>
               鬆開以上傳文件
             </p>
           ) : (

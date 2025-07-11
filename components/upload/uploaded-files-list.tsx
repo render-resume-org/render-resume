@@ -1,11 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { formatFileSize, UploadedFile } from "@/lib/upload-utils";
 import { cn } from "@/lib/utils";
 import { AlertCircle, FileText, X } from "lucide-react";
 import Image from 'next/image';
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
 
 interface UploadedFilesListProps {
   uploadedFiles: UploadedFile[];
@@ -13,12 +15,34 @@ interface UploadedFilesListProps {
 }
 
 export function UploadedFilesList({ uploadedFiles, onRemoveFile }: UploadedFilesListProps) {
+  const [preview, setPreview] = useState<{
+    fileId: string;
+    images: string[];
+    index: number;
+  } | null>(null);
+
+  const handleOpenPreview = (fileId: string, images: string[], index: number) => {
+    setPreview({ fileId, images, index });
+  };
+
+  const handleClosePreview = () => setPreview(null);
+
+  const handlePrev = () => {
+    if (preview && preview.index > 0) {
+      setPreview({ ...preview, index: preview.index - 1 });
+    }
+  };
+  const handleNext = () => {
+    if (preview && preview.index < preview.images.length - 1) {
+      setPreview({ ...preview, index: preview.index + 1 });
+    }
+  };
+
   if (uploadedFiles.length === 0) return null;
 
   return (
-    <Card className="mb-8">
+    <Card className="border-none mb-2 shadow-none">
       <CardHeader>
-        <CardTitle className="text-xl">已上傳文件</CardTitle>
         <CardDescription>
           {uploadedFiles.length} 個文件已上傳
         </CardDescription>
@@ -109,18 +133,15 @@ export function UploadedFilesList({ uploadedFiles, onRemoveFile }: UploadedFiles
               {/* PDF Converted Images Preview */}
               {uploadFile.type === 'pdf' && uploadFile.convertedImages && uploadFile.convertedImages.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    轉換後的圖片預覽：
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {uploadFile.convertedImages.slice(0, 8).map((img, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} className="relative cursor-pointer group" onClick={() => handleOpenPreview(uploadFile.id, uploadFile.convertedImages!, index)}>
                         <Image 
                           width={128}
                           height={128}
                           src={img}   
                           alt={`PDF頁面 ${index + 1}`}
-                          className="w-full h-24 object-cover rounded border"
+                          className="w-full h-24 object-cover rounded border group-hover:opacity-80 transition"
                         />
                         <div className="absolute bottom-1 right-1 bg-black bg-opacity-50 text-white text-xs px-1 rounded">
                           {index + 1}
@@ -141,6 +162,100 @@ export function UploadedFilesList({ uploadedFiles, onRemoveFile }: UploadedFiles
           ))}
         </div>
       </CardContent>
+      {/* Fullscreen Image Preview Modal */}
+      {preview && (
+        <FullscreenImagePreview
+          images={preview.images}
+          index={preview.index}
+          onClose={handleClosePreview}
+          onPrev={handlePrev}
+          onNext={handleNext}
+        />
+      )}
     </Card>
+  );
+} 
+
+// FullscreenImagePreview component
+interface FullscreenImagePreviewProps {
+  images: string[];
+  index: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}
+
+function FullscreenImagePreview({ images, index, onClose, onPrev, onNext }: FullscreenImagePreviewProps) {
+  // Prevent SSR/React hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  // Keyboard navigation
+  React.useEffect(() => {
+    if (!mounted) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        onPrev();
+      } else if (e.key === 'ArrowRight') {
+        onNext();
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mounted, onPrev, onNext, onClose]);
+  if (!mounted || typeof window === 'undefined' || !document.body) return null;
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ pointerEvents: 'auto' }}
+    >
+      {/* Mask (rounded, clickable to close) */}
+      <div
+        className="absolute inset-0 bg-black bg-opacity-80 transition-all"
+        style={{ pointerEvents: 'auto' }}
+        onClick={onClose}
+      />
+      {/* Modal content (stop propagation to prevent closing when clicking inside) */}
+      <div
+        className="relative z-10 max-w-3xl w-full flex flex-col items-center"
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          className="absolute top-4 right-4 text-white text-2xl p-2 hover:bg-black/30 rounded"
+          onClick={onClose}
+          aria-label="Close preview"
+        >
+          <X className="h-8 w-8" />
+        </button>
+        <button
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-2xl p-2 hover:bg-black/30 rounded disabled:opacity-30"
+          onClick={onPrev}
+          disabled={index === 0}
+          aria-label="Previous image"
+        >
+          &#8592;
+        </button>
+        <Image
+          src={images[index]}
+          alt={`PDF頁面 ${index + 1}`}
+          width={800}
+          height={1000}
+          className="max-h-[80vh] w-auto rounded shadow-lg"
+        />
+        <div className="mt-2 text-white text-sm">
+          {index + 1} / {images.length}
+        </div>
+        <button
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-2xl p-2 hover:bg-black/30 rounded disabled:opacity-30"
+          onClick={onNext}
+          disabled={index === images.length - 1}
+          aria-label="Next image"
+        >
+          &#8594;
+        </button>
+      </div>
+    </div>,
+    document.body
   );
 } 

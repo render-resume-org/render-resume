@@ -222,8 +222,8 @@ const AppHeader = () => {
                     </Link>
                   </Button>
                   <Button asChild variant="ghost" size="sm" className="w-full justify-start">
-                    <Link href="/settings" onClick={() => setIsMobileMenuOpen(false)}>
-                      設定
+                    <Link href="/subscription" onClick={() => setIsMobileMenuOpen(false)}>
+                      訂閱
                     </Link>
                   </Button>
                 </div>

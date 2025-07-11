@@ -1,9 +1,11 @@
 "use client";
 
+import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { analyzeDocuments } from "@/lib/api/resume-analysis";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
   Award,
@@ -37,6 +39,7 @@ export default function AnalyzePage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
   const [analysisElapsedTime, setAnalysisElapsedTime] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   const steps: { id: string; title: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
     {
@@ -251,6 +254,7 @@ export default function AnalyzePage() {
       // 如果沒有文件，返回上傳頁面
       router.push('/service-selection');
     }
+    setTimeout(() => setIsVisible(true), 100);
   }, [router, startAnalysis]);
 
   const handleViewResults = () => {
@@ -272,92 +276,129 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 py-8">
+    <div className="min-h-screen py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <span className="text-5xl">🧠</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-            AI 智能解析中
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            AI正在深度分析您的作品內容，識別技能、成就和經驗。
-          </p>
-          <div className="mt-4 space-y-2">
-            <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-              通常平均分析時長是 1.5 分鐘左右，請耐心稍候，可以離開此頁面，但不可關閉
-            </p>
-            {isAnalyzing && (
+        {/* Header Card with Illustration */}
+        <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 
+          <CardHeader className="text-center">
+            <div className="w-48 h-48 mx-auto mb-4 flex items-center justify-center transition-all duration-500 delay-300">
+              <UploadIllustration mainColor="#06b6d4" width={192} height={192} />
+            </div>
+            <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              AI 智能解析
+            </CardTitle>
+            <div className="flex justify-center">
+              <div className="w-fit text-center inline-block px-3 py-1 rounded-full text-sm font-medium bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 dark:text-cyan-400 mb-3">
+                深度分析您的作品內容
+              </div>
+            </div>
+            {/* <CardDescription className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              AI正在深度分析您的作品內容，識別技能、成就和經驗。
+            </CardDescription> */}
+            <div className="mt-4 space-y-2">
               <div className="flex items-center justify-center space-x-2 text-lg font-mono">
                 <span className="text-gray-700 dark:text-gray-300">分析時間：</span>
                 <span className="text-cyan-600 dark:text-cyan-400 font-bold">
                   {formatTime(analysisElapsedTime)}
                 </span>
               </div>
-            )}
-          </div>
-          {uploadedFiles.length > 0 && (
-            <p className="text-sm text-gray-500 mt-2">
-              正在處理 {uploadedFiles.length} 個文件
-            </p>
-          )}
-        </div>
+              {isAnalyzing && <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                通常平均分析時長是 1.5 分鐘左右，請耐心稍候，可以離開此頁面，但不可關閉
+              </p>}
+            </div>
 
-        {/* Analysis Steps */}
-        <div className="space-y-4 mb-8">
-          {steps.map((step, stepIndex) => {
-            const Icon = step.icon;
-            const isProcessing = stepIndex === currentStep && !analysisComplete && !error;
-            const isCompleted = stepIndex < currentStep || analysisComplete;
-            
-            return (
-              <Card key={stepIndex} className={`transition-all duration-300 border-gray-200 dark:border-gray-700 ${
-                isProcessing ? 'ring-2 ring-cyan-500 bg-cyan-50 dark:bg-cyan-950/30' :
-                isCompleted ? 'bg-green-50 dark:bg-green-950/30' : ''
-              }`}>
-                <CardContent className="px-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-full ${
-                      isProcessing ? 'bg-cyan-100 dark:bg-cyan-900/50' :
-                      isCompleted ? 'bg-green-100 dark:bg-green-900/50' : 'bg-gray-100 dark:bg-gray-800'
-                    }`}>
-                      <Icon className={`h-5 w-5 ${
-                        isProcessing ? 'text-cyan-600 dark:text-cyan-400' :
-                        isCompleted ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
-                      }`} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900 dark:text-white">
-                        {step.title}
-                      </h3>
+            {/* 步驟/結果內容區塊（seamless，無卡片感） */}
+            <AnimatePresence mode="wait">
+              {isAnalyzing && !analysisComplete && !error && (
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -24 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="px-0 md:px-8 py-6 mt-6 bg-white/80 dark:bg-gray-900/80"
+                >
+                  {(() => {
+                    const step = steps[currentStep];
+                    const Icon = step.icon;
+                    return (
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 rounded-full bg-cyan-100 dark:bg-cyan-900/50">
+                          <Icon className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 dark:text-white">
+                            {step.title}
+                          </h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {step.description}
+                          </p>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-600"></div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence mode="wait">
+              {analysisComplete && analysisResult && !error && (
+                <motion.div
+                  key="result"
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -24 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  className="px-0 md:px-8 py-6 mt-6 bg-white dark:bg-gray-900 border-l-4 border-green-400"
+                >
+                  <div className="flex items-center mb-4">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 mr-3">
+                      <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </span>
+                    <span className="text-green-700 dark:text-green-400 font-semibold text-lg">AI 已成功分析您的作品，識別出以下關鍵信息</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                      <p className="font-medium text-gray-900 dark:text-white mb-2">技能專長</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {step.description}
+                        識別了 {analysisResult.expertise.length} 項技術技能和軟技能
                       </p>
                     </div>
-                    <div className="flex items-center">
-                      {isProcessing && (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-600"></div>
-                      )}
-                      {isCompleted && (
-                        <div className="text-green-600 dark:text-green-400">
-                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                      )}
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                      <p className="font-medium text-gray-900 dark:text-white mb-2">項目經驗</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        整理了 {analysisResult.projects.length} 個主要項目的詳細信息
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                      <p className="font-medium text-gray-900 dark:text-white mb-2">成就亮點</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        提取了 {analysisResult.achievements.length} 項量化的工作成果
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                      <p className="font-medium text-gray-900 dark:text-white mb-2">工作經驗</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        分析了 {analysisResult.work_experiences.length} 段工作經歷
+                      </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* Error Display - Positioned after analysis steps, same as success summary */}
+          </CardHeader>
+          {/* Step Card 放進 Header Card，下方加動畫 */}
+          {/* Removed original step card rendering from here */}
+        </Card>
+
+        {/* Step or Result Card */}
+        {/* 只顯示正在執行的步驟，分析完成後只顯示結果卡片 */}
         {error && !isAnalyzing && (
-          <Card className="mb-8 bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800">
+          <Card className="mb-8 border-red-200 dark:border-red-800 transition-all duration-700">
             <CardHeader>
               <CardTitle className="flex items-center text-red-700 dark:text-red-400">
                 <span className="text-2xl mr-2">⚠️</span>
@@ -368,7 +409,7 @@ export default function AnalyzePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-red-200 dark:border-red-700">
+              <div className="rounded-lg p-4 border border-red-200 dark:border-red-700">
                 <p className="text-red-800 dark:text-red-200 mb-4 leading-relaxed">
                   {error}
                 </p>
@@ -376,14 +417,14 @@ export default function AnalyzePage() {
                   <Button
                     onClick={handleRetry}
                     disabled={isAnalyzing}
-                    className="bg-red-600 hover:bg-red-700 text-white flex-1"
+                    className="bg-red-600 hover:bg-red-700 text-white flex-1 transition-all duration-300"
                   >
                     重新分析
                   </Button>
                   <Button
                     onClick={() => router.push('/service-selection')}
                     variant="outline"
-                    className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-950/30 flex-1"
+                    className="border-red-300 text-red-700 hover:bg-red-50 dark:border-red-600 dark:text-red-300 dark:hover:bg-red-950/30 flex-1 transition-all duration-300"
                   >
                     重新上傳文件
                   </Button>
@@ -393,63 +434,22 @@ export default function AnalyzePage() {
           </Card>
         )}
 
-        {/* Analysis Complete Summary */}
-        {analysisComplete && analysisResult && !error && (
-          <Card className="mb-8 bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800">
-            <CardHeader>
-              <CardTitle className="flex items-center text-green-700 dark:text-green-400">
-                <span className="text-2xl mr-2">✨</span>
-                分析完成！
-              </CardTitle>
-              <CardDescription>
-                AI已成功分析您的作品，識別出以下關鍵信息：
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="font-medium text-gray-900 dark:text-white mb-2">技能專長</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    識別了 {analysisResult.expertise.length} 項技術技能和軟技能
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="font-medium text-gray-900 dark:text-white mb-2">項目經驗</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    整理了 {analysisResult.projects.length} 個主要項目的詳細信息
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="font-medium text-gray-900 dark:text-white mb-2">成就亮點</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    提取了 {analysisResult.achievements.length} 項量化的工作成果
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                  <p className="font-medium text-gray-900 dark:text-white mb-2">工作經驗</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    分析了 {analysisResult.work_experiences.length} 段工作經歷
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* 分析完成顯示結果卡片，否則只顯示目前步驟 */}
+        {/* Removed original analysis complete rendering */}
 
         {/* Action Buttons */}
-        <div className="flex justify-between items-center">
+        <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <Button 
             variant="outline" 
             onClick={() => router.push('/service-selection')}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition-all duration-300"
           >
             返回上傳
           </Button>
-          
           <Button 
             onClick={handleViewResults}
             disabled={!analysisComplete || !analysisResult}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             查看詳細結果
             <ArrowRight className="ml-2 h-4 w-4" />

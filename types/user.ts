@@ -21,6 +21,7 @@ export interface Plan {
   daily_usage: number;
   duration_days: number | null;
   created_at: string;
+  price?: number | null; // 新增價格欄位
 }
 
 export interface Subscription {
@@ -30,5 +31,7 @@ export interface Subscription {
   is_active: boolean;
   expire_at: string | null;
   created_at: string;
+  order_id?: string | null; // 新增訂單 ID
+  amount?: number | null; // 新增金額
   plans?: Plan;
 } 
