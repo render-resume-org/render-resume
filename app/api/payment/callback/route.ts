@@ -78,7 +78,6 @@ export async function POST(request: NextRequest) {
           plan_id: order.plan_id,
           is_active: true,
           expire_at: expireDate ? expireDate.toISOString() : null,
-          transaction_id: body.transactionId || body.transaction_id,
           order_id: order.order_id,
         })
         .select()
