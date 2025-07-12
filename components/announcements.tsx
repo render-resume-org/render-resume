@@ -43,7 +43,7 @@ export function Announcements({ announcements }: AnnouncementsProps) {
       <div className="space-y-4 mb-8">
         <div className="flex items-center justify-between">
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            📢 系統公告
+            📢 系統公告！
           </h3>
             <Button
               variant="ghost"
