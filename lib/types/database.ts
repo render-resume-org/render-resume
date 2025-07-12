@@ -128,6 +128,7 @@ export type Database = {
           expire_at: string | null
           id: number
           is_active: boolean
+          order_id: string | null
           plan_id: number
           transaction_id: string | null
           user_id: string
@@ -137,6 +138,7 @@ export type Database = {
           expire_at?: string | null
           id?: number
           is_active?: boolean
+          order_id?: string | null
           plan_id: number
           transaction_id?: string | null
           user_id: string
@@ -146,6 +148,7 @@ export type Database = {
           expire_at?: string | null
           id?: number
           is_active?: boolean
+          order_id?: string | null
           plan_id?: number
           transaction_id?: string | null
           user_id?: string
@@ -164,6 +167,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["order_id"]
           },
         ]
       }
