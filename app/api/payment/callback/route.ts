@@ -91,8 +91,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('Subscription created successfully:', subscription);
-
       return NextResponse.json({
         success: true,
         message: 'Subscription created successfully',
