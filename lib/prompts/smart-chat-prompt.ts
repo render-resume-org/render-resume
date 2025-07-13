@@ -90,7 +90,7 @@ ${analysisResult.achievements.join('\n')}
 ${analysisResult.scores?.map(score => `- ${score.category}: ${score.grade} ${score.icon} - ${score.description}`).join('\n') || '無評分資料'}
 
 ### 互動式問題準備
-${analysisResult.missing_content?.follow_ups?.join('\n') || '無特定問題'}
+${analysisResult.missing_content?.follow_ups?.map(followUp => `- ${followUp.title}: ${followUp.question}`).join('\n') || '無特定問題'}
 
 ## 🔍 提問檢查機制
 

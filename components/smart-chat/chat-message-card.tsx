@@ -1,7 +1,8 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { ChatMessage } from "../smart-chat";
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "./user-avatar";
 
 interface ChatMessageCardProps {
   message: ChatMessage;
@@ -16,9 +17,14 @@ const ChatMessageCard = ({ message, shouldShowExcerpt }: ChatMessageCardProps) =
         {message.type === 'user' ? (
           <UserAvatar user={user} />
         ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-            <span className="text-lg">🤖</span>
-          </div>
+          <Image
+            src="/images/remo.png"
+            alt="AI 機器人頭像"
+            width={32}
+            height={32}
+            className="border w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 object-cover"
+            priority
+          />
         )}
         <div className="w-fit max-w-full space-y-2">
           {/* 履歷摘錄卡片 */}

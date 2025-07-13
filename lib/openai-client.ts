@@ -106,7 +106,10 @@ export const ResumeAnalysisSchema = z.object({
         recommended_additions: z.array(z.string()).describe("建議補充內容"),
         impact_analysis: z.string().describe("缺失內容對整體評估的影響分析"),
         priority_suggestions: z.array(z.string()).describe("優先補強建議"),
-        follow_ups: z.array(z.string()).describe("互動式後續問題，協助補齊缺失資料")
+        follow_ups: z.array(z.object({
+            title: z.string().describe("問題標題"),
+            question: z.string().describe("互動式問題內容")
+        })).describe("互動式後續問題，協助補齊缺失資料")
     }).describe("缺失內容分析"),
     scores: z.array(z.object({
         category: z.string().describe("評分類別"),
@@ -549,7 +552,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
 3. 嚴禁基於部分資訊進行推理或產生幻覺
 4. 在 missing_content 中明確指出缺失的關鍵履歷要素
 5. 使用 STAR 原則評估項目和工作經驗的完整性
-6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」
+6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，每個問題需要包含 title（問題標題）和 question（問題內容）。語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，格式為含有 title 和 question 兩個字串屬性的物件。
 
 請確保回傳有效的 JSON 格式。`;
 
@@ -631,7 +634,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
             // Fallback to original manual parsing method
             const prompt = ChatPromptTemplate.fromMessages([
                 ["system", this.config.systemPrompt],
-                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」\n\n請嚴格按照上述格式回傳 JSON 結果。"]
+                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，每個問題需要包含 title（問題標題）和 question（問題內容）。語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，格式為含有 title 和 question 兩個字串屬性的物件。\n\n請嚴格按照上述格式回傳 JSON 結果。"]
             ]);
 
             const chain = prompt.pipe(this.chatModel);
@@ -685,7 +688,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
             // Create prompt template for structured output
             const prompt = ChatPromptTemplate.fromMessages([
                 ["system", this.config.systemPrompt],
-                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」\n\n請確保回傳有效的 JSON 格式。"]
+                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，每個問題需要包含 title（問題標題）和 question（問題內容）。語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，格式為含有 title 和 question 兩個字串屬性的物件。\n\n請確保回傳有效的 JSON 格式。"]
             ]);
 
             const chain = prompt.pipe(this.structuredChatModel);
@@ -743,7 +746,7 @@ ${additionalText ? `\n額外資訊：\n${additionalText}` : ''}
             // Fallback to original manual parsing method
             const prompt = ChatPromptTemplate.fromMessages([
                 ["system", this.config.systemPrompt],
-                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，例如：「你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？」\n\n請嚴格按照上述格式回傳 JSON 結果。"]
+                ["human", "請分析以下履歷內容並以 JSON 格式回傳結果：\n\n履歷內容：\n{resume_content}\n\n額外資訊：\n{additional_text}\n\n請以 JSON 格式回傳分析結果，包含以下欄位：\n- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）\n- projects_summary: 專案摘要\n- expertise: 技能列表\n- expertise_summary: 技能摘要\n- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）\n- work_experiences_summary: 工作經驗摘要\n- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）\n- education_summary: 教育背景摘要\n- achievements: 成就列表\n- achievements_summary: 成就摘要\n- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）\n- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）\n\n特別注意：\n1. 對於履歷內容，請盡可能保留所有詳細資訊\n2. 僅整合明確提及的資訊，缺失資料必須留空\n3. 嚴禁基於部分資訊進行推理或產生幻覺\n4. 在 missing_content 中明確指出缺失的關鍵履歷要素\n5. 使用 STAR 原則評估項目和工作經驗的完整性\n6. missing_content 的 follow_ups 欄位必須包含 3-5 個互動式問題，每個問題需要包含 title（問題標題）和 question（問題內容）。語氣要年輕活潑但專業，協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。問題應針對具體缺失內容設計，格式為含有 title 和 question 兩個字串屬性的物件。\n\n請嚴格按照上述格式回傳 JSON 結果。"]
             ]);
 
             const chain = prompt.pipe(this.chatModel);

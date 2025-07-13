@@ -39,15 +39,9 @@ export default function SmartChatPage() {
 
   const handleChatComplete = (history: ChatMessage[], suggestions: SuggestionRecord[]) => {
     setIsCompleted(true);
-    
-    // 將聊天記錄和建議存儲到 localStorage 以便在建議頁面使用
     localStorage.setItem('chatHistory', JSON.stringify(history));
     localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
-    
-    // 延遲跳轉，讓用戶看到完成狀態
-    setTimeout(() => {
-      router.push('/suggestions');
-    }, 2000);
+    router.push('/suggestions');
   };
 
   const handleSkipToSuggestions = (suggestions: SuggestionRecord[]) => {
@@ -138,7 +132,6 @@ export default function SmartChatPage() {
   return (
     <div className="bg-white dark:bg-gray-900 py-8">
       <div className="container mx-auto px-4">
-        {/* 智慧問答組件 */}
         <SmartChat 
           analysisResult={analysisResult}
           onComplete={handleChatComplete}

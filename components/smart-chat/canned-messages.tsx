@@ -7,8 +7,8 @@ interface CannedMessagesProps {
 }
 
 const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps) => (
-  <div className="space-y-2 min-h-[2.5rem]">
-    <div className="flex flex-wrap gap-1 sm:gap-2">
+  <div className="space-y-2 min-h-[3rem]">
+    <div className="flex flex-wrap gap-2 sm:gap-3">
       {cannedOptions.map((option, index) => (
         <motion.div
           key={`${option}-${index}`}
@@ -26,7 +26,7 @@ const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps)
             variant="outline"
             size="sm"
             onClick={() => onCannedMessage(option)}
-            className="text-xs text-gray-800 hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors"
+            className="text-sm text-gray-800 hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors px-4 py-2"
             asChild
           >
             <motion.button
