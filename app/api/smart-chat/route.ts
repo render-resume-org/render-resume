@@ -1,6 +1,7 @@
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/lib/prompts';
+import { calculateStringSimilarity } from '@/lib/similarity';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -37,6 +38,8 @@ interface RequestBody {
     category: string;
   }>;
 }
+
+const FOLLOW_UP_SIMILARITY_THRESHOLD = 0.1;
 
 // 改進的 AI 回應解析函數
 function parseAIResponse(completion: string): ChatResponse {
@@ -195,7 +198,9 @@ export async function POST(request: NextRequest) {
     const userInput = `對話歷史：\n${conversationHistory}\n\n請根據以上對話歷史回應用戶的最新訊息。`;
 
     console.log('🤖 [API] Creating OpenAI client for smart chat');
-    const client = createNativeOpenAIClient(apiKey);
+    const client = createNativeOpenAIClient(apiKey, {
+      modelName: 'gpt-4.1-mini',
+    });
 
     // 調用 customPrompt 方法
     const completion = await client.customPrompt(systemPrompt, userInput);
@@ -211,6 +216,62 @@ export async function POST(request: NextRequest) {
       chatResponse = { 
         message: completion,
         quickResponses: ['告訴我更多', '下一個問題', '需要具體建議']
+      };
+    }
+
+    // 取得 user 最新一則訊息
+    const userMessage = messages && messages.length > 0 ? messages[messages.length - 1] : null;
+    const userText = userMessage && userMessage.type === 'user' ? userMessage.content : '';
+    // 取得 follow up 問題
+    const followUps = analysisResult.missing_content?.follow_ups || [];
+    // 比對 user 問題與 follow up
+    let matchedFollowUp = null;
+    let maxScore = 0;
+    for (const follow of followUps) {
+      const scoreTitle = calculateStringSimilarity(userText, follow.title || '');
+      const scoreQuestion = calculateStringSimilarity(userText, follow.question || '');
+      if (scoreTitle > maxScore && scoreTitle > FOLLOW_UP_SIMILARITY_THRESHOLD) {
+        matchedFollowUp = follow;
+        maxScore = scoreTitle;
+      }
+      if (scoreQuestion > maxScore && scoreQuestion > FOLLOW_UP_SIMILARITY_THRESHOLD) {
+        matchedFollowUp = follow;
+        maxScore = scoreQuestion;
+      }
+    }
+
+    // 取得 AI 回應 message
+    const aiMessageText = chatResponse.message || '';
+    // 如果 AI 沒有產生 excerpt，但 user 問題或 AI 回應與 follow up 高相似，則自動產生 follow up excerpt
+    let shouldInjectFollowUpExcerpt = false;
+    if (!chatResponse.excerpt && matchedFollowUp) {
+      shouldInjectFollowUpExcerpt = true;
+    } else if (!chatResponse.excerpt && followUps.length > 0) {
+      // 檢查 AI 回應與 follow up 相似度
+      let aiMatchedFollowUp = null;
+      let aiMaxScore = 0;
+      for (const follow of followUps) {
+        const scoreTitle = calculateStringSimilarity(aiMessageText, follow.title || '');
+        const scoreQuestion = calculateStringSimilarity(aiMessageText, follow.question || '');
+        if (scoreTitle > aiMaxScore && scoreTitle > FOLLOW_UP_SIMILARITY_THRESHOLD) {
+          aiMatchedFollowUp = follow;
+          aiMaxScore = scoreTitle;
+        }
+        if (scoreQuestion > aiMaxScore && scoreQuestion > FOLLOW_UP_SIMILARITY_THRESHOLD) {
+          aiMatchedFollowUp = follow;
+          aiMaxScore = scoreQuestion;
+        }
+      }
+      if (aiMatchedFollowUp) {
+        matchedFollowUp = aiMatchedFollowUp;
+        shouldInjectFollowUpExcerpt = true;
+      }
+    }
+    if (shouldInjectFollowUpExcerpt && matchedFollowUp) {
+      chatResponse.excerpt = {
+        title: matchedFollowUp.title,
+        content: matchedFollowUp.question,
+        source: '追問問題',
       };
     }
 

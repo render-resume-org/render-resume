@@ -2,11 +2,10 @@
 
 // 向量化與相似度
 export function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[^-\u9fff\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter(token => token.length > 0);
+  // 取所有英文單詞和所有中文字
+  const enTokens = text.toLowerCase().match(/[a-z0-9]+/g) || [];
+  const zhTokens = text.match(/\p{Script=Han}/gu) || [];
+  return [...enTokens, ...zhTokens];
 }
 
 export function getTextVector(text: string): Map<string, number> {
