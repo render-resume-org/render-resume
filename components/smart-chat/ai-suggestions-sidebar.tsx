@@ -69,6 +69,7 @@ const AISuggestionsSidebar = ({
   // 新增：追蹤需要自動展開的 template id
   const [forceExpandId, setForceExpandId] = useState<string | null>(null);
   const prevStatuses = useRef<{ [id: string]: SuggestionTemplate['status'] }>({});
+  const templateRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     // 檢查狀態變化
@@ -80,6 +81,13 @@ const AISuggestionsSidebar = ({
       prevStatuses.current[t.id] = t.status;
     }
   }, [suggestionTemplates]);
+
+  // 當 forceExpandId 變化且該卡片存在時，自動 scrollIntoView
+  useEffect(() => {
+    if (forceExpandId && templateRefs.current[forceExpandId]) {
+      templateRefs.current[forceExpandId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [forceExpandId]);
   
   return (
     <AnimatePresence>
@@ -220,6 +228,7 @@ const AISuggestionsSidebar = ({
                                 exit={{ opacity: 0, y: -20 }}
                                 layout
                                 transition={{ duration: 0.2, ease: "easeOut" }}
+                                ref={el => { templateRefs.current[template.id] = el; }}
                               >
                                 <SuggestionCard
                                   template={template}

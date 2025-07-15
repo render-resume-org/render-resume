@@ -27,7 +27,6 @@ interface DesktopChatPanelProps {
   onToggleSidebar: () => void;
   messages: ChatMessage[];
   messageVariants: Variants;
-  shouldShowExcerpt: (id?: string) => boolean;
   isLoading: boolean;
   cannedOptions: string[];
   handleCannedMessage: (msg: string) => void;
@@ -71,7 +70,7 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
       <div className="flex-1 h-full">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col">
           {/* Header */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-2 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI 智慧問答</h2>
@@ -91,8 +90,8 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
           </div>
           {/* Chat Area */}
           <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full p-6" ref={props.scrollAreaRef}>
-              <div className="space-y-4">
+            <ScrollArea className="h-full px-6" ref={props.scrollAreaRef}>
+              <div className="space-y-4 py-4">
                 <AnimatePresence mode="popLayout">
                   {props.messages.map((message) => (
                     <motion.div
@@ -103,7 +102,7 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
                       exit="exit"
                       layout
                     >
-                      <ChatMessageCard message={message} shouldShowExcerpt={props.shouldShowExcerpt} />
+                      <ChatMessageCard message={message} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -113,15 +112,12 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
             </ScrollArea>
           </div>
           {/* Input Area */}
-          <div className="p-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+          <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
             <AnimatePresence mode="popLayout">
               {props.cannedOptions.length > 0 && (
                 <CannedMessages cannedOptions={props.cannedOptions} onCannedMessage={props.handleCannedMessage} />
               )}
             </AnimatePresence>
-            {/* <AnimatePresence>
-              {props.messageCount >= 25 && <ChatLimitAlert messageCount={props.messageCount} />}
-            </AnimatePresence> */}
             <ChatInput
               value={props.currentInput}
               onChange={props.handleTextareaChange}

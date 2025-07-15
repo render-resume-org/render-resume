@@ -3,12 +3,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
     useCannedMessages,
-    useExcerptProcessor,
     useInputManager,
     useScrollManager,
     useSimilarityCheck,
-    useTemplateManager,
-    useUniqueId
+    useTemplateManager
 } from './hooks';
 import { ChatMessage, SuggestionRecord } from './types';
 
@@ -23,36 +21,30 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   const [suggestions, setSuggestions] = useState<SuggestionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
-  const [visibleExcerptIds, setVisibleExcerptIds] = useState<string[]>([]);
+  const [visibleExcerptIds] = useState<string[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSuggestionsDrawer, setShowSuggestionsDrawer] = useState(false);
-  // 新增：追蹤是否要在下一則 user prompt 加入 block 提示
-  const [shouldBlockNextSuggestion, setShouldBlockNextSuggestion] = useState(false);
+  // 移除 shouldBlockNextSuggestion 相關 state
 
-  // 使用各種 hooks
-  const generateUniqueId = useUniqueId();
-  const { 
-    suggestionTemplates, 
-    updateTemplateStatus, 
+  const generateUniqueId = useCallback((prefix: string) => {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }, []);
+
+  const {
+    suggestionTemplates,
+    setSuggestionTemplates,
     initializeSuggestionTemplates,
-    removeTemplate 
+    removeTemplate,
+    updateTemplateStatus
   } = useTemplateManager(analysisResult, generateUniqueId);
-  
-  const { isSimilarSuggestion, isExcerptSimilar, findMostSimilarTemplate } = useSimilarityCheck(
+
+  const { isSimilarSuggestion, findMostSimilarTemplate } = useSimilarityCheck(
     suggestions,
     messages,
     visibleExcerptIds,
     suggestionTemplates
   );
-  
-  const { processExcerpt, shouldShowExcerpt } = useExcerptProcessor(
-    messages,
-    visibleExcerptIds,
-    setVisibleExcerptIds,
-    generateUniqueId,
-    isExcerptSimilar
-  );
-  
+
   const {
     scrollAreaRef,
     scrollAreaRefMobile,
@@ -62,23 +54,27 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     scrollToBottom,
     smartScrollToBottom
   } = useScrollManager();
-  
+
   const {
     currentInput,
     setCurrentInput,
     textareaRef,
     textareaRefMobile,
     adjustTextareaHeight,
-    handleTextareaChange,
-    resetTextareaHeight
+    handleTextareaChange
   } = useInputManager();
-  
+
   const {
     cannedOptions,
     initializeCannedMessages,
     updateCannedOptions
   } = useCannedMessages();
-  
+
+  // 簡化的 shouldShowExcerpt 邏輯（後端已處理主要邏輯）
+  const shouldShowExcerpt = useCallback((message: ChatMessage) => {
+    return !!message.excerpt;
+  }, []);
+
   // 初始化聊天
   const initializeChat = useCallback(() => {
     // 初始化建議模板
@@ -107,180 +103,127 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     initializeCannedMessages();
   }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages]);
 
-  // 發送訊息的主要邏輯
   const handleSendMessage = useCallback(async (messageText?: string) => {
-    let textToSend = messageText || currentInput.trim();
+    const textToSend = messageText || currentInput.trim();
     if (!textToSend || isLoading || messageCount >= 30) return;
-
-    // 只在 shouldBlockNextSuggestion 為 true 時加提示，然後設回 false
-    if (shouldBlockNextSuggestion) {
-      textToSend += '\n\n[系統提示：請勿再產生 suggestion，僅進行對話或追問，不要再給建議。]';
-      setShouldBlockNextSuggestion(false);
-    }
 
     const userMessage: ChatMessage = {
       id: generateUniqueId('user'),
       type: 'user',
-      content: messageText || currentInput.trim(),
+      content: textToSend,
       timestamp: new Date()
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setMessageCount(prev => prev + 1);
     setCurrentInput('');
     setIsLoading(true);
-    setMessageCount(prev => prev + 1);
 
-    // 立即滾動到底部顯示用戶訊息
+    // 確保用戶訊息顯示後滾動
     setTimeout(() => {
       smartScrollToBottom(false, suggestions);
     }, 50);
 
-    // 重置 textarea 高度
-    resetTextareaHeight();
-
     try {
-      // 準備發送給 API 的訊息（確保 timestamp 為 string，且只含純資料）
-      const apiMessages = [...messages, userMessage].map(msg => ({
-        type: msg.type,
-        content: msg.content,
-        timestamp: typeof msg.timestamp === 'string' ? msg.timestamp : (msg.timestamp?.toISOString?.() || ''),
-      }));
-
       const response = await fetch('/api/smart-chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: apiMessages,
+          messages: [...messages, userMessage],
           analysisResult,
-          suggestions: suggestions.map(s => ({
-            title: s.title,
-            description: s.description,
-            category: s.category
-          }))
+          suggestions,
+          templates: suggestionTemplates
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || '請求失敗');
       }
 
       const result = await response.json();
+      const { messages: aiMessages, cannedOptions, templates: newTemplates } = result.data as { messages: ChatMessage[], cannedOptions: string[], templates: SuggestionTemplate[] };
 
-      if (!result.success) {
-        throw new Error(result.error || '請求失敗');
-      }
-
-      const { message, suggestion, quickResponses, excerpt } = result.data;
-
-      // 檢查 excerpt 是否與模板相似，如果是則標記為進行中
-      let matchedTemplate: SuggestionTemplate | null = null;
-      if (excerpt) {
-        const excerptText = `${excerpt.title} ${excerpt.content}`;
-        matchedTemplate = findMostSimilarTemplate(excerptText, suggestionTemplates) as SuggestionTemplate | null;
-        console.log('🔍 [Template] Matched template:', matchedTemplate);
-        if (matchedTemplate && matchedTemplate.status === 'pending') {
-          console.log(`🔄 [Template] Marking template "${matchedTemplate.title}" as in_progress due to excerpt match`);
-          updateTemplateStatus(matchedTemplate.id, 'in_progress');
-        }
-      }
-
-      // 處理 excerpt，決定是否顯示並生成 ID
-      let excerptId: string | undefined;
-      if (excerpt) {
-        excerptId = processExcerpt(excerpt) || undefined;
-      }
-
-      // 添加 AI 回應
-      const aiMessage: ChatMessage = {
-        id: generateUniqueId('ai'),
-        type: 'ai',
-        content: message,
-        timestamp: new Date(),
-        suggestion,
-        quickResponses,
-        excerpt,
-        excerptId
-      };
-
-      setMessages(prev => [...prev, aiMessage]);
-      setMessageCount(prev => prev + 1);
-
-      // 如果這一則 AI message 有 suggestion，則標記下一則 user prompt 要 block suggestion
-      if (suggestion) {
-        setShouldBlockNextSuggestion(true);
-      }
-
-      // 更新快速回復選項
-      updateCannedOptions(quickResponses, !!suggestion);
-
-      // 處理建議並檢查是否與模板相關
-      if (suggestion) {
-        // 檢查是否與現有建議相似度過高
-        if (isSimilarSuggestion(suggestion)) {
-          console.log(`🚫 [Suggestion Blocked] Similar suggestion detected, not adding: "${suggestion.title}"`);
-        } else {
-          // 檢查建議是否與某個模板相關
-          const suggestionText = `${suggestion.title} ${suggestion.description}`;
-          let relatedTemplate: SuggestionTemplate | null = matchedTemplate; // 優先使用 excerpt 匹配的模板
-          
-          if (!relatedTemplate) {
-            relatedTemplate = findMostSimilarTemplate(suggestionText, suggestionTemplates) as SuggestionTemplate | null;
-          }
-          
-          if (relatedTemplate && (relatedTemplate.status === 'in_progress' || relatedTemplate.status === 'completed')) {
-            // 建議與模板相關，更新模板為已完成
-            console.log(`✅ [Template] Completing template "${relatedTemplate.title}" with suggestion: "${suggestion.title}"`);
-            
-            const suggestionRecord: SuggestionRecord = {
-              id: generateUniqueId('suggestion'),
-              title: suggestion.title,
-              description: suggestion.description,
-              category: suggestion.category,
-              timestamp: new Date()
-            };
-            
-            updateTemplateStatus(relatedTemplate.id, 'completed', suggestionRecord);
-          } else {
-            // 建議與模板無關，加入額外建議列表
-            console.log(`✅ [Suggestion Added] New additional suggestion: "${suggestion.title}"`);
-            const suggestionRecord: SuggestionRecord = {
-              id: generateUniqueId('suggestion'),
-              title: suggestion.title,
-              description: suggestion.description,
-              category: suggestion.category,
-              timestamp: new Date()
-            };
-            setSuggestions(prev => [...prev, suggestionRecord]);
-          }
-          
-          // 滾動處理
-          console.log('[Suggestion Added] Starting scroll sequence');
-          
-          requestAnimationFrame(() => {
-            smartScrollToBottom(false, suggestions);
-          });
-          
-          setTimeout(() => {
-            console.log('[Suggestion Added] Mid-animation scroll');
-            smartScrollToBottom(false, suggestions);
-          }, 200);
-          
-          setTimeout(() => {
-            console.log('[Suggestion Added] Post-animation scroll');
-            smartScrollToBottom(false, suggestions);
-          }, 400);
-          
-          if (window.innerWidth >= 1024) {
-            setTimeout(() => {
-              console.log('[Desktop] Layout adjustment scroll');
-              smartScrollToBottom(false, suggestions);
-            }, 600);
-          }
-        }
+      // 直接使用後端處理過的訊息
+      setMessages(prev => [...prev, ...aiMessages]);
+      setMessageCount(prev => prev + aiMessages.length);
+      // 如果本次有 suggestion，cannedOptions 第一個改為「好呀」
+      if (aiMessages.some((m) => m.suggestion)) {
+        updateCannedOptions(["好呀", ...cannedOptions.slice(1)], false);
       } else {
-        console.log('ℹ️ [Suggestion] No suggestion provided by AI');
+        updateCannedOptions(cannedOptions, false);
+      }
+      setSuggestionTemplates(newTemplates);
+      
+      // 處理 suggestion（只有當訊息包含 suggestion 時）
+      for (const aiMessage of aiMessages) {
+        if (aiMessage.suggestion) {
+          // 檢查是否與現有建議相似度過高
+          if (isSimilarSuggestion(aiMessage.suggestion)) {
+            console.log(`🚫 [Suggestion Blocked] Similar suggestion detected, not adding: "${aiMessage.suggestion.title}"`);
+          } else {
+            // 檢查建議是否與某個模板相關
+            const suggestionText = `${aiMessage.suggestion.title} ${aiMessage.suggestion.description}`;
+            let relatedTemplate: SuggestionTemplate | null = null;
+            
+            // 這裡可能需要根據 excerpt 匹配模板的邏輯
+            if (!relatedTemplate) {
+              relatedTemplate = findMostSimilarTemplate(suggestionText, suggestionTemplates) as SuggestionTemplate | null;
+            }
+            
+            if (relatedTemplate && (relatedTemplate.status === 'in_progress' || relatedTemplate.status === 'completed')) {
+              // 建議與模板相關，更新模板為已完成
+              console.log(`✅ [Template] Completing template "${relatedTemplate.title}" with suggestion: "${aiMessage.suggestion.title}"`);
+              
+              const suggestionRecord: SuggestionRecord = {
+                id: generateUniqueId('suggestion'),
+                title: aiMessage.suggestion.title,
+                description: aiMessage.suggestion.description,
+                category: aiMessage.suggestion.category,
+                timestamp: new Date()
+              };
+              
+              updateTemplateStatus(relatedTemplate.id, 'completed', suggestionRecord);
+            } else {
+              // 建議與模板無關，加入額外建議列表
+              console.log(`✅ [Suggestion Added] New additional suggestion: "${aiMessage.suggestion.title}"`);
+              const suggestionRecord: SuggestionRecord = {
+                id: generateUniqueId('suggestion'),
+                title: aiMessage.suggestion.title,
+                description: aiMessage.suggestion.description,
+                category: aiMessage.suggestion.category,
+                timestamp: new Date()
+              };
+              setSuggestions(prev => [...prev, suggestionRecord]);
+            }
+
+            // 滾動處理
+            console.log('[Suggestion Added] Starting scroll sequence');
+            
+            requestAnimationFrame(() => {
+              smartScrollToBottom(false, suggestions);
+            });
+            
+            setTimeout(() => {
+              console.log('[Suggestion Added] Mid-animation scroll');
+              smartScrollToBottom(false, suggestions);
+            }, 200);
+            
+            setTimeout(() => {
+              console.log('[Suggestion Added] Post-animation scroll');
+              smartScrollToBottom(false, suggestions);
+            }, 400);
+            
+            if (window.innerWidth >= 1024) {
+              setTimeout(() => {
+                console.log('[Desktop] Layout adjustment scroll');
+                smartScrollToBottom(false, suggestions);
+              }, 600);
+            }
+          }
+        }
       }
           
       // 確保滾動到底部（在狀態更新後）
@@ -305,33 +248,10 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
       setMessages(prev => [...prev, errorMessage]);
       setMessageCount(prev => prev + 1);
-      
-      // 確保滾動到底部（錯誤訊息後）
-      requestAnimationFrame(() => {
-        smartScrollToBottom(false, suggestions);
-      });
     } finally {
       setIsLoading(false);
     }
-  }, [
-    currentInput, 
-    isLoading, 
-    messageCount, 
-    generateUniqueId, 
-    messages, 
-    suggestions, 
-    smartScrollToBottom, 
-    resetTextareaHeight, 
-    analysisResult, 
-    findMostSimilarTemplate, 
-    suggestionTemplates, 
-    updateTemplateStatus, 
-    processExcerpt, 
-    updateCannedOptions, 
-    isSimilarSuggestion, 
-    setSuggestions,
-    shouldBlockNextSuggestion
-  ]);
+  }, [currentInput, isLoading, messageCount, messages, analysisResult, suggestions, smartScrollToBottom, updateCannedOptions, isSimilarSuggestion, suggestionTemplates, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

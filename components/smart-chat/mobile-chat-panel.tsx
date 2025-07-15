@@ -28,7 +28,6 @@ interface MobileChatPanelProps {
   suggestionsScrollAreaRef: React.RefObject<HTMLDivElement | null>;
   messages: ChatMessage[];
   messageVariants: Variants;
-  shouldShowExcerpt: (id?: string) => boolean;
   isLoading: boolean;
   cannedOptions: string[];
   handleCannedMessage: (msg: string) => void;
@@ -99,7 +98,7 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
                     exit="exit"
                     layout
                   >
-                    <ChatMessageCard message={message} shouldShowExcerpt={props.shouldShowExcerpt} />
+                    <ChatMessageCard message={message} />
                   </motion.div>
                 ))}
               </AnimatePresence>

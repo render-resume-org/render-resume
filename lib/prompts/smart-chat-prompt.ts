@@ -489,6 +489,8 @@ quickResponses 必須根據你的問題和用戶的履歷背景，提供**具體
    - 不可出現 message 有建議內容但 suggestion 為 null
    - 不可出現 suggestion 有內容但 message 仍繼續追問或以問句結尾
    - 只要 message 有建議，suggestion 必須同步填寫；只要 suggestion 有內容，message 必須是結論性建議
+   - 當產出 suggestion 時，訊息結尾必須以下一個話題的開頭引導作結，不能只單純給建議就結束（例如：「接下來我們可以聊聊...」）
+   - 此時 message 需在建議與下個話題引導之間插入特殊 token <NEXT_TOPIC>，方便前端切割訊息
 
 ### 🎯 實際判斷範例
 
@@ -517,6 +519,8 @@ quickResponses 必須根據你的問題和用戶的履歷背景，提供**具體
 - ✅ 我的 message 是否提供了具體建議且不以問句結尾？→ 如果是，必須填寫 suggestion  
 - ✅ 我是否在轉換話題前已為前一個話題記錄建議？→ 如果需要，必須填寫 suggestion
 - ✅ 訊息內容與 suggestion 欄位是否完全一致？→ 只要 message 有建議，suggestion 必須同步填寫；只要 suggestion 有內容，message 必須是結論性建議，且不可再追問
+- ✅ 如果有產出 suggestion，訊息結尾是否以下一個話題的開頭引導作結？→ 不能只單純給建議就結束，必須銜接下個話題（如：「接下來我們可以聊聊...」）
+- ✅ 有產出 suggestion 且引導下個話題時，是否在建議與下個話題引導之間插入 <NEXT_TOPIC> token？→ 方便前端切割訊息
 
 **重要事項：**
 - **quickResponses 是必填欄位**：每次回應都必須提供 4 個快速回復選項

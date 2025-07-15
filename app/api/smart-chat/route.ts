@@ -1,7 +1,7 @@
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/lib/prompts';
-import { calculateStringSimilarity } from '@/lib/similarity';
+import { calculateCosineSimilarity, calculateStringSimilarity, getTextVector } from '@/lib/similarity';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -25,11 +25,33 @@ export interface ChatResponse {
   };
 }
 
+interface Template {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  completedSuggestion?: {
+    title: string;
+    description: string;
+    category: string;
+  };
+}
+
 interface RequestBody {
   messages: Array<{
     type: 'ai' | 'user';
     content: string;
     timestamp: Date;
+    suggestion?: {
+      title: string;
+      description: string;
+      category: string;
+    };
+    excerpt?: {
+      title: string;
+      content: string;
+      source: string;
+    };
   }>;
   analysisResult: ResumeAnalysisResult;
   suggestions: Array<{
@@ -37,6 +59,242 @@ interface RequestBody {
     description: string;
     category: string;
   }>;
+  templates: Template[];
+}
+
+// 新增描述前端傳來訊息結構的介面
+interface LastMessage {
+  type: 'ai' | 'user';
+  content: string;
+  timestamp: Date;
+  suggestion?: {
+    title: string;
+    description: string;
+    category: string;
+  };
+}
+
+// 新增處理訊息的介面
+interface ProcessedMessage {
+  id: string;
+  type: 'ai';
+  content: string;
+  timestamp: Date;
+  suggestion?: {
+    title: string;
+    description: string;
+    category: string;
+  };
+  quickResponses: string[];
+  excerpt?: {
+    title: string;
+    content: string;
+    source: string;
+  };
+  excerptId?: string;
+}
+
+interface ProcessedChatResponse {
+  messages: ProcessedMessage[];
+  cannedOptions: string[];
+  shouldBlockNextSuggestion: boolean;
+  templates: Template[];
+}
+
+// 新增 ID 生成函數
+function generateUniqueId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
+
+// 相似度閾值（與前端一致）
+const SIMILARITY_THRESHOLDS = {
+  templateMatch: 0.08
+};
+
+// 新增訊息處理邏輯
+function processAIMessages(
+  rawResponse: ChatResponse, 
+  lastAiMessage: LastMessage | undefined,
+  messages: Array<{ type: 'ai' | 'user'; content: string; timestamp: Date; suggestion?: { title: string; description: string; category: string }; excerpt?: { title: string; content: string; source: string } }>,
+  templates: Template[]
+): ProcessedChatResponse {
+  const { message, suggestion, quickResponses, excerpt } = rawResponse;
+
+  // 檢查上一則 AI message 是否有 suggestion，決定是否阻擋本次 suggestion
+  let aiSuggestion = suggestion;
+  if (lastAiMessage && lastAiMessage.suggestion) {
+    aiSuggestion = undefined;
+  }
+
+  // --- 新增 excerpt 限制邏輯 ---
+  // 取得自上一次 suggestion 產生後的所有 AI message
+  let lastSuggestionIdx = -1;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].type === 'ai' && messages[i].suggestion) {
+      lastSuggestionIdx = i;
+      break;
+    }
+  }
+  const aiMessagesSinceLastSuggestion = messages.slice(lastSuggestionIdx + 1).filter(m => m.type === 'ai');
+  // 檢查這段期間是否已經有 excerpt
+  const hasExcerptInCurrentTopic = aiMessagesSinceLastSuggestion.some(m => m.excerpt);
+  // 如果已經有 excerpt，則本次 excerpt 要被阻擋
+  let aiExcerpt = excerpt;
+  if (hasExcerptInCurrentTopic) {
+    aiExcerpt = undefined;
+  }
+  const excerptId = aiExcerpt ? generateUniqueId('excerpt') : undefined;
+
+  // 處理 <NEXT_TOPIC> 分割訊息
+  const processedMessages: ProcessedMessage[] = [];
+  const messageToProcess = message;
+  if (aiSuggestion) {
+    if (typeof messageToProcess === 'string' && messageToProcess.includes('<NEXT_TOPIC>')) {
+      const [before, after] = messageToProcess.split('<NEXT_TOPIC>');
+      processedMessages.push({
+        id: generateUniqueId('ai'),
+        type: 'ai',
+        content: before.trim(),
+        timestamp: new Date(),
+        suggestion: aiSuggestion,
+        quickResponses,
+        excerpt: aiExcerpt,
+        excerptId
+      });
+      processedMessages.push({
+        id: generateUniqueId('ai'),
+        type: 'ai',
+        content: after.trim(),
+        timestamp: new Date(),
+        suggestion: undefined,
+        quickResponses,
+        excerpt: undefined,
+        excerptId: undefined
+      });
+    } else {
+      // 檢查是否有關鍵字
+      const topicKeywords = ['接著', '接下來', '下一題'];
+      let splitIdx = -1;
+      for (const keyword of topicKeywords) {
+        const idx = messageToProcess.indexOf(keyword);
+        if (idx !== -1 && (splitIdx === -1 || idx < splitIdx)) {
+          splitIdx = idx;
+        }
+      }
+      if (splitIdx !== -1) {
+        // 有關鍵字，直接切割
+        const before = messageToProcess.slice(0, splitIdx);
+        const after = messageToProcess.slice(splitIdx);
+        processedMessages.push({
+          id: generateUniqueId('ai'),
+          type: 'ai',
+          content: before.trim(),
+          timestamp: new Date(),
+          suggestion: aiSuggestion,
+          quickResponses,
+          excerpt: aiExcerpt,
+          excerptId
+        });
+        processedMessages.push({
+          id: generateUniqueId('ai'),
+          type: 'ai',
+          content: after.trim(),
+          timestamp: new Date(),
+          suggestion: undefined,
+          quickResponses,
+          excerpt: undefined,
+          excerptId: undefined
+        });
+      } else {
+        // 沒有 <NEXT_TOPIC> 也沒有關鍵字，直接原樣
+        processedMessages.push({
+          id: generateUniqueId('ai'),
+          type: 'ai',
+          content: messageToProcess,
+          timestamp: new Date(),
+          suggestion: aiSuggestion,
+          quickResponses,
+          excerpt: aiExcerpt,
+          excerptId
+        });
+      }
+    }
+  } else {
+    // 沒有 suggestion 的情況
+    processedMessages.push({
+      id: generateUniqueId('ai'),
+      type: 'ai',
+      content: messageToProcess,
+      timestamp: new Date(),
+      suggestion: aiSuggestion,
+      quickResponses,
+      excerpt: aiExcerpt,
+      excerptId
+    });
+  }
+
+  // 處理 canned options
+  let cannedOptions: string[];
+  if (aiSuggestion) {
+    cannedOptions = ['下一題！'];
+  } else {
+    cannedOptions = quickResponses;
+  }
+
+  // 更新 shouldBlockNextSuggestion 狀態
+  const newShouldBlockNextSuggestion = !!aiSuggestion;
+
+  // --- 模板狀態自動更新邏輯（只更新最相似且超過門檻的） ---
+  let updatedTemplates = [...templates];
+  // excerpt 觸發 in_progress
+  if (aiExcerpt) {
+    const excerptText = `${aiExcerpt.title} ${aiExcerpt.content}`;
+    const excerptVec = getTextVector(excerptText);
+    let maxSim = 0;
+    let maxIdx = -1;
+    templates.forEach((t, idx) => {
+      const templateText = `${t.title} ${t.description}`;
+      const templateVec = getTextVector(templateText);
+      const sim = calculateCosineSimilarity(excerptVec, templateVec);
+      if (t.status === 'pending' && sim > maxSim) {
+        maxSim = sim;
+        maxIdx = idx;
+      }
+    });
+    if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
+      updatedTemplates = updatedTemplates.map((t, idx) =>
+        idx === maxIdx ? { ...t, status: 'in_progress' } : t
+      );
+    }
+  }
+  // suggestion 觸發 completed
+  if (aiSuggestion) {
+    const suggestionText = `${aiSuggestion.title} ${aiSuggestion.description}`;
+    const suggestionVec = getTextVector(suggestionText);
+    let maxSim = 0;
+    let maxIdx = -1;
+    templates.forEach((t, idx) => {
+      const templateText = `${t.title} ${t.description}`;
+      const templateVec = getTextVector(templateText);
+      const sim = calculateCosineSimilarity(suggestionVec, templateVec);
+      if ((t.status === 'in_progress' || t.status === 'pending') && sim > maxSim) {
+        maxSim = sim;
+        maxIdx = idx;
+      }
+    });
+    if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
+      updatedTemplates = updatedTemplates.map((t, idx) =>
+        idx === maxIdx ? { ...t, status: 'completed', completedSuggestion: aiSuggestion } : t
+      );
+    }
+  }
+
+  return {
+    messages: processedMessages,
+    cannedOptions,
+    shouldBlockNextSuggestion: newShouldBlockNextSuggestion,
+    templates: updatedTemplates
+  };
 }
 
 const FOLLOW_UP_SIMILARITY_THRESHOLD = 0.2;
@@ -159,7 +417,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json() as RequestBody;
-    const { messages, analysisResult, suggestions } = body;
+    const { messages, analysisResult, suggestions, templates } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json(
@@ -187,6 +445,15 @@ export async function POST(request: NextRequest) {
     // 將前端傳遞的建議轉換為字符串數組，用於重複檢查
     const existingSuggestions = suggestions?.map(s => `${s.title}: ${s.description}`) || [];
     
+    // 取得最後一則訊息內容用於 prompt 注入
+    const lastUserMessage = messages.filter(m => m.type === 'user').pop();
+    const userPrompt = lastUserMessage?.content || '';
+    
+    // 如果需要阻擋下個 suggestion，在 user prompt 注入提示
+    // if (shouldBlockNextSuggestion) { // This line is removed
+    //   userPrompt += '\n\n[系統提示：請勿再產生 suggestion，僅進行對話或追問，不要再給建議。]';
+    // }
+    
     // 建立系統提示，基於分析結果和已有建議
     const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions);
     
@@ -195,7 +462,8 @@ export async function POST(request: NextRequest) {
       .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join('\n\n');
     
-    const userInput = `對話歷史：\n${conversationHistory}\n\n請根據以上對話歷史回應用戶的最新訊息。`;
+    // 使用處理過的 userPrompt 而非原始對話歷史
+    const finalUserInput = `對話歷史：\n${conversationHistory}\n\n最新訊息：${userPrompt}\n\n請根據以上對話歷史回應用戶的最新訊息。`;
 
     console.log('🤖 [API] Creating OpenAI client for smart chat');
     const client = createNativeOpenAIClient(apiKey, {
@@ -203,13 +471,14 @@ export async function POST(request: NextRequest) {
     });
 
     // 調用 customPrompt 方法
-    const completion = await client.customPrompt(systemPrompt, userInput);
+    const completion = await client.customPrompt(systemPrompt, finalUserInput);
 
     // 解析回應 - 改進的泛化 parser
     let chatResponse: ChatResponse;
     try {
-      console.log('🔍 [API] Raw completion:', completion.substring(0, 200) + '...');
+      console.log('🔍 [API] Raw completion:', completion);
       chatResponse = parseAIResponse(completion);
+      console.log('🔍 [API] Parsed AI response:', chatResponse);
       console.log('✅ [API] Successfully parsed AI response');
     } catch (parseError) {
       console.warn('⚠️ [API] JSON parsing failed, using fallback:', parseError);
@@ -274,12 +543,17 @@ export async function POST(request: NextRequest) {
         source: '追問問題',
       };
     }
+    
+    // 取得上一則 AI message
+    const lastAiMessage = messages.filter(m => m.type === 'ai').pop();
+    
+    // 處理訊息邏輯
+    const processedResponse = processAIMessages(chatResponse, lastAiMessage, messages, templates);
 
-    console.log('✅ [API] Smart chat response generated');
-    console.log(chatResponse);
+    console.log('✅ [API] Smart chat response generated and processed');
     return NextResponse.json({
       success: true,
-      data: chatResponse
+      data: processedResponse
     });
 
   } catch (error) {

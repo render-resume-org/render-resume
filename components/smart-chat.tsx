@@ -51,7 +51,6 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     removeTemplate,
     quoteSuggestion,
     quoteTemplate,
-    shouldShowExcerpt
   } = useChatLogic({ analysisResult, onComplete, onSkip });
 
   return (
@@ -75,7 +74,6 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
             onToggleSidebar={handleToggleSidebar}
             messages={messages}
             messageVariants={messageVariants}
-            shouldShowExcerpt={shouldShowExcerpt}
             isLoading={isLoading}
             cannedOptions={cannedOptions}
             handleCannedMessage={handleCannedMessage}
@@ -100,7 +98,6 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
             suggestionsScrollAreaRef={suggestionsScrollAreaRef}
             messages={messages}
             messageVariants={messageVariants}
-            shouldShowExcerpt={shouldShowExcerpt}
             isLoading={isLoading}
             cannedOptions={cannedOptions}
             handleCannedMessage={handleCannedMessage}

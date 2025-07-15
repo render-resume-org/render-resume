@@ -3,15 +3,17 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { ChatMessage } from "../smart-chat";
 import ExcerptCard from "./excerpt-card";
+import SuggestionCard from "./suggestion-card";
 import UserAvatar from "./user-avatar";
 
 interface ChatMessageCardProps {
   message: ChatMessage;
-  shouldShowExcerpt: (excerptId?: string) => boolean;
 }
 
-const ChatMessageCard = ({ message, shouldShowExcerpt }: ChatMessageCardProps) => {
+const ChatMessageCard = ({ message }: ChatMessageCardProps) => {
   const { user } = useAuth();
+  // timestamp 兼容 string 或 Date
+  const time = typeof message.timestamp === 'string' ? new Date(message.timestamp) : message.timestamp;
   return (
     <div className={cn(`w-full flex`, message.type === 'user' ? 'justify-end' : 'justify-start')}>
       <div className={cn("flex items-start space-x-2 max-w-[90vw]", message.type === 'user' ? 'flex-row-reverse space-x-reverse' : '')}>
@@ -29,7 +31,7 @@ const ChatMessageCard = ({ message, shouldShowExcerpt }: ChatMessageCardProps) =
         )}
         <div className="w-fit max-w-full space-y-2">
           {/* 履歷摘錄卡片 */}
-          {message.excerpt && message.type === 'ai' && shouldShowExcerpt(message.excerptId) && (
+          {message.excerpt && message.type === 'ai' && (
             <ExcerptCard excerpt={message.excerpt} />
           )}
           {/* 主要消息內容 */}
@@ -41,12 +43,24 @@ const ChatMessageCard = ({ message, shouldShowExcerpt }: ChatMessageCardProps) =
           >
             <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
             <p className="text-xs opacity-70 mt-1">
-              {message.timestamp.toLocaleTimeString('zh-TW', {
+              {time.toLocaleTimeString('zh-TW', {
                 hour: '2-digit',
                 minute: '2-digit'
               })}
             </p>
           </div>
+          {/* 若有 suggestion，顯示建議卡片（以 template 樣式） */}
+          {message.type === 'ai' && message.suggestion && (
+            <SuggestionCard
+              suggestion={{
+                id: 'inline',
+                ...message.suggestion,
+                timestamp: message.timestamp
+              }}
+              onQuote={() => {}}
+              onRemove={() => {}}
+            />
+          )}
         </div>
       </div>
     </div>
