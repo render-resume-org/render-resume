@@ -5,12 +5,43 @@ import AISuggestionsSidebar from "./ai-suggestions-sidebar";
 import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
+import type { Variants } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
 import LoadingMessage from "./loading-message";
+import type { ChatMessage, SuggestionRecord } from "./types";
 
-const DesktopChatPanel = (props: any) => {
+interface DesktopChatPanelProps {
+  suggestions: SuggestionRecord[];
+  suggestionTemplates: SuggestionTemplate[];
+  onQuote: (s: SuggestionRecord) => void;
+  onQuoteTemplate: (t: SuggestionTemplate) => void;
+  onRemove: (id: string) => void;
+  onRemoveTemplate: (id: string) => void;
+  onComplete: () => void;
+  messageCount: number;
+  suggestionsScrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+  messages: ChatMessage[];
+  messageVariants: Variants;
+  shouldShowExcerpt: (id?: string) => boolean;
+  isLoading: boolean;
+  cannedOptions: string[];
+  handleCannedMessage: (msg: string) => void;
+  currentInput: string;
+  handleTextareaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleKeyPress: (e: React.KeyboardEvent) => void;
+  handleSendMessage: () => void;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
+  scrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  onSkip: (suggestions: SuggestionRecord[]) => void;
+}
+
+const DesktopChatPanel = (props: DesktopChatPanelProps) => {
   const lastToastRef = useRef<number>(0);
   useEffect(() => {
     if (props.messageCount >= 25 && lastToastRef.current !== props.messageCount) {
@@ -63,7 +94,7 @@ const DesktopChatPanel = (props: any) => {
             <ScrollArea className="h-full p-6" ref={props.scrollAreaRef}>
               <div className="space-y-4">
                 <AnimatePresence mode="popLayout">
-                  {props.messages.map((message: any) => (
+                  {props.messages.map((message) => (
                     <motion.div
                       key={message.id}
                       variants={props.messageVariants}

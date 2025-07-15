@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
     useCannedMessages,
-    useDebugHelpers,
     useExcerptProcessor,
     useInputManager,
     useScrollManager,
@@ -27,12 +26,13 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   const [visibleExcerptIds, setVisibleExcerptIds] = useState<string[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSuggestionsDrawer, setShowSuggestionsDrawer] = useState(false);
+  // 新增：追蹤是否要在下一則 user prompt 加入 block 提示
+  const [shouldBlockNextSuggestion, setShouldBlockNextSuggestion] = useState(false);
 
   // 使用各種 hooks
   const generateUniqueId = useUniqueId();
   const { 
     suggestionTemplates, 
-    setSuggestionTemplates, 
     updateTemplateStatus, 
     initializeSuggestionTemplates,
     removeTemplate 
@@ -75,20 +75,10 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   
   const {
     cannedOptions,
-    setCannedOptions,
     initializeCannedMessages,
     updateCannedOptions
   } = useCannedMessages();
   
-  const { debugScrollState } = useDebugHelpers(
-    scrollAreaRef,
-    scrollAreaRefMobile,
-    messagesEndRef,
-    messagesEndRefMobile,
-    messages,
-    suggestions
-  );
-
   // 初始化聊天
   const initializeChat = useCallback(() => {
     // 初始化建議模板
@@ -119,13 +109,19 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
   // 發送訊息的主要邏輯
   const handleSendMessage = useCallback(async (messageText?: string) => {
-    const textToSend = messageText || currentInput.trim();
+    let textToSend = messageText || currentInput.trim();
     if (!textToSend || isLoading || messageCount >= 30) return;
+
+    // 只在 shouldBlockNextSuggestion 為 true 時加提示，然後設回 false
+    if (shouldBlockNextSuggestion) {
+      textToSend += '\n\n[系統提示：請勿再產生 suggestion，僅進行對話或追問，不要再給建議。]';
+      setShouldBlockNextSuggestion(false);
+    }
 
     const userMessage: ChatMessage = {
       id: generateUniqueId('user'),
       type: 'user',
-      content: textToSend,
+      content: messageText || currentInput.trim(),
       timestamp: new Date()
     };
 
@@ -210,6 +206,11 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
       setMessages(prev => [...prev, aiMessage]);
       setMessageCount(prev => prev + 1);
+
+      // 如果這一則 AI message 有 suggestion，則標記下一則 user prompt 要 block suggestion
+      if (suggestion) {
+        setShouldBlockNextSuggestion(true);
+      }
 
       // 更新快速回復選項
       updateCannedOptions(quickResponses, !!suggestion);
@@ -328,7 +329,8 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     processExcerpt, 
     updateCannedOptions, 
     isSimilarSuggestion, 
-    setSuggestions
+    setSuggestions,
+    shouldBlockNextSuggestion
   ]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
@@ -562,4 +564,4 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     shouldShowExcerpt,
     onSkip
   };
-} 
+}

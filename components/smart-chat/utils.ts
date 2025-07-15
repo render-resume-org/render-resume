@@ -30,7 +30,7 @@ export const SIMILARITY_THRESHOLDS = {
   suggestionToSuggestion: 0.90, // 建議與建議
   excerptTitle: 0.8,           // excerpt 與 excerpt 標題
   excerptContent: 0.7,         // excerpt 與 excerpt 內容
-  templateMatch: 0.15,          // excerpt/template 與模板的相似度
+  templateMatch: 0.08,          // excerpt/template 與模板的相似度
 };
 
 // 消息動畫變體

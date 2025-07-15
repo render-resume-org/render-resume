@@ -11,7 +11,7 @@ interface SuggestionListProps {
   onRemove: (suggestionId: string) => void;
   onComplete: () => void;
   messageCount: number;
-  suggestionsScrollAreaRef: React.RefObject<HTMLDivElement>;
+  suggestionsScrollAreaRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const SuggestionList = ({ suggestions, onQuote, onRemove, onComplete, messageCount, suggestionsScrollAreaRef }: SuggestionListProps) => (

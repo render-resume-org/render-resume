@@ -29,7 +29,7 @@ interface AISuggestionsSidebarProps {
   suggestions: SuggestionRecord[];
   suggestionTemplates: SuggestionTemplate[];
   onQuote: (suggestion: SuggestionRecord) => void;
-  onQuoteTemplate: (item: SuggestionRecord | SuggestionTemplate) => void;
+  onQuoteTemplate: (template: SuggestionTemplate) => void;
   onRemove: (suggestionId: string) => void;
   onRemoveTemplate: (id: string) => void;
   onComplete: () => void;

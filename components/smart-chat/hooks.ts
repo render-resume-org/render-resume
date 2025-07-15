@@ -341,7 +341,7 @@ export function useInputManager() {
     const value = e.target.value;
     setCurrentInput(value);
     adjustTextareaHeight(value);
-  }, [adjustTextareaHeight]);
+  }, [setCurrentInput, adjustTextareaHeight]);
 
   const resetTextareaHeight = useCallback(() => {
     [textareaRef.current, textareaRefMobile.current].forEach(textarea => {

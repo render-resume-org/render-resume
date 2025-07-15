@@ -8,7 +8,7 @@ interface ChatInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onKeyPress: (e: React.KeyboardEvent) => void;
   onSend: () => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   disabled: boolean;
   messageCount: number;
 }

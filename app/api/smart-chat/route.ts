@@ -39,7 +39,7 @@ interface RequestBody {
   }>;
 }
 
-const FOLLOW_UP_SIMILARITY_THRESHOLD = 0.1;
+const FOLLOW_UP_SIMILARITY_THRESHOLD = 0.2;
 
 // 改進的 AI 回應解析函數
 function parseAIResponse(completion: string): ChatResponse {

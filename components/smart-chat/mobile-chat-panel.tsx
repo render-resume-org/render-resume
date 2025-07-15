@@ -6,14 +6,45 @@ import { AnimatePresence, motion } from "framer-motion";
 import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
+import type { Variants } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
 import LoadingMessage from "./loading-message";
 import SuggestionCard from "./suggestion-card";
 import SuggestionList from "./suggestion-list";
+import type { ChatMessage, SuggestionRecord } from "./types";
 
-const MobileChatPanel = (props: any) => {
+interface MobileChatPanelProps {
+  suggestions: SuggestionRecord[];
+  suggestionTemplates: SuggestionTemplate[];
+  onQuote: (s: SuggestionRecord) => void;
+  quoteTemplate: (t: SuggestionTemplate) => void;
+  onRemove: (id: string) => void;
+  removeTemplate: (id: string) => void;
+  onComplete: () => void;
+  messageCount: number;
+  suggestionsScrollAreaRef: React.RefObject<HTMLDivElement | null>;
+  messages: ChatMessage[];
+  messageVariants: Variants;
+  shouldShowExcerpt: (id?: string) => boolean;
+  isLoading: boolean;
+  cannedOptions: string[];
+  handleCannedMessage: (msg: string) => void;
+  currentInput: string;
+  handleTextareaChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleKeyPress: (e: React.KeyboardEvent) => void;
+  handleSendMessage: () => void;
+  textareaRefMobile: React.RefObject<HTMLTextAreaElement | null>;
+  messagesEndRefMobile: React.RefObject<HTMLDivElement | null>;
+  scrollAreaRefMobile: React.RefObject<HTMLDivElement | null>;
+  onSkip: (suggestions: SuggestionRecord[]) => void;
+  showSuggestionsDrawer: boolean;
+  setShowSuggestionsDrawer: (open: boolean) => void;
+}
+
+const MobileChatPanel = (props: MobileChatPanelProps) => {
   const lastToastRef = useRef<number>(0);
   useEffect(() => {
     if (props.messageCount >= 25 && lastToastRef.current !== props.messageCount) {
@@ -59,7 +90,7 @@ const MobileChatPanel = (props: any) => {
           <ScrollArea className="h-full px-4" ref={props.scrollAreaRefMobile}>
             <div className="space-y-4 py-2">
               <AnimatePresence mode="popLayout">
-                {props.messages.map((message: any) => (
+                {props.messages.map((message) => (
                   <motion.div
                     key={message.id}
                     variants={props.messageVariants}
@@ -113,10 +144,10 @@ const MobileChatPanel = (props: any) => {
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
                   <span className="w-2 h-2 bg-cyan-600 rounded-full mr-2"></span>
-                  追蹤問題 ({props.suggestionTemplates.filter((t: any) => t.status === 'completed').length}/{props.suggestionTemplates.length})
+                  追蹤問題 ({props.suggestionTemplates.filter((t) => t.status === 'completed').length}/{props.suggestionTemplates.length})
                 </h4>
                 <div className="space-y-3">
-                  {props.suggestionTemplates.map((template: any) => (
+                  {props.suggestionTemplates.map((template) => (
                     <SuggestionCard
                       key={template.id}
                       template={template}
