@@ -133,7 +133,9 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
         body: JSON.stringify({
           messages: [...messages, userMessage],
           analysisResult,
-          suggestions,
+          suggestions: [
+            ...suggestions
+          ],
           templates: suggestionTemplates
         }),
       });
@@ -269,8 +271,31 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   }, [handleSendMessage, smartScrollToBottom, suggestions]);
 
   const handleComplete = useCallback(() => {
-    onComplete(messages, suggestions);
-  }, [messages, suggestions, onComplete]);
+    // 將所有模板也當作 suggestion 傳遞到下一步，completed 用 completedSuggestion
+    const allSuggestions = [
+      ...suggestions,
+      ...suggestionTemplates.map(t => {
+        if (t.status === 'completed' && t.completedSuggestion) {
+          return {
+            id: t.id,
+            title: t.completedSuggestion.title,
+            description: t.completedSuggestion.description,
+            category: t.completedSuggestion.category,
+            timestamp: t.timestamp || new Date()
+          };
+        } else {
+          return {
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            category: t.category,
+            timestamp: t.timestamp || new Date()
+          };
+        }
+      })
+    ];
+    onComplete(messages, allSuggestions);
+  }, [messages, suggestions, suggestionTemplates, onComplete]);
 
   const removeSuggestion = useCallback((suggestionId: string) => {
     setSuggestions(prev => prev.filter(s => s.id !== suggestionId));

@@ -18,7 +18,7 @@ const ExcerptCard = ({ excerpt }: ExcerptCardProps) => (
     <h4 className="text-sm font-semibold text-orange-900 dark:text-orange-100 mb-1">
       {excerpt.title}
     </h4>
-    <p className="text-xs text-orange-800 dark:text-orange-200 whitespace-pre-wrap break-words leading-relaxed">
+    <p className="text-xs text-orange-800 dark:text-orange-200 whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
       {excerpt.content}
     </p>
   </div>

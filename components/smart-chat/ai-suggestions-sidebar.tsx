@@ -1,8 +1,9 @@
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { CheckCircle, ChevronLeft, ChevronRight, Circle, Lightbulb, MessageCircleQuestion, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import SuggestionCard from "./suggestion-card";
 
@@ -39,14 +40,16 @@ interface AISuggestionsSidebarProps {
   onToggleCollapse: () => void;
 }
 
-const getStatusIcon = (status: SuggestionTemplate['status']) => {
+// indicator bar color mapping from suggestion-card
+const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
+  if (!status) return 'bg-transparent';
   switch (status) {
     case 'pending':
-      return <Circle className="h-4 w-4 text-gray-400" />;
+      return 'bg-gray-300';
     case 'in_progress':
-      return <Play className="h-4 w-4 text-blue-500" />;
+      return 'bg-orange-300';
     case 'completed':
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
+      return 'bg-cyan-500';
   }
 };
 
@@ -162,33 +165,38 @@ const AISuggestionsSidebar = ({
             )}>
               <AnimatePresence mode="wait">
                 {isCollapsed ? (
-                  // Collapsed view - show icons only
+                  // Collapsed view - show avatars only
                   <div>
                     <ScrollArea className="h-full" ref={suggestionsScrollAreaRef}>
                       <div className="space-y-2">
                         {/* Templates */}
-                        {suggestionTemplates.map((template, index) => (
-                          <motion.div
-                            key={template.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="flex justify-center"
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onQuoteTemplate(template)}
-                              className="h-10 w-10 p-0 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors rounded-lg relative"
-                              title={template.title}
+                        {suggestionTemplates.map((template, index) => {
+                          // indicator bar color = avatar bg color
+                          const barColor = getIndicatorBarColor(template.status);
+                          // pending 狀態用深色字
+                          const textColor = template.status === 'pending' ? 'text-gray-700' : 'text-white';
+                          return (
+                            <motion.div
+                              key={template.id}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="flex justify-center"
                             >
-                              {getStatusIcon(template.status)}
-                              <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-600 flex items-center justify-center">
-                                <span className="text-xs text-white font-bold">T</span>
-                              </div>
-                            </Button>
-                          </motion.div>
-                        ))}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onQuoteTemplate(template)}
+                                className="h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-lg flex items-center justify-center"
+                                title={template.title}
+                              >
+                                <Avatar className="size-8">
+                                  <AvatarFallback className={cn(barColor, textColor, "font-bold text-base")}>{template.title?.[0] || "?"}</AvatarFallback>
+                                </Avatar>
+                              </Button>
+                            </motion.div>
+                          );
+                        })}
                         {/* Regular suggestions */}
                         {suggestions.map((suggestion, index) => (
                           <motion.div
@@ -202,10 +210,12 @@ const AISuggestionsSidebar = ({
                               variant="ghost"
                               size="sm"
                               onClick={() => onQuote(suggestion)}
-                              className="h-10 w-10 p-0 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors rounded-lg"
+                              className="h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-lg flex items-center justify-center"
                               title={suggestion.title}
                             >
-                              <MessageCircleQuestion className="h-5 w-5 text-cyan-600" />
+                              <Avatar className="size-8">
+                                <AvatarFallback className="bg-green-600 text-white font-bold text-base">{suggestion.title?.[0] || "?"}</AvatarFallback>
+                              </Avatar>
                             </Button>
                           </motion.div>
                         ))}
@@ -290,7 +300,7 @@ const AISuggestionsSidebar = ({
                   className="w-full bg-cyan-600 hover:bg-cyan-700 text-white transition-colors"
                   size="sm"
                 >
-                  完成對話 ({completedTemplates}/{suggestionTemplates.length} 問題完成, {suggestions.length} 額外建議)
+                  完成對話
                 </Button>
               </motion.div>
             )}

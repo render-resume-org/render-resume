@@ -148,8 +148,11 @@ function processAIMessages(
   // 處理 <NEXT_TOPIC> 分割訊息
   const processedMessages: ProcessedMessage[] = [];
   const messageToProcess = message;
-  if (aiSuggestion) {
-    if (typeof messageToProcess === 'string' && messageToProcess.includes('<NEXT_TOPIC>')) {
+  // 只針對 <NEXT_TOPIC> 進行切割
+  let didSplit = false;
+  if (typeof messageToProcess === 'string') {
+    // 只檢查 <NEXT_TOPIC>
+    if (messageToProcess.includes('<NEXT_TOPIC>')) {
       const [before, after] = messageToProcess.split('<NEXT_TOPIC>');
       processedMessages.push({
         id: generateUniqueId('ai'),
@@ -171,56 +174,11 @@ function processAIMessages(
         excerpt: undefined,
         excerptId: undefined
       });
-    } else {
-      // 檢查是否有關鍵字
-      const topicKeywords = ['接著', '接下來', '下一題'];
-      let splitIdx = -1;
-      for (const keyword of topicKeywords) {
-        const idx = messageToProcess.indexOf(keyword);
-        if (idx !== -1 && (splitIdx === -1 || idx < splitIdx)) {
-          splitIdx = idx;
-        }
-      }
-      if (splitIdx !== -1) {
-        // 有關鍵字，直接切割
-        const before = messageToProcess.slice(0, splitIdx);
-        const after = messageToProcess.slice(splitIdx);
-        processedMessages.push({
-          id: generateUniqueId('ai'),
-          type: 'ai',
-          content: before.trim(),
-          timestamp: new Date(),
-          suggestion: aiSuggestion,
-          quickResponses,
-          excerpt: aiExcerpt,
-          excerptId
-        });
-        processedMessages.push({
-          id: generateUniqueId('ai'),
-          type: 'ai',
-          content: after.trim(),
-          timestamp: new Date(),
-          suggestion: undefined,
-          quickResponses,
-          excerpt: undefined,
-          excerptId: undefined
-        });
-      } else {
-        // 沒有 <NEXT_TOPIC> 也沒有關鍵字，直接原樣
-        processedMessages.push({
-          id: generateUniqueId('ai'),
-          type: 'ai',
-          content: messageToProcess,
-          timestamp: new Date(),
-          suggestion: aiSuggestion,
-          quickResponses,
-          excerpt: aiExcerpt,
-          excerptId
-        });
-      }
+      didSplit = true;
     }
-  } else {
-    // 沒有 suggestion 的情況
+  }
+  // 若沒切割，原樣 push
+  if (!didSplit) {
     processedMessages.push({
       id: generateUniqueId('ai'),
       type: 'ai',
