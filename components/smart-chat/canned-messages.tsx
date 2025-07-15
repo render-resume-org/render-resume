@@ -7,8 +7,8 @@ interface CannedMessagesProps {
 }
 
 const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps) => (
-  <div className="space-y-2 min-h-[3rem]">
-    <div className="flex gap-2 overflow-x-auto whitespace-nowrap lg:flex-wrap lg:overflow-x-visible lg:whitespace-normal py-1 px-1">
+  <div className="py-0 space-y-2 min-h-[3rem]">
+    <div className="flex gap-2 overflow-x-auto whitespace-nowrap lg:flex-wrap lg:overflow-x-visible lg:whitespace-normal px-1">
       {cannedOptions.map((option, index) => (
         <motion.div
           key={`${option}-${index}`}
