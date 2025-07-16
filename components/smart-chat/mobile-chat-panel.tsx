@@ -7,10 +7,12 @@ import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
 import type { Variants } from "framer-motion";
+import { Lightbulb } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
+import DraggableFab from "./draggable-fab";
 import LoadingMessage from "./loading-message";
 import SuggestionCard from "./suggestion-card";
 import SuggestionList from "./suggestion-list";
@@ -74,14 +76,15 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
           <div className="text-sm text-gray-600 dark:text-gray-300 my-1">
             自由詢問履歷相關問題，AI 會記錄並提供具體建議
           </div>
-          <Button
+          {/* 移除原 Button trigger */}
+          {/* <Button
             variant="outline"
             size="sm"
             className="px-2 py-1 h-8 text-xs border-cyan-200 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-900 dark:text-cyan-100"
             onClick={() => props.setShowSuggestionsDrawer(true)}
           >
             查看建議 ({props.suggestions.length})
-          </Button>
+          </Button> */}
         </div>
         <Separator className="mt-2" />
         {/* Chat Area */}
@@ -126,6 +129,17 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
           />
         </div>
       </div>
+      {/* 浮動 Lightbulb trigger */}
+      <DraggableFab
+        onClick={() => props.setShowSuggestionsDrawer(true)}
+        icon={
+          <div className="rounded-xl bg-gray-50 hover:scale-110 transition-all p-2 flex items-center justify-center shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]">
+            <Lightbulb className="h-6 w-6 text-cyan-600" />
+          </div>
+        }
+        initialPosition={{ right: 16, bottom: 16 }}
+        snapMargin={16}
+      />
       {/* 彈出建議總結 Sheet */}
       <Sheet open={props.showSuggestionsDrawer} onOpenChange={props.setShowSuggestionsDrawer}>
         <SheetContent side="bottom" className="max-h-[80vh] p-0">
