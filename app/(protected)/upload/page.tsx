@@ -88,7 +88,7 @@ export default function UploadPage() {
   const pageContent = getPageContent();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header Card */}
         <Card className={`mb-8 transition-all duration-700 ${

@@ -25,47 +25,57 @@ const DraggableFab: React.FC<DraggableFabProps> = ({ onClick, icon, initialPosit
   const handleDragStart = (e: React.DragEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const el = fabRef.current;
     if (!el) return;
-    let startX = 0, startY = 0, shiftX = 0, shiftY = 0;
+    let shiftX = 0, shiftY = 0;
     let dragging = false;
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const width = el.offsetWidth;
     const height = el.offsetHeight;
 
-    const getEventXY = (ev: any) => {
-      if (ev.touches && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
-      return { x: ev.clientX, y: ev.clientY };
-    };
+    function getEventXY(ev: MouseEvent | TouchEvent): { x: number; y: number } {
+      if ('touches' in ev && ev.touches[0]) return { x: ev.touches[0].clientX, y: ev.touches[0].clientY };
+      const mouseEv = ev as MouseEvent;
+      return { x: mouseEv.clientX, y: mouseEv.clientY };
+    }
 
-    const { x, y } = getEventXY(e);
-    startX = x;
-    startY = y;
+    // 型別安全轉換
+    let eventXY: { x: number; y: number };
+    if ((e as unknown as TouchEvent).touches) {
+      eventXY = getEventXY(e as unknown as TouchEvent);
+    } else {
+      eventXY = getEventXY(e as unknown as MouseEvent);
+    }
+    const { x, y } = eventXY;
     const rect = el.getBoundingClientRect();
     shiftX = x - rect.left;
     shiftY = y - rect.top;
     dragging = true;
 
     function moveAt(pageX: number, pageY: number) {
-      el.style.left = Math.max(0, Math.min(pageX - shiftX, vw - width)) + "px";
-      el.style.top = Math.max(0, Math.min(pageY - shiftY, vh - height)) + "px";
+      if (!fabRef.current) return;
+      const el = fabRef.current;
+      el.style.left = Math.max(0, Math.min(pageX - shiftX, window.innerWidth - width)) + "px";
+      el.style.top = Math.max(0, Math.min(pageY - shiftY, window.innerHeight - height)) + "px";
       el.style.right = "auto";
       el.style.bottom = "auto";
       el.style.position = "fixed";
     }
 
-    function onMove(ev: any) {
-      if (!dragging) return;
+    function onMove(ev: MouseEvent | TouchEvent) {
+      if (!dragging || !fabRef.current) return;
       const { x, y } = getEventXY(ev);
       moveAt(x, y);
     }
 
-    function onEnd(ev?: any) {
+    function onEnd() {
+      if (!fabRef.current) return;
       dragging = false;
-      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mousemove", onMove as EventListener);
       document.removeEventListener("mouseup", onEnd);
-      document.removeEventListener("touchmove", onMove);
+      document.removeEventListener("touchmove", onMove as EventListener);
       document.removeEventListener("touchend", onEnd);
       // snap
+      const el = fabRef.current;
       const rect = el.getBoundingClientRect();
       const snapTop = Math.max(snapMargin, Math.min(rect.top, vh - height - snapMargin));
       el.style.left = "";
@@ -82,9 +92,9 @@ const DraggableFab: React.FC<DraggableFabProps> = ({ onClick, icon, initialPosit
       el.style.position = "fixed";
     }
 
-    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mousemove", onMove as EventListener);
     document.addEventListener("mouseup", onEnd);
-    document.addEventListener("touchmove", onMove);
+    document.addEventListener("touchmove", onMove as EventListener);
     document.addEventListener("touchend", onEnd);
   };
 
