@@ -494,7 +494,7 @@ export async function POST(request: NextRequest) {
     }
     // 取出最後一則 ai 之後的所有訊息（user/file）
     const messagesToSend = messages.slice(lastAiIdx + 1);
-    const openAIMessages = [];
+    const openAIMessages: { role: 'system' | 'user' | 'assistant'; content: string | Array<{ type: 'text' | 'image_url'; text?: string; image_url?: { url: string; detail?: string } }> }[] = [];
     openAIMessages.push({
       role: 'system',
       content: systemPrompt

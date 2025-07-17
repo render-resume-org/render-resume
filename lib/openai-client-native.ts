@@ -1203,7 +1203,7 @@ export class NativeOpenAIClient {
     /**
      * Vision/文件支援：直接傳遞 messages array，支援 input_file/input_text 格式
      */
-    async customPromptWithFiles(messages: any[]): Promise<string> {
+    async customPromptWithFiles(messages: OpenAIMessage[]): Promise<string> {
         console.log('🚀 [Native OpenAI Client] Making custom prompt call with files');
         try {
             const request = {

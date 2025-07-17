@@ -296,7 +296,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     } finally {
       setIsLoading(false);
     }
-  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId]);
+  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId, flattenFilesToMessages]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -439,7 +439,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
         }, 100);
       });
     }
-  }, [isLoading, messageCount, focusInput]);
+  }, [isLoading, messageCount, focusInput, textareaRef, textareaRefMobile]);
 
   // 處理螢幕尺寸變化
   useEffect(() => {
