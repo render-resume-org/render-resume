@@ -1,6 +1,7 @@
 // API 請求和回應的型別定義
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 
-export interface Project {
+export interface AnalysisProject {
     name: string;
     description: string;
     technologies: string[];
@@ -42,7 +43,7 @@ export interface Profile {
 }
 
 // Define letter grade type
-export type LetterGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'F';
+export type LetterGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D' | 'F';
 
 export interface AnalysisScore {
     category: string;
@@ -63,7 +64,7 @@ export interface MissingContent {
 
 export interface ResumeAnalysisResult {
     profile?: Profile;
-    projects: Project[];
+    projects: AnalysisProject[];
     expertise: string[];
     projects_summary: string;
     expertise_summary: string;
@@ -137,6 +138,12 @@ export interface ResumeAnalysisOptions {
 export interface DocumentAnalysisOptions {
     files: File[];
     additionalText?: string;
+    education?: Education[];
+    experience?: Experience[];
+    projects?: Project[];
+    skills?: string;
+    personalInfo?: PersonalInfo;
+    links?: Links;
     useVision?: boolean;
 }
 

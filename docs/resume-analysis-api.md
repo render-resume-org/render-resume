@@ -112,6 +112,12 @@ Content-Type: multipart/form-data
 **表單欄位：**
 - `files` (必需): 一個或多個文件
 - `additionalText` (可選): 額外資訊
+- `education` (可選): 教育背景資訊 (JSON 格式)
+- `experience` (可選): 工作經驗資訊 (JSON 格式)
+- `projects` (可選): 專案經驗資訊 (JSON 格式)
+- `skills` (可選): 技能列表 (JSON 格式)
+- `personalInfo` (可選): 個人基本資料 (JSON 格式)
+- `links` (可選): 連結資訊 (JSON 格式)
 - `useVision` (可選): 是否使用 Vision 模型 (預設: true)
 
 **範例請求：**
@@ -120,6 +126,12 @@ curl -X POST http://localhost:3000/api/analyze \
   -F "files=@resume.pdf" \
   -F "files=@portfolio.png" \
   -F "additionalText=應徵前端工程師職位" \
+  -F "education=[{\"school\":\"台大\",\"major\":\"資工\",\"degree\":\"學士\",\"gpa\":\"3.8\",\"startYear\":\"2018\",\"endYear\":\"2022\"}]" \
+  -F "experience=[{\"company\":\"Google\",\"position\":\"軟體工程師\",\"startYear\":\"2022\",\"endYear\":\"2024\"}]" \
+  -F "projects=[{\"name\":\"電商平台\",\"description\":\"全端開發\",\"startYear\":\"2023\",\"endYear\":\"2024\"}]" \
+  -F "skills=JavaScript,React,Node.js" \
+  -F "personalInfo={\"address\":\"台北市\",\"phone\":\"0912345678\",\"email\":\"test@example.com\"}" \
+  -F "links={\"linkedin\":\"https://linkedin.com/in/test\",\"github\":\"https://github.com/test\",\"portfolio\":\"https://portfolio.com\"}" \
   -F "useVision=true"
 ```
 
@@ -168,6 +180,43 @@ const files = [pdfFile, imageFile]; // File 物件陣列
 const result = await analyzeDocuments({
   files: files,
   additionalText: "應徵軟體工程師",
+  education: [
+    {
+      school: "台大",
+      major: "資工",
+      degree: "學士",
+      gpa: "3.8",
+      startYear: "2018",
+      endYear: "2022"
+    }
+  ],
+  experience: [
+    {
+      company: "Google",
+      position: "軟體工程師",
+      startYear: "2022",
+      endYear: "2024"
+    }
+  ],
+  projects: [
+    {
+      name: "電商平台",
+      description: "全端開發",
+      startYear: "2023",
+      endYear: "2024"
+    }
+  ],
+  skills: "JavaScript,React,Node.js",
+  personalInfo: {
+    address: "台北市",
+    phone: "0912345678",
+    email: "test@example.com"
+  },
+  links: {
+    linkedin: "https://linkedin.com/in/test",
+    github: "https://github.com/test",
+    portfolio: "https://portfolio.com"
+  },
   useVision: true
 });
 

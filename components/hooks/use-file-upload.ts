@@ -1,7 +1,9 @@
 "use client";
 
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 import {
     UploadedFile,
+    FileData,
     clearUploadSession,
     generateFileId,
     getFileType,
@@ -9,12 +11,32 @@ import {
     saveToSession
 } from '@/lib/upload-utils';
 import { pdfToImg } from 'pdftoimg-js/browser';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [additionalText, setAdditionalText] = useState('');
+  const [education, setEducation] = useState<Education[]>([
+    { school: "", major: "", degree: "", gpa: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
+  ]);
+  const [experience, setExperience] = useState<Experience[]>([
+    { company: "", position: "", location: "", description: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
+  ]);
+  const [projects, setProjects] = useState<Project[]>([
+    { name: "", description: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
+  ]);
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    address: "",
+    phone: "",
+    email: ""
+  });
+  const [skills, setSkills] = useState<string>("");
+  const [links, setLinks] = useState<Links>({
+    linkedin: "",
+    github: "",
+    portfolio: ""
+  });
 
   // Clear previous session data on mount
   useEffect(() => {
@@ -130,18 +152,45 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
     });
   }, []);
 
+  // 檢查是否有有效的經驗內容
+  const hasValidExperience = useMemo(() => {
+    return experience.some(exp => 
+      exp.company.trim() !== '' && 
+      exp.position.trim() !== '' && 
+      exp.description.trim() !== ''
+    );
+  }, [experience]);
+
+  // 檢查是否有有效的專案內容
+  const hasValidProjects = useMemo(() => {
+    return projects.some(proj => 
+      proj.name.trim() !== '' && 
+      proj.description.trim() !== ''
+    );
+  }, [projects]);
+
   const prepareForAnalysis = useCallback(async () => {
     console.log('🚀 [File Upload Hook] Starting file preparation for analysis');
     console.log('📊 [File Upload Hook] Current state:', {
       uploadedFilesCount: uploadedFiles.length,
       additionalTextLength: additionalText.length,
+      educationCount: education.length,
+      experienceCount: experience.length,
+      projectsCount: projects.length,
       serviceType,
-      canProceed: uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed')
+              canProceed: serviceType === 'optimize' 
+        ? uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed')
+        : hasValidExperience || hasValidProjects
     });
     
-    if (uploadedFiles.length === 0) {
-      console.warn('⚠️ [File Upload Hook] No files to process');
-      throw new Error('No files to process');
+    if (serviceType === 'optimize' && uploadedFiles.length === 0) {
+      console.warn('⚠️ [File Upload Hook] No files to process for optimize service');
+      throw new Error('請選擇要分析的文件');
+    }
+    
+    if (serviceType === 'create' && !hasValidExperience && !hasValidProjects) {
+      console.warn('⚠️ [File Upload Hook] No valid experience or projects for create service');
+      throw new Error('請至少填寫一項工作經驗或專案經驗');
     }
     
     setIsProcessing(true);
@@ -149,16 +198,21 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
     try {
       console.log('📋 [File Upload Hook] Preparing files data');
       
-      const allFilesData = await processFilesForAnalysis(uploadedFiles);
-      
-      console.log('📄 [File Upload Hook] All files data prepared:', allFilesData.map(f => ({
-        id: f.id,
-        name: f.name,
-        type: f.type,
-        isFromPdf: f.isFromPdf || false
-      })));
+      let allFilesData: FileData[] = [];
+      if (uploadedFiles.length > 0) {
+        allFilesData = await processFilesForAnalysis(uploadedFiles);
+        
+        console.log('📄 [File Upload Hook] All files data prepared:', allFilesData.map(f => ({
+          id: f.id,
+          name: f.name,
+          type: f.type,
+          isFromPdf: f.isFromPdf || false
+        })));
+      } else {
+        console.log('📄 [File Upload Hook] No files to process, using form data only');
+      }
 
-      saveToSession(allFilesData, additionalText, serviceType);
+      saveToSession(allFilesData, additionalText, education, experience, projects, skills, personalInfo, links, serviceType);
       
       console.log('🏁 [File Upload Hook] File preparation process completed');
       return allFilesData;
@@ -172,15 +226,31 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
     } finally {
       setIsProcessing(false);
     }
-  }, [uploadedFiles, additionalText, serviceType]);
+  }, [uploadedFiles, additionalText, education, experience, projects, personalInfo, links, skills, serviceType, hasValidExperience, hasValidProjects]);
 
-  const canProceed = uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed');
+  const canProceed = useMemo(() => {
+    return serviceType === 'optimize' 
+      ? uploadedFiles.length > 0 && uploadedFiles.every(f => f.status === 'completed')
+      : hasValidExperience || hasValidProjects;
+  }, [serviceType, uploadedFiles, hasValidExperience, hasValidProjects]);
 
   return {
     uploadedFiles,
     isProcessing,
     additionalText,
     setAdditionalText,
+    education,
+    setEducation,
+    experience,
+    setExperience,
+    projects,
+    setProjects,
+    skills,
+    setSkills,
+    personalInfo,
+    setPersonalInfo,
+    links,
+    setLinks,
     onDrop,
     removeFile,
     prepareForAnalysis,

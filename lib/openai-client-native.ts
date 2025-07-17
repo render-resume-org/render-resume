@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt
@@ -50,6 +51,12 @@ export interface DocumentUpload {
 export interface FileAnalysisOptions {
     documents: DocumentUpload[];
     additionalText?: string;
+    education?: Education[];
+    experience?: Experience[];
+    projects?: Project[];
+    skills?: string;
+    personalInfo?: PersonalInfo;
+    links?: Links;
     useVision?: boolean;
     customSystemPrompt?: string;
 }
@@ -398,7 +405,7 @@ export class NativeOpenAIClient {
     async analyzeDocuments(options: FileAnalysisOptions): Promise<ResumeAnalysisResult> {
         console.log('🚀 [Native OpenAI Client] Starting document analysis with native client');
         
-        const { documents, additionalText, useVision = false, customSystemPrompt } = options;
+        const { documents, additionalText, education, experience, projects, skills, personalInfo, links, useVision = false, customSystemPrompt } = options;
         
         if (!documents || documents.length === 0) {
             throw new Error('沒有提供文件進行分析');
@@ -467,6 +474,45 @@ export class NativeOpenAIClient {
             
             if (additionalText) {
                 userPrompt += `\n\n額外資訊：\n${additionalText}`;
+            }
+
+            if (education && education.length > 0) {
+                userPrompt += `\n\n教育背景資訊：\n${education.map(edu => {
+                    const duration = edu.isCurrent ? 
+                        `${edu.startMonth}/${edu.startYear} - 現在` : 
+                        `${edu.startMonth}/${edu.startYear} - ${edu.endMonth}/${edu.endYear}`;
+                    return `- ${edu.school} ${edu.degree} ${edu.major} (${duration}) GPA: ${edu.gpa}`;
+                }).join('\n')}`;
+            }
+
+            if (experience && experience.length > 0) {
+                userPrompt += `\n\n工作經驗資訊：\n${experience.map(exp => {
+                    const duration = exp.isCurrent ? 
+                        `${exp.startMonth}/${exp.startYear} - 現在` : 
+                        `${exp.startMonth}/${exp.startYear} - ${exp.endMonth}/${exp.endYear}`;
+                    return `- ${exp.company} ${exp.position} (${exp.location})\n  期間：${duration}\n  描述：${exp.description}`;
+                }).join('\n\n')}`;
+            }
+
+            if (projects && projects.length > 0) {
+                userPrompt += `\n\n專案經驗資訊：\n${projects.map(project => {
+                    const duration = project.isCurrent ? 
+                        `${project.startMonth}/${project.startYear} - 現在` : 
+                        `${project.startMonth}/${project.startYear} - ${project.endMonth}/${project.endYear}`;
+                    return `- ${project.name}\n  期間：${duration}\n  描述：${project.description}`;
+                }).join('\n\n')}`;
+            }
+
+            if (skills) {
+                userPrompt += `\n\n技能列表：\n${skills}`;
+            }
+
+            if (personalInfo) {
+                userPrompt += `\n\n個人基本資料：\n地址：${personalInfo.address}\n電話：${personalInfo.phone}\n郵箱：${personalInfo.email}`;
+            }
+
+            if (links) {
+                userPrompt += `\n\n連結：\nLinkedIn：${links.linkedin}\nGitHub：${links.github}\n作品集：${links.portfolio}`;
             }
 
             if (hasImages) {

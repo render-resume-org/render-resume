@@ -27,7 +27,7 @@ export default function ServiceSelectionPage() {
   const router = useRouter();
 
   const handleServiceSelect = (serviceType: 'create' | 'optimize') => {
-    router.push(`/upload?type=${serviceType}`);
+    router.push(`/upload-${serviceType}`);
   };
 
   return (
