@@ -1,7 +1,8 @@
+import { SIMILARITY_THRESHOLDS } from '@/components/smart-chat/utils';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/lib/prompts';
-import { calculateCosineSimilarity, calculateStringSimilarity, getTextVector } from '@/lib/similarity';
+import { calculateCosineSimilarity, getTextVector } from '@/lib/similarity';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -38,21 +39,24 @@ interface Template {
 }
 
 interface RequestBody {
-  messages: Array<{
-    type: 'ai' | 'user';
-    content: string;
-    timestamp: Date;
-    suggestion?: {
-      title: string;
-      description: string;
-      category: string;
-    };
-    excerpt?: {
-      title: string;
-      content: string;
-      source: string;
-    };
-  }>;
+  messages: Array<
+    | {
+        type: 'ai' | 'user';
+        content: string;
+        timestamp: Date;
+        suggestion?: {
+          title: string;
+          description: string;
+          category: string;
+        };
+        excerpt?: {
+          title: string;
+          content: string;
+          source: string;
+        };
+      }
+    | FileMessage
+  >;
   analysisResult: ResumeAnalysisResult;
   suggestions: Array<{
     title: string;
@@ -97,7 +101,6 @@ interface ProcessedMessage {
 interface ProcessedChatResponse {
   messages: ProcessedMessage[];
   cannedOptions: string[];
-  shouldBlockNextSuggestion: boolean;
   templates: Template[];
 }
 
@@ -106,10 +109,7 @@ function generateUniqueId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// 相似度閾值（與前端一致）
-const SIMILARITY_THRESHOLDS = {
-  templateMatch: 0.08
-};
+
 
 // 新增訊息處理邏輯
 function processAIMessages(
@@ -175,7 +175,7 @@ function processAIMessages(
         excerptId: undefined
       });
       didSplit = true;
-    }
+    } 
   }
   // 若沒切割，原樣 push
   if (!didSplit) {
@@ -200,29 +200,53 @@ function processAIMessages(
   }
 
   // 更新 shouldBlockNextSuggestion 狀態
-  const newShouldBlockNextSuggestion = !!aiSuggestion;
 
   // --- 模板狀態自動更新邏輯（只更新最相似且超過門檻的） ---
   let updatedTemplates = [...templates];
   // excerpt 觸發 in_progress
+  let movedTemplateId: string | null = null;
   if (aiExcerpt) {
-    const excerptText = `${aiExcerpt.title} ${aiExcerpt.content}`;
+    // const excerptText = `${aiExcerpt.title} ${aiExcerpt.content.slice(0, 250)} ${lastAiMessage?.content}`;
+    const excerptText = `${aiExcerpt.title}`;
     const excerptVec = getTextVector(excerptText);
     let maxSim = 0;
     let maxIdx = -1;
+    let allBelowThreshold = true;
     templates.forEach((t, idx) => {
-      const templateText = `${t.title} ${t.description}`;
+      // const templateText = `${t.title} ${t.description}`;
+      const templateText = `${t.title}`;
       const templateVec = getTextVector(templateText);
       const sim = calculateCosineSimilarity(excerptVec, templateVec);
+      console.log(`🟦 [Similarity][Excerpt] Excerpt: "${excerptText}" vs Template: "${templateText}" → Cosine: ${sim.toFixed(4)}`);
+      if (sim >= SIMILARITY_THRESHOLDS.templateMatch) {
+        allBelowThreshold = false;
+      }
       if (t.status === 'pending' && sim > maxSim) {
         maxSim = sim;
         maxIdx = idx;
       }
     });
     if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
-      updatedTemplates = updatedTemplates.map((t, idx) =>
-        idx === maxIdx ? { ...t, status: 'in_progress' } : t
-      );
+      updatedTemplates = updatedTemplates.map((t, idx) => {
+        if (idx === maxIdx) {
+          movedTemplateId = t.id;
+          return { ...t, status: 'in_progress' };
+        }
+        return t;
+      });
+    }
+    // 新增：如果所有模板都低於門檻，append 一個 in_progress template
+    if (allBelowThreshold) {
+      const newTemplate = {
+        id: generateUniqueId('template'),
+        title: aiExcerpt.title,
+        description: aiExcerpt.content,
+        category: aiExcerpt.source,
+        status: 'in_progress'
+      };
+      updatedTemplates = [newTemplate, ...updatedTemplates]; // append to front
+      movedTemplateId = newTemplate.id;
+      console.log('🆕 [Template][Append] Appended new in_progress template from excerpt:', newTemplate);
     }
   }
   // suggestion 觸發 completed
@@ -235,27 +259,44 @@ function processAIMessages(
       const templateText = `${t.title} ${t.description}`;
       const templateVec = getTextVector(templateText);
       const sim = calculateCosineSimilarity(suggestionVec, templateVec);
+      console.log(`🟩 [Similarity][Suggestion] Suggestion: "${suggestionText}" vs Template: "${templateText}" → Cosine: ${sim.toFixed(4)}`);
       if ((t.status === 'in_progress' || t.status === 'pending') && sim > maxSim) {
         maxSim = sim;
         maxIdx = idx;
       }
     });
     if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
-      updatedTemplates = updatedTemplates.map((t, idx) =>
-        idx === maxIdx ? { ...t, status: 'completed', completedSuggestion: aiSuggestion } : t
-      );
+      const updated = updatedTemplates.map((t, idx) => {
+        if (idx === maxIdx) {
+          movedTemplateId = t.id;
+          return { ...t, status: 'completed', completedSuggestion: aiSuggestion };
+        }
+        return t;
+      });
+      // 將剛完成的 template 移到最前面
+      const moved = updated.find((t, idx) => idx === maxIdx);
+      if (moved) {
+        updatedTemplates = [moved, ...updated.filter((_, idx) => idx !== maxIdx)];
+      } else {
+        updatedTemplates = updated;
+      }
+    }
+  }
+  // 若有狀態變動或新增，確保該 template 在最前面
+  if (movedTemplateId) {
+    const idx = updatedTemplates.findIndex(t => t.id === movedTemplateId);
+    if (idx > 0) {
+      const [moved] = updatedTemplates.splice(idx, 1);
+      updatedTemplates = [moved, ...updatedTemplates];
     }
   }
 
   return {
     messages: processedMessages,
     cannedOptions,
-    shouldBlockNextSuggestion: newShouldBlockNextSuggestion,
     templates: updatedTemplates
   };
 }
-
-const FOLLOW_UP_SIMILARITY_THRESHOLD = 0.2;
 
 // 改進的 AI 回應解析函數
 function parseAIResponse(completion: string): ChatResponse {
@@ -355,6 +396,23 @@ function parseAIResponse(completion: string): ChatResponse {
   }
 }
 
+// --- 型別擴充：支援 file message ---
+interface FileMessage {
+  type: 'file';
+  content: string;
+  timestamp: Date;
+  file: {
+    id: string;
+    name: string;
+    type: string;
+    size: number;
+    preview?: string;
+    pages?: string[];
+    isFromPdf?: boolean;
+    originalPdfName?: string;
+  };
+}
+
 export async function POST(request: NextRequest) {
   console.log('🚀 [API] POST /api/smart-chat - Request received');
   
@@ -377,7 +435,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json() as RequestBody;
     const { messages, analysisResult, suggestions, templates } = body;
 
-    if (!messages || !Array.isArray(messages)) {
+    // --- 新增：分離 file message 與對話訊息 ---
+    const chatMessages = messages.filter(m => m.type !== 'file');
+
+    if (!chatMessages || !Array.isArray(chatMessages)) {
       return NextResponse.json(
         { error: '缺少必要參數: messages' },
         { status: 400 }
@@ -403,33 +464,71 @@ export async function POST(request: NextRequest) {
     // 將前端傳遞的建議轉換為字符串數組，用於重複檢查
     const existingSuggestions = suggestions?.map(s => `${s.title}: ${s.description}`) || [];
     
-    // 取得最後一則訊息內容用於 prompt 注入
-    const lastUserMessage = messages.filter(m => m.type === 'user').pop();
-    const userPrompt = lastUserMessage?.content || '';
     
-    // 如果需要阻擋下個 suggestion，在 user prompt 注入提示
-    // if (shouldBlockNextSuggestion) { // This line is removed
-    //   userPrompt += '\n\n[系統提示：請勿再產生 suggestion，僅進行對話或追問，不要再給建議。]';
-    // }
-    
-    // 建立系統提示，基於分析結果和已有建議
-    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions);
+    // 建立系統提示，基於分析結果和已有建議與 templates
+    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions, templates);
     
     // 準備用戶對話內容，包含對話歷史
     const conversationHistory = messages
-      .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+    .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join('\n\n');
     
-    // 使用處理過的 userPrompt 而非原始對話歷史
-    const finalUserInput = `對話歷史：\n${conversationHistory}\n\n最新訊息：${userPrompt}\n\n請根據以上對話歷史回應用戶的最新訊息。`;
+    
+    const lastUserMessage = messages.filter(m => m.type === 'user').pop();
+    const userPrompt = lastUserMessage?.content || '';
+    let finalUserInput = `對話歷史：\n${conversationHistory}`;
+    if (messages[messages.length - 1].type === 'user') {
+      finalUserInput += `\n\n最新訊息：${userPrompt}`;
+    } else { 
+      finalUserInput += `\n\n最新訊息：用戶沒有輸入文字，只是上傳了圖片`;
+    }
 
-    console.log('🤖 [API] Creating OpenAI client for smart chat');
+    // --- 新增：組合 vision 格式 messages ---
+    // 找出最後一則 ai 訊息的 index
+    let lastAiIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].type === 'ai') {
+        lastAiIdx = i;
+        break;
+      }
+    }
+    // 取出最後一則 ai 之後的所有訊息（user/file）
+    const messagesToSend = messages.slice(lastAiIdx + 1);
+    const openAIMessages = [];
+    openAIMessages.push({
+      role: 'system',
+      content: systemPrompt
+    });
+    for (const msg of messagesToSend) {
+      if (msg.type === 'file' && msg.file?.preview) {
+        openAIMessages.push({
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: msg.file.preview }
+            }
+          ]
+        });
+      }
+    }
+    openAIMessages.push({
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: finalUserInput
+        }
+      ]
+    });
+
+    console.log('🤖 [API] Creating OpenAI client for smart chat (vision)');
     const client = createNativeOpenAIClient(apiKey, {
       modelName: 'gpt-4.1-mini',
     });
 
-    // 調用 customPrompt 方法
-    const completion = await client.customPrompt(systemPrompt, finalUserInput);
+    // 調用 customPromptWithFiles 方法
+    const completion = await client.customPromptWithFiles(openAIMessages);
 
     // 解析回應 - 改進的泛化 parser
     let chatResponse: ChatResponse;
@@ -446,72 +545,20 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // 取得 user 最新一則訊息
-    const userMessage = messages && messages.length > 0 ? messages[messages.length - 1] : null;
-    const userText = userMessage && userMessage.type === 'user' ? userMessage.content : '';
-    // 取得 follow up 問題
-    const followUps = analysisResult.missing_content?.follow_ups || [];
-    // 比對 user 問題與 follow up
-    let matchedFollowUp = null;
-    let maxScore = 0;
-    for (const follow of followUps) {
-      const scoreTitle = calculateStringSimilarity(userText, follow.title || '');
-      const scoreQuestion = calculateStringSimilarity(userText, follow.question || '');
-      if (scoreTitle > maxScore && scoreTitle > FOLLOW_UP_SIMILARITY_THRESHOLD) {
-        matchedFollowUp = follow;
-        maxScore = scoreTitle;
-      }
-      if (scoreQuestion > maxScore && scoreQuestion > FOLLOW_UP_SIMILARITY_THRESHOLD) {
-        matchedFollowUp = follow;
-        maxScore = scoreQuestion;
-      }
-    }
-
-    // 取得 AI 回應 message
-    const aiMessageText = chatResponse.message || '';
-    // 如果 AI 沒有產生 excerpt，但 user 問題或 AI 回應與 follow up 高相似，則自動產生 follow up excerpt
-    let shouldInjectFollowUpExcerpt = false;
-    if (!chatResponse.excerpt && matchedFollowUp) {
-      shouldInjectFollowUpExcerpt = true;
-    } else if (!chatResponse.excerpt && followUps.length > 0) {
-      // 檢查 AI 回應與 follow up 相似度
-      let aiMatchedFollowUp = null;
-      let aiMaxScore = 0;
-      for (const follow of followUps) {
-        const scoreTitle = calculateStringSimilarity(aiMessageText, follow.title || '');
-        const scoreQuestion = calculateStringSimilarity(aiMessageText, follow.question || '');
-        if (scoreTitle > aiMaxScore && scoreTitle > FOLLOW_UP_SIMILARITY_THRESHOLD) {
-          aiMatchedFollowUp = follow;
-          aiMaxScore = scoreTitle;
-        }
-        if (scoreQuestion > aiMaxScore && scoreQuestion > FOLLOW_UP_SIMILARITY_THRESHOLD) {
-          aiMatchedFollowUp = follow;
-          aiMaxScore = scoreQuestion;
-        }
-      }
-      if (aiMatchedFollowUp) {
-        matchedFollowUp = aiMatchedFollowUp;
-        shouldInjectFollowUpExcerpt = true;
-      }
-    }
-    if (shouldInjectFollowUpExcerpt && matchedFollowUp) {
-      chatResponse.excerpt = {
-        title: matchedFollowUp.title,
-        content: matchedFollowUp.question,
-        source: '追問問題',
-      };
-    }
-    
     // 取得上一則 AI message
-    const lastAiMessage = messages.filter(m => m.type === 'ai').pop();
+    const lastAiMessage = chatMessages.filter(m => m.type === 'ai').pop();
     
     // 處理訊息邏輯
-    const processedResponse = processAIMessages(chatResponse, lastAiMessage, messages, templates);
+    // 回傳時，只回傳 AI 處理後的訊息，不回傳 user/file message，避免前端重複渲染
+    const processedResponse = processAIMessages(chatResponse, lastAiMessage, chatMessages, templates);
 
     console.log('✅ [API] Smart chat response generated and processed');
     return NextResponse.json({
       success: true,
-      data: processedResponse
+      data: {
+        ...processedResponse,
+        messages: processedResponse.messages
+      }
     });
 
   } catch (error) {

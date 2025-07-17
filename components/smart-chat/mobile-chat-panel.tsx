@@ -6,9 +6,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
+import { FullscreenImagePreview, UploadedFileCard } from "@/components/upload/uploaded-files-list";
+import type { UploadedFile } from "@/lib/upload-utils";
 import type { Variants } from "framer-motion";
 import { Lightbulb } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
@@ -17,6 +19,7 @@ import LoadingMessage from "./loading-message";
 import SuggestionCard from "./suggestion-card";
 import SuggestionList from "./suggestion-list";
 import type { ChatMessage, SuggestionRecord } from "./types";
+import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "./utils";
 
 interface MobileChatPanelProps {
   suggestions: SuggestionRecord[];
@@ -43,18 +46,44 @@ interface MobileChatPanelProps {
   onSkip: (suggestions: SuggestionRecord[]) => void;
   showSuggestionsDrawer: boolean;
   setShowSuggestionsDrawer: (open: boolean) => void;
+  onFileUpload: (files: File[]) => void;
+  pendingFiles: UploadedFile[];
+  onRemovePendingFile: (id: string) => void;
+  onRestart: () => void;
 }
 
 const MobileChatPanel = (props: MobileChatPanelProps) => {
   const lastToastRef = useRef<number>(0);
   useEffect(() => {
-    if (props.messageCount >= 25 && lastToastRef.current !== props.messageCount) {
-      toast(props.messageCount >= 30 ? "已達到對話上限（30則）" : `即將達到對話上限（${props.messageCount}/30）`);
+    if (props.messageCount >= (CHAT_MESSAGE_LIMIT - 5) && lastToastRef.current !== props.messageCount) {
+      toast(props.messageCount >= CHAT_MESSAGE_LIMIT ? `已達到對話上限（${CHAT_MESSAGE_LIMIT}則）` : `即將達到對話上限（${props.messageCount}/${CHAT_MESSAGE_LIMIT}）`);
       lastToastRef.current = props.messageCount;
     }
   }, [props.messageCount]);
+  // Auto-expand logic for new in_progress template
+  const [forceExpandId, setForceExpandId] = useState<string | null>(null);
+  const prevStatuses = useRef<{ [id: string]: string }>({});
+  useEffect(() => {
+    let foundNewInProgress = false;
+    let newInProgressId: string | null = null;
+    for (const t of props.suggestionTemplates) {
+      const prev = prevStatuses.current[t.id];
+      if (!prev && t.status === 'in_progress') {
+        foundNewInProgress = true;
+        newInProgressId = t.id;
+      }
+      if (prev && prev !== t.status && (t.status === 'in_progress' || t.status === 'completed')) {
+        setForceExpandId(t.id);
+      }
+      prevStatuses.current[t.id] = t.status;
+    }
+    if (foundNewInProgress && newInProgressId) {
+      setForceExpandId(newInProgressId);
+    }
+  }, [props.suggestionTemplates]);
   // 直接複製原本 lg:hidden 內的內容，將 props 替換為 props.xxx
   // ...
+  const [preview, setPreview] = useState<{ images: string[]; index: number } | null>(null);
   return (
     <div className="lg:hidden flex flex-col space-y-4">
       {/* 聊天區域 */}
@@ -64,11 +93,11 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center justify-between sm:justify-end sm:space-x-4 gap-2 w-full">
               <div className="text-sm text-gray-500">
-                {props.messageCount}/30 則對話
+                {props.messageCount}/{CHAT_MESSAGE_LIMIT} 則對話
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => props.onSkip(props.suggestions)} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm">
-                  跳過問答
+                <Button variant="ghost" size="sm" onClick={props.onRestart} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm">
+                  重新對話
                 </Button>
               </div>
             </div>
@@ -113,6 +142,29 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
         {/* Input Area */}
         <Separator />
         <div className="p-4 space-y-4 flex-shrink-0">
+          {/* File preview above input */}
+          {props.pendingFiles && props.pendingFiles.length > 0 && (
+            <div className="mb-2 flex gap-2 overflow-x-auto">
+              {props.pendingFiles.map((file) => (
+                <UploadedFileCard
+                  key={file.id}
+                  file={file}
+                  onRemove={props.onRemovePendingFile}
+                  onPreview={(images, index) => setPreview({ images, index })}
+                />
+              ))}
+              {/* Modal for preview */}
+              {preview && (
+                <FullscreenImagePreview
+                  images={preview.images}
+                  index={preview.index}
+                  onClose={() => setPreview(null)}
+                  onPrev={() => setPreview(p => p && p.index > 0 ? { ...p, index: p.index - 1 } : p)}
+                  onNext={() => setPreview(p => p && p.index < p.images.length - 1 ? { ...p, index: p.index + 1 } : p)}
+                />
+              )}
+            </div>
+          )}
           <AnimatePresence mode="popLayout">
             {props.cannedOptions.length > 0 && (
               <CannedMessages cannedOptions={props.cannedOptions} onCannedMessage={props.handleCannedMessage} />
@@ -124,8 +176,10 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
             onKeyPress={props.handleKeyPress}
             onSend={props.handleSendMessage}
             textareaRef={props.textareaRefMobile}
-            disabled={props.isLoading || props.messageCount >= 30}
+            disabled={props.isLoading || props.messageCount >= CHAT_MESSAGE_LIMIT}
+            fileUploadDisabled={props.pendingFiles.length >= MAX_FILES_PER_MESSAGE}
             messageCount={props.messageCount}
+            onFileUpload={props.onFileUpload}
           />
         </div>
       </div>
@@ -173,6 +227,7 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
                         }
                       }}
                       onRemove={props.removeTemplate}
+                      forceExpand={forceExpandId === template.id}
                     />
                   ))}
                 </div>

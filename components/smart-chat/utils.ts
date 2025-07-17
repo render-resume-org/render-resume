@@ -2,6 +2,9 @@
 // Helper Functions & Constants
 // =====================
 
+// 對話上限
+export const CHAT_MESSAGE_LIMIT = 50;
+
 // 罐頭訊息
 export const CANNED_MESSAGES = [
   "你先問我！",
@@ -30,7 +33,7 @@ export const SIMILARITY_THRESHOLDS = {
   suggestionToSuggestion: 0.90, // 建議與建議
   excerptTitle: 0.8,           // excerpt 與 excerpt 標題
   excerptContent: 0.7,         // excerpt 與 excerpt 內容
-  templateMatch: 0.08,          // excerpt/template 與模板的相似度
+  templateMatch: 0.32,          // excerpt/template 與模板的相似度
 };
 
 // 消息動畫變體
@@ -57,3 +60,6 @@ export const messageVariants = {
     }
   }
 }; 
+
+// 單次訊息最多可上傳的檔案數量
+export const MAX_FILES_PER_MESSAGE = 3; 

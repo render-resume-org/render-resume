@@ -37,6 +37,13 @@ export default function SmartChatPage() {
     loadAnalysisResult();
   }, [loadAnalysisResult]);
 
+  // 修正：如果 analysisResult 存在但 sessionStorage 沒有，補存一次
+  useEffect(() => {
+    if (analysisResult && !sessionStorage.getItem('analysisResult')) {
+      sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
+    }
+  }, [analysisResult]);
+
   const handleChatComplete = (history: ChatMessage[], suggestions: SuggestionRecord[]) => {
     setIsCompleted(true);
     localStorage.setItem('chatHistory', JSON.stringify(history));

@@ -1199,6 +1199,29 @@ export class NativeOpenAIClient {
             throw new Error(`AI 請求失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
         }
     }
+
+    /**
+     * Vision/文件支援：直接傳遞 messages array，支援 input_file/input_text 格式
+     */
+    async customPromptWithFiles(messages: any[]): Promise<string> {
+        console.log('🚀 [Native OpenAI Client] Making custom prompt call with files');
+        try {
+            const request = {
+                model: this.config.modelName,
+                messages,
+                temperature: this.config.temperature
+            };
+            const response = await this.callOpenAI(request);
+            const content = response.choices[0].message.content;
+            if (!content) {
+                throw new Error('No content in response');
+            }
+            return content;
+        } catch (error) {
+            console.error("Native OpenAI custom prompt with files error:", error);
+            throw new Error(`AI 請求失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
+        }
+    }
 }
 
 // 便利函數：快速創建客戶端實例

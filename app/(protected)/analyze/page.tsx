@@ -257,6 +257,10 @@ export default function AnalyzePage() {
     setTimeout(() => setIsVisible(true), 100);
   }, [router, startAnalysis]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [router]);
+
   const handleViewResults = () => {
     // 將分析結果存儲到 sessionStorage
     if (analysisResult) {
@@ -276,7 +280,7 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-2 md:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header Card with Illustration */}
         <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 

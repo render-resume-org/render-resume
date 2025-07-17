@@ -1,12 +1,12 @@
 "use client";
 
 import {
-    UploadedFile,
-    clearUploadSession,
-    generateFileId,
-    getFileType,
-    processFilesForAnalysis,
-    saveToSession
+  UploadedFile,
+  clearUploadSession,
+  generateFileId,
+  getFileType,
+  processFilesForAnalysis,
+  saveToSession
 } from '@/lib/upload-utils';
 import { pdfToImg } from 'pdftoimg-js/browser';
 import { useCallback, useEffect, useState } from 'react';
@@ -30,30 +30,22 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
       serviceType
     });
 
+    // 先建立暫存物件，稍後補 preview
     const newFiles: UploadedFile[] = acceptedFiles.map(file => {
       const fileType = getFileType(file);
-
       return {
         id: generateFileId(),
         file,
         type: fileType,
         status: 'uploading',
-        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+        preview: undefined, // 稍後補
         serviceType
       };
     });
 
-    console.log('📋 [File Upload Hook] Created upload file objects:', newFiles.map(f => ({
-      id: f.id,
-      name: f.file.name,
-      type: f.type,
-      status: f.status,
-      serviceType: f.serviceType
-    })));
-
     setUploadedFiles(prev => [...prev, ...newFiles]);
 
-    // Process file upload and PDF conversion
+    // 處理每個檔案
     for (const uploadFile of newFiles) {
       try {
         if (uploadFile.type === 'pdf') {
@@ -68,10 +60,19 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
           );
 
           await processPDFToImages(uploadFile);
+        } else if (uploadFile.file.type.startsWith('image/')) {
+          // Image 檔案，轉 base64
+          const base64 = await fileToBase64(uploadFile.file);
+          setUploadedFiles(prev =>
+            prev.map(f =>
+              f.id === uploadFile.id
+                ? { ...f, status: 'completed', preview: base64 }
+                : f
+            )
+          );
         } else {
-          // Regular file - mark as completed
+          // 其他檔案
           setTimeout(() => {
-            console.log(`✅ [File Upload Hook] File upload completed: ${uploadFile.file.name}`);
             setUploadedFiles(prev => 
               prev.map(f => 
                 f.id === uploadFile.id 
@@ -82,10 +83,10 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
           }, 1000);
         }
       } catch (error) {
-        console.error(`❌ [File Upload Hook] Error processing file ${uploadFile.file.name}:`, error);
-        setUploadedFiles(prev => 
-          prev.map(f => 
-            f.id === uploadFile.id 
+        console.error('文件處理失敗:', error);
+        setUploadedFiles(prev =>
+          prev.map(f =>
+            f.id === uploadFile.id
               ? { ...f, status: 'error' }
               : f
           )
@@ -93,6 +94,16 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
       }
     }
   }, [serviceType]);
+
+  // 新增：file 轉 base64 helper
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
 
   const processPDFToImages = async (uploadFile: UploadedFile) => {
     const pdfUrl = URL.createObjectURL(uploadFile.file);

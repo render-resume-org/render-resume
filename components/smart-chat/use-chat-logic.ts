@@ -1,4 +1,6 @@
+import { useFileUpload } from "@/components/hooks/use-file-upload";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import type { UploadedFile } from '@/lib/upload-utils';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
@@ -9,6 +11,7 @@ import {
     useTemplateManager
 } from './hooks';
 import { ChatMessage, SuggestionRecord } from './types';
+import { CHAT_MESSAGE_LIMIT } from "./utils";
 
 interface UseChatLogicProps {
   analysisResult: ResumeAnalysisResult;
@@ -70,10 +73,69 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     updateCannedOptions
   } = useCannedMessages();
 
+  // ===== 整合檔案上傳邏輯 =====
+  const {
+    uploadedFiles,
+    onDrop,
+    removeFile,
+    isProcessing: isFileProcessing,
+    additionalText,
+    setAdditionalText,
+    prepareForAnalysis,
+    canProceed
+  } = useFileUpload();
+
+  // 已送出的檔案 id
+  const [sentFileIds, setSentFileIds] = useState<string[]>([]);
+  // 尚未送出的檔案（pendingFiles）
+  const pendingFiles = uploadedFiles.filter(f => f.status === 'completed' && !sentFileIds.includes(f.id));
+
   // 簡化的 shouldShowExcerpt 邏輯（後端已處理主要邏輯）
   const shouldShowExcerpt = useCallback((message: ChatMessage) => {
     return !!message.excerpt;
   }, []);
+
+  // Helper: flatten pendingFiles into file messages (PDF to images)
+  function flattenFilesToMessages(files: UploadedFile[]) {
+    const result: ChatMessage[] = [];
+    for (const f of files) {
+      if (f.type === 'pdf' && f.convertedImages && f.convertedImages.length > 0) {
+        f.convertedImages.forEach((img, idx) => {
+          result.push({
+            id: generateUniqueId('file'),
+            type: 'file',
+            content: `${f.file.name} 頁${idx + 1}`,
+            timestamp: new Date(),
+            file: {
+              id: f.id,
+              name: `${f.file.name} 頁${idx + 1}`,
+              type: 'image/png',
+              size: 0,
+              preview: img,
+              isFromPdf: true,
+              originalPdfName: f.file.name
+            }
+          });
+        });
+      } else if (f.type === 'image' && f.preview) {
+        result.push({
+          id: generateUniqueId('file'),
+          type: 'file',
+          content: f.file.name || '檔案',
+          timestamp: new Date(),
+          file: {
+            id: f.id,
+            name: f.file.name,
+            type: f.file.type,
+            size: f.file.size,
+            preview: f.preview
+          }
+        });
+      }
+      // 可擴展：其他檔案型態可在此處理
+    }
+    return result;
+  }
 
   // 初始化聊天
   const initializeChat = useCallback(() => {
@@ -103,23 +165,35 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     initializeCannedMessages();
   }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages]);
 
-  const handleSendMessage = useCallback(async (messageText?: string) => {
-    const textToSend = messageText || currentInput.trim();
-    if (!textToSend || isLoading || messageCount >= 30) return;
+  // 發送訊息時，將 pendingFiles（檔案訊息）與 user 文字訊息一次性組成，並一起送進 API call
+  const handleSendMessage = useCallback(async () => {
+    const hasText = currentInput.trim().length > 0;
+    const hasFiles = pendingFiles.length > 0;
+    if (!hasText && !hasFiles) return;
 
-    const userMessage: ChatMessage = {
-      id: generateUniqueId('user'),
-      type: 'user',
-      content: textToSend,
-      timestamp: new Date()
-    };
+    // 1. 準備 file messages (PDF 會展開為多個 image file message)
+    const fileMessages: ChatMessage[] = flattenFilesToMessages(pendingFiles);
 
-    setMessages(prev => [...prev, userMessage]);
-    setMessageCount(prev => prev + 1);
+    // 2. 準備 user message
+    let userMessage: ChatMessage | undefined = undefined;
+    if (hasText) {
+      userMessage = {
+        id: generateUniqueId('user'),
+        type: 'user',
+        content: currentInput.trim(),
+        timestamp: new Date()
+      };
+    }
+
+    // 3. 一次 setMessages 並組成要送進 API 的 messages
+    const messagesToSend = [...fileMessages, ...(userMessage ? [userMessage] : [])];
+    setMessages(prev => [...prev, ...messagesToSend]);
+    setMessageCount(prev => prev + messagesToSend.length);
     setCurrentInput('');
+    setSentFileIds(prev => [...prev, ...pendingFiles.map(f => f.id)]);
     setIsLoading(true);
 
-    // 確保用戶訊息顯示後滾動
+    // 4. API call: 一定要包含 fileMessages + userMessage
     setTimeout(() => {
       smartScrollToBottom(false, suggestions);
     }, 50);
@@ -131,7 +205,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
+          messages: [...messages, ...messagesToSend],
           analysisResult,
           suggestions: [
             ...suggestions
@@ -148,37 +222,26 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       const result = await response.json();
       const { messages: aiMessages, cannedOptions, templates: newTemplates } = result.data as { messages: ChatMessage[], cannedOptions: string[], templates: SuggestionTemplate[] };
 
-      // 直接使用後端處理過的訊息
       setMessages(prev => [...prev, ...aiMessages]);
       setMessageCount(prev => prev + aiMessages.length);
-      // 如果本次有 suggestion，cannedOptions 第一個改為「好呀」
       if (aiMessages.some((m) => m.suggestion)) {
         updateCannedOptions(["好呀", ...cannedOptions.slice(1)], false);
       } else {
         updateCannedOptions(cannedOptions, false);
       }
       setSuggestionTemplates(newTemplates);
-      
-      // 處理 suggestion（只有當訊息包含 suggestion 時）
+
       for (const aiMessage of aiMessages) {
         if (aiMessage.suggestion) {
-          // 檢查是否與現有建議相似度過高
           if (isSimilarSuggestion(aiMessage.suggestion)) {
             console.log(`🚫 [Suggestion Blocked] Similar suggestion detected, not adding: "${aiMessage.suggestion.title}"`);
           } else {
-            // 檢查建議是否與某個模板相關
             const suggestionText = `${aiMessage.suggestion.title} ${aiMessage.suggestion.description}`;
             let relatedTemplate: SuggestionTemplate | null = null;
-            
-            // 這裡可能需要根據 excerpt 匹配模板的邏輯
             if (!relatedTemplate) {
               relatedTemplate = findMostSimilarTemplate(suggestionText, suggestionTemplates) as SuggestionTemplate | null;
             }
-            
             if (relatedTemplate && (relatedTemplate.status === 'in_progress' || relatedTemplate.status === 'completed')) {
-              // 建議與模板相關，更新模板為已完成
-              console.log(`✅ [Template] Completing template "${relatedTemplate.title}" with suggestion: "${aiMessage.suggestion.title}"`);
-              
               const suggestionRecord: SuggestionRecord = {
                 id: generateUniqueId('suggestion'),
                 title: aiMessage.suggestion.title,
@@ -186,11 +249,8 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
                 category: aiMessage.suggestion.category,
                 timestamp: new Date()
               };
-              
               updateTemplateStatus(relatedTemplate.id, 'completed', suggestionRecord);
             } else {
-              // 建議與模板無關，加入額外建議列表
-              console.log(`✅ [Suggestion Added] New additional suggestion: "${aiMessage.suggestion.title}"`);
               const suggestionRecord: SuggestionRecord = {
                 id: generateUniqueId('suggestion'),
                 title: aiMessage.suggestion.title,
@@ -200,60 +260,43 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
               };
               setSuggestions(prev => [...prev, suggestionRecord]);
             }
-
-            // 滾動處理
-            console.log('[Suggestion Added] Starting scroll sequence');
-            
             requestAnimationFrame(() => {
               smartScrollToBottom(false, suggestions);
             });
-            
             setTimeout(() => {
-              console.log('[Suggestion Added] Mid-animation scroll');
               smartScrollToBottom(false, suggestions);
             }, 200);
-            
             setTimeout(() => {
-              console.log('[Suggestion Added] Post-animation scroll');
               smartScrollToBottom(false, suggestions);
             }, 400);
-            
             if (window.innerWidth >= 1024) {
               setTimeout(() => {
-                console.log('[Desktop] Layout adjustment scroll');
                 smartScrollToBottom(false, suggestions);
               }, 600);
             }
           }
         }
       }
-          
-      // 確保滾動到底部（在狀態更新後）
       requestAnimationFrame(() => {
         smartScrollToBottom(false, suggestions);
-        
-        // 額外確保滾動
         setTimeout(() => {
           smartScrollToBottom(false, suggestions);
         }, 100);
       });
-
     } catch (error) {
       console.error('Failed to send message:', error);
-      
       const errorMessage: ChatMessage = {
         id: generateUniqueId('ai-error'),
         type: 'ai',
         content: '抱歉，發生了一些問題。請稍後再試。',
         timestamp: new Date()
       };
-
       setMessages(prev => [...prev, errorMessage]);
       setMessageCount(prev => prev + 1);
     } finally {
       setIsLoading(false);
     }
-  }, [currentInput, isLoading, messageCount, messages, analysisResult, suggestions, smartScrollToBottom, updateCannedOptions, isSimilarSuggestion, suggestionTemplates, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates]);
+  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -262,13 +305,39 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     }
   }, [handleSendMessage]);
 
+  // ===== Focus input helper =====
+  const focusInput = useCallback((cursorToEnd: boolean = true, customValue?: string) => {
+    const desktopTextarea = textareaRef.current;
+    const mobileTextarea = textareaRefMobile.current;
+    let targetTextarea: HTMLTextAreaElement | null = null;
+    // 檢查大螢幕版本是否可見
+    if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
+      targetTextarea = desktopTextarea;
+    } else if (mobileTextarea && window.getComputedStyle(mobileTextarea.closest('.lg\\:hidden') || mobileTextarea).display !== 'none') {
+      targetTextarea = mobileTextarea;
+    }
+    if (targetTextarea) {
+      targetTextarea.focus();
+      if (cursorToEnd) {
+        setTimeout(() => {
+          if (targetTextarea) {
+            const value = customValue ?? targetTextarea.value;
+            targetTextarea.setSelectionRange(value.length, value.length);
+          }
+        }, 0);
+      }
+    }
+  }, [textareaRef, textareaRefMobile]);
+
   const handleCannedMessage = useCallback((message: string) => {
-    handleSendMessage(message);
+    setCurrentInput(message);
     // 多次延遲 scroll，確保訊息渲染後手機/桌面都能正確滾動
     setTimeout(() => smartScrollToBottom(false, suggestions), 100);
     setTimeout(() => smartScrollToBottom(false, suggestions), 300);
     setTimeout(() => smartScrollToBottom(false, suggestions), 600);
-  }, [handleSendMessage, smartScrollToBottom, suggestions]);
+    // 新增：自動 focus input
+    setTimeout(() => focusInput(true, message), 0);
+  }, [smartScrollToBottom, suggestions, setCurrentInput, focusInput]);
 
   const handleComplete = useCallback(() => {
     // 將所有模板也當作 suggestion 傳遞到下一步，completed 用 completedSuggestion
@@ -302,41 +371,13 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   }, []);
 
   const quoteSuggestion = useCallback((suggestion: SuggestionRecord) => {
-    const quoteMessage = `關於「${suggestion.title}」這個建議，我想進一步了解：
-
-原建議：${suggestion.description}
-
-我想問：`;
+    const quoteMessage = `關於「${suggestion.title}」這個建議，我想進一步了解：\n\n原建議：${suggestion.description}\n\n我想問：`;
     setCurrentInput(quoteMessage);
-    
     // 自動調整高度
     adjustTextareaHeight(quoteMessage);
-    
-    // Focus 到當前可見的 textarea
-    const desktopTextarea = textareaRef.current;
-    const mobileTextarea = textareaRefMobile.current;
-    
-    let targetTextarea = null;
-    
-    // 檢查大螢幕版本是否可見
-    if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
-      targetTextarea = desktopTextarea;
-    }
-    // 檢查小螢幕版本是否可見
-    else if (mobileTextarea) {
-      targetTextarea = mobileTextarea;
-    }
-    
-    if (targetTextarea) {
-      targetTextarea.focus();
-      // 將光標移到最後
-      setTimeout(() => {
-        if (targetTextarea) {
-          targetTextarea.setSelectionRange(quoteMessage.length, quoteMessage.length);
-        }
-      }, 0);
-    }
-  }, [setCurrentInput, adjustTextareaHeight, textareaRef, textareaRefMobile]);
+    // Focus input
+    focusInput(true, quoteMessage);
+  }, [setCurrentInput, adjustTextareaHeight, focusInput]);
 
   const quoteTemplate = useCallback((template: SuggestionTemplate) => {
     let quoteMessage = '';
@@ -347,26 +388,36 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     }
     setCurrentInput(quoteMessage);
     adjustTextareaHeight(quoteMessage);
-    // focus input (手機/電腦都適用)
-    setTimeout(() => {
-      const desktopTextarea = textareaRef.current;
-      const mobileTextarea = textareaRefMobile.current;
-      let target: HTMLTextAreaElement | null = null;
-      if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
-        target = desktopTextarea;
-      } else if (mobileTextarea) {
-        target = mobileTextarea;
-      }
-      if (target) {
-        target.focus();
-        target.setSelectionRange(quoteMessage.length, quoteMessage.length);
-      }
-    }, 0);
-  }, [setCurrentInput, adjustTextareaHeight, textareaRef, textareaRefMobile]);
+    // Focus input
+    setTimeout(() => focusInput(true, quoteMessage), 0);
+  }, [setCurrentInput, adjustTextareaHeight, focusInput]);
 
   const handleToggleSidebar = useCallback(() => {
     setIsSidebarCollapsed(prev => !prev);
   }, []);
+
+  // 新增：插入 file 訊息
+  const addFileMessage = useCallback((file: UploadedFile) => {
+    setMessages(prev => [
+      ...prev,
+      {
+        id: generateUniqueId('file'),
+        type: 'file',
+        content: file.file.name || '檔案',
+        timestamp: new Date(),
+        file: {
+          id: file.id,
+          name: file.file.name,
+          type: file.file.type,
+          size: file.file.size,
+          preview: file.preview,
+          pages: file.convertedImages,
+          isFromPdf: !!file.convertedImages
+        }
+      }
+    ]);
+    setMessageCount(prev => prev + 1);
+  }, [generateUniqueId]);
 
   // 初始化
   useEffect(() => {
@@ -379,32 +430,16 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       // 使用 requestAnimationFrame 確保在下一個渲染循環中 focus
       requestAnimationFrame(() => {
         setTimeout(() => {
-          // 檢查哪個 textarea 是可見的並 focus
-          const desktopTextarea = textareaRef.current;
-          const mobileTextarea = textareaRefMobile.current;
-          
-          let targetTextarea = null;
-          
-          // 檢查大螢幕版本是否可見
-          if (desktopTextarea && window.getComputedStyle(desktopTextarea.closest('.hidden') || desktopTextarea).display !== 'none') {
-            targetTextarea = desktopTextarea;
-          }
-          // 檢查小螢幕版本是否可見
-          else if (mobileTextarea && window.getComputedStyle(mobileTextarea.closest('.lg\\:hidden') || mobileTextarea).display !== 'none') {
-            targetTextarea = mobileTextarea;
-          }
-          
-          if (targetTextarea && 
-              !targetTextarea.disabled && 
-              messageCount < 30 &&
-              document.activeElement !== targetTextarea) {
-            console.log('Auto focusing to textarea:', targetTextarea === desktopTextarea ? 'desktop' : 'mobile');
-            targetTextarea.focus();
+          if (
+            messageCount < CHAT_MESSAGE_LIMIT &&
+            document.activeElement !== (textareaRef.current || textareaRefMobile.current)
+          ) {
+            focusInput();
           }
         }, 100);
       });
     }
-  }, [isLoading, messageCount, textareaRef, textareaRefMobile]);
+  }, [isLoading, messageCount, focusInput]);
 
   // 處理螢幕尺寸變化
   useEffect(() => {
@@ -507,6 +542,17 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     quoteSuggestion,
     quoteTemplate,
     shouldShowExcerpt,
-    onSkip
+    onSkip,
+    addFileMessage,
+    uploadedFiles,
+    onDrop,
+    removeFile,
+    pendingFiles,
+    isFileProcessing,
+    additionalText,
+    setAdditionalText,
+    prepareForAnalysis,
+    canProceed,
+    initializeChat
   };
 }

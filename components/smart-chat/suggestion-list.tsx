@@ -4,6 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatePresence, motion } from "framer-motion";
 import { Copy, Lightbulb, Trash2 } from "lucide-react";
 import { SuggestionRecord } from "../smart-chat";
+import { CHAT_MESSAGE_LIMIT } from "./utils";
 
 interface SuggestionListProps {
   suggestions: SuggestionRecord[];
@@ -83,7 +84,7 @@ const SuggestionList = ({ suggestions, onQuote, onRemove, onComplete, messageCou
           </AnimatePresence>
         </div>
       </ScrollArea>
-      {(suggestions.length > 0 || messageCount >= 20) && (
+      {(suggestions.length > 0 || messageCount >= CHAT_MESSAGE_LIMIT - 10) && (
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

@@ -55,6 +55,14 @@ export function clearUploadSession(): void {
   console.log('🧹 [Upload Utils] Clearing previous sessionStorage data');
   sessionStorage.removeItem('uploadedFiles');
   sessionStorage.removeItem('additionalText');
+  sessionStorage.removeItem('serviceType');
+}
+
+// 新增一個專門的函數來完全清除 session（包含 analysisResult）
+export function clearCompleteSession(): void {
+  console.log('🧹 [Upload Utils] Clearing ALL sessionStorage data including analysisResult');
+  sessionStorage.removeItem('uploadedFiles');
+  sessionStorage.removeItem('additionalText');
   sessionStorage.removeItem('analysisResult');
   sessionStorage.removeItem('serviceType');
 }
@@ -79,13 +87,7 @@ export function saveToSession(files: FileData[], additionalText: string, service
 export const DROPZONE_CONFIG = {
   accept: {
     'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
-    'application/pdf': ['.pdf'],
-    'application/msword': ['.doc'],
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-    'text/plain': ['.txt'],
-    'text/markdown': ['.md'],
-    'application/json': ['.json'],
-    'text/csv': ['.csv']
+    'application/pdf': ['.pdf']
   },
   maxSize: 10 * 1024 * 1024 // 10MB
 };

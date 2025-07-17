@@ -75,13 +75,25 @@ const AISuggestionsSidebar = ({
   const templateRefs = useRef<{ [id: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
-    // 檢查狀態變化
+    // 檢查狀態變化或新 in_progress template
+    let foundNewInProgress = false;
+    let newInProgressId: string | null = null;
     for (const t of suggestionTemplates) {
       const prev = prevStatuses.current[t.id];
+      // 新增：如果是新出現且 in_progress
+      if (!prev && t.status === 'in_progress') {
+        foundNewInProgress = true;
+        newInProgressId = t.id;
+      }
+      // 原本的狀態變化
       if (prev && prev !== t.status && (t.status === 'in_progress' || t.status === 'completed')) {
         setForceExpandId(t.id);
       }
       prevStatuses.current[t.id] = t.status;
+    }
+    // 新增 in_progress template 時自動展開
+    if (foundNewInProgress && newInProgressId) {
+      setForceExpandId(newInProgressId);
     }
   }, [suggestionTemplates]);
 
