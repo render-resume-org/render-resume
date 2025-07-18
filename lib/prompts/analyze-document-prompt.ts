@@ -13,6 +13,7 @@ import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/uploa
  * @param personalInfo 個人基本資料
  * @param links 連結資訊
  */
+
 export function generateAnalyzeDocumentUserPrompt({
   textContent = '',
   additionalText = '',
@@ -36,6 +37,7 @@ export function generateAnalyzeDocumentUserPrompt({
 }): string {
   
   let userPrompt = '';
+  
   if (textContent) {
     userPrompt += `請分析以下文件內容：\n\n${textContent}`;
   }
