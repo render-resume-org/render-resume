@@ -1,5 +1,5 @@
 
-import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
+import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 
 /**
  * 產生分析履歷文件的 user prompt
@@ -34,6 +34,7 @@ export function generateAnalyzeDocumentUserPrompt({
   personalInfo?: PersonalInfo;
   links?: Links;
 }): string {
+  
   let userPrompt = '';
   if (textContent) {
     userPrompt += `請分析以下文件內容：\n\n${textContent}`;
