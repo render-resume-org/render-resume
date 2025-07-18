@@ -5,17 +5,17 @@ import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdditionalTextInput } from "@/components/upload/additional-text-input";
+import { EducationInput } from "@/components/upload/education-input";
+import { ExperienceInput } from "@/components/upload/experience-input";
+import { LinksInput } from "@/components/upload/links-input";
+import { PersonalInput } from "@/components/upload/personal-input";
+import { ProjectInput } from "@/components/upload/project-input";
+import { SkillsInput } from "@/components/upload/skills-input";
 import { UploadDropzone } from "@/components/upload/upload-dropzone";
 import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { EducationInput } from "@/components/upload/education-input";
-import { ExperienceInput } from "@/components/upload/experience-input";
-import { ProjectInput } from "@/components/upload/project-input";
-import { PersonalInput } from "@/components/upload/personal-input";
-import { SkillsInput } from "@/components/upload/skills-input";
-import { LinksInput } from "@/components/upload/links-input";
 
 export default function UploadCreatePage() {
   const router = useRouter();
@@ -63,9 +63,9 @@ export default function UploadCreatePage() {
   // Dynamic content based on service type
   const getPageContent = () => {
     return {
-      title: '上傳您的作品材料',
+      title: '輸入您的履歷內容',
       subtitle: '從零打造專業履歷',
-      description: '上傳作品截圖、專案報告書、技能證明或任何能展示您能力的材料。AI 將自動分析並提取重要信息來打造您的履歷。',
+      description: '',
       color: {
         border: 'border-cyan-300 dark:border-cyan-600',
         bg: 'bg-cyan-50 dark:bg-cyan-900/20',
@@ -78,27 +78,9 @@ export default function UploadCreatePage() {
   const pageContent = getPageContent();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Education Section */}
-        <EducationInput value={education} onChange={setEducation} />
-
-        {/* Experience Section */}
-        <ExperienceInput value={experience} onChange={setExperience} />
-
-        {/* Project Section */}
-        <ProjectInput value={projects} onChange={setProjects} />
-
-        {/* Personal Info Section */}
-        <PersonalInput value={personalInfo} onChange={setPersonalInfo} />
-
-        {/* Skills Section */}
-        <SkillsInput value={skills} onChange={setSkills} />
-
-        {/* Links Section */}
-        <LinksInput value={links} onChange={setLinks} />
-
-        {/* Upload Card */}
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Combined Header and Upload Section */}
         <Card className={`mb-8 transition-all duration-700 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         } $`}>
@@ -115,7 +97,7 @@ export default function UploadCreatePage() {
               </div>
             </div>
             <CardDescription className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              {pageContent.description}
+              請在下方輸入您的履歷內容，包括教育背景、工作經驗、專案經歷等。您也可以上傳作品截圖、專案報告書或技能證明作為輔助材料。AI 將自動分析並整合所有資訊，為後續的履歷優化提供最佳建議。
             </CardDescription>
           </CardHeader>
           <CardContent className="px-2">
@@ -133,6 +115,24 @@ export default function UploadCreatePage() {
             />
           </CardContent>
         </Card>
+
+        {/* Education Section */}
+        <EducationInput value={education} onChange={setEducation} />
+
+        {/* Experience Section */}
+        <ExperienceInput value={experience} onChange={setExperience} />
+
+        {/* Project Section */}
+        <ProjectInput value={projects} onChange={setProjects} />
+
+        {/* Personal Info Section */}
+        <PersonalInput value={personalInfo} onChange={setPersonalInfo} />
+
+        {/* Skills Section */}
+        <SkillsInput value={skills} onChange={setSkills} />
+
+        {/* Links Section */}
+        <LinksInput value={links} onChange={setLinks} />
 
         {/* Additional Text Section */}
         <AdditionalTextInput 

@@ -4,11 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { cn } from "@/lib/utils";
 import {
   Award,
   Briefcase,
   Calendar,
   Code,
+  Copy,
   Edit,
   FileText,
   Globe,
@@ -86,6 +88,7 @@ export default function PreviewPage() {
   const [resumeData, setResumeData] = useState<OptimizedResume | null>(null);
   const [originalAnalysis, setOriginalAnalysis] = useState<ResumeAnalysisResult | null>(null);
   const [selectedSuggestions, setSelectedSuggestions] = useState<OptimizationSuggestion[]>([]);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -179,6 +182,79 @@ export default function PreviewPage() {
     }
   }, [originalAnalysis, selectedSuggestions, resumeData, generateOptimizedResume]);
 
+  const copyResumeText = useCallback(async () => {
+    if (!resumeData) return;
+
+    try {
+      // 構建履歷文字內容
+      let resumeText = `${resumeData.personalInfo.fullName}\n`;
+      resumeText += `${resumeData.personalInfo.title}\n\n`;
+      
+      // 聯絡資訊
+      if (resumeData.personalInfo.email) resumeText += `Email: ${resumeData.personalInfo.email}\n`;
+      if (resumeData.personalInfo.phone) resumeText += `Phone: ${resumeData.personalInfo.phone}\n`;
+      if (resumeData.personalInfo.location) resumeText += `Location: ${resumeData.personalInfo.location}\n`;
+      if (resumeData.personalInfo.website) resumeText += `Website: ${resumeData.personalInfo.website}\n`;
+      if (resumeData.personalInfo.linkedin) resumeText += `LinkedIn: ${resumeData.personalInfo.linkedin}\n`;
+      if (resumeData.personalInfo.github) resumeText += `GitHub: ${resumeData.personalInfo.github}\n`;
+      
+      resumeText += `\n專業摘要\n${resumeData.summary}\n\n`;
+      
+      // 技能
+      resumeText += `技術技能\n`;
+      resumeData.skills.forEach(skillGroup => {
+        resumeText += `${skillGroup.category}: ${skillGroup.items.join(', ')}\n`;
+      });
+      resumeText += '\n';
+      
+      // 工作經驗
+      resumeText += `工作經驗\n`;
+      resumeData.experience.forEach(exp => {
+        resumeText += `${exp.title} - ${exp.company} (${exp.period})\n`;
+        exp.achievements.forEach(achievement => {
+          resumeText += `• ${achievement}\n`;
+        });
+        resumeText += '\n';
+      });
+      
+      // 專案經驗
+      if (resumeData.projects.length > 0) {
+        resumeText += `專案經驗\n`;
+        resumeData.projects.forEach(project => {
+          resumeText += `${project.name}\n`;
+          resumeText += `${project.description}\n`;
+          resumeText += `技術: ${project.technologies.join(', ')}\n`;
+          project.achievements.forEach(achievement => {
+            resumeText += `• ${achievement}\n`;
+          });
+          resumeText += '\n';
+        });
+      }
+      
+      // 教育背景
+      resumeText += `教育背景\n`;
+      resumeData.education.forEach(edu => {
+        resumeText += `${edu.degree} - ${edu.school} (${edu.period})\n`;
+        if (edu.details) {
+          edu.details.forEach(detail => {
+            resumeText += `• ${detail}\n`;
+          });
+        }
+        resumeText += '\n';
+      });
+
+      // 複製到剪貼簿
+      await navigator.clipboard.writeText(resumeText);
+      setCopySuccess(true);
+      
+      // 3秒後重置狀態
+      setTimeout(() => setCopySuccess(false), 3000);
+    } catch (error) {
+      console.error('複製失敗:', error);
+      alert('複製失敗，請手動選擇文字複製');
+    }
+  }, [resumeData]);
+
   // 如果正在生成履歷，顯示加載畫面
   if (isGenerating) {
     return (
@@ -199,7 +275,7 @@ export default function PreviewPage() {
   // 如果沒有履歷數據，顯示錯誤狀態
   if (!resumeData) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 flex items-center justify-center">
+      <div className="min-h-screen py-8 flex items-center justify-center">
         <div className="text-center max-w-md">
           <FileText className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -229,7 +305,7 @@ export default function PreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen py-8">
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -261,6 +337,32 @@ export default function PreviewPage() {
                   <Printer className="w-4 h-4 mr-2" />
                   列印/下載 PDF
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Copy Resume Text */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">複製文字</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  onClick={copyResumeText}
+                  variant={copySuccess ? "default" : "outline"}
+                  className={cn(
+                    "w-full",
+                    copySuccess 
+                      ? "bg-green-600 hover:bg-green-700 text-white" 
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                  )}
+                  disabled={copySuccess}
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  {copySuccess ? "已複製！" : "複製履歷文字"}
+                </Button>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  複製純文字格式的履歷內容到剪貼簿
+                </p>
               </CardContent>
             </Card>
 
@@ -320,7 +422,7 @@ export default function PreviewPage() {
             <Card className="shadow-lg p-0">
               <CardContent className="p-0">
                 {/* Resume Document */}
-                <div className="bg-white dark:bg-gray-800 p-8 min-h-[1000px]" id="resume-content">
+                <div className="bg-white dark:bg-gray-800 p-8 min-h-[1000px] h-fit" id="resume-content">
                   {/* Header */}
                   <div className="border-b-2 border-cyan-600 pb-6 mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
