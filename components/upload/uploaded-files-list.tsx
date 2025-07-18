@@ -176,6 +176,75 @@ export function UploadedFilesList({ uploadedFiles, onRemoveFile }: UploadedFiles
   );
 } 
 
+// Compact single file card for Smart Chat and other usages
+interface UploadedFileCardProps {
+  file: UploadedFile;
+  onRemove: (id: string) => void;
+  onPreview?: (images: string[], index: number) => void;
+  className?: string;
+}
+
+export function UploadedFileCard({ file, onRemove, onPreview, className }: UploadedFileCardProps) {
+  return (
+    <div
+      className={cn(
+        'flex items-center gap-2 p-2 rounded border bg-white dark:bg-gray-800',
+        file.status === 'uploading' || file.status === 'converting'
+          ? 'border-cyan-200 dark:border-cyan-800'
+          : 'border-gray-200 dark:border-gray-700',
+        className
+      )}
+      style={{ minWidth: 0 }}
+    >
+      {/* Thumbnail */}
+      <div className="flex-shrink-0 cursor-pointer" onClick={() => {
+        if (file.type === 'image' && file.preview && onPreview) {
+          onPreview([file.preview], 0);
+        } else if (file.type === 'pdf' && file.convertedImages && file.convertedImages.length > 0 && onPreview) {
+          onPreview(file.convertedImages, 0);
+        }
+      }}>
+        {file.type === 'image' && file.preview ? (
+          <Image width={40} height={40} src={file.preview} alt="Preview" className="w-10 h-10 object-cover rounded" />
+        ) : file.type === 'pdf' && file.convertedImages && file.convertedImages.length > 0 ? (
+          <Image width={40} height={40} src={file.convertedImages[0]} alt="PDF 預覽" className="w-10 h-10 object-cover rounded border" />
+        ) : (
+          <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+            <FileText className="h-5 w-5 text-gray-600" />
+          </div>
+        )}
+      </div>
+      {/* Info */}
+      <div className="flex-grow min-w-0">
+        <div className="truncate font-medium text-gray-900 dark:text-white text-sm">{file.file.name}</div>
+        <div className="text-xs text-gray-500 truncate">{formatFileSize(file.file.size)} MB</div>
+        {file.type === 'pdf' && file.convertedImages && (
+          <div className="text-[10px] text-cyan-600 truncate">{file.convertedImages.length} 頁</div>
+        )}
+      </div>
+      {/* Status */}
+      <div className="flex items-center">
+        {file.status === 'uploading' && (
+          <div className="w-3 h-3 border-2 border-cyan-600 border-t-transparent rounded-full animate-spin mr-1" />
+        )}
+        {file.status === 'converting' && (
+          <div className="w-3 h-3 border-2 border-orange-600 border-t-transparent rounded-full animate-spin mr-1" />
+        )}
+        {file.status === 'completed' && (
+          <span className="text-green-600 text-xs mr-1">完成</span>
+        )}
+        {file.status === 'error' && (
+          <AlertCircle className="w-4 h-4 text-red-600 mr-1" />
+        )}
+      </div>
+      {/* Remove */}
+      <Button variant="ghost" size="icon" onClick={() => onRemove(file.id)} className="text-gray-400 hover:text-red-600 ml-1">
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
 // FullscreenImagePreview component
 interface FullscreenImagePreviewProps {
   images: string[];
@@ -259,3 +328,5 @@ function FullscreenImagePreview({ images, index, onClose, onPrev, onNext }: Full
     document.body
   );
 } 
+
+export { FullscreenImagePreview };

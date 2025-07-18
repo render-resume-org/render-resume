@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
+import { CHAT_MESSAGE_LIMIT } from "./utils";
 
 interface ChatLimitAlertProps {
   messageCount: number;
@@ -14,7 +15,7 @@ const ChatLimitAlert = ({ messageCount }: ChatLimitAlertProps) => (
   >
     <AlertCircle className="h-4 w-4 text-amber-600" />
     <span className="text-sm text-amber-800 dark:text-amber-200">
-      {messageCount >= 30 ? '已達到對話上限（30則）' : `即將達到對話上限（${messageCount}/30）`}
+      {messageCount >= CHAT_MESSAGE_LIMIT ? `已達到對話上限（${CHAT_MESSAGE_LIMIT}則）` : `即將達到對話上限（${messageCount}/${CHAT_MESSAGE_LIMIT}）`}
     </span>
   </motion.div>
 );

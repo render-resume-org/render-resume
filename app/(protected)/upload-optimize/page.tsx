@@ -31,6 +31,10 @@ export default function UploadOptimizePage() {
     setTimeout(() => setIsVisible(true), 100);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const handleNext = async () => {
     try {
       await prepareForAnalysis();
@@ -60,7 +64,7 @@ export default function UploadOptimizePage() {
   const pageContent = getPageContent();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen py-2 md:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Upload Card */}
         <Card className={`mb-8 transition-all duration-700 ${
@@ -105,25 +109,29 @@ export default function UploadOptimizePage() {
         />
 
         {/* Action Buttons */}
-        <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}>
-          <Button 
-            variant="outline" 
+        <div
+          className={`flex w-full justify-between items-center gap-x-4 transition-all duration-700 delay-900 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+        >
+          <Button
+            variant="outline"
             onClick={() => router.push('/service-selection')}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition-all duration-300"
           >
             返回選擇
           </Button>
-          
-          <Button 
+          <Button
             onClick={handleNext}
             disabled={!canProceed || isProcessing}
-            className={`${pageContent.color.button} text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+            aria-busy={isProcessing}
+            className={`${pageContent.color.button} text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]`}
           >
             {isProcessing ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <span className="mr-2 flex items-center">
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </span>
                 準備中...
               </>
             ) : (

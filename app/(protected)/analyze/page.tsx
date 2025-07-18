@@ -353,6 +353,10 @@ export default function AnalyzePage() {
     setTimeout(() => setIsVisible(true), 100);
   }, [router, startAnalysis]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [router]);
+
   const handleViewResults = () => {
     // 將分析結果存儲到 sessionStorage
     if (analysisResult) {
@@ -372,7 +376,7 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-2 md:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header Card with Illustration */}
         <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 
@@ -388,9 +392,6 @@ export default function AnalyzePage() {
                 深度分析您的作品內容
               </div>
             </div>
-            {/* <CardDescription className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              AI正在深度分析您的作品內容，識別技能、成就和經驗。
-            </CardDescription> */}
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-center space-x-2 text-lg font-mono">
                 <span className="text-gray-700 dark:text-gray-300">分析時間：</span>
@@ -454,7 +455,7 @@ export default function AnalyzePage() {
                     <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 mr-3">
                       <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                     </span>
-                    <span className="text-green-700 dark:text-green-400 font-semibold text-lg">AI 已成功分析您的作品，識別出以下關鍵信息</span>
+                    <span className="text-green-700 dark:text-green-400 font-semibold text-lg">AI 已成功分析您的履歷，識別出以下關鍵信息</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
@@ -487,12 +488,8 @@ export default function AnalyzePage() {
             </AnimatePresence>
 
           </CardHeader>
-          {/* Step Card 放進 Header Card，下方加動畫 */}
-          {/* Removed original step card rendering from here */}
         </Card>
 
-        {/* Step or Result Card */}
-        {/* 只顯示正在執行的步驟，分析完成後只顯示結果卡片 */}
         {error && !isAnalyzing && (
           <Card className="mb-8 border-red-200 dark:border-red-800 transition-all duration-700">
             <CardHeader>
@@ -530,10 +527,6 @@ export default function AnalyzePage() {
           </Card>
         )}
 
-        {/* 分析完成顯示結果卡片，否則只顯示目前步驟 */}
-        {/* Removed original analysis complete rendering */}
-
-        {/* Action Buttons */}
         <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <Button 
             variant="outline" 

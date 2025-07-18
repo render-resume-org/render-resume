@@ -1,8 +1,7 @@
 "use client";
 
+import { ServiceCard } from "@/components/service-selection/service-card";
 import { CreateResumeIcon, OptimizeResumeIcon } from "@/components/svg-icon";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from 'next/navigation';
 
 // Static text constants
@@ -42,63 +41,24 @@ export default function ServiceSelectionPage() {
 
         {/* Service Options */}
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {/* Create New Resume */}
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-cyan-300 dark:hover:border-cyan-600"
+          <ServiceCard
+            icon={<CreateResumeIcon />}
+            title={PAGE_CONTENT.services.create.title}
+            description={PAGE_CONTENT.services.create.description}
+            buttonText={PAGE_CONTENT.services.create.buttonText}
+            buttonColor="bg-cyan-500 hover:bg-cyan-600"
+            className="hover:border-cyan-300 dark:hover:border-cyan-600 border-2"
             onClick={() => handleServiceSelect('create')}
-          >
-            <CardHeader className="text-center pb-4">
-              <div className="w-48 h-48 mx-auto my-6">
-                <CreateResumeIcon />
-              </div>
-              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-                {PAGE_CONTENT.services.create.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <CardDescription className="text-gray-600 dark:text-gray-300 mb-6">
-                {PAGE_CONTENT.services.create.description}
-              </CardDescription>
-              <Button 
-                className="w-full bg-cyan-500 hover:bg-cyan-600 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleServiceSelect('create');
-                }}
-              >
-                {PAGE_CONTENT.services.create.buttonText}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Optimize Existing Resume */}
-          <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-300 border-2 hover:border-orange-300 dark:hover:border-orange-600"
+          />
+          <ServiceCard
+            icon={<OptimizeResumeIcon />}
+            title={PAGE_CONTENT.services.optimize.title}
+            description={PAGE_CONTENT.services.optimize.description}
+            buttonText={PAGE_CONTENT.services.optimize.buttonText}
+            buttonColor="bg-orange-300 hover:bg-orange-400"
+            className="hover:border-orange-300 dark:hover:border-orange-600 border-2"
             onClick={() => handleServiceSelect('optimize')}
-          >
-            <CardHeader className="text-center pb-4">
-              <div className="w-48 h-48 mx-auto my-6">
-                <OptimizeResumeIcon />
-              </div>
-              <CardTitle className="text-xl font-semibold text-gray-900 dark:text-white">
-                {PAGE_CONTENT.services.optimize.title}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center">
-              <CardDescription className="text-gray-600 dark:text-gray-300 mb-6">
-                {PAGE_CONTENT.services.optimize.description}
-              </CardDescription>
-              <Button 
-                className="w-full bg-orange-300 hover:bg-orange-400 text-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleServiceSelect('optimize');
-                }}
-              >
-                {PAGE_CONTENT.services.optimize.buttonText}
-              </Button>
-            </CardContent>
-          </Card>
+          />
         </div>
 
        
