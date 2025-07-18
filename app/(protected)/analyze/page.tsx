@@ -97,7 +97,7 @@ export default function AnalyzePage() {
   ];
 
   // Helper function to check if an object has any non-empty values
-  const hasNonEmptyValues = (obj: Record<string, any>): boolean => {
+  const hasNonEmptyValues = (obj: PersonalInfo | Links): boolean => {
     return Object.values(obj).some(value => value && value.toString().trim() !== '');
   };
 
