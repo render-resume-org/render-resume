@@ -1,11 +1,11 @@
+import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 import { z } from 'zod';
-import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt
 } from './config/resume-analysis-config';
-import { generateAnalyzeDocumentUserPrompt } from './prompts/analyze-document-prompt';
 import { generateAnalyzeResumeUserPrompt } from './prompts/analyze-resume-prompt';
+import { generateAnalyzeUploadUserPrompt } from './prompts/analyze-upload-prompt';
 
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
@@ -472,7 +472,7 @@ export class NativeOpenAIClient {
             }
 
             // 新增主要分析請求
-            const userPrompt = generateAnalyzeDocumentUserPrompt({
+            const userPrompt = generateAnalyzeUploadUserPrompt({
                 textContent,
                 additionalText,
                 hasImages,

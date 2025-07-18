@@ -1,11 +1,11 @@
 "use client";
 
-import { Education, Experience, Project, PersonalInfo, Links } from "@/lib/upload-utils";
 import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { analyzeDocuments } from "@/lib/api/resume-analysis";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ArrowRight,
@@ -97,7 +97,7 @@ export default function AnalyzePage() {
   ];
 
   // Helper function to check if an object has any non-empty values
-  const hasNonEmptyValues = (obj: Record<string, any>): boolean => {
+  const hasNonEmptyValues = (obj: PersonalInfo | Links): boolean => {
     return Object.values(obj).some(value => value && value.toString().trim() !== '');
   };
 

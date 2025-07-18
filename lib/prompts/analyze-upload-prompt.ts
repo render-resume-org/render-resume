@@ -1,8 +1,7 @@
-
 import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 
 /**
- * 產生分析履歷文件的 user prompt
+ * 產生分析履歷上傳文件的 user prompt
  * @param textContent 文件內容彙總（可為空）
  * @param additionalText 額外補充說明（可為空）
  * @param hasImages 是否包含圖像或 PDF
@@ -14,7 +13,7 @@ import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/uploa
  * @param links 連結資訊
  */
 
-export function generateAnalyzeDocumentUserPrompt({
+export function generateAnalyzeUploadUserPrompt({
   textContent = '',
   additionalText = '',
   hasImages = false,
