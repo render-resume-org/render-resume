@@ -96,6 +96,11 @@ export default function AnalyzePage() {
     }
   ];
 
+  // Helper function to check if an object has any non-empty values
+  const hasNonEmptyValues = (obj: Record<string, any>): boolean => {
+    return Object.values(obj).some(value => value && value.toString().trim() !== '');
+  };
+
   // Helper function to generate user-friendly error messages
   const getErrorMessage = (error: string): string => {
     const lowerError = error.toLowerCase();
@@ -192,8 +197,8 @@ export default function AnalyzePage() {
         experience: experience.length > 0 ? experience : undefined,
         projects: projects.length > 0 ? projects : undefined,
         skills: skills || undefined,
-        personalInfo: Object.keys(personalInfo).length > 0 ? personalInfo : undefined,
-        links: Object.keys(links).length > 0 ? links : undefined,
+        personalInfo: hasNonEmptyValues(personalInfo) ? personalInfo : undefined,
+        links: hasNonEmptyValues(links) ? links : undefined,
         useVision: true,
         serviceType: serviceType
       });
