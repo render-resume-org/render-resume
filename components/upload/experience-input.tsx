@@ -1,10 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import React, { useState, useCallback } from "react";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Experience } from "@/lib/upload-utils";
+import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
+import React, { useCallback, useState } from "react";
 
 const MONTH_OPTIONS = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
 const YEAR_OPTIONS = Array.from({ length: 80 }, (_, i) => `${2030 - i}`);
@@ -107,7 +107,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
             </div>
             {/* Position */}
             <div className="mb-4">
-              <label className={labelClass}>職稱</label>
+              <label className={labelClass}>職稱 <span className="text-red-500">*</span></label>
               <input
                 className={fieldClass}
                 value={exp.position}
@@ -122,7 +122,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
             {/* Company Name and Location */}
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>公司名稱</label>
+                <label className={labelClass}>公司名稱 <span className="text-red-500">*</span></label>
                 <input
                   className={fieldClass}
                   value={exp.company}
@@ -135,7 +135,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>地點</label>
+                <label className={labelClass}>地點 <span className="text-red-500">*</span></label>
                 <input
                   className={fieldClass}
                   value={exp.location}
@@ -150,7 +150,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
             </div>
             {/* Description */}
             <div className="mb-4">
-              <label className={labelClass}>經歷描述</label>
+              <label className={labelClass}>經歷描述 <span className="text-red-500">*</span></label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base min-h-[80px] resize-vertical"
                 value={exp.description}
@@ -177,7 +177,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
             {/* Dates row */}
             <div className="flex flex-col md:flex-row gap-4 mb-2">
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>開始月份</label>
+                <label className={labelClass}>開始月份 <span className="text-red-500">*</span></label>
                 <Select
                   value={exp.startMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "startMonth", v)}
@@ -196,7 +196,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>開始年份</label>
+                <label className={labelClass}>開始年份 <span className="text-red-500">*</span></label>
                 <Select
                   value={exp.startYear || ""}
                   onValueChange={v => handleFieldChange(idx, "startYear", v)}

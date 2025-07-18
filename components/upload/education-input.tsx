@@ -1,10 +1,10 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
-import React, { useState, useCallback } from "react";
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Education } from "@/lib/upload-utils";
+import { cn } from "@/lib/utils";
+import { Plus, X } from "lucide-react";
+import React, { useCallback, useState } from "react";
 
 const DEGREE_OPTIONS = ["學士", "碩士", "博士"];
 const MONTH_OPTIONS = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
@@ -91,7 +91,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
             </div>
             {/* School Name */}
             <div className="mb-4">
-              <label className={labelClass}>學校名稱</label>
+              <label className={labelClass}>學校名稱 <span className="text-red-500">*</span></label>
               <input
                 className={fieldClass}
                 value={edu.school}
@@ -106,7 +106,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
             {/* Major, Degree, GPA row */}
             <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>主修</label>
+                <label className={labelClass}>主修 <span className="text-red-500">*</span></label>
                 <input
                   className={fieldClass}
                   value={edu.major}
@@ -119,7 +119,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>學位類型</label>
+                <label className={labelClass}>學位類型 <span className="text-red-500">*</span></label>
                 <Select
                   value={edu.degree || ""}
                   onValueChange={v => handleFieldChange(idx, "degree", v)}
@@ -166,7 +166,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
             {/* Dates row */}
             <div className="flex flex-col md:flex-row gap-4 mb-2">
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>開始月份</label>
+                <label className={labelClass}>開始月份 <span className="text-red-500">*</span></label>
                 <Select
                   value={edu.startMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "startMonth", v)}
@@ -182,7 +182,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 </Select>
               </div>
               <div className="flex-1 min-w-0">
-                <label className={labelClass}>開始年份</label>
+                <label className={labelClass}>開始年份 <span className="text-red-500">*</span></label>
                 <Select
                   value={edu.startYear || ""}
                   onValueChange={v => handleFieldChange(idx, "startYear", v)}

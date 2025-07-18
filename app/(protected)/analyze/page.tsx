@@ -83,9 +83,15 @@ export default function AnalyzePage() {
       icon: Briefcase,
     },
     {
-      id: 'profile',
+      id: 'education',
       title: '學習經歷',
       description: '提取學習經歷和學習成果...',
+      icon: GraduationCap,
+    },
+    {
+      id: 'profile',
+      title: '個人資料',
+      description: '提取個人基本資料和聯絡資訊...',
       icon: GraduationCap,
     },
     {
@@ -93,6 +99,12 @@ export default function AnalyzePage() {
       title: '評分與建議',
       description: '評分您的履歷，並提供建議...',
       icon: Bot,
+    },
+    {
+      id: 'optimization',
+      title: '優化追問',
+      description: '生成針對履歷潛在優化的追問...',
+      icon: ArrowRight,
     }
   ];
 
@@ -186,7 +198,7 @@ export default function AnalyzePage() {
             return prev;
           }
         });
-      }, 4500);
+      }, 5000);
 
       console.log('🤖 [Analyze Page] Calling analyzeDocuments API');
       // 執行實際的文檔分析
@@ -381,7 +393,7 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen py-2 md:py-8">
+    <div className="h-fit py-2 md:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header Card with Illustration */}
         <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 

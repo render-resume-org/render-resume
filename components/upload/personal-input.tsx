@@ -29,34 +29,37 @@ const PersonalInputComponent: React.FC<Props> = ({ value, onChange }) => {
           
           {/* Address */}
           <div className="mb-4">
-            <label className={labelClass}>地址</label>
+            <label className={labelClass}>地址 <span className="text-red-500">*</span></label>
             <input
               className={fieldClass}
               value={value.address}
               onChange={e => handleFieldChange("address", e.target.value)}
               placeholder="請輸入您的地址"
+              required
             />
           </div>
 
           {/* Phone and Email row */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex-1 min-w-0">
-              <label className={labelClass}>電話</label>
+              <label className={labelClass}>電話 <span className="text-red-500">*</span></label>
               <input
                 className={fieldClass}
                 value={value.phone}
                 onChange={e => handleFieldChange("phone", e.target.value)}
                 placeholder="請輸入您的電話號碼"
+                required
               />
             </div>
             <div className="flex-1 min-w-0">
-              <label className={labelClass}>電子郵件</label>
+              <label className={labelClass}>電子郵件 <span className="text-red-500">*</span></label>
               <input
                 className={fieldClass}
                 type="email"
                 value={value.email}
                 onChange={e => handleFieldChange("email", e.target.value)}
                 placeholder="請輸入您的電子郵件"
+                required
               />
             </div>
           </div>
