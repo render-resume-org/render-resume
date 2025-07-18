@@ -8,6 +8,7 @@ export const GRADE_MAPPING = {
   'C+': { value: 68, level: "待改進", emoji: '📈' },
   'C': { value: 65, level: "需改進", emoji: '📈' },
   'C-': { value: 60, level: "需改進", emoji: '📈' },
+  'D': { value: 55, level: "不及格", emoji: '💪' },
   'F': { value: 50, level: "不合格", emoji: '💪' }
 } as const;
 

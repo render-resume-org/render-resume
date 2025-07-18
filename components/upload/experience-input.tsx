@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Experience } from "@/lib/upload-utils";
 
@@ -14,7 +14,7 @@ type Props = {
   onChange: (value: Experience[]) => void;
 };
 
-export const ExperienceInput: React.FC<Props> = React.memo(({ value, onChange }) => {
+const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
   // 新增錯誤狀態
   const [errors, setErrors] = useState<{ company: boolean; position: boolean; location: boolean; description: boolean; startMonth: boolean; startYear: boolean; endMonth: boolean; endYear: boolean }[]>([]);
 
@@ -86,13 +86,6 @@ export const ExperienceInput: React.FC<Props> = React.memo(({ value, onChange })
   // 統一 input/Select 樣式
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
   const labelClass = "block text-base font-semibold text-gray-800 mb-1";
-
-  // 新增工作經歷按鈕是否可點擊
-  const canAdd = useMemo(() => {
-    return value.every(
-      (exp) => exp.company.trim() && exp.position.trim() && exp.description && exp.description.trim()
-    );
-  }, [value]);
 
   return (
     <div className="mb-8">
@@ -275,4 +268,6 @@ export const ExperienceInput: React.FC<Props> = React.memo(({ value, onChange })
       </Button>
     </div>
   );
-}); 
+};
+
+export const ExperienceInput = React.memo(ExperienceInputComponent); 

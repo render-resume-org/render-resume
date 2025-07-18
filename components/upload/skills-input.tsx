@@ -1,13 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import React, { useCallback } from "react";
+import React from "react";
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
 };
 
-export const SkillsInput: React.FC<Props> = React.memo(({ value, onChange }) => {
+const SkillsInputComponent: React.FC<Props> = ({ value, onChange }) => {
   // 統一 input 樣式
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
   const labelClass = "block text-base font-semibold text-gray-800 mb-1";
@@ -34,4 +33,6 @@ export const SkillsInput: React.FC<Props> = React.memo(({ value, onChange }) => 
       </Card>
     </div>
   );
-}); 
+};
+
+export const SkillsInput = React.memo(SkillsInputComponent); 

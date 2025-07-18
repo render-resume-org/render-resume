@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
 import { Education } from "@/lib/upload-utils";
 
@@ -15,7 +15,7 @@ type Props = {
   onChange: (value: Education[]) => void;
 };
 
-export const EducationInput: React.FC<Props> = React.memo(({ value, onChange }) => {
+const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
   // 新增錯誤狀態
   const [errors, setErrors] = useState<{ school: boolean; major: boolean; degree: boolean }[]>([]);
 
@@ -69,12 +69,7 @@ export const EducationInput: React.FC<Props> = React.memo(({ value, onChange }) 
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
   const labelClass = "block text-base font-semibold text-gray-800 mb-1";
 
-  // 新增學歷按鈕是否可點擊
-  const canAdd = useMemo(() => {
-    return value.every(
-      (edu) => edu.school.trim() && edu.major.trim() && edu.degree && edu.degree.trim()
-    );
-  }, [value]);
+
 
   return (
     <div className="mb-8">
@@ -250,4 +245,6 @@ export const EducationInput: React.FC<Props> = React.memo(({ value, onChange }) 
       </Button>
     </div>
   );
-});
+};
+
+export const EducationInput = React.memo(EducationInputComponent);

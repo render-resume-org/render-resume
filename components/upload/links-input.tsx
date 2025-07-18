@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import { Links } from "@/lib/upload-utils";
 import React, { useCallback } from "react";
 
@@ -8,7 +7,7 @@ type Props = {
   onChange: (value: Links) => void;
 };
 
-export const LinksInput: React.FC<Props> = React.memo(({ value, onChange }) => {
+const LinksInputComponent: React.FC<Props> = ({ value, onChange }) => {
   const handleFieldChange = useCallback((field: keyof Links, fieldValue: string) => {
     onChange({
       ...value,
@@ -64,4 +63,6 @@ export const LinksInput: React.FC<Props> = React.memo(({ value, onChange }) => {
       </Card>
     </div>
   );
-}); 
+};
+
+export const LinksInput = React.memo(LinksInputComponent); 
