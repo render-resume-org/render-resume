@@ -1,18 +1,38 @@
 
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
+
 /**
  * 產生分析履歷文件的 user prompt
  * @param textContent 文件內容彙總（可為空）
  * @param additionalText 額外補充說明（可為空）
  * @param hasImages 是否包含圖像或 PDF
+ * @param education 教育背景資訊
+ * @param experience 工作經驗資訊
+ * @param projects 專案經驗資訊
+ * @param skills 技能列表
+ * @param personalInfo 個人基本資料
+ * @param links 連結資訊
  */
 export function generateAnalyzeDocumentUserPrompt({
   textContent = '',
   additionalText = '',
-  hasImages = false
+  hasImages = false,
+  education,
+  experience,
+  projects,
+  skills,
+  personalInfo,
+  links
 }: {
   textContent?: string;
   additionalText?: string;
   hasImages?: boolean;
+  education?: Education[];
+  experience?: Experience[];
+  projects?: Project[];
+  skills?: string;
+  personalInfo?: PersonalInfo;
+  links?: Links;
 }): string {
   let userPrompt = '';
   if (textContent) {
@@ -23,6 +43,51 @@ export function generateAnalyzeDocumentUserPrompt({
   }
   if (hasImages) {
     userPrompt += '\n\n請同時分析上面提供的圖像檔案。';
+  }
+
+  // 處理教育背景資訊
+  if (education && education.length > 0) {
+    userPrompt += `\n\n教育背景資訊：\n${education.map(edu => {
+      const duration = edu.isCurrent ? 
+        `${edu.startMonth}/${edu.startYear} - 現在` : 
+        `${edu.startMonth}/${edu.startYear} - ${edu.endMonth}/${edu.endYear}`;
+      return `- ${edu.school} ${edu.degree} ${edu.major} (${duration}) GPA: ${edu.gpa}`;
+    }).join('\n')}`;
+  }
+
+  // 處理工作經驗資訊
+  if (experience && experience.length > 0) {
+    userPrompt += `\n\n工作經驗資訊：\n${experience.map(exp => {
+      const duration = exp.isCurrent ? 
+        `${exp.startMonth}/${exp.startYear} - 現在` : 
+        `${exp.startMonth}/${exp.startYear} - ${exp.endMonth}/${exp.endYear}`;
+      return `- ${exp.company} ${exp.position} (${exp.location})\n  期間：${duration}\n  描述：${exp.description}`;
+    }).join('\n\n')}`;
+  }
+
+  // 處理專案經驗資訊
+  if (projects && projects.length > 0) {
+    userPrompt += `\n\n專案經驗資訊：\n${projects.map(project => {
+      const duration = project.isCurrent ? 
+        `${project.startMonth}/${project.startYear} - 現在` : 
+        `${project.startMonth}/${project.startYear} - ${project.endMonth}/${project.endYear}`;
+      return `- ${project.name}\n  期間：${duration}\n  描述：${project.description}`;
+    }).join('\n\n')}`;
+  }
+
+  // 處理技能列表
+  if (skills) {
+    userPrompt += `\n\n技能列表：\n${skills}`;
+  }
+
+  // 處理個人基本資料
+  if (personalInfo) {
+    userPrompt += `\n\n個人基本資料：\n地址：${personalInfo.address}\n電話：${personalInfo.phone}\n郵箱：${personalInfo.email}`;
+  }
+
+  // 處理連結資訊
+  if (links) {
+    userPrompt += `\n\n連結：\nLinkedIn：${links.linkedin}\nGitHub：${links.github}\n作品集：${links.portfolio}`;
   }
   userPrompt += `
 

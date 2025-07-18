@@ -1,5 +1,6 @@
 "use client";
 
+import { Education, Experience, Project, PersonalInfo, Links } from "@/lib/upload-utils";
 import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +37,21 @@ export default function AnalyzePage() {
   const [error, setError] = useState<string | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<StoredFile[]>([]);
   const [additionalText, setAdditionalText] = useState('');
+  const [education, setEducation] = useState<Education[]>([]);
+  const [experience, setExperience] = useState<Experience[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [skills, setSkills] = useState<string>('');
+  const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    address: '',
+    phone: '',
+    email: ''
+  });
+  const [links, setLinks] = useState<Links>({
+    linkedin: '',
+    github: '',
+    portfolio: ''
+  });
+  const [serviceType, setServiceType] = useState<'create' | 'optimize'>('create');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null);
   const [analysisElapsedTime, setAnalysisElapsedTime] = useState(0);
@@ -112,12 +128,19 @@ export default function AnalyzePage() {
     return `分析失敗：${error}。可能原因包括：文件內容無法識別、圖片解析度過低、文件格式不支援等。請檢查上傳的文件是否包含清晰的履歷內容，並考慮使用PDF或文字格式重新上傳。`;
   };
 
-  const startAnalysis = useCallback(async (files: StoredFile[], additionalText: string) => {
-    console.log('🚀 [Analyze Page] Starting analysis with:', {
-      filesCount: files.length,
-      fileNames: files.map(f => f.name),
-      additionalTextLength: additionalText.length
-    });
+  const startAnalysis = useCallback(async (files: StoredFile[], additionalText: string, education: Education[], experience: Experience[], projects: Project[], skills: string, personalInfo: PersonalInfo, links: Links, serviceType: 'create' | 'optimize') => {
+          console.log('🚀 [Analyze Page] Starting analysis with:', {
+        filesCount: files.length,
+        fileNames: files.map(f => f.name),
+        additionalTextLength: additionalText.length,
+        educationCount: education.length,
+        experienceCount: experience.length,
+        projectsCount: projects.length,
+        skillsLength: skills.length,
+        personalInfoKeys: Object.keys(personalInfo),
+        linksKeys: Object.keys(links),
+        serviceType
+      });
     
     setIsAnalyzing(true);
     setError(null);
@@ -165,7 +188,14 @@ export default function AnalyzePage() {
       const response = await analyzeDocuments({
         files: fileObjects,
         additionalText: additionalText || undefined,
-        useVision: true
+        education: education.length > 0 ? education : undefined,
+        experience: experience.length > 0 ? experience : undefined,
+        projects: projects.length > 0 ? projects : undefined,
+        skills: skills || undefined,
+        personalInfo: Object.keys(personalInfo).length > 0 ? personalInfo : undefined,
+        links: Object.keys(links).length > 0 ? links : undefined,
+        useVision: true,
+        serviceType: serviceType
       });
 
       console.log('📋 [Analyze Page] API response received:', {
@@ -230,22 +260,88 @@ export default function AnalyzePage() {
     console.log('🔍 [Analyze Page] Component mounted, checking for stored files');
     const storedFilesData = sessionStorage.getItem('uploadedFiles');
     const storedAdditionalText = sessionStorage.getItem('additionalText');
+    const storedEducation = sessionStorage.getItem('education');
+    const storedExperience = sessionStorage.getItem('experience');
+    const storedProjects = sessionStorage.getItem('projects');
+    const storedSkills = sessionStorage.getItem('skills');
+    const storedPersonalInfo = sessionStorage.getItem('personalInfo');
+    const storedLinks = sessionStorage.getItem('links');
+    const storedServiceType = sessionStorage.getItem('serviceType');
     
     if (storedFilesData) {
       console.log('📦 [Analyze Page] Found stored files data');
       try {
         const files: StoredFile[] = JSON.parse(storedFilesData);
+        const additionalText: string = storedAdditionalText || '';
+        const education: Education[] = storedEducation ? JSON.parse(storedEducation) : [];
+        const experience: Experience[] = storedExperience ? JSON.parse(storedExperience) : [];
+        const projects: Project[] = storedProjects ? JSON.parse(storedProjects) : [];
+        const skills: string = storedSkills || '';
+        const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : {
+          address: '',
+          phone: '',
+          email: ''
+        };
+        const links: Links = storedLinks ? JSON.parse(storedLinks) : {
+          linkedin: '',
+          github: '',
+          portfolio: ''
+        };
+        const serviceType: 'create' | 'optimize' = (storedServiceType as 'create' | 'optimize') || 'create';
+        
         console.log('📄 [Analyze Page] Parsed files:', {
           count: files.length,
           names: files.map(f => f.name),
           sizes: files.map(f => f.size)
         });
         
+        console.log('📝 [Analyze Page] Parsed additional text:', {
+          length: additionalText.length,
+          additionalTextData: additionalText
+        });
+
+        console.log('🎓 [Analyze Page] Parsed education:', {
+          count: education.length,
+          educationData: education
+        });
+        
+        console.log('💼 [Analyze Page] Parsed experience:', {
+          count: experience.length,
+          experienceData: experience
+        });
+        
+        console.log('🚀 [Analyze Page] Parsed projects:', {
+          count: projects.length,
+          projectsData: projects
+        });
+        
+        console.log('⚡ [Analyze Page] Parsed skills:', {
+          length: skills.length,
+          skillsData: skills
+        });
+        
+        console.log('👤 [Analyze Page] Parsed personal info:', {
+          keys: Object.keys(personalInfo),
+          personalInfoData: personalInfo
+        });
+        
+        console.log('🔗 [Analyze Page] Parsed links:', {
+          keys: Object.keys(links),
+          linksData: links
+        });
+        
         setUploadedFiles(files);
-        setAdditionalText(storedAdditionalText || '');
+        setAdditionalText(additionalText);
+        setEducation(education);
+        setExperience(experience);
+        setProjects(projects);
+        setSkills(skills);
+        setPersonalInfo(personalInfo);
+        setLinks(links);
+        setServiceType(serviceType);
         
         // 自動開始分析
-        startAnalysis(files, storedAdditionalText || '');
+        startAnalysis(files, additionalText, education, experience, projects, skills, personalInfo, links, serviceType);
       } catch (error) {
         console.error('Error parsing stored files:', error);
         setError('讀取上傳文件時發生錯誤');
@@ -275,7 +371,7 @@ export default function AnalyzePage() {
       setAnalysisComplete(false);
       setError(null);
       setAnalysisResult(null);
-      startAnalysis(uploadedFiles, additionalText);
+      startAnalysis(uploadedFiles, additionalText, education, experience, projects, skills, personalInfo, links, serviceType);
     }
   };
 
