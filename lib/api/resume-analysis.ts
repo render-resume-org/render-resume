@@ -1,3 +1,4 @@
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 import type {
     AnalyzePostBody,
     ApiResponse,
@@ -68,21 +69,62 @@ export async function analyzeResume(options: ResumeAnalysisOptions): Promise<Res
 export async function analyzeDocuments(options: {
     files: File[];
     additionalText?: string;
+    education?: Education[];
+    experience?: Experience[];
+    projects?: Project[];
+    skills?: string;
+    personalInfo?: PersonalInfo;
+    links?: Links;
     useVision?: boolean;
+    serviceType?: 'create' | 'optimize';
 }): Promise<ApiResponse<ResumeAnalysisResult>> {
     console.log('📁 [Frontend API] Starting document analysis:', {
         filesCount: options.files.length,
         fileNames: options.files.map(f => f.name),
         fileSizes: options.files.map(f => f.size),
         additionalText: options.additionalText ? 'provided' : 'none',
-        useVision: options.useVision
+        education: options.education ? `${options.education.length} entries` : 'none',
+        experience: options.experience ? `${options.experience.length} entries` : 'none',
+        projects: options.projects ? `${options.projects.length} entries` : 'none',
+        skills: options.skills ? 'provided' : 'none',
+        personalInfo: options.personalInfo ? 'provided' : 'none',
+        links: options.links ? 'provided' : 'none',
+        useVision: options.useVision,
+        serviceType: options.serviceType || 'create'
     });
 
-    if (!options.files || options.files.length === 0) {
-        console.error('❌ [Frontend API] No files provided');
+    // 檢查是否有有效的經驗內容
+    const hasValidExperience = (experienceList?: Experience[]) => {
+        return experienceList?.some(exp => 
+            exp.company.trim() !== '' || 
+            exp.position.trim() !== '' || 
+            exp.description.trim() !== ''
+        ) || false;
+    };
+
+    // 檢查是否有有效的專案內容
+    const hasValidProjects = (projectsList?: Project[]) => {
+        return projectsList?.some(proj => 
+            proj.name.trim() !== '' || 
+            proj.description.trim() !== ''
+        ) || false;
+    };
+
+    // 根據 serviceType 決定是否需要檔案
+    if (options.serviceType === 'optimize' && (!options.files || options.files.length === 0)) {
+        console.error('❌ [Frontend API] No files provided for optimize service');
         return {
             success: false,
             error: '請選擇要分析的文件'
+        };
+    }
+
+    // 對於 create 服務，檢查是否有經驗或專案資料
+    if (options.serviceType === 'create' && !hasValidExperience(options.experience) && !hasValidProjects(options.projects)) {
+        console.error('❌ [Frontend API] No valid experience or projects provided for create service');
+        return {
+            success: false,
+            error: '請至少填寫一項工作經驗或專案經驗'
         };
     }
 
@@ -90,11 +132,15 @@ export async function analyzeDocuments(options: {
         console.log('📋 [Frontend API] Creating FormData');
         const formData = new FormData();
         
-        // 添加文件
-        options.files.forEach((file, index) => {
-            console.log(`📄 [Frontend API] Adding file ${index + 1}: ${file.name} (${file.size} bytes)`);
-            formData.append('files', file);
-        });
+        // 添加文件（只有在有檔案時才添加）
+        if (options.files && options.files.length > 0) {
+            options.files.forEach((file, index) => {
+                console.log(`📄 [Frontend API] Adding file ${index + 1}: ${file.name} (${file.size} bytes)`);
+                formData.append('files', file);
+            });
+        } else {
+            console.log('📄 [Frontend API] No files to add');
+        }
         
         // 添加額外資訊
         if (options.additionalText) {
@@ -102,9 +148,49 @@ export async function analyzeDocuments(options: {
             formData.append('additionalText', options.additionalText);
         }
         
+        // 添加教育資訊
+        if (options.education) {
+            console.log('🎓 [Frontend API] Adding education data');
+            formData.append('education', JSON.stringify(options.education));
+        }
+        
+        // 添加工作經驗
+        if (options.experience) {
+            console.log('💼 [Frontend API] Adding experience data');
+            formData.append('experience', JSON.stringify(options.experience));
+        }
+        
+        // 添加項目經驗
+        if (options.projects) {
+            console.log('🚀 [Frontend API] Adding projects data');
+            formData.append('projects', JSON.stringify(options.projects));
+        }
+        
+        // 添加技能
+        if (options.skills) {
+            console.log('⚡ [Frontend API] Adding skills data');
+            formData.append('skills', JSON.stringify(options.skills));
+        }
+        
+        // 添加個人資訊
+        if (options.personalInfo) {
+            console.log('👤 [Frontend API] Adding personal info data');
+            formData.append('personalInfo', JSON.stringify(options.personalInfo));
+        }
+        
+        // 添加連結
+        if (options.links) {
+            console.log('🔗 [Frontend API] Adding links data');
+            formData.append('links', JSON.stringify(options.links));
+        }
+        
         // 添加 Vision 設定
         formData.append('useVision', String(options.useVision ?? true));
         console.log('👁️ [Frontend API] Vision enabled:', options.useVision ?? true);
+
+        // 添加服務類型
+        formData.append('serviceType', options.serviceType || 'create');
+        console.log('🔧 [Frontend API] Service type:', options.serviceType || 'create');
 
         console.log('🚀 [Frontend API] Sending request to /api/analyze');
         const response = await fetch('/api/analyze', {

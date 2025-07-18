@@ -96,7 +96,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   }, []);
 
   // Helper: flatten pendingFiles into file messages (PDF to images)
-  function flattenFilesToMessages(files: UploadedFile[]) {
+  const flattenFilesToMessages = useCallback((files: UploadedFile[]) => {
     const result: ChatMessage[] = [];
     for (const f of files) {
       if (f.type === 'pdf' && f.convertedImages && f.convertedImages.length > 0) {
@@ -135,7 +135,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       // 可擴展：其他檔案型態可在此處理
     }
     return result;
-  }
+  }, [generateUniqueId]);
 
   // 初始化聊天
   const initializeChat = useCallback(() => {
@@ -296,7 +296,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     } finally {
       setIsLoading(false);
     }
-  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId, flattenFilesToMessages]);
+  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId, flattenFilesToMessages, setCurrentInput]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {

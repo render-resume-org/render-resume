@@ -7,6 +7,7 @@ import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt
 } from './config/resume-analysis-config';
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
@@ -44,6 +45,12 @@ export interface DocumentUpload {
 export interface FileAnalysisOptions {
     documents: DocumentUpload[];
     additionalText?: string;
+    education?: Education[];
+    experience?: Experience[];
+    projects?: Project[];
+    skills?: string;
+    personalInfo?: PersonalInfo;
+    links?: Links;
     useVision?: boolean; // 是否使用 Vision 模型處理圖片/PDF
 }
 

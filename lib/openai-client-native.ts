@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
 import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt
@@ -52,6 +53,12 @@ export interface DocumentUpload {
 export interface FileAnalysisOptions {
     documents: DocumentUpload[];
     additionalText?: string;
+    education?: Education[];
+    experience?: Experience[];
+    projects?: Project[];
+    skills?: string;
+    personalInfo?: PersonalInfo;
+    links?: Links;
     useVision?: boolean;
     customSystemPrompt?: string;
 }
@@ -403,7 +410,7 @@ export class NativeOpenAIClient {
     async analyzeDocuments(options: FileAnalysisOptions): Promise<ResumeAnalysisResult> {
         console.log('🚀 [Native OpenAI Client] Starting document analysis with native client');
         
-        const { documents, additionalText, useVision = false, customSystemPrompt } = options;
+        const { documents, additionalText, education, experience, projects, skills, personalInfo, links, useVision = false, customSystemPrompt } = options;
         
         if (!documents || documents.length === 0) {
             throw new Error('沒有提供文件進行分析');
@@ -468,7 +475,13 @@ export class NativeOpenAIClient {
             const userPrompt = generateAnalyzeDocumentUserPrompt({
                 textContent,
                 additionalText,
-                hasImages
+                hasImages,
+                education,
+                experience,
+                projects,
+                skills,
+                personalInfo,
+                links
             });
 
             messages.push({

@@ -1,3 +1,49 @@
+export interface Education {
+  school: string;
+  major: string;
+  degree: string;
+  gpa: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+  isCurrent: boolean;
+};
+
+export interface Experience {
+  company: string;
+  position: string;
+  location: string;
+  description: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+  isCurrent: boolean;
+}
+
+export interface Project {
+  name: string;
+  description: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+  isCurrent: boolean;
+}
+
+export interface PersonalInfo {
+  address: string;
+  phone: string;
+  email: string;
+}
+
+export interface Links {
+  linkedin: string;
+  github: string;
+  portfolio: string;
+}
+
 export interface UploadedFile {
   id: string;
   file: File;
@@ -55,22 +101,41 @@ export function clearUploadSession(): void {
   console.log('🧹 [Upload Utils] Clearing previous sessionStorage data');
   sessionStorage.removeItem('uploadedFiles');
   sessionStorage.removeItem('additionalText');
+  sessionStorage.removeItem('education');
+  sessionStorage.removeItem('experience');
+  sessionStorage.removeItem('projects');
+  sessionStorage.removeItem('skills');
+  sessionStorage.removeItem('personalInfo');
+  sessionStorage.removeItem('links');
   sessionStorage.removeItem('serviceType');
 }
+
 
 // 新增一個專門的函數來完全清除 session（包含 analysisResult）
 export function clearCompleteSession(): void {
   console.log('🧹 [Upload Utils] Clearing ALL sessionStorage data including analysisResult');
   sessionStorage.removeItem('uploadedFiles');
   sessionStorage.removeItem('additionalText');
+  sessionStorage.removeItem('education');
+  sessionStorage.removeItem('experience');
+  sessionStorage.removeItem('projects');
+  sessionStorage.removeItem('skills');
+  sessionStorage.removeItem('personalInfo');
+  sessionStorage.removeItem('links');
   sessionStorage.removeItem('analysisResult');
   sessionStorage.removeItem('serviceType');
 }
 
-export function saveToSession(files: FileData[], additionalText: string, serviceType?: 'create' | 'optimize'): void {
+export function saveToSession(files: FileData[], additionalText: string, education: Education[], experience: Experience[], projects: Project[], skills: string, personalInfo: PersonalInfo, links: Links, serviceType?: 'create' | 'optimize'): void {
   console.log('💾 [Upload Utils] Storing data in sessionStorage');
   sessionStorage.setItem('uploadedFiles', JSON.stringify(files));
   sessionStorage.setItem('additionalText', additionalText);
+  sessionStorage.setItem('education', JSON.stringify(education));
+  sessionStorage.setItem('experience', JSON.stringify(experience));
+  sessionStorage.setItem('projects', JSON.stringify(projects));
+  sessionStorage.setItem('skills', skills);
+  sessionStorage.setItem('personalInfo', JSON.stringify(personalInfo));
+  sessionStorage.setItem('links', JSON.stringify(links));
   if (serviceType) {
     sessionStorage.setItem('serviceType', serviceType);
   }
@@ -78,6 +143,12 @@ export function saveToSession(files: FileData[], additionalText: string, service
   console.log('📊 [Upload Utils] SessionStorage data stored:', {
     uploadedFilesSize: JSON.stringify(files).length,
     additionalTextSize: additionalText.length,
+    educationSize: JSON.stringify(education).length,
+    experienceSize: JSON.stringify(experience).length,
+    projectsSize: JSON.stringify(projects).length,
+    skillsSize: skills.length,
+    personalInfoSize: JSON.stringify(personalInfo).length,
+    linksSize: JSON.stringify(links).length,
     totalFilesForModel: files.length,
     serviceType
   });
