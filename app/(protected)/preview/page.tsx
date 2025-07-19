@@ -1,21 +1,13 @@
 "use client";
 
+import { ActionSidebar } from "@/components/preview/action-sidebar";
 import ResumePreview from "@/components/preview/resume-preview";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { availableTemplates, getTemplateById } from "@/lib/config/resume-templates";
+import { Card, CardContent } from "@/components/ui/card";
+import { getTemplateById } from "@/lib/config/resume-templates";
 import { OptimizationSuggestion, OptimizedResume } from "@/lib/types/resume";
 import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
-import { cn } from "@/lib/utils";
-import {
-  Copy,
-  Edit,
-  FileText,
-  Printer,
-  UserCircle
-} from "lucide-react";
+import { FileText } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from "sonner";
@@ -210,121 +202,13 @@ export default function PreviewPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar - Controls */}
-          <div className="lg:col-span-1 space-y-6">
-            
-            {/* Template Selector */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">選擇模板</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Select value={currentTemplateId} onValueChange={handleTemplateChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="選擇一個模板" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTemplates.map(template => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {template.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </CardContent>
-            </Card>
-
-            {/* Download Options */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">列印/下載</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  onClick={() => window.print()}
-                  className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
-                >
-                  <Printer className="w-4 h-4 mr-2" />
-                  列印/下載 PDF
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Copy Resume Text */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">複製文字</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  onClick={copyResumeText}
-                  variant={copySuccess ? "default" : "outline"}
-                  className={cn(
-                    "w-full",
-                    copySuccess 
-                      ? "bg-cyan-600 hover:bg-cyan-700 text-white" 
-                      : "border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                  )}
-                  disabled={copySuccess}
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  {copySuccess ? "已複製！" : "複製履歷文字"}
-                </Button>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  複製純文字格式的履歷內容到剪貼簿
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Applied Suggestions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">已套用建議</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {selectedSuggestions.slice(0, 3).map((suggestion, index) => (
-                    <div key={index} className="text-sm">
-                      <Badge variant="secondary" className="text-xs mb-1">
-                        {suggestion.category}
-                      </Badge>
-                      <p className="text-gray-600 dark:text-gray-300">{suggestion.title}</p>
-                    </div>
-                  ))}
-                  {selectedSuggestions.length > 3 && (
-                    <p className="text-xs text-gray-500">
-                      和其他 {selectedSuggestions.length - 3} 個建議...
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">快速操作</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  onClick={() => router.push('/suggestions')}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  返回建議
-                </Button>
-                
-                <Button 
-                  onClick={() => router.push('/dashboard')}
-                  variant="outline"
-                  className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-                >
-                  <UserCircle className="w-4 h-4 mr-2" />
-                  返回首頁
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <ActionSidebar
+            currentTemplateId={currentTemplateId}
+            onTemplateChange={handleTemplateChange}
+            copySuccess={copySuccess}
+            onCopy={copyResumeText}
+            selectedSuggestions={selectedSuggestions}
+          />
 
           {/* Main Content - Resume Preview */}
           <div className="lg:col-span-3">

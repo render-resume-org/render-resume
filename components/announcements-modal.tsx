@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -93,8 +92,8 @@ export function AnnouncementsModal({ open, onOpenChange }: AnnouncementsModalPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[70rem] max-w-[95vw] max-h-[80vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="w-full max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+        <DialogHeader className="text-left px-4">
           <DialogTitle className="flex items-center gap-2 flex-wrap">
             📢 系統公告
             <span className="text-sm font-normal text-muted-foreground">
@@ -103,13 +102,13 @@ export function AnnouncementsModal({ open, onOpenChange }: AnnouncementsModalPro
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto px-1">
+        <div className="flex-1 overflow-y-auto px-4">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-2 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></div>
             </div>
           ) : error ? (
-            <div className="text-center py-8 text-red-500 dark:text-red-400">
+            <div className="text-left py-8 text-red-500 dark:text-red-400">
               {error}
               <div className="mt-4">
                 <Button 
@@ -122,7 +121,7 @@ export function AnnouncementsModal({ open, onOpenChange }: AnnouncementsModalPro
               </div>
             </div>
           ) : !data || data.announcements.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            <div className="text-left py-8 text-gray-500 dark:text-gray-400">
               目前沒有公告
             </div>
           ) : (
@@ -132,20 +131,22 @@ export function AnnouncementsModal({ open, onOpenChange }: AnnouncementsModalPro
                 const className = typeStyles[announcement.type];
                 
                 return (
-                  <Alert key={announcement.id} className={className}>
-                    <Icon className="h-4 w-4" />
-                    <AlertTitle className="break-words word-wrap overflow-wrap-anywhere">
-                      {announcement.title}
-                    </AlertTitle>
-                    <AlertDescription className="mt-2">
-                      <div className="whitespace-pre-wrap break-words word-wrap overflow-wrap-anywhere leading-relaxed">
-                        {announcement.content}
+                  <div key={announcement.id} className={`${className} relative w-full rounded-lg border px-4 py-3 text-sm flex items-start gap-3`} style={{ textAlign: 'left' }}>
+                    <Icon className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="break-words word-wrap overflow-wrap-anywhere text-left font-medium tracking-tight mb-2">
+                        {announcement.title}
                       </div>
-                      <div className="w-full text-end text-xs text-muted-foreground mt-2">
-                        {new Date(announcement.created_at).toLocaleString('zh-TW')}
+                      <div className="text-muted-foreground text-left">
+                        <div className="whitespace-pre-wrap break-words word-wrap overflow-wrap-anywhere leading-relaxed text-left" style={{ textAlign: 'left' }}>
+                          {announcement.content}
+                        </div>
+                        <div className="w-full text-end text-xs text-muted-foreground mt-2">
+                          {new Date(announcement.created_at).toLocaleString('zh-TW')}
+                        </div>
                       </div>
-                    </AlertDescription>
-                  </Alert>
+                    </div>
+                  </div>
                 );
               })}
             </div>
@@ -154,7 +155,7 @@ export function AnnouncementsModal({ open, onOpenChange }: AnnouncementsModalPro
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-4 border-t">
+          <div className="flex items-center justify-between pt-4 border-t px-4">
             <Button
               variant="outline"
               size="sm"
