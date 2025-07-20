@@ -21,24 +21,36 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '請輸入有效的序號' }, { status: 400 });
     }
 
-    // 查找方案
-    const { data: plan, error: planError } = await supabase
-      .from('plans')
-      .select('*')
+    // 查找 promo code
+    const { data: promoCode, error: promoError } = await supabase
+      .from('promo_codes')
+      .select(`
+        *,
+        plans:plan_id (*)
+      `)
       .eq('code', code.trim())
       .single();
 
-    if (planError || !plan) {
+    if (promoError || !promoCode) {
       return NextResponse.json({ error: '序號無效或不存在' }, { status: 404 });
     }
 
+    // 檢查 promo code 是否過期
+    if (promoCode.expire_date && new Date(promoCode.expire_date) < new Date()) {
+      return NextResponse.json({ error: '序號已過期' }, { status: 410 });
+    }
+
+    // 檢查是否為一次性代碼且已被兌換
+    if (promoCode.single_use && promoCode.redeemed_by) {
+      return NextResponse.json({ error: '此序號已被使用' }, { status: 409 });
+    }
+
     // 檢查用戶是否已有該方案的有效訂閱
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { data: existingSubscription, error: subError } = await supabase
+    const { data: existingSubscription } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('user_id', currentUser.id)
-      .eq('plan_id', plan.id)
+      .eq('plan_id', promoCode.plan_id)
       .eq('is_active', true)
       .gte('expire_at', new Date().toISOString())
       .single();
@@ -50,16 +62,17 @@ export async function POST(request: NextRequest) {
     }
 
     // 計算到期日期
+    const plan = promoCode.plans;
     const expireDate = plan.duration_days 
       ? new Date(Date.now() + plan.duration_days * 24 * 60 * 60 * 1000)
       : null;
 
-    // 創建新訂閱
+    // 開始事務：創建訂閱並更新 promo code（如果是一次性代碼）
     const { data: subscription, error: createError } = await supabase
       .from('subscriptions')
       .insert({
         user_id: currentUser.id,
-        plan_id: plan.id,
+        plan_id: promoCode.plan_id,
         is_active: true,
         expire_at: expireDate?.toISOString() || null,
       })
@@ -75,6 +88,20 @@ export async function POST(request: NextRequest) {
         { error: '序號兌換失敗，請稍後再試' },
         { status: 500 }
       );
+    }
+
+    // 如果是一次性代碼，更新 redeemed_by
+    if (promoCode.single_use) {
+      const { error: updateError } = await supabase
+        .from('promo_codes')
+        .update({ redeemed_by: currentUser.id })
+        .eq('id', promoCode.id);
+
+      if (updateError) {
+        console.error('Error updating promo code:', updateError);
+        // 注意：這裡不返回錯誤，因為訂閱已經創建成功
+        // 但應該記錄這個問題以便後續處理
+      }
     }
 
     return NextResponse.json({

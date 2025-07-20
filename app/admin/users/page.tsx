@@ -37,10 +37,12 @@ const getInitials = (name: string) => {
 };
 
 interface Plan {
-  id: string;
+  id: number;
   title: string;
   type: string;
-  price: number;
+  daily_usage: number;
+  duration_days: number | null;
+  price: number | null;
 }
 
 export default function UsersPage() {

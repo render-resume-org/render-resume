@@ -14,6 +14,26 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          user_id: string
+        }
+        Insert: {
+          user_id: string
+        }
+        Update: {
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           content: string | null
@@ -91,7 +111,6 @@ export type Database = {
       }
       plans: {
         Row: {
-          code: string | null
           created_at: string
           daily_usage: number
           duration_days: number | null
@@ -101,7 +120,6 @@ export type Database = {
           type: string | null
         }
         Insert: {
-          code?: string | null
           created_at?: string
           daily_usage?: number
           duration_days?: number | null
@@ -111,7 +129,6 @@ export type Database = {
           type?: string | null
         }
         Update: {
-          code?: string | null
           created_at?: string
           daily_usage?: number
           duration_days?: number | null
@@ -121,6 +138,51 @@ export type Database = {
           type?: string | null
         }
         Relationships: []
+      }
+      promo_codes: {
+        Row: {
+          code: string | null
+          created_at: string
+          expire_date: string | null
+          id: number
+          plan_id: number
+          redeemed_by: string | null
+          single_use: boolean
+        }
+        Insert: {
+          code?: string | null
+          created_at?: string
+          expire_date?: string | null
+          id?: number
+          plan_id: number
+          redeemed_by?: string | null
+          single_use?: boolean
+        }
+        Update: {
+          code?: string | null
+          created_at?: string
+          expire_date?: string | null
+          id?: number
+          plan_id?: number
+          redeemed_by?: string | null
+          single_use?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_codes_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promo_codes_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
