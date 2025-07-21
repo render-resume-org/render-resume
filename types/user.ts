@@ -15,7 +15,6 @@ export interface UserProfile {
 
 export interface Plan {
   id: number;
-  code: string;
   title: string;
   type: string;
   daily_usage: number;

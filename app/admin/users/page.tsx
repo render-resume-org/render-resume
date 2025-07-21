@@ -37,10 +37,12 @@ const getInitials = (name: string) => {
 };
 
 interface Plan {
-  id: string;
+  id: number;
   title: string;
   type: string;
-  price: number;
+  daily_usage: number;
+  duration_days: number | null;
+  price: number | null;
 }
 
 export default function UsersPage() {
@@ -120,7 +122,7 @@ export default function UsersPage() {
         },
         body: JSON.stringify({
           userId: selectedUser.id,
-          planId: selectedPlan,
+          planId: parseInt(selectedPlan),
           duration: parseInt(subscriptionDuration)
         }),
       });
@@ -576,7 +578,7 @@ export default function UsersPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {plans.map((plan) => (
-                    <SelectItem key={plan.id} value={plan.id}>
+                    <SelectItem key={plan.id} value={plan.id.toString()}>
                       {plan.title} - {plan.type === 'free' ? '免費' : `$${plan.price}`}
                     </SelectItem>
                   ))}

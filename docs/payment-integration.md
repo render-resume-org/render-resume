@@ -101,10 +101,10 @@
 在資料庫 `plans` 表中添加測試方案：
 
 ```sql
-INSERT INTO plans (code, title, type, daily_usage, duration_days, price) 
+INSERT INTO plans (title, type, daily_usage, duration_days, price) 
 VALUES 
-('TEST_PRO', '測試 Pro 方案', 'pro', 10, 30, 299),
-('TEST_PREMIUM', '測試 Premium 方案', 'premium', 50, 90, 899);
+('測試 Pro 方案', 'pro', 10, 30, 299),
+('測試 Premium 方案', 'premium', 50, 90, 899);
 ```
 
 ### 2. 測試支付流程

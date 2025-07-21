@@ -27,7 +27,6 @@ export default function SettingsPage() {
   // 定義免費方案
   const freePlan: Plan = {
     id: 0,
-    code: 'FREE',
     title: '免費方案',
     type: 'free',
     daily_usage: 3,

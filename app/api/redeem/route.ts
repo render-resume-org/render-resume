@@ -21,56 +21,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '請輸入有效的序號' }, { status: 400 });
     }
 
-    // 查找方案
-    const { data: plan, error: planError } = await supabase
-      .from('plans')
-      .select('*')
-      .eq('code', code.trim())
-      .single();
+    // 使用資料庫事務來確保原子性操作
+    const { data: result, error: transactionError } = await supabase.rpc('redeem_promo_code', {
+      p_code: code.trim(),
+      p_user_id: currentUser.id
+    });
 
-    if (planError || !plan) {
-      return NextResponse.json({ error: '序號無效或不存在' }, { status: 404 });
+    if (transactionError) {
+      console.error('Transaction error:', transactionError);
+      
+      // 根據錯誤類型返回適當的錯誤訊息
+      if (transactionError.message.includes('CODE_NOT_FOUND')) {
+        return NextResponse.json({ error: '序號無效或不存在' }, { status: 404 });
+      } else if (transactionError.message.includes('CODE_EXPIRED')) {
+        return NextResponse.json({ error: '序號已過期' }, { status: 410 });
+      } else if (transactionError.message.includes('CODE_ALREADY_REDEEMED')) {
+        return NextResponse.json({ error: '此序號已被使用' }, { status: 409 });
+      } else if (transactionError.message.includes('USER_ALREADY_SUBSCRIBED')) {
+        return NextResponse.json({ 
+          error: '您已擁有此方案的有效訂閱' 
+        }, { status: 409 });
+      } else {
+        return NextResponse.json(
+          { error: '序號兌換失敗，請稍後再試' },
+          { status: 500 }
+        );
+      }
     }
 
-    // 檢查用戶是否已有該方案的有效訂閱
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { data: existingSubscription, error: subError } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', currentUser.id)
-      .eq('plan_id', plan.id)
-      .eq('is_active', true)
-      .gte('expire_at', new Date().toISOString())
-      .single();
-
-    if (existingSubscription) {
-      return NextResponse.json({ 
-        error: '您已擁有此方案的有效訂閱' 
-      }, { status: 409 });
-    }
-
-    // 計算到期日期
-    const expireDate = plan.duration_days 
-      ? new Date(Date.now() + plan.duration_days * 24 * 60 * 60 * 1000)
-      : null;
-
-    // 創建新訂閱
-    const { data: subscription, error: createError } = await supabase
-      .from('subscriptions')
-      .insert({
-        user_id: currentUser.id,
-        plan_id: plan.id,
-        is_active: true,
-        expire_at: expireDate?.toISOString() || null,
-      })
-      .select(`
-        *,
-        plans:plan_id (*)
-      `)
-      .single();
-
-    if (createError) {
-      console.error('Error creating subscription:', createError);
+    if (!result) {
       return NextResponse.json(
         { error: '序號兌換失敗，請稍後再試' },
         { status: 500 }
@@ -79,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       message: '序號兌換成功！',
-      subscription,
+      subscription: result,
     });
 
   } catch (error) {
