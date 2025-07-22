@@ -215,7 +215,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, exp.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份</label>
+                <label className={cn(labelClass, exp.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份 {!exp.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={exp.endMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "endMonth", v)}
@@ -235,7 +235,7 @@ const ExperienceInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, exp.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份</label>
+                <label className={cn(labelClass, exp.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份 {!exp.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={exp.endYear || ""}
                   onValueChange={v => handleFieldChange(idx, "endYear", v)}

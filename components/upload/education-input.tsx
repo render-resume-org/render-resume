@@ -224,7 +224,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份</label>
+                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份 {!edu.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={edu.endMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "endMonth", v)}
@@ -244,7 +244,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份</label>
+                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份 {!edu.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={edu.endYear || ""}
                   onValueChange={v => handleFieldChange(idx, "endYear", v)}
