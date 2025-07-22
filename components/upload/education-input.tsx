@@ -17,7 +17,15 @@ type Props = {
 
 const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
   // 新增錯誤狀態
-  const [errors, setErrors] = useState<{ school: boolean; major: boolean; degree: boolean }[]>([]);
+  const [errors, setErrors] = useState<{
+    school: boolean;
+    major: boolean;
+    degree: boolean;
+    startMonth: boolean;
+    startYear: boolean;
+    endMonth: boolean;
+    endYear: boolean;
+  }[]>([]);
 
   const handleFieldChange = useCallback((idx: number, field: keyof Education, fieldValue: string | boolean) => {
     const newValue = value.map((item, i) => {
@@ -33,11 +41,14 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       return item;
     });
     onChange(newValue);
-    // 清除該欄位錯誤
     setErrors(prev => {
       const newErrors = [...prev];
       if (newErrors[idx]) {
         newErrors[idx] = { ...newErrors[idx], [field]: false };
+        // 如果勾選了「目前在此學校就讀」，同時清除結束時間的錯誤
+        if (field === 'isCurrent' && fieldValue === true) {
+          newErrors[idx] = { ...newErrors[idx], endMonth: false, endYear: false };
+        }
       }
       return newErrors;
     });
@@ -49,8 +60,14 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       school: !edu.school || !edu.school.trim(),
       major: !edu.major || !edu.major.trim(),
       degree: !edu.degree || !edu.degree.trim(),
+      startMonth: !edu.startMonth || !edu.startMonth.trim(),
+      startYear: !edu.startYear || !edu.startYear.trim(),
+      endMonth: edu.isCurrent ? false : (!edu.endMonth || !edu.endMonth.trim()),
+      endYear: edu.isCurrent ? false : (!edu.endYear || !edu.endYear.trim()),
     }));
-    const hasError = newErrors.some(e => e.school || e.major || e.degree);
+    const hasError = newErrors.some(e =>
+      e.school || e.major || e.degree || e.startMonth || e.startYear || e.endMonth || e.endYear
+    );
     setErrors(newErrors);
     if (hasError) return;
     // 若無錯誤才新增
@@ -58,7 +75,10 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       ...value,
       { school: "", major: "", degree: "", gpa: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
     ]);
-    setErrors([...newErrors, { school: false, major: false, degree: false }]);
+    setErrors([
+      ...newErrors,
+      { school: false, major: false, degree: false, startMonth: false, startYear: false, endMonth: false, endYear: false }
+    ]);
   }, [value, onChange]);
 
   const handleRemove = useCallback((idx: number) => {
@@ -180,6 +200,9 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors[idx]?.startMonth && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <label className={labelClass}>開始年份 <span className="text-red-500">*</span></label>
@@ -196,6 +219,9 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors[idx]?.startYear && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份</label>
@@ -213,6 +239,9 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {!edu.isCurrent && errors[idx]?.endMonth && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份</label>
@@ -230,6 +259,9 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                     ))}
                   </SelectContent>
                 </Select>
+                {!edu.isCurrent && errors[idx]?.endYear && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
             </div>
           </CardContent>
