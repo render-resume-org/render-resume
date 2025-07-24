@@ -10,7 +10,7 @@ import { FullscreenImagePreview, UploadedFileCard } from "@/components/upload/up
 import type { UploadedFile } from "@/lib/upload-utils";
 import type { Variants } from "framer-motion";
 import { Lightbulb } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, memo } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
@@ -43,7 +43,7 @@ interface MobileChatPanelProps {
   textareaRefMobile: React.RefObject<HTMLTextAreaElement | null>;
   messagesEndRefMobile: React.RefObject<HTMLDivElement | null>;
   scrollAreaRefMobile: React.RefObject<HTMLDivElement | null>;
-  onSkip: (suggestions: SuggestionRecord[]) => void;
+  onSkip: (suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
   showSuggestionsDrawer: boolean;
   setShowSuggestionsDrawer: (open: boolean) => void;
   onFileUpload: (files: File[]) => void;
@@ -52,7 +52,7 @@ interface MobileChatPanelProps {
   onRestart: () => void;
 }
 
-const MobileChatPanel = (props: MobileChatPanelProps) => {
+const MobileChatPanel = memo((props: MobileChatPanelProps) => {
   const lastToastRef = useRef<number>(0);
   useEffect(() => {
     if (props.messageCount >= (CHAT_MESSAGE_LIMIT - 5) && lastToastRef.current !== props.messageCount) {
@@ -81,6 +81,43 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
       setForceExpandId(newInProgressId);
     }
   }, [props.suggestionTemplates]);
+  
+  // 優化：使用 useMemo 緩存訊息列表
+  const messageElements = useMemo(() => (
+    <AnimatePresence mode="popLayout">
+      {props.messages.map((message) => (
+        <motion.div
+          key={message.id}
+          variants={props.messageVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          layout
+        >
+          <ChatMessageCard message={message} />
+        </motion.div>
+      ))}
+    </AnimatePresence>
+  ), [props.messages, props.messageVariants]);
+
+  // 優化：使用 useMemo 緩存檔案預覽
+  const filePreviewElements = useMemo(() => {
+    if (!props.pendingFiles || props.pendingFiles.length === 0) return null;
+    
+    return (
+      <div className="mb-2 flex gap-2 overflow-x-auto">
+        {props.pendingFiles.map((file) => (
+          <UploadedFileCard
+            key={file.id}
+            file={file}
+            onRemove={props.onRemovePendingFile}
+            onPreview={(images, index) => setPreview({ images, index })}
+          />
+        ))}
+      </div>
+    );
+  }, [props.pendingFiles, props.onRemovePendingFile]);
+
   // 直接複製原本 lg:hidden 內的內容，將 props 替換為 props.xxx
   // ...
   const [preview, setPreview] = useState<{ images: string[]; index: number } | null>(null);
@@ -120,20 +157,7 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
         <div className="overflow-hidden" style={{ height: 'calc(100vh - 25rem)' }}>
           <ScrollArea className="h-full px-4" ref={props.scrollAreaRefMobile}>
             <div className="space-y-4 py-2">
-              <AnimatePresence mode="popLayout">
-                {props.messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    variants={props.messageVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    layout
-                  >
-                    <ChatMessageCard message={message} />
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+              {messageElements}
               {props.isLoading && <LoadingMessage />}
             </div>
             <div ref={props.messagesEndRefMobile} className="h-0" />
@@ -143,27 +167,16 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
         <Separator />
         <div className="p-4 space-y-4 flex-shrink-0">
           {/* File preview above input */}
-          {props.pendingFiles && props.pendingFiles.length > 0 && (
-            <div className="mb-2 flex gap-2 overflow-x-auto">
-              {props.pendingFiles.map((file) => (
-                <UploadedFileCard
-                  key={file.id}
-                  file={file}
-                  onRemove={props.onRemovePendingFile}
-                  onPreview={(images, index) => setPreview({ images, index })}
-                />
-              ))}
-              {/* Modal for preview */}
-              {preview && (
-                <FullscreenImagePreview
-                  images={preview.images}
-                  index={preview.index}
-                  onClose={() => setPreview(null)}
-                  onPrev={() => setPreview(p => p && p.index > 0 ? { ...p, index: p.index - 1 } : p)}
-                  onNext={() => setPreview(p => p && p.index < p.images.length - 1 ? { ...p, index: p.index + 1 } : p)}
-                />
-              )}
-            </div>
+          {filePreviewElements}
+          {/* Modal for preview */}
+          {preview && (
+            <FullscreenImagePreview
+              images={preview.images}
+              index={preview.index}
+              onClose={() => setPreview(null)}
+              onPrev={() => setPreview(p => p && p.index > 0 ? { ...p, index: p.index - 1 } : p)}
+              onNext={() => setPreview(p => p && p.index < p.images.length - 1 ? { ...p, index: p.index + 1 } : p)}
+            />
           )}
           <AnimatePresence mode="popLayout">
             {props.cannedOptions.length > 0 && (
@@ -247,6 +260,8 @@ const MobileChatPanel = (props: MobileChatPanelProps) => {
       </Sheet>
     </div>
   );
-};
+});
+
+MobileChatPanel.displayName = 'MobileChatPanel';
 
 export default MobileChatPanel; 
