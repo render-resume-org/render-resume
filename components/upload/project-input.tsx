@@ -152,7 +152,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -171,7 +171,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -191,7 +191,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, project.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -211,7 +211,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, project.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
