@@ -8,7 +8,7 @@ import ChatInput from "./chat-input";
 import { FullscreenImagePreview, UploadedFileCard } from "@/components/upload/uploaded-files-list";
 import type { UploadedFile } from "@/lib/upload-utils";
 import type { Variants } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, memo } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
@@ -40,14 +40,14 @@ interface DesktopChatPanelProps {
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   scrollAreaRef: React.RefObject<HTMLDivElement | null>;
-  onSkip: (suggestions: SuggestionRecord[]) => void;
+  onSkip: (suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
   onFileUpload: (files: File[]) => void;
   pendingFiles: UploadedFile[];
   onRemovePendingFile: (id: string) => void;
   onRestart: () => void;
 }
 
-const DesktopChatPanel = (props: DesktopChatPanelProps) => {
+const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
   const lastToastRef = useRef<number>(0);
   useEffect(() => {
     if (props.messageCount >= (CHAT_MESSAGE_LIMIT - 5) && lastToastRef.current !== props.messageCount) {
@@ -56,6 +56,43 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
     }
   }, [props.messageCount]);
   const [preview, setPreview] = useState<{ images: string[]; index: number } | null>(null);
+  
+  // 優化：使用 useMemo 緩存訊息列表
+  const messageElements = useMemo(() => (
+    <AnimatePresence mode="popLayout">
+      {props.messages.map((message) => (
+        <motion.div
+          key={message.id}
+          variants={props.messageVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          layout
+        >
+          <ChatMessageCard message={message} />
+        </motion.div>
+      ))}
+    </AnimatePresence>
+  ), [props.messages, props.messageVariants]);
+
+  // 優化：使用 useMemo 緩存檔案預覽
+  const filePreviewElements = useMemo(() => {
+    if (!props.pendingFiles || props.pendingFiles.length === 0) return null;
+    
+    return (
+      <div className="mb-2 flex gap-2 overflow-x-auto">
+        {props.pendingFiles.map((file) => (
+          <UploadedFileCard
+            key={file.id}
+            file={file}
+            onRemove={props.onRemovePendingFile}
+            onPreview={(images, index) => setPreview({ images, index })}
+          />
+        ))}
+      </div>
+    );
+  }, [props.pendingFiles, props.onRemovePendingFile]);
+
   // 直接複製原本 lg:flex 內的內容，將 props 替換為 props.xxx
   // ...
   return (
@@ -100,20 +137,7 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full px-6" ref={props.scrollAreaRef}>
               <div className="space-y-4 py-4">
-                <AnimatePresence mode="popLayout">
-                  {props.messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      variants={props.messageVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="exit"
-                      layout
-                    >
-                      <ChatMessageCard message={message} />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                {messageElements}
                 {props.isLoading && <LoadingMessage />}
               </div>
               <div ref={props.messagesEndRef} className="h-0" />
@@ -122,27 +146,16 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
           {/* Input Area */}
           <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
             {/* File preview above input */}
-            {props.pendingFiles && props.pendingFiles.length > 0 && (
-              <div className="mb-2 flex gap-2 overflow-x-auto">
-                {props.pendingFiles.map((file) => (
-                  <UploadedFileCard
-                    key={file.id}
-                    file={file}
-                    onRemove={props.onRemovePendingFile}
-                    onPreview={(images, index) => setPreview({ images, index })}
-                  />
-                ))}
-                {/* Modal for preview */}
-                {preview && (
-                  <FullscreenImagePreview
-                    images={preview.images}
-                    index={preview.index}
-                    onClose={() => setPreview(null)}
-                    onPrev={() => setPreview(p => p && p.index > 0 ? { ...p, index: p.index - 1 } : p)}
-                    onNext={() => setPreview(p => p && p.index < p.images.length - 1 ? { ...p, index: p.index + 1 } : p)}
-                  />
-                )}
-              </div>
+            {filePreviewElements}
+            {/* Modal for preview */}
+            {preview && (
+              <FullscreenImagePreview
+                images={preview.images}
+                index={preview.index}
+                onClose={() => setPreview(null)}
+                onPrev={() => setPreview(p => p && p.index > 0 ? { ...p, index: p.index - 1 } : p)}
+                onNext={() => setPreview(p => p && p.index < p.images.length - 1 ? { ...p, index: p.index + 1 } : p)}
+              />
             )}
             <AnimatePresence mode="popLayout">
               {props.cannedOptions.length > 0 && (
@@ -165,6 +178,8 @@ const DesktopChatPanel = (props: DesktopChatPanelProps) => {
       </div>
     </div>
   );
-};
+});
+
+DesktopChatPanel.displayName = 'DesktopChatPanel';
 
 export default DesktopChatPanel; 
