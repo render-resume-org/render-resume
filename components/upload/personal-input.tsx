@@ -17,14 +17,14 @@ const PersonalInputComponent: React.FC<Props> = ({ value, onChange }) => {
 
   // 統一 input 樣式
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
-  const labelClass = "block text-base font-semibold text-gray-800 mb-1";
+  const labelClass = "block text-base font-semibold text-gray-800 dark:text-gray-200 mb-1";
 
   return (
     <div className="mb-8">
       <Card>
         <CardContent>
           <div className="mb-4">
-            <span className="text-xl font-bold text-gray-900">個人資訊</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">個人資訊</span>
           </div>
           
           {/* Address */}
