@@ -150,7 +150,7 @@ export default function TermsPage() {
               </p>
               <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-gray-700 dark:text-gray-300">
-                  電子郵件：ruby0322@ntu.im<br />
+                  電子郵件：info@render-resume.com<br />
                   服務時間：週一至週五 09:00-18:00
                 </p>
               </div>
