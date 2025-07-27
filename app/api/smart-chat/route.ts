@@ -126,6 +126,18 @@ function processAIMessages(
     aiSuggestion = undefined;
   }
 
+  // 新增：如果有 in_progress template，覆蓋 suggestion title
+  if (aiSuggestion) {
+    const inProgressTemplate = templates.find(t => t.status === 'in_progress');
+    if (inProgressTemplate) {
+      aiSuggestion = {
+        ...aiSuggestion,
+        title: inProgressTemplate.title
+      };
+      console.log('🔄 [Template][Suggestion] Overriding suggestion title with in_progress template:', inProgressTemplate.title);
+    }
+  }
+
   // --- 新增 excerpt 限制邏輯 ---
   // 取得自上一次 suggestion 產生後的所有 AI message
   let lastSuggestionIdx = -1;
