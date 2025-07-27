@@ -17,7 +17,15 @@ type Props = {
 
 const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
   // 新增錯誤狀態
-  const [errors, setErrors] = useState<{ school: boolean; major: boolean; degree: boolean }[]>([]);
+  const [errors, setErrors] = useState<{
+    school: boolean;
+    major: boolean;
+    degree: boolean;
+    startMonth: boolean;
+    startYear: boolean;
+    endMonth: boolean;
+    endYear: boolean;
+  }[]>([]);
 
   const handleFieldChange = useCallback((idx: number, field: keyof Education, fieldValue: string | boolean) => {
     const newValue = value.map((item, i) => {
@@ -33,11 +41,14 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       return item;
     });
     onChange(newValue);
-    // 清除該欄位錯誤
     setErrors(prev => {
       const newErrors = [...prev];
       if (newErrors[idx]) {
         newErrors[idx] = { ...newErrors[idx], [field]: false };
+        // 如果勾選了「目前在此學校就讀」，同時清除結束時間的錯誤
+        if (field === 'isCurrent' && fieldValue === true) {
+          newErrors[idx] = { ...newErrors[idx], endMonth: false, endYear: false };
+        }
       }
       return newErrors;
     });
@@ -49,8 +60,14 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       school: !edu.school || !edu.school.trim(),
       major: !edu.major || !edu.major.trim(),
       degree: !edu.degree || !edu.degree.trim(),
+      startMonth: !edu.startMonth || !edu.startMonth.trim(),
+      startYear: !edu.startYear || !edu.startYear.trim(),
+      endMonth: edu.isCurrent ? false : (!edu.endMonth || !edu.endMonth.trim()),
+      endYear: edu.isCurrent ? false : (!edu.endYear || !edu.endYear.trim()),
     }));
-    const hasError = newErrors.some(e => e.school || e.major || e.degree);
+    const hasError = newErrors.some(e =>
+      e.school || e.major || e.degree || e.startMonth || e.startYear || e.endMonth || e.endYear
+    );
     setErrors(newErrors);
     if (hasError) return;
     // 若無錯誤才新增
@@ -58,7 +75,10 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       ...value,
       { school: "", major: "", degree: "", gpa: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
     ]);
-    setErrors([...newErrors, { school: false, major: false, degree: false }]);
+    setErrors([
+      ...newErrors,
+      { school: false, major: false, degree: false, startMonth: false, startYear: false, endMonth: false, endYear: false }
+    ]);
   }, [value, onChange]);
 
   const handleRemove = useCallback((idx: number) => {
@@ -67,7 +87,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
 
   // 統一 input/Select 樣式
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
-  const labelClass = "block text-base font-semibold text-gray-800 mb-1";
+  const labelClass = "block text-base font-semibold text-gray-800 dark:text-gray-200 mb-1";
 
 
 
@@ -77,7 +97,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
         <Card key={idx} className="mb-8">
           <CardContent>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xl font-bold text-gray-900">學歷 {idx + 1}</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">學歷 {idx + 1}</span>
               {value.length > 1 && (
                 <button
                   type="button"
@@ -127,7 +147,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {DEGREE_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -160,7 +180,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   onChange={e => handleFieldChange(idx, "isCurrent", e.target.checked)}
                   className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">目前在此學校就讀</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">目前在此學校就讀</span>
               </label>
             </div>
             {/* Dates row */}
@@ -174,12 +194,15 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors[idx]?.startMonth && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <label className={labelClass}>開始年份 <span className="text-red-500">*</span></label>
@@ -190,15 +213,18 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors[idx]?.startYear && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份</label>
+                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份 {!edu.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={edu.endMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "endMonth", v)}
@@ -207,15 +233,18 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, edu.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {!edu.isCurrent && errors[idx]?.endMonth && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份</label>
+                <label className={cn(labelClass, edu.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份 {!edu.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={edu.endYear || ""}
                   onValueChange={v => handleFieldChange(idx, "endYear", v)}
@@ -224,12 +253,15 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, edu.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {!edu.isCurrent && errors[idx]?.endYear && (
+                  <div className="text-red-500 text-sm mt-1">必須填寫</div>
+                )}
               </div>
             </div>
           </CardContent>
@@ -238,7 +270,7 @@ const EducationInputComponent: React.FC<Props> = ({ value, onChange }) => {
       <Button
         type="button"
         variant="outline"
-        className="w-full border-dashed border-2 border-gray-300 text-gray-700 mt-2 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100"
+        className="w-full border-dashed border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 mt-2 flex items-center justify-center gap-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
         onClick={handleAdd}
       >
         <Plus className="w-5 h-5" /> 新增學歷

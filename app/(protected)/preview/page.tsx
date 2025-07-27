@@ -38,7 +38,7 @@ export default function PreviewPage() {
       }
 
       // 載入選中的建議
-      const suggestions = localStorage.getItem('selectedSuggestions');
+      const suggestions = sessionStorage.getItem('selectedSuggestions');
       if (suggestions) {
         try {
           const suggestionData: OptimizationSuggestion[] = JSON.parse(suggestions);

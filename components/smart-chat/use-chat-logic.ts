@@ -15,8 +15,8 @@ import { CHAT_MESSAGE_LIMIT } from "./utils";
 
 interface UseChatLogicProps {
   analysisResult: ResumeAnalysisResult;
-  onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[]) => void;
-  onSkip: (suggestions: SuggestionRecord[]) => void;
+  onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
+  onSkip: (suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
 }
 
 export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogicProps) {
@@ -79,8 +79,6 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     onDrop,
     removeFile,
     isProcessing: isFileProcessing,
-    additionalText,
-    setAdditionalText,
     prepareForAnalysis,
     canProceed
   } = useFileUpload();
@@ -139,6 +137,41 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
   // 初始化聊天
   const initializeChat = useCallback(() => {
+    try {
+      // 嘗試從 sessionStorage 恢復狀態
+      const savedChatHistory = sessionStorage.getItem('chatHistory');
+      const savedSuggestions = sessionStorage.getItem('chatSuggestions');
+      const savedSuggestionTemplates = sessionStorage.getItem('chatSuggestionTemplates');
+
+      if (savedChatHistory && savedSuggestions && savedSuggestionTemplates) {
+        // 恢復之前的狀態
+        console.log('🔄 恢復之前的智慧問答狀態');
+        const chatHistory: ChatMessage[] = JSON.parse(savedChatHistory);
+        const suggestions: SuggestionRecord[] = JSON.parse(savedSuggestions);
+        const suggestionTemplates: SuggestionTemplate[] = JSON.parse(savedSuggestionTemplates);
+
+        setMessages(chatHistory);
+        setMessageCount(chatHistory.length);
+        setSuggestions(suggestions);
+        setSuggestionTemplates(suggestionTemplates);
+        
+        console.log(`恢復了 ${chatHistory.length} 個聊天記錄、${suggestions.length} 個額外建議、${suggestionTemplates.length} 個追蹤問題`);
+        
+        // 生成隨機罐頭選項
+        initializeCannedMessages();
+        return;
+      }
+    } catch (error) {
+      console.error('恢復聊天狀態失敗:', error);
+      // 如果恢復失敗，清除可能損壞的數據
+      sessionStorage.removeItem('chatHistory');
+      sessionStorage.removeItem('chatSuggestions');
+      sessionStorage.removeItem('chatSuggestionTemplates');
+    }
+
+    // 新開始或恢復失敗時的初始化邏輯
+    console.log('🎯 開始新的智慧問答對話');
+    
     // 初始化建議模板
     initializeSuggestionTemplates();
     
@@ -163,7 +196,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     
     // 生成隨機罐頭選項
     initializeCannedMessages();
-  }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages]);
+  }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages, setSuggestions, setSuggestionTemplates]);
 
   // 發送訊息時，將 pendingFiles（檔案訊息）與 user 文字訊息一次性組成，並一起送進 API call
   const handleSendMessage = useCallback(async () => {
@@ -260,28 +293,16 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
               };
               setSuggestions(prev => [...prev, suggestionRecord]);
             }
+            // 優化滾動邏輯：只保留必要的滾動調用
             requestAnimationFrame(() => {
               smartScrollToBottom(false, suggestions);
             });
-            setTimeout(() => {
-              smartScrollToBottom(false, suggestions);
-            }, 200);
-            setTimeout(() => {
-              smartScrollToBottom(false, suggestions);
-            }, 400);
-            if (window.innerWidth >= 1024) {
-              setTimeout(() => {
-                smartScrollToBottom(false, suggestions);
-              }, 600);
-            }
           }
         }
       }
+      // 最終確保滾動到底部
       requestAnimationFrame(() => {
         smartScrollToBottom(false, suggestions);
-        setTimeout(() => {
-          smartScrollToBottom(false, suggestions);
-        }, 100);
       });
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -341,29 +362,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
   const handleComplete = useCallback(() => {
     // 將所有模板也當作 suggestion 傳遞到下一步，completed 用 completedSuggestion
-    const allSuggestions = [
-      ...suggestions,
-      ...suggestionTemplates.map(t => {
-        if (t.status === 'completed' && t.completedSuggestion) {
-          return {
-            id: t.id,
-            title: t.completedSuggestion.title,
-            description: t.completedSuggestion.description,
-            category: t.completedSuggestion.category,
-            timestamp: t.timestamp || new Date()
-          };
-        } else {
-          return {
-            id: t.id,
-            title: t.title,
-            description: t.description,
-            category: t.category,
-            timestamp: t.timestamp || new Date()
-          };
-        }
-      })
-    ];
-    onComplete(messages, allSuggestions);
+    onComplete(messages, suggestions, suggestionTemplates);
   }, [messages, suggestions, suggestionTemplates, onComplete]);
 
   const removeSuggestion = useCallback((suggestionId: string) => {
@@ -441,36 +440,41 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     }
   }, [isLoading, messageCount, focusInput, textareaRef, textareaRefMobile]);
 
+  // 優化滾動函數，避免閉包問題
+  const scrollToBottomWithSuggestions = useCallback(() => {
+    smartScrollToBottom(false, suggestions);
+  }, [smartScrollToBottom, suggestions]);
+
   // 處理螢幕尺寸變化
   useEffect(() => {
     const handleResize = () => {
       // 延遲滾動以確保布局完成
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 100);
     };
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [smartScrollToBottom, suggestions]);
+  }, [scrollToBottomWithSuggestions]);
 
   // 訊息更新時滾動
   useEffect(() => {
     // 使用 requestAnimationFrame 確保在 DOM 更新後滾動
     requestAnimationFrame(() => {
-      smartScrollToBottom(false, suggestions);
+      scrollToBottomWithSuggestions();
       
       // 額外的延遲確保動畫完成
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 100);
       
       // 最後確保滾動
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 300);
     });
-  }, [messages, smartScrollToBottom, suggestions]);
+  }, [messages, scrollToBottomWithSuggestions]);
 
   // 當有新建議時，自動滾動建議面板到底部，並確保主聊天區域也滾動
   useEffect(() => {
@@ -484,29 +488,29 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       
       // 同時確保主聊天區域滾動到底部（新建議可能影響布局）
       requestAnimationFrame(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       });
       
       // 建議面板動畫期間確保滾動
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 200);
       
       // 建議面板動畫完成後最終確保
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 500);
     }
-  }, [suggestions, scrollToBottom, smartScrollToBottom, suggestionsScrollAreaRef]);
+  }, [suggestions.length, scrollToBottom, scrollToBottomWithSuggestions, suggestionsScrollAreaRef]);
 
   // 當載入狀態改變時，確保滾動到底部（顯示載入動畫）
   useEffect(() => {
     if (isLoading) {
       setTimeout(() => {
-        smartScrollToBottom(false, suggestions);
+        scrollToBottomWithSuggestions();
       }, 100);
     }
-  }, [isLoading, smartScrollToBottom, suggestions]);
+  }, [isLoading, scrollToBottomWithSuggestions]);
 
   return {
     // 狀態
@@ -549,8 +553,6 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     removeFile,
     pendingFiles,
     isFileProcessing,
-    additionalText,
-    setAdditionalText,
     prepareForAnalysis,
     canProceed,
     initializeChat

@@ -4,6 +4,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { useState } from "react";
 import { toast } from "sonner";
+import type { SuggestionTemplate } from "./smart-chat/ai-suggestions-sidebar";
 import DesktopChatPanel from "./smart-chat/desktop-chat-panel";
 import MobileChatPanel from "./smart-chat/mobile-chat-panel";
 import type { ChatMessage, SuggestionRecord } from "./smart-chat/types";
@@ -15,8 +16,8 @@ export type { ChatMessage, SuggestionRecord } from "./smart-chat/types";
 
 interface SmartChatProps {
   analysisResult: ResumeAnalysisResult;
-  onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[]) => void;
-  onSkip: (suggestions: SuggestionRecord[]) => void;
+  onComplete: (chatHistory: ChatMessage[], suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
+  onSkip: (suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => void;
 }
 
 export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartChatProps) {
@@ -69,6 +70,17 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
 
   const handleConfirmRestart = () => {
     setShowRestartDialog(false);
+    // 清除會話數據（不能清掉 analysisResult）
+    try {
+      sessionStorage.removeItem('chatHistory');
+      sessionStorage.removeItem('chatSuggestions');
+      sessionStorage.removeItem('chatSuggestionTemplates');
+      sessionStorage.removeItem('selectedSuggestions');
+      console.log('🧹 清除智慧問答會話數據');
+    } catch (error) {
+      console.warn('⚠️ 清除智慧問答會話數據失敗:', error);
+    }
+    // 重新初始化聊天
     initializeChat();
     toast("已重新開始對話");
   };

@@ -81,7 +81,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
 
   // 統一 input/Select 樣式
   const fieldClass = "w-full !h-10 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-base";
-  const labelClass = "block text-base font-semibold text-gray-800 mb-1";
+  const labelClass = "block text-base font-semibold text-gray-800 dark:text-gray-200 mb-1";
 
   return (
     <div className="mb-8">
@@ -89,7 +89,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
         <Card key={idx} className="mb-8">
           <CardContent>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xl font-bold text-gray-900">專案經歷 {idx + 1}</span>
+              <span className="text-xl font-bold text-gray-900 dark:text-white">專案經歷 {idx + 1}</span>
               {value.length > 1 && (
                 <button
                   type="button"
@@ -138,7 +138,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   onChange={e => handleFieldChange(idx, "isCurrent", e.target.checked)}
                   className="w-4 h-4 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">專案進行中</span>
+                <span className="text-sm text-gray-700 dark:text-gray-200">專案進行中</span>
               </label>
             </div>
             {/* Dates row */}
@@ -152,7 +152,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -171,7 +171,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={fieldClass}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -182,7 +182,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, project.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份</label>
+                <label className={cn(labelClass, project.isCurrent && "text-gray-500 dark:text-gray-400")}>結束月份 {!project.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={project.endMonth || ""}
                   onValueChange={v => handleFieldChange(idx, "endMonth", v)}
@@ -191,7 +191,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, project.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {MONTH_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -202,7 +202,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <label className={cn(labelClass, project.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份</label>
+                <label className={cn(labelClass, project.isCurrent && "text-gray-500 dark:text-gray-400")}>結束年份 {!project.isCurrent && <span className="text-red-500">*</span>}</label>
                 <Select
                   value={project.endYear || ""}
                   onValueChange={v => handleFieldChange(idx, "endYear", v)}
@@ -211,7 +211,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
                   <SelectTrigger className={cn(fieldClass, project.isCurrent && "bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed")}>
                     <SelectValue placeholder="請選擇" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-60">
                     {YEAR_OPTIONS.map(opt => (
                       <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                     ))}
@@ -228,7 +228,7 @@ const ProjectInputComponent: React.FC<Props> = ({ value, onChange }) => {
       <Button
         type="button"
         variant="outline"
-        className="w-full border-dashed border-2 border-gray-300 text-gray-700 mt-2 flex items-center justify-center gap-2 bg-gray-50 hover:bg-gray-100"
+        className="w-full border-dashed border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 mt-2 flex items-center justify-center gap-2 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700"
         onClick={handleAdd}
       >
         <Plus className="w-5 h-5" /> 新增專案經歷

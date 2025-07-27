@@ -1,6 +1,7 @@
 "use client";
 
 import SmartChat, { ChatMessage, SuggestionRecord } from "@/components/smart-chat";
+import type { SuggestionTemplate } from "@/components/smart-chat/ai-suggestions-sidebar";
 import { Button } from "@/components/ui/button";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { useRouter } from 'next/navigation';
@@ -44,24 +45,29 @@ export default function SmartChatPage() {
     }
   }, [analysisResult]);
 
-  const handleChatComplete = (history: ChatMessage[], suggestions: SuggestionRecord[]) => {
+  const handleChatComplete = (history: ChatMessage[], suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => {
     setIsCompleted(true);
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
+    // 使用 sessionStorage 並分離存儲建議類型
+    sessionStorage.setItem('chatHistory', JSON.stringify(history));
+    sessionStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
+    sessionStorage.setItem('chatSuggestionTemplates', JSON.stringify(suggestionTemplates));
     router.push('/suggestions');
   };
 
-  const handleSkipToSuggestions = (suggestions: SuggestionRecord[]) => {
+  // 目前並沒有實作呼叫這個 function 的邏輯 e.g. skip button
+  const handleSkipToSuggestions = (suggestions: SuggestionRecord[], suggestionTemplates: SuggestionTemplate[]) => {
     // 保存跳過時已收集的建議
-    if (suggestions.length > 0) {
-      localStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
-      console.log(`跳過問答時保存了 ${suggestions.length} 個建議`);
+    if (suggestions.length > 0 || suggestionTemplates.length > 0) {
+      sessionStorage.setItem('chatSuggestions', JSON.stringify(suggestions));
+      sessionStorage.setItem('chatSuggestionTemplates', JSON.stringify(suggestionTemplates));
+      console.log(`跳過問答時保存了 ${suggestions.length} 個額外建議和 ${suggestionTemplates.length} 個追蹤問題`);
     } else {
-      localStorage.removeItem('chatSuggestions');
+      sessionStorage.removeItem('chatSuggestions');
+      sessionStorage.removeItem('chatSuggestionTemplates');
     }
     
     // 清空聊天記錄（跳過時不保存對話記錄）
-    localStorage.removeItem('chatHistory');
+    sessionStorage.removeItem('chatHistory');
     
     router.push('/suggestions');
   };
