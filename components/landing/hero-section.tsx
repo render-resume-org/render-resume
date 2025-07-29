@@ -16,8 +16,6 @@ interface HeroSectionProps {
 export default function HeroSection({ stats }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-white dark:bg-gray-900" itemScope itemType="https://schema.org/WebApplication">
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-gray-50 to-blue-100/40 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900/40"></div>
-      <div className="absolute inset-0 opacity-10 bg-[url('/grid.svg')] bg-center" style={{maskImage: 'radial-gradient(ellipse at center, white 20%, transparent 70%)'}}></div>
 
       <div className="relative container mx-auto px-4 py-8 sm:py-24 md:py-16 text-center">
         <div className="mx-auto max-w-4xl">
