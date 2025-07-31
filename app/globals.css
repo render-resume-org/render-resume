@@ -113,6 +113,11 @@
   .stroke-orange-300 {
     stroke: #f4be82 !important;
   }
+
+  .bg-grid {
+    background-image: linear-gradient(to right, theme('colors.gray.700 / 5%') 1px, transparent 1px), linear-gradient(to bottom, theme('colors.gray.700 / 5%') 1px, transparent 1px);
+    background-size: 2rem 2rem;
+  }
 }
 
 @keyframes gradient {
@@ -130,6 +135,54 @@
 .background-animate {
   background-size: 200% 200%;
   animation: gradient 2s ease infinite;
+}
+
+@keyframes wave {
+  0% { background-position: 0px 0; }
+  100% { background-position: 50px 0; }
+}
+
+@keyframes swing {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@keyframes wave-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-8px);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+}
+
+.animate-wave-ripple {
+  animation: wave-ripple 2s ease-in-out infinite;
+}
+
+.animate-bubble-float {
+  animation: bubble-float 1.5s ease-in-out infinite;
 }
 
 :root {
@@ -187,5 +240,24 @@
     box-shadow: none !important;
     margin: 0 !important;
     padding: 24px 8px !important;
+  }
+}
+
+/* 3D Transform utilities for flip animation */
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
   }
 }
