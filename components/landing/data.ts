@@ -196,8 +196,8 @@ export const threadsPosts = [
   },
   {
     author: {
-      name: "小美",
-      handle: "mei_ui_designer",
+      name: "小卡",
+      handle: "caca_ui_designer",
       avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
     },
     content: "我也是！每次看到別人漂亮的履歷就覺得自己寫的好醜...而且不知道該突出什麼重點，感覺什麼都想寫但什麼都寫不好",
