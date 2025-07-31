@@ -4,6 +4,7 @@ import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { ProBadge } from "@/components/ui/pro-badge";
 import { Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -73,7 +74,13 @@ const AppHeader = () => {
           {/* Brand Logo & Name */}
           <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-lg sm:text-2xl">✨</span>
+              <Image
+                src="/images/logo-transparent.png"
+                alt="RenderResume Logo"
+                width={1024}
+                height={1024}
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="min-w-0">
               <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">

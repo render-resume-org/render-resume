@@ -347,3 +347,37 @@
   }
 }
 
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #resume-content, #resume-content * {
+    visibility: visible !important;
+  }
+  #resume-content {
+    position: absolute !important;
+    left: 0; top: 0; width: 100vw; background: white !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 24px 8px !important;
+  }
+}
+
+/* 3D Transform utilities for flip animation */
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+}

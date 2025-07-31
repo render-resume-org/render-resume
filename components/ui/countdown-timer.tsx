@@ -80,7 +80,7 @@ const CountdownTimer = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto my-8 p-6 pt-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+    <div className="w-full max-w-3xl mx-auto my-8 p-6 pt-4 bg-gray-50 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
       <div className="text-center mb-4">
         <h3 className="text-md font-bold text-gray-600 dark:text-gray-200">Beta 上線倒數，期待與您相見！</h3>
       </div>
