@@ -1,12 +1,13 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
+import { memo } from 'react';
 import EducationSection from './sections/education-section';
 import ExperienceSection from './sections/experience-section';
 import ProjectsSection from './sections/projects-section';
 import SkillsSection from './sections/skills-section';
 import SummarySection from './sections/summary-section';
 
-type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education' | 'achievements' | 'certifications';
+type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education';
 
 interface SectionProps<T = unknown> {
   data: T;
@@ -16,14 +17,19 @@ interface SectionProps<T = unknown> {
 
 type SectionComponent = React.ComponentType<SectionProps>;
 
+// 記憶化區段元件以提升效能
+const MemoizedSummarySection = memo(SummarySection);
+const MemoizedSkillsSection = memo(SkillsSection);
+const MemoizedExperienceSection = memo(ExperienceSection);
+const MemoizedProjectsSection = memo(ProjectsSection);
+const MemoizedEducationSection = memo(EducationSection);
+
 const SECTION_REGISTRY: Record<SectionName, SectionComponent> = {
-  summary: SummarySection as SectionComponent,
-  skills: SkillsSection as SectionComponent,
-  experience: ExperienceSection as SectionComponent,
-  projects: ProjectsSection as SectionComponent,
-  education: EducationSection as SectionComponent,
-  achievements: () => null, // Placeholder for future implementation
-  certifications: () => null, // Placeholder for future implementation
+  summary: MemoizedSummarySection as SectionComponent,
+  skills: MemoizedSkillsSection as SectionComponent,
+  experience: MemoizedExperienceSection as SectionComponent,
+  projects: MemoizedProjectsSection as SectionComponent,
+  education: MemoizedEducationSection as SectionComponent,
 };
 
 interface SectionRendererProps {
@@ -33,6 +39,10 @@ interface SectionRendererProps {
   onEdit?: () => void;
 }
 
+/**
+ * 優化的區段渲染器
+ * 使用記憶化組件和數據驗證來提升性能
+ */
 export function renderSection({ sectionName, resumeData, template, onEdit }: SectionRendererProps) {
   const SectionComponent = SECTION_REGISTRY[sectionName];
   
@@ -43,15 +53,42 @@ export function renderSection({ sectionName, resumeData, template, onEdit }: Sec
 
   const sectionData = resumeData[sectionName as keyof OptimizedResume];
   
-  if (!sectionData) {
+  // 檢查數據是否存在和有效
+  if (!sectionData || 
+      (Array.isArray(sectionData) && sectionData.length === 0) ||
+      (typeof sectionData === 'string' && !sectionData.trim())) {
     return null;
   }
 
   return <SectionComponent data={sectionData} template={template} onEdit={onEdit} />;
 }
 
+/**
+ * 動態註冊新的區段元件
+ */
 export function registerSection(sectionName: SectionName, component: SectionComponent) {
-  SECTION_REGISTRY[sectionName] = component;
+  SECTION_REGISTRY[sectionName] = memo(component) as SectionComponent;
+}
+
+/**
+ * 獲取已註冊的區段元件
+ */
+export function getSectionComponent(sectionName: SectionName): SectionComponent | undefined {
+  return SECTION_REGISTRY[sectionName];
+}
+
+/**
+ * 檢查區段是否已註冊
+ */
+export function isSectionRegistered(sectionName: SectionName): boolean {
+  return sectionName in SECTION_REGISTRY;
+}
+
+/**
+ * 獲取所有已註冊的區段名稱
+ */
+export function getRegisteredSections(): SectionName[] {
+  return Object.keys(SECTION_REGISTRY) as SectionName[];
 }
 
 export { SECTION_REGISTRY };

@@ -1,20 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
-import BaseEditDialog from "./base-edit-dialog";
-import FormTips from "./form-tips";
-
-interface SkillCategory {
-  category: string;
-  items: string[];
-}
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { OptimizedResume } from '@/lib/types/resume';
+import { Plus, Trash2, X } from 'lucide-react';
+import { useState } from 'react';
+import BaseEditDialog from './base-edit-dialog';
 
 interface SkillsEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (skills: SkillCategory[]) => void;
-  currentSkills: SkillCategory[];
+  onSave: (skills: OptimizedResume['skills']) => void;
+  currentSkills: OptimizedResume['skills'];
 }
 
 export default function SkillsEditDialog({
@@ -23,137 +20,126 @@ export default function SkillsEditDialog({
   onSave,
   currentSkills,
 }: SkillsEditDialogProps) {
-  const [skills, setSkills] = useState<SkillCategory[]>(currentSkills);
-  const [isLoading, setIsLoading] = useState(false);
+  const [skills, setSkills] = useState(currentSkills || []);
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    try {
-      await onSave(skills);
-      onClose();
-    } catch (error) {
-      console.error('Failed to save skills:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleClose = () => {
-    setSkills(currentSkills); // Reset to original value
-    onClose();
-  };
-
-  const addCategory = () => {
+  const addSkillGroup = () => {
     setSkills([...skills, { category: '', items: [] }]);
   };
 
-  const removeCategory = (index: number) => {
+  const removeSkillGroup = (index: number) => {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
-  const updateCategory = (index: number, category: string) => {
-    const newSkills = [...skills];
-    newSkills[index].category = category;
-    setSkills(newSkills);
+  const updateSkillGroup = (index: number, category: string, items: string[]) => {
+    const updatedSkills = [...skills];
+    updatedSkills[index] = { category, items };
+    setSkills(updatedSkills);
   };
 
-  const addSkill = (categoryIndex: number) => {
-    const newSkills = [...skills];
-    newSkills[categoryIndex].items.push('');
-    setSkills(newSkills);
+  const addSkillItem = (groupIndex: number) => {
+    const updatedSkills = [...skills];
+    updatedSkills[groupIndex].items.push('');
+    setSkills(updatedSkills);
   };
 
-  const removeSkill = (categoryIndex: number, skillIndex: number) => {
-    const newSkills = [...skills];
-    newSkills[categoryIndex].items.splice(skillIndex, 1);
-    setSkills(newSkills);
+  const removeSkillItem = (groupIndex: number, itemIndex: number) => {
+    const updatedSkills = [...skills];
+    updatedSkills[groupIndex].items.splice(itemIndex, 1);
+    setSkills(updatedSkills);
   };
 
-  const updateSkill = (categoryIndex: number, skillIndex: number, skill: string) => {
-    const newSkills = [...skills];
-    newSkills[categoryIndex].items[skillIndex] = skill;
-    setSkills(newSkills);
+  const updateSkillItem = (groupIndex: number, itemIndex: number, value: string) => {
+    const updatedSkills = [...skills];
+    updatedSkills[groupIndex].items[itemIndex] = value;
+    setSkills(updatedSkills);
+  };
+
+  const handleSave = () => {
+    const filteredSkills = skills.filter(group => 
+      group.category.trim() && group.items.some(item => item.trim())
+    );
+    
+    onSave(filteredSkills);
   };
 
   return (
     <BaseEditDialog
       isOpen={isOpen}
-      onClose={handleClose}
-      onSave={handleSave}
       title="編輯技能"
-      description="管理您的技能分類和具體技能項目。"
-      isLoading={isLoading}
+      onSave={handleSave}
+      onClose={onClose}
     >
-      <div className="space-y-6">
-        {skills.map((category, categoryIndex) => (
-          <div key={categoryIndex} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <Input
-                value={category.category}
-                onChange={(e) => updateCategory(categoryIndex, e.target.value)}
-                placeholder="技能分類 (例如: 程式語言、框架、工具...)"
-                className="flex-1 mr-2"
-              />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeCategory(categoryIndex)}
-                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="space-y-2">
-              {category.items.map((skill, skillIndex) => (
-                <div key={skillIndex} className="flex items-center space-x-2">
-                  <Input
-                    value={skill}
-                    onChange={(e) => updateSkill(categoryIndex, skillIndex, e.target.value)}
-                    placeholder="技能名稱"
-                    className="flex-1"
-                  />
+      <div className="space-y-4">
+        {skills.map((skillGroup, groupIndex) => (
+          <Card key={groupIndex}>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">技能分類 {groupIndex + 1}</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => removeSkillGroup(groupIndex)}
+                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <Label htmlFor={`category-${groupIndex}`}>分類名稱</Label>
+                <Input
+                  id={`category-${groupIndex}`}
+                  value={skillGroup.category}
+                  onChange={(e) => updateSkillGroup(groupIndex, e.target.value, skillGroup.items)}
+                  placeholder="例如：程式語言、工具軟體"
+                />
+              </div>
+              
+              <div>
+                <Label>技能項目</Label>
+                <div className="space-y-2">
+                  {skillGroup.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="flex items-center space-x-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => updateSkillItem(groupIndex, itemIndex, e.target.value)}
+                        placeholder="輸入技能名稱"
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeSkillItem(groupIndex, itemIndex)}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={() => removeSkill(categoryIndex, skillIndex)}
-                    className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => addSkillItem(groupIndex)}
+                    className="w-full"
                   >
-                    <X className="h-4 w-4" />
+                    <Plus className="w-4 h-4 mr-2" />
+                    新增技能項目
                   </Button>
                 </div>
-              ))}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => addSkill(categoryIndex)}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                新增技能
-              </Button>
-            </div>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         ))}
-
+        
         <Button
           variant="outline"
-          onClick={addCategory}
+          onClick={addSkillGroup}
           className="w-full"
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="w-4 h-4 mr-2" />
           新增技能分類
         </Button>
-
-        <FormTips
-          title="技能管理建議："
-          tips={[
-            "按技術領域或熟練程度分類",
-            "包含相關的技術、工具和框架",
-            "突出與目標職位相關的技能",
-            "保持技能列表的時效性和準確性",
-          ]}
-        />
       </div>
     </BaseEditDialog>
   );

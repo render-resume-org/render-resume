@@ -10,7 +10,6 @@ export interface OptimizationSuggestion {
 export interface OptimizedResume {
   personalInfo: {
     fullName: string;
-    title: string;
     email: string;
     phone: string;
     location: string;
@@ -31,27 +30,16 @@ export interface OptimizedResume {
   }>;
   projects: Array<{
     name: string;
-    description: string;
-    technologies: string[];
+    period?: string;
     achievements: string[];
-    duration?: string;
   }>;
   education: Array<{
     degree: string;
     school: string;
     period: string;
     details?: string[];
-  }>;
-  achievements?: Array<{
-    title: string;
-    description: string;
-    date?: string;
-  }>;
-  certifications?: Array<{
-    name: string;
-    issuer: string;
-    date: string;
-    expiryDate?: string;
+    gpa?: string;
+    honor?: string;
   }>;
 }
 export { };

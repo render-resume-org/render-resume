@@ -74,6 +74,126 @@
     width: 100%;
     min-height: 100vh;
   }
+  
+  /* A4 預覽樣式 */
+  .resume-preview-container {
+    width: 100%;
+    max-width: 794px; /* A4 寬度 (210mm) */
+    margin: 0 auto;
+    background: var(--card);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 8px;
+    overflow: visible;
+  }
+
+  .resume-content {
+    width: 100%; /* 讓內容自適應 */
+    min-height: 1123px; /* A4 高度 (297mm) */
+    padding: 15mm 15mm; /* 與 PDF 相同的邊距 */
+    margin: 0 auto;
+    background: white !important;
+    color: #000000 !important;
+    box-sizing: border-box;
+    
+    /* 確保字體渲染與 PDF 一致 */
+    font-smooth: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    /* 分頁處理 */
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  /* 確保內容不會溢出 A4 邊界 */
+  .resume-content > * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
+  /* 分頁樣式 */
+  @media print {
+    .resume-content {
+      width: 100%;
+      min-height: 297mm;
+      margin: 0;
+      padding: 15mm 15mm;
+      box-shadow: none;
+      border-radius: 0;
+    }
+  }
+
+  /* 響應式設計 */
+  @media (max-width: 794px) {
+    .resume-preview-container {
+      max-width: 100%;
+      margin: 0 16px;
+    }
+    
+    .resume-content {
+      width: 100%;
+      min-width: 100%;
+      padding: 15mm 15mm;
+    }
+  }
+  
+
+  
+  /* 自定義 serif 字體設定 */
+  .font-serif {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 確保履歷內容使用 serif 字體 */
+  #resume-content.font-serif,
+  #resume-content.font-serif * {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 強制 serif 字體顯示 */
+  .font-serif,
+  .font-serif * {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 確保履歷內容中的所有文字都使用 serif 字體 */
+  #resume-content.font-serif h1,
+  #resume-content.font-serif h2,
+  #resume-content.font-serif h3,
+  #resume-content.font-serif h4,
+  #resume-content.font-serif p,
+  #resume-content.font-serif span,
+  #resume-content.font-serif div,
+  #resume-content.font-serif li {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 覆蓋任何可能的 sans-serif 設定 */
+  .font-serif,
+  .font-serif *,
+  [class*="font-serif"] {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 確保所有 serif 字體都正確顯示 */
+  .font-serif {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+  
+  /* 強制覆蓋任何其他字體設定 */
+  .font-serif * {
+    font-family: inherit !important;
+  }
+  
+  /* 確保履歷內容的字體渲染與 PDF 完全一致 */
+  .resume-content.font-serif,
+  .resume-content.font-serif * {
+    font-family: "Times New Roman", Times, serif !important;
+    font-smooth: antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 }
 
 @layer utilities {
@@ -227,18 +347,3 @@
   }
 }
 
-@media print {
-  body * {
-    visibility: hidden !important;
-  }
-  #resume-content, #resume-content * {
-    visibility: visible !important;
-  }
-  #resume-content {
-    position: absolute !important;
-    left: 0; top: 0; width: 100vw; background: white !important;
-    box-shadow: none !important;
-    margin: 0 !important;
-    padding: 24px 8px !important;
-  }
-}

@@ -29,29 +29,36 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
 
   return (
     <>
-      <div 
-        className={cn('p-8 min-h-[1000px] h-fit', font.family, colors.background)} 
-        id="resume-content"
-      >
-        <ResumeHeader personalInfo={resumeData.personalInfo} template={template} />
+      {/* A4 預覽容器 */}
+      <div className="resume-preview-container">
+        <div 
+          className={cn('resume-content', font.family, colors.background)} 
+          id="resume-content"
+          style={{ 
+            backgroundColor: 'white',
+            color: '#000000'
+          }}
+        >
+          <ResumeHeader personalInfo={resumeData.personalInfo} template={template} />
 
-        {template.layout.sections.map(sectionName => (
-          <div key={sectionName}>
-            {renderSection({ 
-              sectionName, 
-              resumeData, 
-              template,
-              onEdit: createEditHandler(sectionName),
-            })}
+          {template.layout.sections.map(sectionName => (
+            <div key={sectionName}>
+              {renderSection({ 
+                sectionName, 
+                resumeData, 
+                template,
+                onEdit: createEditHandler(sectionName),
+              })}
+            </div>
+          ))}
+          
+          <footer className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-black text-center select-none print:mt-8" style={{ letterSpacing: '0.04em' }}>
+            <p>made with</p>
+            <p className={cn('font-semibold text-black')}>RenderResume</p>
+          </footer>
+          <div className="text-xs text-black w-full text-center">
+            www.render-resume.com
           </div>
-        ))}
-        
-        <footer className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-gray-400 dark:text-gray-500 text-center select-none print:mt-8" style={{ letterSpacing: '0.04em' }}>
-          <p>made with</p>
-          <p className={cn('font-semibold', colors.primary)}>RenderResume</p>
-        </footer>
-        <div className="text-xs text-gray-400 w-full text-center">
-          www.render-resume.com
         </div>
       </div>
 

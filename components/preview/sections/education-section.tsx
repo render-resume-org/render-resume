@@ -11,7 +11,7 @@ interface EducationSectionProps {
 }
 
 export default function EducationSection({ data, template, onEdit }: EducationSectionProps) {
-  const { font, colors, spacing, styles } = template;
+  const { font, spacing, styles } = template;
 
   if (!data || data.length === 0) return null;
 
@@ -23,22 +23,31 @@ export default function EducationSection({ data, template, onEdit }: EducationSe
         title="Education"
         icon={GraduationCap}
         className={spacing.section}
-        titleClassName={cn(font.sizes.heading, colors.text, styles.sectionTitle)}
-        iconClassName={cn(colors.primary, 'w-5 h-5')}
+        titleClassName={cn(font.sizes.heading, 'text-black', styles.sectionTitle)}
+        iconClassName={cn('text-black w-5 h-5')}
         showIcon={styles.showSectionIcons}
         onEdit={onEdit}
       >
         <div className="space-y-2">
-          {data.map((edu, index) => (
+          {data.map((education, index) => (
             <div key={index}>
-              <div className="flex justify-between items-center">
-                <span className={cn(font.sizes.body, colors.text, 'font-bold')}>
-                  {edu.school} | {edu.degree}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h4 className={cn(font.sizes.body, 'text-black font-medium')}>
+                    {education.degree}
+                  </h4>
+                  <p className={cn(font.sizes.caption, 'text-black')}>
+                    {education.school}
+                  </p>
+                </div>
+                <span className={cn(font.sizes.caption, 'text-black')}>
+                  {education.period}
                 </span>
-                <span className={cn(font.sizes.body, colors.secondary)}>{edu.period}</span>
               </div>
-              {edu.details && edu.details.length > 0 && (
-                <p className={cn(font.sizes.body, colors.secondary)}>{edu.details.join(', ')}</p>
+              {education.details && education.details.length > 0 && (
+                <p className={cn(font.sizes.caption, 'text-black mt-1')}>
+                  {education.details.join(', ')}
+                </p>
               )}
             </div>
           ))}
@@ -47,29 +56,36 @@ export default function EducationSection({ data, template, onEdit }: EducationSe
     );
   }
 
-  // Default template
+  // Standard template
   return (
     <ResumeSection
-      title="Education"
+      title="EDUCATION"
       icon={GraduationCap}
       className={spacing.section}
-      titleClassName={cn(font.sizes.heading, colors.text, styles.sectionTitle)}
-      iconClassName={cn(colors.primary, 'w-5 h-5')}
+      titleClassName={cn(font.family, font.sizes.heading, 'text-black', styles.sectionTitle)}
+      iconClassName={cn('text-black w-5 h-5')}
       showIcon={styles.showSectionIcons}
       onEdit={onEdit}
     >
-      <div className="space-y-4">
-        {data.map((edu, index) => (
-          <div key={index} className="border-l-2 border-cyan-200 dark:border-cyan-800 pl-4">
-            <div className="flex justify-between items-start mb-1">
-              <div>
-                <h3 className={cn(font.sizes.body, colors.text, 'font-semibold')}>{edu.degree}</h3>
-                <p className={cn(font.sizes.body, colors.primary, 'font-medium')}>{edu.school}</p>
+      <div className="space-y-2">
+        {data.map((education, index) => (
+          <div key={index}>
+            <div className="mb-1">
+              <div className="flex justify-between items-center">
+                <h3 className={cn(font.sizes.body, 'text-black font-bold')}>{education.school}</h3>
+                {education.period && (
+                  <span className={cn(font.sizes.caption, 'text-black')}>{education.period}</span>
+                )}
               </div>
-              <span className={cn(font.sizes.caption, colors.secondary)}>{edu.period}</span>
             </div>
-            {edu.details && edu.details.length > 0 && (
-              <p className={cn(font.sizes.caption, colors.secondary)}>{edu.details.join(', ')}</p>
+            <div className="mb-1">
+              <p className={cn(font.sizes.body, 'text-black italic')}>
+                {education.degree}
+                {education.gpa && `, GPA: ${education.gpa}`}
+              </p>
+            </div>
+            {education.honor && (
+              <p className={cn(font.sizes.body, 'text-black')}>{education.honor}</p>
             )}
           </div>
         ))}

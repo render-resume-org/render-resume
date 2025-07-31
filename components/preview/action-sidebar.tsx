@@ -11,10 +11,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { availableTemplates } from "@/lib/config/resume-templates";
+import { PdfGenerator } from "@/lib/pdf-generator";
 import type { OptimizationSuggestion } from "@/lib/types/resume";
+import type { OptimizedResume } from "@/lib/types/resume";
 import { cn } from "@/lib/utils";
-import { Copy, Edit, Printer, UserCircle } from "lucide-react";
+import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface ActionSidebarProps {
   currentTemplateId: string;
@@ -22,6 +25,7 @@ interface ActionSidebarProps {
   copySuccess: boolean;
   onCopy: () => void;
   selectedSuggestions: OptimizationSuggestion[];
+  resumeData: OptimizedResume;
 }
 
 export function ActionSidebar({
@@ -30,8 +34,25 @@ export function ActionSidebar({
   copySuccess,
   onCopy,
   selectedSuggestions,
+  resumeData,
 }: ActionSidebarProps) {
   const router = useRouter();
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    
+    try {
+      await PdfGenerator.generate(resumeData, currentTemplateId, {
+        filename: `履歷_${new Date().toISOString().slice(0, 10)}.pdf`,
+      });
+    } catch (error) {
+      // 錯誤處理已在 PdfGenerator 中統一處理
+      console.error('PDF 下載失敗:', error);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   return (
     <div className="lg:col-span-1 space-y-6">
@@ -41,8 +62,8 @@ export function ActionSidebar({
         </CardHeader>
         <CardContent>
           <Select value={currentTemplateId} onValueChange={onTemplateChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="選擇一個模板" />
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="選擇一個模板" defaultValue="standard" />
             </SelectTrigger>
             <SelectContent>
               {availableTemplates.map((template) => (
@@ -61,11 +82,21 @@ export function ActionSidebar({
         </CardHeader>
         <CardContent className="space-y-3">
           <Button
-            onClick={() => window.print()}
-            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white disabled:opacity-50"
           >
-            <Printer className="w-4 h-4 mr-2" />
-            列印/下載 PDF
+            {isGeneratingPdf ? (
+              <>
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                生成中...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                下載 PDF
+              </>
+            )}
           </Button>
 
           <Button
