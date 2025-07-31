@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import CountdownTimer from "@/components/ui/countdown-timer";
 import { ScrollText } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface HeroSectionProps {
@@ -17,10 +16,10 @@ export default function HeroSection({ stats }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden bg-white dark:bg-gray-900" itemScope itemType="https://schema.org/WebApplication">
 
-      <div className="relative container mx-auto px-4 py-8 sm:py-24 md:py-16 text-center">
+      <div className="relative container mx-auto px-4 py-16 sm:py-24 text-center">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center flex-col md:flex-row justify-center gap-8">
-            <div className="flex justify-center items-center">
+            {/* <div className="flex justify-center items-center">
               <div className="h-32 w-32 p-4 rounded-full flex items-center justify-center">
                 <Image 
                   src="/images/logo-transparent.png"
@@ -30,7 +29,7 @@ export default function HeroSection({ stats }: HeroSectionProps) {
                   className="w-full h-full object-contain"
                 />
               </div>
-            </div>
+            </div> */}
             
             <div className="flex flex-col justify-center items-center gap-6">
               <h1 className="text-nowrap text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white" itemProp="name">
