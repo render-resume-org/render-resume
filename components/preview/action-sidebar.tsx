@@ -13,7 +13,6 @@ import {
 import { availableTemplates } from "@/lib/config/resume-templates";
 import { PdfGenerator } from "@/lib/pdf-generator";
 import type { OptimizationSuggestion } from "@/lib/types/resume";
-import type { OptimizedResume } from "@/lib/types/resume";
 import { cn } from "@/lib/utils";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -25,7 +24,6 @@ interface ActionSidebarProps {
   copySuccess: boolean;
   onCopy: () => void;
   selectedSuggestions: OptimizationSuggestion[];
-  resumeData: OptimizedResume;
 }
 
 export function ActionSidebar({
@@ -34,7 +32,6 @@ export function ActionSidebar({
   copySuccess,
   onCopy,
   selectedSuggestions,
-  resumeData,
 }: ActionSidebarProps) {
   const router = useRouter();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -43,8 +40,8 @@ export function ActionSidebar({
     setIsGeneratingPdf(true);
     
     try {
-      await PdfGenerator.generate(resumeData, currentTemplateId, {
-        filename: `履歷_${new Date().toISOString().slice(0, 10)}.pdf`,
+      await PdfGenerator.generate({
+        filename: `我的履歷.pdf`,
       });
     } catch (error) {
       // 錯誤處理已在 PdfGenerator 中統一處理

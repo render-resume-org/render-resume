@@ -120,7 +120,6 @@ export default function PreviewPage() {
             copySuccess={copySuccess}
             onCopy={handleCopyResumeText}
             selectedSuggestions={selectedSuggestions}
-            resumeData={resumeData}
           />
 
           {/* Main Content - Resume Preview */}

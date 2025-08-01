@@ -3,7 +3,6 @@ import { toast } from 'sonner';
 
 export interface PdfGenerationOptions {
   filename?: string;
-  method?: 'dom-snapshot' | 'traditional';
   resumeElementId?: string;
 }
 
@@ -13,7 +12,7 @@ export interface PdfGenerationOptions {
  */
 export class PdfGenerator {
   /**
-   * 從 DOM 元素生成 PDF（推薦方式）
+   * 從 DOM 元素生成 PDF
    */
   static async generateFromDom(options: PdfGenerationOptions = {}): Promise<void> {
     const { 
@@ -51,73 +50,13 @@ export class PdfGenerator {
   }
 
   /**
-   * 傳統方式生成 PDF（備用）
+   * 生成 PDF（主要方法）
    */
-  static async generateTraditional(
-    resumeData: unknown, 
-    templateId: string, 
-    options: PdfGenerationOptions = {}
-  ): Promise<void> {
-    const { filename = `履歷_${new Date().toISOString().slice(0, 10)}.pdf` } = options;
-
-    // 首先生成 HTML
-    const htmlResponse = await fetch('/api/generate-resume-html', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        resumeData,
-        templateId,
-      }),
-    });
-
-    const htmlResult = await htmlResponse.json();
-    
-    if (!htmlResult.success) {
-      throw new Error(htmlResult.error || 'HTML 生成失敗');
-    }
-
-    // 然後生成 PDF
-    const pdfResponse = await fetch('/api/generate-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        htmlContent: htmlResult.html,
-        filename,
-      }),
-    });
-
-    if (!pdfResponse.ok) {
-      const errorResult = await pdfResponse.json();
-      throw new Error(errorResult.error || 'PDF 生成失敗');
-    }
-
-    // 下載 PDF
-    await this.downloadPdfFromResponse(pdfResponse, filename);
-  }
-
-  /**
-   * 自動選擇最佳生成方式
-   */
-  static async generate(
-    resumeDataOrOptions?: unknown, 
-    templateId?: string, 
-    options: PdfGenerationOptions = {}
-  ): Promise<void> {
+  static async generate(options: PdfGenerationOptions = {}): Promise<void> {
     try {
       toast.loading('正在生成 PDF...', { id: 'pdf-generation' });
 
-      // 優先使用 DOM 快照方式
-      if (document.getElementById(options.resumeElementId || 'resume-content')) {
-        await this.generateFromDom(options);
-      } else {
-        // 備用傳統方式
-        toast.loading('使用備用方法生成 PDF...', { id: 'pdf-generation' });
-        await this.generateTraditional(resumeDataOrOptions, templateId || 'standard', options);
-      }
+      await this.generateFromDom(options);
 
       toast.success('PDF 已成功下載！', { id: 'pdf-generation' });
     } catch (error) {
