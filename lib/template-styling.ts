@@ -145,7 +145,7 @@ export class TemplateStylingService {
       categoryName: cn(this.getBodyTextStyle(template), 'font-bold mb-1'),
       skillContainer: cn('flex flex-wrap gap-2'),
       skillBadge: cn('px-3 py-1 bg-cyan-100 text-cyan-600 rounded-full text-sm'),
-      skillList: cn('space-y-0'),
+      skillList: cn('space-y-1'),
     };
   }
 

@@ -236,9 +236,11 @@ function PdfSkillsSection({ data, template }: { data: OptimizedResume['skills'],
     >
       <div className="space-y-1">
         {data.map((skillGroup, index) => (
-          <div key={index} className="flex items-start">
-            <p className={cnPdf(font.sizes.body, colors.text, 'w-fit font-bold flex-shrink-0 mr-1')}>{skillGroup.category}:</p>
-            <p className={cnPdf(font.sizes.body, colors.secondary)}>{skillGroup.items.join(', ')}</p>
+          <div key={index}>
+            <p className={cnPdf(font.sizes.body, colors.text)}>
+              <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{skillGroup.category}:</span>{' '}
+              {skillGroup.items.join(', ')}
+            </p>
           </div>
         ))}
       </div>

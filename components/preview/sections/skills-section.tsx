@@ -28,7 +28,7 @@ export default function SkillsSection({ data, template, onEdit }: SkillsSectionP
     >
       <div className={styles.skillList}>
         {data.map((skillGroup, index) => (
-          <div key={index} className="mb-2">
+          <div key={index}>
             <p className={TemplateStylingService.getBodyTextStyle(template)}>
               <span className={cn(styles.categoryName, 'font-bold')}>{skillGroup.category}:</span>{' '}
               {skillGroup.items.join(', ')}
