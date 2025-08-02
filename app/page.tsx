@@ -2,14 +2,13 @@
 
 import Footer from "@/components/footer";
 import {
+  AfterSection,
+  BeforeSection,
   CTASection,
   FeaturesSection,
   HeroSection,
-  ScoringSystem,
-  StructuredData,
-  coreFeatures,
-  scoreCategories,
   stats,
+  StructuredData
 } from "@/components/landing";
 
 export default function Home() {
@@ -19,9 +18,13 @@ export default function Home() {
 
       <HeroSection stats={stats} />
       
-      <ScoringSystem scoreCategories={scoreCategories} />
+      {/* <ScoringSystem scoreCategories={scoreCategories} /> */}
       
-      <FeaturesSection coreFeatures={coreFeatures} />
+      <BeforeSection />
+      
+      <FeaturesSection />
+      
+      <AfterSection />
       
       <CTASection />
 

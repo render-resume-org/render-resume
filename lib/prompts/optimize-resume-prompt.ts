@@ -152,7 +152,9 @@ export function generateOptimizeResumeSystemPrompt(categories: ScoreCategory[]):
 - **嚴禁產生與履歷內容無關的泛用問題，也不能只用「請補充」等模糊字眼。**
 - 請務必產生「5 個（含）以上」具體且有 reference 的 follow_up，否則視為不合格。
 
-**強烈提醒：如未嚴格遵守上述規範，將導致履歷補全與智能追問功能失效，請務必逐條檢查！**`;
+**強烈提醒：如未嚴格遵守上述規範，將導致履歷補全與智能追問功能失效，請務必逐條檢查！**
+
+**重要提醒：絕對禁止生成任何假資料，只能使用實際存在的履歷內容進行優化。**`;
 
     return basePrompt + optimizeResumeSpecificInstructions;
 } 

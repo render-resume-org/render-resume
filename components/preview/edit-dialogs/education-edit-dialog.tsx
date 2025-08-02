@@ -9,6 +9,7 @@ import FormTips from "./form-tips";
 
 interface Education {
   degree: string;
+  major: string;
   school: string;
   period: string;
   details?: string[];
@@ -48,7 +49,7 @@ export default function EducationEditDialog({
   };
 
   const addEducation = () => {
-    setEducation([...education, { degree: '', school: '', period: '', details: [] }]);
+    setEducation([...education, { degree: '', major: '', school: '', period: '', details: [] }]);
   };
 
   const removeEducation = (index: number) => {
@@ -106,7 +107,7 @@ export default function EducationEditDialog({
       onClose={handleClose}
       onSave={handleSave}
       title="編輯教育背景"
-      description="管理您的教育背景，包括學位、學校、時間和相關細節。"
+      description="管理您的教育背景，包括學位、主修、學校、時間和相關細節。"
       isLoading={isLoading}
     >
       <div className="space-y-6">
@@ -133,6 +134,17 @@ export default function EducationEditDialog({
               </div>
 
               <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  主修
+                </label>
+                <Input
+                  value={edu.major}
+                  onChange={(e) => updateEducation(eduIndex, 'major', e.target.value)}
+                  placeholder="例如: 資訊工程"
+                />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   學校名稱
                 </label>
@@ -202,9 +214,8 @@ export default function EducationEditDialog({
         </Button>
 
         <FormTips
-          title="教育背景撰寫建議："
           tips={[
-            "包含完整的學位名稱和學校名稱",
+            "包含完整的學位名稱和主修科目",
             "列出相關的課程、專案或成就",
             "突出與目標職位相關的學術背景",
             "按時間順序排列，最新的學歷在前",
