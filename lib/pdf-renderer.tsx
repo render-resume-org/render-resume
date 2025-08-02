@@ -337,7 +337,7 @@ function PdfEducationSection({ data, template }: { data: OptimizedResume['educat
           {data.map((edu, index) => (
             <div key={index}>
               <div className="mb-1">
-                <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{edu.degree}</span>
+                <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{edu.degree}{edu.major && `, ${edu.major}`}</span>
                 <span className={cnPdf(font.sizes.body, colors.secondary)}> | {edu.school} | {edu.period}</span>
               </div>
               {edu.details && edu.details.length > 0 && (
@@ -369,7 +369,7 @@ function PdfEducationSection({ data, template }: { data: OptimizedResume['educat
           <div key={index}>
             <div className="flex justify-between items-start mb-2">
               <div>
-                <h3 className={cnPdf(font.sizes.body, colors.text, 'font-semibold')}>{edu.degree}</h3>
+                <h3 className={cnPdf(font.sizes.body, colors.text, 'font-semibold')}>{edu.degree}{edu.major && `, ${edu.major}`}</h3>
                 <p className={cnPdf(font.sizes.body, colors.primary, 'font-medium')}>{edu.school}</p>
               </div>
               <span className={cnPdf(font.sizes.caption, colors.secondary)}>{edu.period}</span>

@@ -51,6 +51,7 @@ ${analysisResult.projects?.map(proj => `
 **教育背景：**
 ${analysisResult.education_background?.map(edu => `
 - 學位：${edu.degree}
+- 主修：${edu.major}
 - 學校：${edu.institution}
 - 期間：${edu.duration}
 - 詳細資訊：${edu.gpa ? `GPA: ${edu.gpa}` : '無'}
@@ -86,6 +87,7 @@ ${index + 1}. **${suggestion.title}** (${suggestion.category})
 ### 特別注意：
 - **嚴格禁止生成假資料**：只能使用分析結果中實際存在的資料，絕對不能憑空創造任何假資料
 - **個人資訊處理**：如果 profile 中有完整的個人資訊，直接使用；如果缺失某些欄位，請留空或使用實際存在的資料
+- **教育背景處理**：education_background 中的 institution 對應到 school，degree 和 major 都要保留，duration 對應到 period
 - 確保所有時間表述一致（如：2021年6月 - 2023年12月）
 - 避免使用過於誇張的形容詞
 - 確保技術棧與實際專案經驗相符
@@ -107,7 +109,7 @@ ${index + 1}. **${suggestion.title}** (${suggestion.category})
   "skills": [{ "category": "", "items": [] }],
   "experience": [{ "title": "", "company": "", "period": "", "achievements": [] }],
   "projects": [{ "name": "", "period": "", "achievements": [] }],
-  "education": [{ "degree": "", "school": "", "period": "", "details": [] }]
+  "education": [{ "degree": "", "major": "", "school": "", "period": "", "details": [] }]
 }
 
 **重要提醒**：如果某個 section 沒有實際資料，請將該欄位設為空字串（string）或空陣列（array），不要生成任何假資料。

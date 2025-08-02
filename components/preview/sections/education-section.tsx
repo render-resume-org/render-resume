@@ -34,7 +34,7 @@ export default function EducationSection({ data, template, onEdit }: EducationSe
               <div className="flex justify-between items-start">
                 <div>
                   <h4 className={cn(font.sizes.body, 'text-black font-medium')}>
-                    {education.degree}
+                    {education.degree}{education.major && `, ${education.major}`}
                   </h4>
                   <p className={cn(font.sizes.caption, 'text-black')}>
                     {education.school}
@@ -80,7 +80,7 @@ export default function EducationSection({ data, template, onEdit }: EducationSe
             </div>
             <div className="mb-1">
               <p className={cn(font.sizes.body, 'text-black italic')}>
-                {education.degree}
+                {education.degree}{education.major && `, ${education.major}`}
                 {education.gpa && `, GPA: ${education.gpa}`}
               </p>
             </div>

@@ -35,6 +35,7 @@ export interface OptimizedResume {
   }>;
   education: Array<{
     degree: string;
+    major: string;
     school: string;
     period: string;
     details?: string[];
