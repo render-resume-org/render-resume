@@ -1,7 +1,7 @@
-import React from 'react';
 import { getTemplateById, ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
 import { cnPdf } from '@/lib/utils';
+import React from 'react';
 
 // 動態導入 renderToStaticMarkup 以避免客戶端錯誤
 let renderToStaticMarkup: ((element: React.ReactElement) => string) | null = null;
