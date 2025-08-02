@@ -27,12 +27,12 @@ export default async function DashboardPage() {
           {/* First Row - Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Announcements Section - 1 column */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 order-2 lg:order-1">
               <DashboardAnnouncements announcements={announcements} />
             </div>
             
             {/* Banner Card - 2 columns */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 h-full order-1 lg:order-2">
               <BannerCard />
             </div>
           </div>
