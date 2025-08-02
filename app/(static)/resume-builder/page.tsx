@@ -1,32 +1,21 @@
 "use client";
 
-import { Slider } from "@/components/ui/slider";
+
 import {
   AlertCircle,
   CheckCircle,
-  MessageSquare
+  MessageSquare,
+  Check,
+  ArrowLeft,
+  ArrowRight,
+  RotateCcw,
+  Search
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import Footer from "@/components/footer";
 
-export default function HelpPage() {
-  const [gradeValue, setGradeValue] = useState([7]); // 預設為 B+ (index 7)
+export default function ResumeBuilderPage() {
 
-  const gradeScale = [
-    { grade: "F", label: "不合格", color: "text-red-800", bgColor: "bg-red-100 dark:bg-red-900/30", description: "履歷存在重大缺陷，需要全面重構內容結構與專業呈現" },
-    { grade: "D", label: "嚴重不足", color: "text-red-700", bgColor: "bg-red-100 dark:bg-red-900/30", description: "基礎信息缺失嚴重，專業能力表達不清，急需改善" },
-    { grade: "C-", label: "需大幅改進", color: "text-red-600", bgColor: "bg-red-50 dark:bg-red-900/20", description: "內容組織混亂，缺乏重點突出，建議重新整理" },
-    { grade: "C", label: "需改進", color: "text-red-500", bgColor: "bg-orange-50 dark:bg-orange-900/20", description: "基本信息完整但缺乏亮點，需要加強成果量化" },
-    { grade: "C+", label: "待改進", color: "text-orange-600", bgColor: "bg-orange-50 dark:bg-orange-900/20", description: "結構尚可但內容平淡，建議增加具體案例與數據支撐" },
-    { grade: "B-", label: "合格表現", color: "text-yellow-600", bgColor: "bg-yellow-50 dark:bg-yellow-900/20", description: "滿足基本要求，但缺乏競爭優勢，可進一步優化" },
-    { grade: "B", label: "尚可表現", color: "text-yellow-500", bgColor: "bg-yellow-50 dark:bg-yellow-900/20", description: "內容結構良好，專業能力清晰，但需要更多成就亮點" },
-    { grade: "B+", label: "滿意表現", color: "text-lime-600", bgColor: "bg-lime-50 dark:bg-lime-900/20", description: "履歷內容豐富，專業形象佳，在多數職位中具備競爭力" },
-    { grade: "A-", label: "良好表現", color: "text-green-600", bgColor: "bg-green-50 dark:bg-green-900/20", description: "專業能力突出，成果量化清晰，易獲得面試機會" },
-    { grade: "A", label: "優秀表現", color: "text-emerald-600", bgColor: "bg-emerald-50 dark:bg-emerald-900/20", description: "履歷結構完美，內容充實有力，在競爭中明顯領先" },
-    { grade: "A+", label: "卓越表現", color: "text-emerald-700", bgColor: "bg-emerald-100 dark:bg-emerald-900/30", description: "頂級履歷水準，各維度表現優異，極具吸引力和說服力" }
-  ];
-
-  const currentGrade = gradeScale[gradeValue[0]];
 
   const faqs = [
     {
@@ -49,14 +38,149 @@ export default function HelpPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto flex p-4 py-8">
-        <Link
-          href="/"
-          className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
-        >
-          返回首頁
-        </Link>
-      </div>
+      {/* Hero Section - 圖中的組件配置 */}
+      <section className="container mx-auto px-4 py-16 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* 左側內容 */}
+          <div className="space-y-8">
+            <div className="space-y-6">
+              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
+                <span className="block">打造最佳履歷。</span>
+                <span className="block">獲得更多機會。</span>
+              </h1>
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed max-w-lg">
+                使用 AI 技術打造量身定制的履歷，識別缺失的關鍵字，並獲得個人化的優化建議，一切只需幾個點擊。
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              <Link 
+                href="/auth/sign-up"
+                className="inline-flex items-center px-8 py-4 bg-cyan-600 hover:bg-cyan-700 text-white text-lg font-semibold rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
+              >
+                立即建立履歷 - 免費！
+              </Link>
+            </div>
+          </div>
+
+          {/* 右側產品視覺展示 */}
+          <div className="relative">
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
+              {/* 頂部功能標籤 */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm">
+                  <Check className="h-3 w-3 mr-1 text-green-600" />
+                  量身定制履歷
+                </div>
+                <div className="flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm">
+                  <Check className="h-3 w-3 mr-1 text-green-600" />
+                  識別缺失關鍵字
+                </div>
+                <div className="flex items-center px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded-full text-sm">
+                  <Check className="h-3 w-3 mr-1 text-green-600" />
+                  使用 AI 量身定制
+                </div>
+              </div>
+
+              {/* 瀏覽器視窗 */}
+              <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                {/* 瀏覽器標題欄 */}
+                <div className="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                      <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                      <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                      <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                      <ArrowLeft className="h-4 w-4 text-gray-500" />
+                    </button>
+                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                      <ArrowRight className="h-4 w-4 text-gray-500" />
+                    </button>
+                    <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">
+                      <RotateCcw className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </div>
+                  <div className="flex-1 mx-4">
+                    <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg px-3 py-1 border border-gray-200 dark:border-gray-600">
+                      <Search className="h-4 w-4 text-gray-400 mr-2" />
+                      <span className="text-sm text-gray-500">搜尋...</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 瀏覽器內容區域 */}
+                <div className="p-6">
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* 左側：職位資訊 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">A</span>
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">airbnb</span>
+                      </div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                        軟體工程師
+                      </div>
+                      
+                      {/* 進度條 */}
+                      <div className="space-y-2">
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '85%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '70%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '90%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '60%'}}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 右側：關鍵字匹配 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-5 h-5 bg-cyan-500 rounded-full flex items-center justify-center">
+                            <Check className="h-3 w-3 text-white" />
+                          </div>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">關鍵字匹配</span>
+                        </div>
+                        <button className="px-3 py-1 bg-cyan-500 text-white text-xs rounded-full">
+                          <Check className="h-3 w-3" />
+                        </button>
+                      </div>
+                      
+                      {/* 進度條 */}
+                      <div className="space-y-2">
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '95%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '80%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '75%'}}></div>
+                        </div>
+                        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-500 rounded-full" style={{width: '90%'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pb-12 max-w-4xl">
@@ -182,96 +306,7 @@ export default function HelpPage() {
             </div>
           </section>
 
-          {/* Interactive Grade Scoring System */}
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 text-center">
-              等第制評分系統預覽
-            </h2>
-            
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 shadow-sm border border-gray-200 dark:border-gray-700 max-w-4xl mx-auto">
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                  互動式評分預覽 (F 到 A+ 共 11 級)
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  拖拽滑塊或點擊等級，了解評級資訊
-                </p>
-              </div>
-              
-              {/* Interactive Grade Slider */}
-              <div className="space-y-6">
-                <div className="px-4">
-                  <Slider
-                    value={gradeValue}
-                    onValueChange={setGradeValue}
-                    max={10}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    <span>F (最低)</span>
-                    <span>A+ (最高)</span>
-                  </div>
-                </div>
 
-                {/* Current Grade Display */}
-                <div className={`${currentGrade.bgColor} rounded-lg p-6 border-2 transition-all duration-300`}>
-                  <div className="text-center space-y-3">
-                    <div className={`text-4xl font-bold ${currentGrade.color}`}>
-                      {currentGrade.grade}
-                    </div>
-                    <div className={`text-lg font-semibold ${currentGrade.color}`}>
-                      {currentGrade.label}
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                      {currentGrade.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Grade Scale Reference */}
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 mt-6">
-                  {gradeScale.map((item, index) => (
-                    <div 
-                      key={index} 
-                      className={`text-center p-2 rounded transition-all duration-200 cursor-pointer ${
-                        index === gradeValue[0] 
-                          ? `${item.bgColor} shadow-sm` 
-                          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                      }`}
-                      onClick={() => setGradeValue([index])}
-                    >
-                      <div className={`text-sm font-bold ${
-                        index === gradeValue[0] ? item.color : 'text-gray-500'
-                      }`}>
-                        {item.grade}
-                      </div>
-                      <div className={`text-xs ${
-                        index === gradeValue[0] ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'
-                      }`}>
-                        {item.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center">
-                  💡 拖拽滑塊或點擊等級查看不同評分的詳細說明
-                </div>
-              </div>
-              
-              <div className="mt-8 p-4 bg-cyan-50 dark:bg-cyan-950/30 border border-cyan-200 dark:border-cyan-800 rounded-lg">
-                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">評分標準說明：</h4>
-                <ul className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-                  <li>• <strong>A+/A/A-</strong>：卓越至良好表現，符合頂級企業標準</li>
-                  <li>• <strong>B+/B/B-</strong>：滿意至合格表現，具備基本競爭力</li>
-                  <li>• <strong>C+/C/C-</strong>：待改進至需改進，建議優化內容</li>
-                  <li>• <strong>D/F</strong>：不足至不合格，需要重大改善</li>
-                </ul>
-              </div>
-            </div>
-          </section>
 
           {/* Tips & Best Practices */}
           <section className="mb-16">
@@ -365,57 +400,10 @@ export default function HelpPage() {
               </Link>
             </div>
           </section>
-
-          {/* Contact Support */}
-          <section className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/30 dark:to-blue-950/30 rounded-lg p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              需要協助？
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              如果您在使用過程中遇到任何問題，請隨時聯繫我們的客服團隊
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="mailto:info@render-resume.com"
-                className="inline-flex items-center justify-center px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg transition-colors"
-              >
-                聯絡客服
-              </a>
-              <a 
-                href="https://forms.gle/XdYUd8wRrqS5WJw59"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center px-6 py-3 border border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 rounded-lg transition-colors"
-              >
-                意見回饋
-              </a>
-            </div>
-          </section>
-
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row gap-4 text-center">
-              <Link
-                href="/about"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                關於我們
-              </Link>
-              <Link
-                href="/faq"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                常見問題
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                隱私權政策
-              </Link>
-            </div>
-          </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 } 

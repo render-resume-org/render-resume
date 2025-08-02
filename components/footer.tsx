@@ -25,7 +25,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">功能</h3>
             <ul className="space-y-2">
                 <li>
-                <Link href="/help" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Link href="/resume-builder" className="text-gray-400 hover:text-cyan-400 transition-colors">
                     AI 履歷編輯器
                 </Link>
                 </li>

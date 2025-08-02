@@ -10,7 +10,7 @@ Allow: /
 Allow: /auth/login
 Allow: /auth/sign-up
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 Allow: /privacy
 Allow: /terms
@@ -34,31 +34,31 @@ Disallow: /node_modules/
 User-agent: GPTBot
 Allow: /
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 
 User-agent: ChatGPT-User
 Allow: /
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 
 User-agent: CCBot
 Allow: /
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 
 User-agent: Claude-Web
 Allow: /
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 
 User-agent: anthropic-ai
 Allow: /
 Allow: /faq
-Allow: /help
+Allow: /resume-builder
 Allow: /about
 
 # Sitemap location

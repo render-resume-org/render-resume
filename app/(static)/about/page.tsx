@@ -177,7 +177,7 @@ export default function AboutPage() {
                 服務條款
               </Link>
               <Link
-                href="/help"
+                href="/resume-builder"
                 className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
               >
                 使用說明
