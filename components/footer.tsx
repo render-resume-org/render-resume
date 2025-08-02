@@ -44,6 +44,11 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">支援服務</h3>
             <ul className="space-y-2">
               <li>
+                <Link href="/announcements" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                  系統公告
+                </Link>
+              </li>
+              <li>
                 <Link href="/help" className="text-gray-400 hover:text-cyan-400 transition-colors">
                   使用說明
                 </Link>

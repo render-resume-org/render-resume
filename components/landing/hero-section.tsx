@@ -9,6 +9,8 @@ interface HeroSectionProps {
   stats: Array<{
     number: string;
     label: string;
+    icon?: React.ComponentType<{ className?: string }>;
+    animate?: boolean;
   }>;
 }
 
@@ -50,8 +52,15 @@ export default function HeroSection({ stats }: HeroSectionProps) {
           <div className="mt-12 grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto" itemScope itemType="https://schema.org/ItemList">
             {stats.map((stat, index) => (
               <div key={index} className="text-center" itemScope itemType="https://schema.org/Statistic">
-                <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400" itemProp="value">
-                  {stat.number}
+                <div className="flex items-center justify-center gap-2">
+                  {stat.icon && (
+                    <stat.icon 
+                      className={`h-6 w-6 text-cyan-600 dark:text-cyan-400 ${stat.animate ? 'animate-bounce' : ''}`} 
+                    />
+                  )}
+                  <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400" itemProp="value">
+                    {stat.number}
+                  </div>
                 </div>
                 <div className="text-md text-gray-600 dark:text-gray-300" itemProp="name">
                   {stat.label}

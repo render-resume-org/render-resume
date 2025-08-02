@@ -20,6 +20,51 @@ export async function getActiveAnnouncements(): Promise<AnnouncementTable[]> {
   return announcements || [];
 }
 
+export async function getAnnouncementById(id: number): Promise<AnnouncementTable | null> {
+  const supabase = await createClient();
+  
+  const { data: announcement, error } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('id', id)
+    .eq('is_active', true)
+    .single();
+
+  if (error) {
+    console.error('Error fetching announcement:', error);
+    return null;
+  }
+
+  return announcement;
+}
+
+export async function incrementAnnouncementViews(id: number): Promise<void> {
+  const supabase = await createClient();
+  
+  // First get the current views count
+  const { data: announcement, error: fetchError } = await supabase
+    .from('announcements')
+    .select('views')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) {
+    console.error('Error fetching announcement views:', fetchError);
+    return;
+  }
+
+  // Then increment the views count
+  const currentViews = announcement?.views || 0;
+  const { error: updateError } = await supabase
+    .from('announcements')
+    .update({ views: currentViews + 1 })
+    .eq('id', id);
+
+  if (updateError) {
+    console.error('Error incrementing announcement views:', updateError);
+  }
+}
+
 export interface PaginatedAnnouncements {
   announcements: AnnouncementTable[];
   totalCount: number;

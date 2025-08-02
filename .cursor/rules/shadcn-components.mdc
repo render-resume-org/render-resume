@@ -1,6 +1,5 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description: should be applied when common ui components were to be used or implemented
+alwaysApply: false
 ---
 If you were to implment ui components, always check @/components/ui first for shadcn components and use if available. Avoid using native elements.
