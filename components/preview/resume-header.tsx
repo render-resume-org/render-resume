@@ -60,7 +60,7 @@ export default function ResumeHeader({ personalInfo, template }: ResumeHeaderPro
           personalInfo.linkedin,
           personalInfo.github,
           personalInfo.website
-        ].filter(Boolean).join(' • ')}
+        ].filter(Boolean).join('・')}
       </div>
     </header>
   );

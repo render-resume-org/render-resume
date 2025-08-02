@@ -99,14 +99,14 @@ export default function PreviewPage() {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          {/* <div className="flex justify-center mb-4">
             <span className="text-5xl">✨</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          </div> */}
+          {/* <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             AI 優化履歷
-          </h1>
+          </h1> */}
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            基於 Remo 與您的對話優化生成的專業履歷，您可以進一步編輯和下載。
+            基於 Remo 與您的對話優化的專業履歷，您可以進一步編輯和下載。
           </p>
         </div>
 

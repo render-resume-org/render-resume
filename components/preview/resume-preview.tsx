@@ -1,6 +1,7 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import { useEditDialogManager } from './edit-dialogs';
 import ResumeHeader from './resume-header';
 import { renderSection } from './section-registry';
@@ -53,12 +54,13 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
           ))}
           
           <footer className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-black text-center select-none print:mt-8" style={{ letterSpacing: '0.04em' }}>
-            <p>made with</p>
-            <p className={cn('font-semibold text-black')}>RenderResume</p>
+            <Link href="https://www.render-resume.com" target="_blank" className="flex items-center gap-1">
+              <p>Powered by</p>
+              <p className={cn('font-semibold text-black')}>RenderResume</p>
+              <p>・</p>
+              <p className={cn('font-semibold text-black')}>www.render-resume.com</p>
+            </Link>
           </footer>
-          <div className="text-xs text-black w-full text-center">
-            www.render-resume.com
-          </div>
         </div>
       </div>
 
