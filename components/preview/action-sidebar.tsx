@@ -1,18 +1,16 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { availableTemplates } from "@/lib/config/resume-templates";
 import { PdfGenerator } from "@/lib/pdf-generator";
-import type { OptimizationSuggestion } from "@/lib/types/resume";
 import { cn } from "@/lib/utils";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -23,7 +21,6 @@ interface ActionSidebarProps {
   onTemplateChange: (templateId: string) => void;
   copySuccess: boolean;
   onCopy: () => void;
-  selectedSuggestions: OptimizationSuggestion[];
 }
 
 export function ActionSidebar({
@@ -31,7 +28,6 @@ export function ActionSidebar({
   onTemplateChange,
   copySuccess,
   onCopy,
-  selectedSuggestions,
 }: ActionSidebarProps) {
   const router = useRouter();
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -52,7 +48,7 @@ export function ActionSidebar({
   };
 
   return (
-    <div className="lg:col-span-1 space-y-6">
+    <div className="md:max-w-xs w-full space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">選擇模板</CardTitle>
@@ -128,31 +124,6 @@ export function ActionSidebar({
             <UserCircle className="w-4 h-4 mr-2" />
             返回首頁
           </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">已套用建議</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {selectedSuggestions.slice(0, 3).map((suggestion, index) => (
-              <div key={index} className="text-sm">
-                <Badge variant="secondary" className="text-xs mb-1">
-                  {suggestion.category}
-                </Badge>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {suggestion.title}
-                </p>
-              </div>
-            ))}
-            {selectedSuggestions.length > 3 && (
-              <p className="text-xs text-gray-500">
-                和其他 {selectedSuggestions.length - 3} 個建議...
-              </p>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>

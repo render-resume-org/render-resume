@@ -3,9 +3,8 @@
 import { ActionSidebar } from "@/components/preview/action-sidebar";
 import ResumePreview from "@/components/preview/resume-preview";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { getTemplateById } from "@/lib/config/resume-templates";
 import { useResumeCopy, useResumeOptimization, useResumeTemplate } from "@/hooks/use-resume-optimization";
+import { getTemplateById } from "@/lib/config/resume-templates";
 import { FileText } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { toast } from "sonner";
@@ -17,7 +16,6 @@ export default function PreviewPage() {
   const { 
     isGenerating, 
     resumeData, 
-    selectedSuggestions, 
     updateResumeData 
   } = useResumeOptimization();
   
@@ -101,38 +99,35 @@ export default function PreviewPage() {
       <div className="container mx-auto px-4 max-w-7xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+          {/* <div className="flex justify-center mb-4">
             <span className="text-5xl">✨</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          </div> */}
+          {/* <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             AI 優化履歷
-          </h1>
+          </h1> */}
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            基於 {selectedSuggestions.length} 個優化建議生成的專業履歷，您可以進一步編輯和下載。
+            基於 Remo 與您的對話優化的專業履歷，您可以進一步編輯和下載。
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="flex md:flex-row flex-col justify-center items-center md:items-start gap-8">
           {/* Sidebar - Controls */}
           <ActionSidebar
             currentTemplateId={templateId}
             onTemplateChange={updateTemplateId}
             copySuccess={copySuccess}
             onCopy={handleCopyResumeText}
-            selectedSuggestions={selectedSuggestions}
           />
 
           {/* Main Content - Resume Preview */}
           <div className="lg:col-span-3">
-            <Card className="p-6">
-              <div className="flex justify-center">
-                <ResumePreview 
-                  resumeData={resumeData} 
-                  template={currentTemplate} 
-                  onUpdateResume={updateResumeData}
-                />
-              </div>
-            </Card>
+            <div className="flex justify-center">
+              <ResumePreview 
+                resumeData={resumeData} 
+                template={currentTemplate} 
+                onUpdateResume={updateResumeData}
+              />
+            </div>
           </div>
         </div>
 
