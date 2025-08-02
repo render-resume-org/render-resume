@@ -45,8 +45,8 @@ const AppHeader = () => {
       '/analyze': '分析中',
       '/results': '分析完成',
       '/smart-chat': '智慧問答',
-      '/suggestions': '優化建議（建置中）',
-      '/preview': '履歷生成（建置中）',
+      '/suggestions': '優化建議',
+      '/preview': '履歷生成',
     };
     return stepMap[pathname] || '處理中';
   };

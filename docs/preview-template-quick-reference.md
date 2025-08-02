@@ -85,18 +85,26 @@ const myTemplate: ResumeTemplate = {
 
 ### Color Schemes
 ```typescript
-// Default (Cyan)
+// Standard (Black)
 colors: {
-  primary: 'text-cyan-600',
-  secondary: 'text-gray-600 dark:text-gray-300',
-  text: 'text-gray-900 dark:text-white',
-  background: 'bg-white dark:bg-gray-800',
+  primary: 'text-black',
+  secondary: 'text-black',
+  text: 'text-black',
+  background: 'bg-white',
 }
 
 // LaTex (Black)
 colors: {
   primary: 'text-black',
-  secondary: 'text-gray-700',
+  secondary: 'text-black',
+  text: 'text-black',
+  background: 'bg-white',
+}
+
+// Modern (Black)
+colors: {
+  primary: 'text-black',
+  secondary: 'text-black',
   text: 'text-black',
   background: 'bg-white',
 }
@@ -141,7 +149,6 @@ registerSection('my-section', MySection);
 interface OptimizedResume {
   personalInfo: {
     fullName: string;
-    title: string;
     email: string;
     phone: string;
     location: string;
@@ -162,10 +169,9 @@ interface OptimizedResume {
   }>;
   projects: Array<{
     name: string;
-    description: string;
+    period?: string;
     technologies: string[];
     achievements: string[];
-    duration?: string;
   }>;
   education: Array<{
     degree: string;
@@ -220,7 +226,7 @@ const [currentTemplateId, setCurrentTemplateId] = useState('default');
 localStorage.setItem('selectedTemplateId', templateId);
 
 // Load from localStorage
-const savedTemplateId = localStorage.getItem('selectedTemplateId') || 'default';
+const savedTemplateId = localStorage.getItem('selectedTemplateId') || 'standard';
 const template = getTemplateById(savedTemplateId);
 ```
 
