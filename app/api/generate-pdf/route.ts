@@ -73,6 +73,13 @@ export async function POST(request: NextRequest) {
     // 確保頁面完全載入
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // 設定頁面視口大小為 A4
+    await page.setViewport({
+      width: 794, // A4 寬度 (210mm)
+      height: 1123, // A4 高度 (297mm)
+      deviceScaleFactor: 1,
+    });
+
     // 生成 PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -83,7 +90,7 @@ export async function POST(request: NextRequest) {
         bottom: '15mm',
         left: '15mm',
       },
-      preferCSSPageSize: false,
+      preferCSSPageSize: true,
       scale: 1.0,
       displayHeaderFooter: false,
     });

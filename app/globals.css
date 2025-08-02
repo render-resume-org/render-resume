@@ -88,7 +88,7 @@
 
   .resume-content {
     width: 100%; /* 讓內容自適應 */
-    min-height: 1123px; /* A4 高度 (297mm) */
+    height: auto; /* 讓高度自適應內容 */
     padding: 15mm 15mm; /* 與 PDF 相同的邊距 */
     margin: 0 auto;
     background: white !important;
@@ -116,7 +116,7 @@
   @media print {
     .resume-content {
       width: 100%;
-      min-height: 297mm;
+      height: auto;
       margin: 0;
       padding: 15mm 15mm;
       box-shadow: none;

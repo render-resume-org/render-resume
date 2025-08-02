@@ -56,7 +56,8 @@ export function renderSection({ sectionName, resumeData, template, onEdit }: Sec
   // 檢查數據是否存在和有效
   if (!sectionData || 
       (Array.isArray(sectionData) && sectionData.length === 0) ||
-      (typeof sectionData === 'string' && !sectionData.trim())) {
+      (typeof sectionData === 'string' && !sectionData.trim()) ||
+      (typeof sectionData === 'object' && Object.keys(sectionData).length === 0)) {
     return null;
   }
 

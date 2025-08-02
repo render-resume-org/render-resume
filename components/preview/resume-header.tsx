@@ -14,12 +14,12 @@ export default function ResumeHeader({ personalInfo, template }: ResumeHeaderPro
     return (
       <header className={cn(styles.header)}>
         <h1 className={cn(font.sizes.title, 'text-black')}>
-          {personalInfo.fullName}
+          {personalInfo.fullName || '姓名未提供'}
         </h1>
         <div className={cn(font.sizes.subtitle, 'text-black flex justify-center items-center space-x-2')}>
-          <span>{personalInfo.email}</span>
-          <span>{'//'}</span>
-          <span>{personalInfo.phone}</span>
+          {personalInfo.email && <span>{personalInfo.email}</span>}
+          {personalInfo.email && personalInfo.phone && <span>{'//'}</span>}
+          {personalInfo.phone && <span>{personalInfo.phone}</span>}
           {personalInfo.linkedin && (
             <>
               <span>{'//'}</span>
@@ -49,7 +49,7 @@ export default function ResumeHeader({ personalInfo, template }: ResumeHeaderPro
   return (
     <header className={cn(styles.header)}>
       <h1 className={cn(font.sizes.title, 'text-black text-center mb-1')}>
-        {personalInfo.fullName}
+        {personalInfo.fullName || '姓名未提供'}
       </h1>
       
       <div className={cn('text-center', font.sizes.body, 'text-black')}>

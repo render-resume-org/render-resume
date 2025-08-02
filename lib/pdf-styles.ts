@@ -15,7 +15,7 @@ body {
 /* A4 頁面尺寸 */
 .pdf-container {
   width: 100%;
-  min-height: 297mm;
+  height: auto;
   margin: 0;
   background: white;
   box-sizing: border-box;
@@ -31,7 +31,7 @@ button, [role="button"] {
 @media print {
   .pdf-container {
     width: 100%;
-    min-height: 297mm;
+    height: auto;
     margin: 0;
     box-shadow: none;
     padding: 0;
@@ -81,6 +81,18 @@ export const PDF_LAYOUT_STYLES = `
 .page-break-inside-avoid {
   page-break-inside: avoid;
   break-inside: avoid;
+}
+
+/* 確保內容不會強制分頁 */
+.pdf-container {
+  height: auto !important;
+  min-height: auto !important;
+}
+
+/* 確保履歷內容不會強制最小高度 */
+#resume-content {
+  height: auto !important;
+  min-height: auto !important;
 }
 
 /* Flexbox */
