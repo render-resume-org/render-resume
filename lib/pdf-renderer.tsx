@@ -467,7 +467,7 @@ export function generatePdfHtml(resumeData: OptimizedResume, templateId: string 
     /* A4 頁面尺寸 */
     .pdf-container {
       width: 100%;
-      min-height: 297mm;
+      height: auto;
       margin: 0;
       background: white;
       box-sizing: border-box;
@@ -482,7 +482,7 @@ export function generatePdfHtml(resumeData: OptimizedResume, templateId: string 
     @media print {
       .pdf-container {
         width: 100%;
-        min-height: 297mm;
+        height: auto;
         margin: 0;
         box-shadow: none;
       }
