@@ -11,21 +11,21 @@ interface SummarySectionProps {
 }
 
 export default function SummarySection({ data, template, onEdit }: SummarySectionProps) {
-  const { font, colors, styles } = template;
+  const { font, styles } = template;
 
   if (!data) return null;
 
   return (
     <ResumeSection
-      title="Summary"
+      title="SUMMARY"
       icon={UserCircle}
       className={template.spacing.section}
-      titleClassName={cn(font.sizes.heading, colors.text, styles.sectionTitle)}
-      iconClassName={cn(colors.primary, 'w-5 h-5')}
+      titleClassName={cn(font.sizes.heading, 'text-black', styles.sectionTitle)}
+      iconClassName={cn('text-black w-5 h-5')}
       showIcon={styles.showSectionIcons}
       onEdit={onEdit}
     >
-      <p className={cn(font.sizes.body, colors.secondary, 'leading-relaxed')}>{data}</p>
+      <p className={cn(font.sizes.body, 'text-black leading-relaxed')}>{data}</p>
     </ResumeSection>
   );
 } 

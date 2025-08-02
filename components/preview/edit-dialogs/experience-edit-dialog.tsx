@@ -195,7 +195,6 @@ export default function ExperienceEditDialog({
         </Button>
 
         <FormTips
-          title="工作經驗撰寫建議："
           tips={[
             "使用具體的數字和成果來描述成就",
             "突出與目標職位相關的經驗",

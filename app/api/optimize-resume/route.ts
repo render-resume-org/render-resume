@@ -1,69 +1,13 @@
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
+import type { OptimizationSuggestion, OptimizedResume } from '@/lib/types/resume';
 import type { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
-
-interface OptimizationSuggestion {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  priority: string;
-  timestamp: string;
-}
 
 interface OptimizeRequest {
   analysisResult: ResumeAnalysisResult;
   selectedSuggestions: OptimizationSuggestion[];
   targetRole?: string;
   targetCompany?: string;
-}
-
-interface OptimizedResume {
-  personalInfo: {
-    fullName: string;
-    title: string;
-    email: string;
-    phone: string;
-    location: string;
-    website?: string;
-    linkedin?: string;
-    github?: string;
-  };
-  summary: string;
-  skills: Array<{
-    category: string;
-    items: string[];
-  }>;
-  experience: Array<{
-    title: string;
-    company: string;
-    period: string;
-    achievements: string[];
-  }>;
-  projects: Array<{
-    name: string;
-    description: string;
-    technologies: string[];
-    achievements: string[];
-    duration?: string;
-  }>;
-  education: Array<{
-    degree: string;
-    school: string;
-    period: string;
-    details?: string[];
-  }>;
-  achievements?: Array<{
-    title: string;
-    description: string;
-    date?: string;
-  }>;
-  certifications?: Array<{
-    name: string;
-    issuer: string;
-    date: string;
-    expiryDate?: string;
-  }>;
 }
 
 function generateOptimizationPrompt(analysisResult: ResumeAnalysisResult, suggestions: OptimizationSuggestion[]): string {
@@ -74,7 +18,6 @@ function generateOptimizationPrompt(analysisResult: ResumeAnalysisResult, sugges
 **個人基本資訊：**
 ${analysisResult.profile ? `
 - 姓名：${analysisResult.profile.name || '未提供'}
-- 專業頭銜：${analysisResult.profile.title || '未提供'}
 - 個人簡介：${analysisResult.profile.brief_introduction || '未提供'}
 - 電子郵件：${analysisResult.profile.email || '未提供'}
 - 電話：${analysisResult.profile.phone || '未提供'}
@@ -146,26 +89,24 @@ ${index + 1}. **${suggestion.title}** (${suggestion.category})
 - 避免使用過於誇張的形容詞
 - 確保技術棧與實際專案經驗相符
 - 如果 profile 中有 LinkedIn、GitHub 等專業平台連結，務必保留在履歷中
+- projects 欄位請勿包含 description，duration 欄位請改為 period
 
-請生成一份完整的JSON格式履歷，包含以下結構：
+### 請生成一份完整的JSON格式履歷，包含以下結構：
 {
   "personalInfo": { 
-    "fullName": "", // 優先使用 profile.name
-    "title": "", // 優先使用 profile.title
-    "email": "", // 優先使用 profile.email
-    "phone": "", // 優先使用 profile.phone
-    "location": "", // 優先使用 profile.location
-    "website": "", // 優先使用 profile.website
-    "linkedin": "", // 優先使用 profile.linkedin
-    "github": "" // 優先使用 profile.github
+    "fullName": "",
+    "email": "",
+    "phone": "",
+    "location": "",
+    "website": "",
+    "linkedin": "",
+    "github": ""
   },
-  "summary": "", // 可參考 profile.brief_introduction 作為基礎
+  "summary": "",
   "skills": [{ "category": "", "items": [] }],
   "experience": [{ "title": "", "company": "", "period": "", "achievements": [] }],
-  "projects": [{ "name": "", "description": "", "technologies": [], "achievements": [], "duration": "" }],
-  "education": [{ "degree": "", "school": "", "period": "", "details": [] }],
-  "achievements": [{ "title": "", "description": "", "date": "" }],
-  "certifications": [{ "name": "", "issuer": "", "date": "", "expiryDate": "" }]
+  "projects": [{ "name": "", "period": "", "achievements": [] }],
+  "education": [{ "degree": "", "school": "", "period": "", "details": [] }]
 }
 
 請直接返回有效的JSON，不要包含任何其他文字或格式。`;

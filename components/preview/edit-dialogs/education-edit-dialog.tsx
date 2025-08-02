@@ -202,7 +202,6 @@ export default function EducationEditDialog({
         </Button>
 
         <FormTips
-          title="教育背景撰寫建議："
           tips={[
             "包含完整的學位名稱和學校名稱",
             "列出相關的課程、專案或成就",
