@@ -1,5 +1,4 @@
 ---
-description: should be applied when styling changes were requested
-alwaysApply: false
+alwaysApply: true
 ---
 for conditional classNames, you must use cn function to implement. avoid use of dynamic string and ternary operators.

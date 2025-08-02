@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_logs: {
+        Row: {
+          action: Database["public"]["Enums"]["action-type"]
+          created_at: string
+          detail: string | null
+          id: number
+          user_id: string
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["action-type"]
+          created_at?: string
+          detail?: string | null
+          id?: number
+          user_id: string
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["action-type"]
+          created_at?: string
+          detail?: string | null
+          id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admins: {
         Row: {
           user_id: string
@@ -42,6 +74,7 @@ export type Database = {
           is_active: boolean
           title: string
           type: Database["public"]["Enums"]["announcement-type"]
+          views: number
         }
         Insert: {
           content?: string | null
@@ -50,6 +83,7 @@ export type Database = {
           is_active: boolean
           title: string
           type: Database["public"]["Enums"]["announcement-type"]
+          views?: number
         }
         Update: {
           content?: string | null
@@ -58,6 +92,7 @@ export type Database = {
           is_active?: boolean
           title?: string
           type?: Database["public"]["Enums"]["announcement-type"]
+          views?: number
         }
         Relationships: []
       }
@@ -271,9 +306,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      redeem_promo_code: {
+        Args: { p_code: string; p_user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
+      "action-type":
+        | "view announcement"
+        | "build resume"
+        | "optimize resume"
+        | "view profile"
+        | "download resume"
+        | "send smart chat message"
+        | "upload smart chat attachment"
       "announcement-type": "info" | "warning" | "success" | "error"
     }
     CompositeTypes: {
@@ -402,6 +448,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      "action-type": [
+        "view announcement",
+        "build resume",
+        "optimize resume",
+        "view profile",
+        "download resume",
+        "send smart chat message",
+        "upload smart chat attachment",
+      ],
       "announcement-type": ["info", "warning", "success", "error"],
     },
   },
