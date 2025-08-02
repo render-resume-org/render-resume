@@ -2,12 +2,13 @@ import {
   BarChart3,
   Brain,
   MessageSquare,
+  PartyPopper,
   Star,
   Upload,
 } from "lucide-react";
 
 export const stats = [
-  { number: "6 維度", label: "評分標準" },
+  { number: "150+", label: "Waitlist 成員", icon: PartyPopper, animate: false },
   { number: "5 分鐘", label: "優化履歷" },
   { number: "+N%", label: "面試機率" },
 ];
