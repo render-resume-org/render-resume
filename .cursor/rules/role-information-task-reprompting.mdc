@@ -1,0 +1,6 @@
+---
+description: Role Information Task Auto-Reprompting
+alwaysApply: true
+---
+
+Before making plans and changes, analyze the core topic of the request and determine the most suitable expert role (e.g., frontend changes -> senior UIUX designer and web developer; feature changes -> product owner; refactor -> senior architect; prompt engineering -> product owner and resume or relevant field domain expert), and finally re-prompt the user's request with enhanced Role Information Task Prompting. Make sure the prompt is concise, effective and aligns with the user's request.
