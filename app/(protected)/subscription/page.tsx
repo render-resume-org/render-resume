@@ -155,20 +155,23 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        
-        <Skeleton className="h-8 w-24 mb-4" />
-        <Skeleton className="h-6 w-64 mb-8" />
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-24" />
-              <Skeleton className="h-4 w-48" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-40 w-full" />
-            </CardContent>
-          </Card>
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="text-center mb-12">
+          <Skeleton className="h-10 w-48 mx-auto mb-4" />
+          <Skeleton className="h-6 w-64 mx-auto" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-48" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-40 w-full" />
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     );
@@ -177,15 +180,34 @@ export default function SettingsPage() {
   const freePlan = getFreePlan();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">訂閱</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          管理您的訂閱方案
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      {/* 主要標題區域 */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          升級你的方案
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400">
+          選擇最適合您的方案，讓您求職過程更有效率！
         </p>
       </div>
-      
 
+      {/* 主要方案卡片區域 */}
+      <div className="grid gap-6 md:grid-cols-3 mb-16">
+        {allPlans.map((plan) => (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            isCurrent={isCurrentPlan(plan.id)}
+            canUpgrade={canUpgradeToPlan(plan)}
+            onUpgrade={handleUpgrade}
+            isUpgrading={isUpgrading === plan.id}
+            currentPlanType={currentPlan?.plans?.type || 'FREE'}
+            freePlanId={freePlan?.id || 0}
+          />
+        ))}
+      </div>
+
+      {/* 其他功能區域 */}
       <div className="grid gap-6">
         {/* 序號兌換卡片 */}
         <Card>
@@ -295,33 +317,6 @@ export default function SettingsPage() {
                 無法載入方案資訊
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        {/* 可用方案 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>可用方案</CardTitle>
-            <CardDescription>
-              查看所有可用的訂閱方案
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* 顯示所有方案，包括免費方案 */}
-              {allPlans.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  plan={plan}
-                  isCurrent={isCurrentPlan(plan.id)}
-                  canUpgrade={canUpgradeToPlan(plan)}
-                  onUpgrade={handleUpgrade}
-                  isUpgrading={isUpgrading === plan.id}
-                  currentPlanType={currentPlan?.plans?.type || 'FREE'}
-                  freePlanId={freePlan?.id || 0}
-                />
-              ))}
-            </div>
           </CardContent>
         </Card>
 
