@@ -31,10 +31,11 @@ export async function GET() {
       );
     }
 
-    // 獲取所有可用方案
+    // 獲取所有默認方案
     const { data: allPlans, error: plansError } = await supabase
       .from('plans')
       .select('*')
+      .eq('default', true)
       .order('daily_usage', { ascending: false });
 
     if (plansError) {

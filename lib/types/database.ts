@@ -151,6 +151,7 @@ export type Database = {
         Row: {
           created_at: string
           daily_usage: number
+          default: boolean
           duration_days: number | null
           id: number
           price: number | null
@@ -160,6 +161,7 @@ export type Database = {
         Insert: {
           created_at?: string
           daily_usage?: number
+          default?: boolean
           duration_days?: number | null
           id?: number
           price?: number | null
@@ -169,6 +171,7 @@ export type Database = {
         Update: {
           created_at?: string
           daily_usage?: number
+          default?: boolean
           duration_days?: number | null
           id?: number
           price?: number | null

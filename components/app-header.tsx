@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserDropdown } from "./user-dropdown";
 
+const NAVIGATIONS = [
+  { name: "儀表板", href: "/dashboard" },
+  { name: "價格方案", href: "/subscription" },
+];
+
 const AppHeader = () => {
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -89,17 +94,16 @@ const AppHeader = () => {
             </Link>
 
             {/* Navigation Buttons */}
-            <div className="hidden sm:flex items-center space-x-4 lg:space-x-6">
-              <Button asChild variant="ghost" size="sm" className="text-base font-medium">
-                <Link href="/dashboard">
-                  主控台
+            <div className="hidden sm:flex items-center space-x-4 lg:space-x-4">
+              {NAVIGATIONS.map((nav) => (
+                <Link 
+                  key={nav.href}
+                  href={nav.href}
+                  className="text-gray-700 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-cyan-600 transition-colors"
+                >
+                  {nav.name}
                 </Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm" className="text-base font-medium">
-                <Link href="/subscription">
-                  價格方案
-                </Link>
-              </Button>
+              ))}
             </div>
           </div>
 
@@ -170,22 +174,22 @@ const AppHeader = () => {
           <div className="mt-4 md:hidden border-t border-gray-200 dark:border-gray-700 pt-4">
             {/* Mobile Navigation Buttons */}
             <div className="space-y-2 px-2 mb-4">
-              <Button asChild variant="ghost" size="sm" className="w-full justify-start text-base font-medium">
-                <Link 
-                  href="/dashboard" 
-                  onClick={() => setIsMobileMenuOpen(false)}
+              {NAVIGATIONS.map((nav) => (
+                <Button 
+                  key={nav.href}
+                  asChild 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-base font-medium"
                 >
-                  主控台
-                </Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm" className="w-full justify-start text-base font-medium">
-                <Link 
-                  href="/subscription" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  價格方案
-                </Link>
-              </Button>
+                  <Link 
+                    href={nav.href} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {nav.name}
+                  </Link>
+                </Button>
+              ))}
             </div>
 
             {!mounted || loading ? (
