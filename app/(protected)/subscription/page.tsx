@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { ProBadge } from "@/components/ui/pro-badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plan, Subscription } from "@/types/user";
-import { Calendar, Crown, Gift, Zap } from "lucide-react";
+import { Crown, Gift, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -264,6 +264,7 @@ export default function SettingsPage() {
           <CardContent>
             {currentPlan ? (
               <div className="space-y-4">
+                {/* 方案基本資訊 */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <ProBadge 
@@ -283,26 +284,68 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                {currentPlan.id && currentPlan.expire_at && (
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    到期日：{formatDate(currentPlan.expire_at)}
+                {/* 詳細屬性資訊 */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                  {/* 方案類型 */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      方案類型
+                    </span>
+                    <span className="text-sm text-gray-900 dark:text-white">
+                      {currentPlan.plans?.type || 'FREE'}
+                    </span>
                   </div>
-                )}
-                
-                {!currentPlan.id && (
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    永久有效
+
+                  {/* 每日使用額度 */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      每日額度
+                    </span>
+                    <span className="text-sm text-gray-900 dark:text-white">
+                      {currentPlan.plans?.daily_usage || 0} 次
+                    </span>
                   </div>
-                )}
-                
-                {currentPlan.id && currentPlan.created_at && (
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    訂閱於：{formatDate(currentPlan.created_at)}
+
+                  {/* 方案價格 */}
+                  {currentPlan.plans?.price && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        方案價格
+                      </span>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        ${currentPlan.plans.price}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 方案時長 */}
+                  {currentPlan.plans?.duration_days && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        方案時長
+                      </span>
+                      <span className="text-sm text-gray-900 dark:text-white">
+                        {currentPlan.plans.duration_days} 天
+                      </span>
+                    </div>
+                  )}
+
+                  {/* 方案效期 */}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      方案效期
+                    </span>
+                    <span className="text-sm text-gray-900 dark:text-white">
+                      {currentPlan.created_at ? formatDate(currentPlan.created_at) : 'N/A'} - {currentPlan.expire_at ? formatDate(currentPlan.expire_at) : '永久有效'}
+                    </span>
                   </div>
-                )}
+
+
+                </div>
+
+
                 
+                {/* 免費方案提示 */}
                 {!currentPlan.id && (
                   <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <p className="text-sm text-blue-700 dark:text-blue-300">
