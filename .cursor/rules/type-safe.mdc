@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+---
+You should always define type and place the type definition at appropriate location. if the type is specific for the page, put it at top of the file; if the type is common for multiple files or even share accros frontend and backend, then put it in a separate file.
+
+Under no circumstances should you use type 'any' for final version. Always ensure type safety for final changes. 

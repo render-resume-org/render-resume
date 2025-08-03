@@ -1,5 +1,4 @@
 ---
-description: should be applied when frontend changes were requested
-alwaysApply: false
+alwaysApply: true
 ---
 when user ask you to make changes to frontend interfaces layout/styling, make sure to reference existing page to mimic styling and vibe to ensure consistent brand iamge.

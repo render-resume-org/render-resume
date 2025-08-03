@@ -1,5 +1,4 @@
 ---
-description: should be applied when new files were to be created
-alwaysApply: false
+alwaysApply: true
 ---
 If user ask you to separate some sinppet as a component, create a component tsx file (filename kebab-case) under subfolder (named the same as the source page folder) under @/components.

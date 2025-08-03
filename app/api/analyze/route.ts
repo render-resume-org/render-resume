@@ -66,6 +66,192 @@ function buildFormDataText(
     return text;
 }
 
+// 驗證輸入數據的輔助函數
+function validateCreateServiceInput(experience: Experience[], projects: Project[]): { isValid: boolean; error?: string } {
+    const hasValidExperience = experience.some(exp => 
+        exp.company.trim() !== '' || 
+        exp.position.trim() !== '' || 
+        exp.description.trim() !== ''
+    );
+    
+    const hasValidProjects = projects.some(proj => 
+        proj.name.trim() !== '' || 
+        proj.description.trim() !== ''
+    );
+    
+    if (!hasValidExperience && !hasValidProjects) {
+        return { 
+            isValid: false, 
+            error: '請至少填寫一項工作經驗或專案經驗' 
+        };
+    }
+    
+    return { isValid: true };
+}
+
+function validateOptimizeServiceInput(files: File[]): { isValid: boolean; error?: string } {
+    if (files.length === 0) {
+        return { 
+            isValid: false, 
+            error: '請選擇要分析的文件' 
+        };
+    }
+    
+    return { isValid: true };
+}
+
+// 處理 Create 服務的邏輯
+async function handleCreateService(
+    client: ReturnType<typeof createNativeOpenAIClient>,
+    files: File[],
+    additionalText: string,
+    education: Education[],
+    experience: Experience[],
+    projects: Project[],
+    skills: string,
+    personalInfo: PersonalInfo | null,
+    links: Links | null,
+    useVision: boolean
+): Promise<ResumeAnalysisResult> {
+    console.log('🎯 [API] Handling CREATE service');
+    
+    // 驗證 Create 服務的輸入
+    const validation = validateCreateServiceInput(experience, projects);
+    if (!validation.isValid) {
+        throw new Error(validation.error);
+    }
+    
+    // 生成 Create 服務專屬的 system prompt
+    const customSystemPrompt = generateServiceSpecificSystemPrompt('create');
+    
+    // 處理文件（如果有的話）
+    const documents: DocumentUpload[] = [];
+    if (files.length > 0) {
+        for (const file of files) {
+            console.log(`📄 [API] Processing file for CREATE service: ${file.name}`);
+            
+            if (!validateFileType(file.name)) {
+                throw new Error(`不支援的文件類型: ${file.name}`);
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                throw new Error(`文件過大: ${file.name} (最大 10MB)`);
+            }
+            
+            const fileExtension = file.name.split('.').pop()?.toLowerCase();
+            let content: string | undefined;
+            
+            if (fileExtension && (SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(fileExtension)) {
+                content = await processTextFile(file);
+            }
+            
+            documents.push({
+                file,
+                fileName: file.name,
+                fileType: file.type,
+                content
+            });
+        }
+    }
+    
+    // 執行分析
+    let result: ResumeAnalysisResult;
+    if (documents.length > 0) {
+        result = await client.analyzeDocuments({
+            documents,
+            additionalText: additionalText || undefined,
+            education: education.length > 0 ? education : undefined,
+            experience: experience.length > 0 ? experience : undefined,
+            projects: projects.length > 0 ? projects : undefined,
+            skills: skills || undefined,
+            personalInfo: personalInfo || undefined,
+            links: links || undefined,
+            useVision,
+            customSystemPrompt
+        });
+    } else {
+        const formDataText = buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links);
+        result = await client.analyzeResume(formDataText, undefined, customSystemPrompt);
+    }
+    
+    // 記錄活動
+    await logResumeBuild(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
+    
+    return result;
+}
+
+// 處理 Optimize 服務的邏輯
+async function handleOptimizeService(
+    client: ReturnType<typeof createNativeOpenAIClient>,
+    files: File[],
+    additionalText: string,
+    education: Education[],
+    experience: Experience[],
+    projects: Project[],
+    skills: string,
+    personalInfo: PersonalInfo | null,
+    links: Links | null,
+    useVision: boolean
+): Promise<ResumeAnalysisResult> {
+    console.log('🎯 [API] Handling OPTIMIZE service');
+    
+    // 驗證 Optimize 服務的輸入
+    const validation = validateOptimizeServiceInput(files);
+    if (!validation.isValid) {
+        throw new Error(validation.error);
+    }
+    
+    // 生成 Optimize 服務專屬的 system prompt
+    const customSystemPrompt = generateServiceSpecificSystemPrompt('optimize');
+    
+    // 處理文件
+    const documents: DocumentUpload[] = [];
+    for (const file of files) {
+        console.log(`📄 [API] Processing file for OPTIMIZE service: ${file.name}`);
+        
+        if (!validateFileType(file.name)) {
+            throw new Error(`不支援的文件類型: ${file.name}`);
+        }
+        
+        if (file.size > 10 * 1024 * 1024) {
+            throw new Error(`文件過大: ${file.name} (最大 10MB)`);
+        }
+        
+        const fileExtension = file.name.split('.').pop()?.toLowerCase();
+        let content: string | undefined;
+        
+        if (fileExtension && (SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(fileExtension)) {
+            content = await processTextFile(file);
+        }
+        
+        documents.push({
+            file,
+            fileName: file.name,
+            fileType: file.type,
+            content
+        });
+    }
+    
+    // 執行分析
+    const result = await client.analyzeDocuments({
+        documents,
+        additionalText: additionalText || undefined,
+        education: education.length > 0 ? education : undefined,
+        experience: experience.length > 0 ? experience : undefined,
+        projects: projects.length > 0 ? projects : undefined,
+        skills: skills || undefined,
+        personalInfo: personalInfo || undefined,
+        links: links || undefined,
+        useVision,
+        customSystemPrompt
+    });
+    
+    // 記錄活動
+    await logResumeOptimize(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
+    
+    return result;
+}
+
 export async function POST(request: NextRequest) {
     console.log('🚀 [API] POST /api/analyze - Request received (using Native OpenAI Client)');
     
@@ -95,12 +281,33 @@ export async function POST(request: NextRequest) {
     
     try {
         const contentType = request.headers.get('content-type') || '';
-        console.log('�� [API] Content-Type:', contentType);
+        console.log('📋 [API] Content-Type:', contentType);
         
         // 處理文件上傳 (multipart/form-data)
         if (contentType.includes('multipart/form-data')) {
             console.log('📁 [API] Handling file upload request');
-            return await handleFileUpload(request, authResult.user!);
+            
+            // 先檢查 serviceType 是否存在
+            const formData = await request.formData();
+            const serviceType = formData.get('serviceType') as 'create' | 'optimize';
+            
+            if (!serviceType) {
+                console.error('❌ [API] Missing required parameter: serviceType');
+                return NextResponse.json(
+                    { error: '缺少必要參數: serviceType' },
+                    { status: 400 }
+                );
+            }
+            
+            if (serviceType !== 'create' && serviceType !== 'optimize') {
+                console.error(`❌ [API] Invalid service type: ${serviceType}`);
+                return NextResponse.json(
+                    { error: `不支援的服務類型: ${serviceType}` },
+                    { status: 400 }
+                );
+            }
+            
+            return await handleFileUpload(formData, serviceType, authResult.user!);
         }
         
         console.log('📝 [API] Handling JSON request');
@@ -192,7 +399,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 處理文件上傳的函數
-async function handleFileUpload(request: NextRequest, user: { id: string; email: string }) {
+async function handleFileUpload(formData: FormData, serviceType: 'create' | 'optimize', user: { id: string; email: string }) {
     console.log('📁 [API] Starting file upload handling for user:', user.email);
     
     // 檢查用戶今日使用量是否超過限制
@@ -202,7 +409,6 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
     }
     
     try {
-        const formData = await request.formData();
         console.log('📋 [API] FormData received');
         
         const files = formData.getAll('files') as File[];
@@ -214,73 +420,14 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
         const personalInfoData = formData.get('personalInfo') as string;
         const linksData = formData.get('links') as string;
         const useVision = formData.get('useVision') === 'true';
-        const serviceType = formData.get('serviceType') as 'create' | 'optimize' | null;
 
-        // 解析 education 資料
-        let education: Education[] = [];
-        if (educationData) {
-            try {
-                education = JSON.parse(educationData);
-                console.log('🎓 [API] Education data parsed:', education);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse education data:', error);
-            }
-        }
-
-        // 解析 experience 資料
-        let experience: Experience[] = [];
-        if (experienceData) {
-            try {
-                experience = JSON.parse(experienceData);
-                console.log('💼 [API] Experience data parsed:', experience);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse experience data:', error);
-            }
-        }
-
-        // 解析 projects 資料
-        let projects: Project[] = [];
-        if (projectsData) {
-            try {
-                projects = JSON.parse(projectsData);
-                console.log('🚀 [API] Projects data parsed:', projects);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse projects data:', error);
-            }
-        }
-
-        // 解析 skills 資料
-        let skills: string = '';
-        if (skillsData) {
-            try {
-                skills = JSON.parse(skillsData);
-                console.log('⚡ [API] Skills data parsed:', skills);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse skills data:', error);
-            }
-        }
-
-        // 解析 personalInfo 資料
-        let personalInfo: PersonalInfo | null = null;
-        if (personalInfoData) {
-            try {
-                personalInfo = JSON.parse(personalInfoData);
-                console.log('👤 [API] PersonalInfo data parsed:', personalInfo);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse personalInfo data:', error);
-            }
-        }
-
-        // 解析 links 資料
-        let links: Links | null = null;
-        if (linksData) {
-            try {
-                links = JSON.parse(linksData);
-                console.log('🔗 [API] Links data parsed:', links);
-            } catch (error) {
-                console.error('❌ [API] Failed to parse links data:', error);
-            }
-        }
+        // 解析各種數據
+        const education = educationData ? JSON.parse(educationData) : [];
+        const experience = experienceData ? JSON.parse(experienceData) : [];
+        const projects = projectsData ? JSON.parse(projectsData) : [];
+        const skills = skillsData ? JSON.parse(skillsData) : '';
+        const personalInfo = personalInfoData ? JSON.parse(personalInfoData) : null;
+        const links = linksData ? JSON.parse(linksData) : null;
 
         console.log('📊 [API] Upload details:', {
             filesCount: files.length,
@@ -298,42 +445,6 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
             userId: user.id
         });
 
-        // 檢查是否有有效的經驗內容
-        const hasValidExperience = (experienceList: Experience[]) => {
-            return experienceList.some(exp => 
-                exp.company.trim() !== '' || 
-                exp.position.trim() !== '' || 
-                exp.description.trim() !== ''
-            );
-        };
-
-        // 檢查是否有有效的專案內容
-        const hasValidProjects = (projectsList: Project[]) => {
-            return projectsList.some(proj => 
-                proj.name.trim() !== '' || 
-                proj.description.trim() !== ''
-            );
-        };
-
-        // 根據 serviceType 驗證輸入
-        if (serviceType === 'optimize') {
-            if (files.length === 0) {
-                console.error('❌ [API] No files uploaded for optimize service');
-                return NextResponse.json(
-                    { error: '請選擇要分析的文件' },
-                    { status: 400 }
-                );
-            }
-        } else if (serviceType === 'create') {
-            if (!hasValidExperience(experience) && !hasValidProjects(projects)) {
-                console.error('❌ [API] No valid experience or projects for create service');
-                return NextResponse.json(
-                    { error: '請至少填寫一項工作經驗或專案經驗' },
-                    { status: 400 }
-                );
-            }
-        }
-
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
             console.error('❌ [API] OPENAI_API_KEY is not configured');
@@ -343,114 +454,43 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
             );
         }
 
-        console.log('🔍 [API] Starting file validation and processing');
-        // 驗證文件類型並處理文件
-        const documents: DocumentUpload[] = [];
-        
-        // 只有在有檔案時才進行文件處理
-        if (files.length > 0) {
-            for (const file of files) {
-                console.log(`📄 [API] Processing file: ${file.name} (${file.size} bytes)`);
-                
-                if (!validateFileType(file.name)) {
-                    console.error(`❌ [API] Unsupported file type: ${file.name}`);
-                    return NextResponse.json(
-                        { error: `不支援的文件類型: ${file.name}` },
-                        { status: 400 }
-                    );
-                }
-
-                // 檢查文件大小 (10MB 限制)
-                if (file.size > 10 * 1024 * 1024) {
-                    console.error(`❌ [API] File too large: ${file.name} (${file.size} bytes)`);
-                    return NextResponse.json(
-                        { error: `文件過大: ${file.name} (最大 10MB)` },
-                        { status: 400 }
-                    );
-                }
-
-                const fileExtension = file.name.split('.').pop()?.toLowerCase();
-                console.log(`📋 [API] File extension: ${fileExtension} for ${file.name}`);
-                
-                let content: string | undefined;
-
-                // 對於文字文檔，預先讀取內容
-                if (fileExtension && (SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(fileExtension)) {
-                    console.log(`📝 [API] Reading text content for: ${file.name}`);
-                    try {
-                        content = await processTextFile(file);
-                        console.log(`✅ [API] Text content read successfully, length: ${content.length} for ${file.name}`);
-                    } catch (error) {
-                        console.error(`❌ [API] Failed to read text file ${file.name}:`, error);
-                        return NextResponse.json(
-                            { error: `無法讀取文件 ${file.name}: ${error instanceof Error ? error.message : '未知錯誤'}` },
-                            { status: 400 }
-                        );
-                    }
-                }
-
-                documents.push({
-                    file,
-                    fileName: file.name,
-                    fileType: file.type,
-                    content
-                });
-                
-                console.log(`✅ [API] Document prepared: ${file.name}`);
-            }
-        } else {
-            console.log('📄 [API] No files to process, proceeding with form data only');
-        }
-
         console.log('🤖 [API] Creating Native OpenAI client for document analysis');
         const client = createNativeOpenAIClient(apiKey);
         
-        // 根據服務類型生成專屬的 system prompt
-        let customSystemPrompt: string | undefined;
-        if (serviceType === 'create' || serviceType === 'optimize') {
-            console.log(`🎯 [API] Using service-specific system prompt for file upload: ${serviceType}`);
-            customSystemPrompt = generateServiceSpecificSystemPrompt(serviceType);
-        }
-        
-        console.log('🚀 [API] Starting document analysis');
-        
-        // 根據是否有檔案選擇不同的分析方法
+        // 根據服務類型選擇對應的處理邏輯
         let result: ResumeAnalysisResult;
-        if (documents.length > 0) {
-            // 有檔案時使用 analyzeDocuments
-            result = await client.analyzeDocuments({
-                documents,
-                additionalText: additionalText || undefined,
-                education: education.length > 0 ? education : undefined,
-                experience: experience.length > 0 ? experience : undefined,
-                projects: projects.length > 0 ? projects : undefined,
-                skills: skills || undefined,
-                personalInfo: personalInfo || undefined,
-                links: links || undefined,
-                useVision,
-                customSystemPrompt
-            });
+        
+        if (serviceType === 'create') {
+            result = await handleCreateService(
+                client,
+                files,
+                additionalText,
+                education,
+                experience,
+                projects,
+                skills,
+                personalInfo,
+                links,
+                useVision
+            );
         } else {
-            // 沒有檔案時使用 analyzeResume（僅處理表單數據）
-            console.log('📝 [API] No documents provided, using analyzeResume for form data only');
-            const formDataText = buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links);
-            result = await client.analyzeResume(formDataText, undefined, customSystemPrompt);
+            // serviceType 已經在 POST handler 中驗證過，這裡一定是 'optimize'
+            result = await handleOptimizeService(
+                client,
+                files,
+                additionalText,
+                education,
+                experience,
+                projects,
+                skills,
+                personalInfo,
+                links,
+                useVision
+            );
         }
         
         console.log('✅ [API] Document analysis completed successfully');
         console.log('📊 [API] Analysis result keys:', Object.keys(result));
-        console.log('📊 [API] Analysis result:', result);
-
-        // 後端記錄 build/optimize resume
-        try {
-            if (serviceType === 'create') {
-                await logResumeBuild(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
-            } else if (serviceType === 'optimize') {
-                await logResumeOptimize(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
-            }
-        } catch (e) {
-            console.error('Error logging resume build/optimize:', e);
-        }
 
         return NextResponse.json({
             success: true,
@@ -480,4 +520,6 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
             { status: 500 }
         );
     }
-} 
+}
+
+ 
