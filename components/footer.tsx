@@ -37,7 +37,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">團隊</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/about#vision" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                <Link href="/about" className="text-gray-400 hover:text-cyan-400 transition-colors">
                   關於我們
                 </Link>
               </li>
