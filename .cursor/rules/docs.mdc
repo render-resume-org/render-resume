@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+## Core Documentation Structure
+- User Manual (`user-manual.md`): Complete user guide with workflows, features, and FAQs
+- System Architecture (`system-architecture.md`): Technical stack, project structure, and system design
+- Business Logic (`business-logic.md`): Core scoring model, STAR framework, and business rules
+- Comprehensive System (`comprehensive-system-documentation.md`): Complete system overview and implementation details
+
+## Documentation-First Approach
+1. Before any task: Read relevant docs to understand context, business logic, and technical constraints
+2. For UI changes: Reference existing pages for consistent styling and brand image
+3. For new features: Check business logic docs for scoring models and user workflows
+4. For technical decisions: Review system architecture for technical constraints and patterns
+
+## Key Documentation Patterns
+- Chinese documentation with English code references
+- Structured sections with clear headings and navigation
+- Code examples and implementation details in technical docs
+- User workflows and step-by-step guides in user manual
+- Business rules and scoring models in business logic docs
+
+## Maintenance Guidelines
+- Keep docs synchronized with code changes
+- Update user workflows when features change
+- Maintain consistent formatting and structure
+- Reference existing patterns when adding new content
+- Use clear, actionable language for user-facing docs 

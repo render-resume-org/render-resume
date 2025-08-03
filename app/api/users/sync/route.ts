@@ -99,19 +99,43 @@ export async function POST() {
       .eq('user_id', authUser.id)
       .eq('is_active', true);
 
+    // Get all available plans to find the free plan
+    const { data: allPlans } = await supabase
+      .from('plans')
+      .select('*')
+      .order('daily_usage', { ascending: false });
+
     // Find the current valid highest tier plan
     const now = new Date().toISOString();
     const activeSubscriptions = subscriptions?.filter(sub => 
       !sub.expire_at || sub.expire_at > now
     ) || [];
 
-    const currentPlan = activeSubscriptions.length > 0 
-      ? activeSubscriptions.reduce((best, current) => {
-          const currentDailyUsage = current.plans?.daily_usage || 0;
-          const bestDailyUsage = best.plans?.daily_usage || 0;
-          return currentDailyUsage > bestDailyUsage ? current : best;
-        })
-      : null;
+    let currentPlan = null;
+    
+    if (activeSubscriptions.length > 0) {
+      // 有有效訂閱，選擇最高級方案
+      currentPlan = activeSubscriptions.reduce((best, current) => {
+        const currentDailyUsage = current.plans?.daily_usage || 0;
+        const bestDailyUsage = best.plans?.daily_usage || 0;
+        return currentDailyUsage > bestDailyUsage ? current : best;
+      });
+    } else {
+      // 沒有有效訂閱，返回免費方案
+      const freePlan = allPlans?.find(plan => plan.type === 'FREE');
+      if (freePlan) {
+        currentPlan = {
+          id: null,
+          user_id: authUser.id,
+          plan_id: freePlan.id,
+          is_active: false,
+          expire_at: null,
+          created_at: null,
+          order_id: null,
+          plans: freePlan
+        };
+      }
+    }
 
     // Return user data with current plan
     const userWithPlan = {

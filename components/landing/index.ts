@@ -1,5 +1,6 @@
 export { default as AfterSection } from "./after-section";
 export { default as BeforeSection } from "./before-section";
+export { default as CelebrationBanner } from "./celebration-banner";
 export { default as CTASection } from "./cta-section";
 export { default as FeatureCard } from "./feature-card";
 export { default as FeatureCarousel } from "./feature-carousel";
