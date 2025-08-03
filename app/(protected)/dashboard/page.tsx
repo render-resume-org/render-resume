@@ -1,4 +1,4 @@
-import { BannerCard, DashboardAnnouncements, RecentActivity } from "@/components/dashboard";
+import { BannerCard, DashboardAnnouncements, RecentActivity, UsageStats } from "@/components/dashboard";
 import { DashboardClient } from "@/components/dashboard-client";
 import { getActiveAnnouncements } from "@/lib/actions/announcements";
 import { createClient } from "@/lib/supabase/server";
@@ -40,9 +40,17 @@ export default async function DashboardPage() {
           {/* Dashboard Client Component */}
           <DashboardClient />
 
-          {/* Recent Activity */}
-          <div className="mt-8">
-            <RecentActivity />
+          {/* Last Row - 3 Slot Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+            {/* Recent Activity - Left Two Slots */}
+            <div className="lg:col-span-2">
+              <RecentActivity />
+            </div>
+            
+            {/* Usage Stats - Right Slot */}
+            <div className="lg:col-span-1">
+              <UsageStats />
+            </div>
           </div>
         </div>
       </main>

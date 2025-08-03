@@ -1,9 +1,11 @@
+import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { generateServiceSpecificSystemPrompt } from '@/lib/config/resume-analysis-config';
 import type { DocumentUpload } from '@/lib/openai-client-native';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES, validateFileType } from '@/lib/openai-client-native';
 import type { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
-import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
+import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
+import { checkUsageLimit } from '@/lib/utils/usage-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 // 輔助函數：構建表單數據文本
@@ -85,9 +87,15 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ [API] Pro user authenticated:', authResult.user?.email);
     
+    // 檢查用戶今日使用量是否超過限制
+    const usageResult = await checkUsageLimit();
+    if (!usageResult.success) {
+        return usageResult.response!;
+    }
+    
     try {
         const contentType = request.headers.get('content-type') || '';
-        console.log('📋 [API] Content-Type:', contentType);
+        console.log('�� [API] Content-Type:', contentType);
         
         // 處理文件上傳 (multipart/form-data)
         if (contentType.includes('multipart/form-data')) {
@@ -150,6 +158,17 @@ export async function POST(request: NextRequest) {
         const result = await client.analyzeResume(resume, text, customSystemPrompt);
         console.log('✅ [API] Resume analysis completed');
         
+        // 後端記錄 build/optimize resume
+        try {
+            if (serviceType === 'create') {
+                await logResumeBuild(`分析了 ${resume.length} 字元的履歷內容`);
+            } else if (serviceType === 'optimize') {
+                await logResumeOptimize(`分析了 ${resume.length} 字元的履歷內容`);
+            }
+        } catch (e) {
+            console.error('Error logging resume build/optimize:', e);
+        }
+        
         return NextResponse.json({
             success: true,
             data: result,
@@ -175,6 +194,12 @@ export async function POST(request: NextRequest) {
 // 處理文件上傳的函數
 async function handleFileUpload(request: NextRequest, user: { id: string; email: string }) {
     console.log('📁 [API] Starting file upload handling for user:', user.email);
+    
+    // 檢查用戶今日使用量是否超過限制
+    const usageResult = await checkUsageLimit();
+    if (!usageResult.success) {
+        return usageResult.response!;
+    }
     
     try {
         const formData = await request.formData();
@@ -415,6 +440,17 @@ async function handleFileUpload(request: NextRequest, user: { id: string; email:
         console.log('✅ [API] Document analysis completed successfully');
         console.log('📊 [API] Analysis result keys:', Object.keys(result));
         console.log('📊 [API] Analysis result:', result);
+
+        // 後端記錄 build/optimize resume
+        try {
+            if (serviceType === 'create') {
+                await logResumeBuild(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
+            } else if (serviceType === 'optimize') {
+                await logResumeOptimize(`分析了 ${files.length} 個檔案，包含 ${education.length} 個教育經歷、${experience.length} 個工作經歷、${projects.length} 個專案`);
+            }
+        } catch (e) {
+            console.error('Error logging resume build/optimize:', e);
+        }
 
         return NextResponse.json({
             success: true,

@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer-core';
+import { logResumeDownload } from '@/lib/actions/activity';
 import chromium from '@sparticuz/chromium-min';
 import { existsSync } from 'fs';
+import { NextRequest, NextResponse } from 'next/server';
+import puppeteer from 'puppeteer-core';
 
 export async function POST(request: NextRequest) {
   try {
@@ -96,6 +97,13 @@ export async function POST(request: NextRequest) {
     });
 
     await browser.close();
+
+    // Log download activity
+    try {
+      await logResumeDownload(`生成了 PDF 檔案：${filename}`);
+    } catch (error) {
+      console.error('Failed to log download activity:', error);
+    }
 
     // 返回 PDF 文件
     return new Response(Buffer.from(pdfBuffer), {

@@ -35,6 +35,9 @@ export function ProfilePlanCard({ profileUser, isOwnProfile }: ProfilePlanCardPr
 
   // Use current plan or default to free plan
   const displayPlan = profileUser.currentPlan || defaultFreePlan;
+  
+  // Check if this is a free plan (no subscription ID means it's the mock free plan)
+  const isFreePlan = displayPlan.type === 'FREE' || displayPlan.type === 'free';
 
   return (
     <Card>
@@ -75,7 +78,14 @@ export function ProfilePlanCard({ profileUser, isOwnProfile }: ProfilePlanCardPr
             </div>
           )}
 
-          {!profileUser.currentPlan && isOwnProfile && (
+          {!displayPlan.expire_at && (
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+              <Calendar className="h-4 w-4 mr-2" />
+              永久有效
+            </div>
+          )}
+
+          {isFreePlan && isOwnProfile && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 前往設定頁面兌換序號來升級您的方案

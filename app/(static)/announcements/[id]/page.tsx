@@ -3,6 +3,7 @@
 import { AnnouncementDetailCard } from "@/components/announcements/announcement-detail-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { logAnnouncementView } from "@/lib/actions/activity";
 import { getAnnouncementById, incrementAnnouncementViews } from "@/lib/actions/announcements";
 import { AnnouncementTable } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Home, XCircle } from "lucide-react";
@@ -16,7 +17,7 @@ function AnnouncementSkeleton() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Breadcrumb - Static Content */}
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
+          <Link href="/dashboard" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
             <Home className="h-4 w-4 mr-1" />
             儀表板
           </Link>
@@ -106,6 +107,7 @@ export default function AnnouncementDetailPage() {
           if (!viewsIncremented) {
             await incrementAnnouncementViews(announcementId);
             setViewsIncremented(true);
+            logAnnouncementView(announcementId, result.title);
           }
         } else {
           setError('找不到該公告');
@@ -131,7 +133,7 @@ export default function AnnouncementDetailPage() {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Breadcrumb */}
           <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-            <Link href="/" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
+            <Link href="/dashboard" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
               <Home className="h-4 w-4 mr-1" />
               儀表板
             </Link>
@@ -178,7 +180,7 @@ export default function AnnouncementDetailPage() {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
+          <Link href="/dashboard" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
             <Home className="h-4 w-4 mr-1" />
             儀表板
           </Link>
