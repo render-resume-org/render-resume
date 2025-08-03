@@ -1,14 +1,15 @@
 import { useFileUpload } from "@/components/hooks/use-file-upload";
+import { logSmartChatAttachment } from "@/lib/actions/activity";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import type { UploadedFile } from '@/lib/upload-utils';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
-    useCannedMessages,
-    useInputManager,
-    useScrollManager,
-    useSimilarityCheck,
-    useTemplateManager
+  useCannedMessages,
+  useInputManager,
+  useScrollManager,
+  useSimilarityCheck,
+  useTemplateManager
 } from './hooks';
 import { ChatMessage, SuggestionRecord } from './types';
 import { CHAT_MESSAGE_LIMIT } from "./utils";
@@ -203,6 +204,13 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     const hasText = currentInput.trim().length > 0;
     const hasFiles = pendingFiles.length > 0;
     if (!hasText && !hasFiles) return;
+
+    // Log activity for file uploads
+    if (hasFiles) {
+      for (const file of pendingFiles) {
+        logSmartChatAttachment(file.file.name, file.file.size);
+      }
+    }
 
     // 1. 準備 file messages (PDF 會展開為多個 image file message)
     const fileMessages: ChatMessage[] = flattenFilesToMessages(pendingFiles);

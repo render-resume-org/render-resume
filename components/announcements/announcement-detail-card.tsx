@@ -1,3 +1,5 @@
+'use client';
+
 import { AnnouncementTable } from "@/lib/types";
 import { formatSmartTime } from "@/lib/utils/time";
 import { Eye } from "lucide-react";

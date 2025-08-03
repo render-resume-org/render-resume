@@ -87,15 +87,6 @@ export function ProUserGuard({
       <div className="bg-white dark:bg-gray-900">
         <main className="container mx-auto px-4 py-16">
           <div className="max-w-lg mx-auto">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Pro 功能專區
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300">
-                此功能僅限 Pro 會員使用
-              </p>
-            </div>
-            
             <Card>
               <CardHeader className="text-center space-y-4">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-cyan-100 to-cyan-200 dark:from-cyan-900 dark:to-cyan-800">
