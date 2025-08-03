@@ -102,22 +102,6 @@ export function DashboardClient() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent Activity */}
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          最近活動
-        </h3>
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>還沒有任何履歷記錄</p>
-              <p className="text-sm">開始創建您的第一份履歷吧！</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </>
   );
 } 

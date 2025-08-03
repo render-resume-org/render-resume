@@ -1,3 +1,4 @@
+import { logUserAction } from "@/lib/actions/activity";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -20,6 +21,9 @@ export async function GET(
     
     // 如果查看自己的資料，直接返回當前用戶資料
     if (targetUserId === currentUser.id) {
+      // 記錄用戶查看個人資料的活動
+      await logUserAction('view profile', '查看自己的個人資料', `/profile/${targetUserId}`);
+
       // 從 users 表獲取用戶資料
       const { data: dbUser } = await supabase
         .from('users')
@@ -37,19 +41,43 @@ export async function GET(
         .eq('user_id', currentUser.id)
         .eq('is_active', true);
 
+      // 獲取所有可用方案
+      const { data: allPlans } = await supabase
+        .from('plans')
+        .select('*')
+        .order('daily_usage', { ascending: false });
+
       // 找到當前有效的最高級方案
       const now = new Date().toISOString();
       const activeSubscriptions = subscriptions?.filter(sub => 
         !sub.expire_at || sub.expire_at > now
       ) || [];
 
-      const currentPlan = activeSubscriptions.length > 0 
-        ? activeSubscriptions.reduce((best, current) => {
-            const currentDailyUsage = current.plans?.daily_usage || 0;
-            const bestDailyUsage = best.plans?.daily_usage || 0;
-            return currentDailyUsage > bestDailyUsage ? current : best;
-          })
-        : null;
+      let currentPlan = null;
+      
+      if (activeSubscriptions.length > 0) {
+        // 有有效訂閱，選擇最高級方案
+        currentPlan = activeSubscriptions.reduce((best, current) => {
+          const currentDailyUsage = current.plans?.daily_usage || 0;
+          const bestDailyUsage = best.plans?.daily_usage || 0;
+          return currentDailyUsage > bestDailyUsage ? current : best;
+        });
+      } else {
+        // 沒有有效訂閱，返回免費方案
+        const freePlan = allPlans?.find(plan => plan.type === 'FREE');
+        if (freePlan) {
+          currentPlan = {
+            id: null,
+            user_id: currentUser.id,
+            plan_id: freePlan.id,
+            is_active: false,
+            expire_at: null,
+            created_at: null,
+            order_id: null,
+            plans: freePlan
+          };
+        }
+      }
 
       return NextResponse.json({
         id: currentUser.id,
@@ -84,6 +112,9 @@ export async function GET(
     if (userError || !targetUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    // 記錄管理員查看其他用戶資料的活動
+    await logUserAction('view profile', `查看 ${targetUser.display_name || targetUser.email} 的個人資料`, `/profile/${targetUserId}`);
 
     // 獲取目標用戶的當前方案（管理員查看）
     const { data: subscriptions } = await supabase

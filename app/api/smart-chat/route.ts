@@ -1,4 +1,5 @@
 import { SIMILARITY_THRESHOLDS } from '@/components/smart-chat/utils';
+import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/lib/prompts';
@@ -563,6 +564,16 @@ export async function POST(request: NextRequest) {
     // 處理訊息邏輯
     // 回傳時，只回傳 AI 處理後的訊息，不回傳 user/file message，避免前端重複渲染
     const processedResponse = processAIMessages(chatResponse, lastAiMessage, chatMessages, templates);
+
+    // 後端記錄 smart chat message
+    try {
+      const messageContent = userPrompt || '圖片上傳';
+      const aiResponse = chatResponse.message || completion;
+      const detail = `用戶訊息：「${messageContent}」(${messageContent.length} 字元)\nAI 回應：「${aiResponse.substring(0, 100)}${aiResponse.length > 100 ? '...' : ''}」(${aiResponse.length} 字元)`;
+      await logSmartChatMessage(messageContent.length, detail);
+    } catch (e) {
+      console.error('Error logging smart chat message:', e);
+    }
 
     console.log('✅ [API] Smart chat response generated and processed');
     return NextResponse.json({

@@ -70,6 +70,8 @@ export default function ProfilePage() {
     fetchUserProfile();
   }, [currentUser, authLoading, fetchUserProfile]);
 
+
+
   useEffect(() => {
     if (profileUser) {
       setDisplayName(profileUser.display_name || profileUser.email?.split('@')[0] || '');

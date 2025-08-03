@@ -24,17 +24,6 @@ export default function SettingsPage() {
   const [currentPlan, setCurrentPlan] = useState<Subscription | null>(null);
   const [allPlans, setAllPlans] = useState<Plan[]>([]);
 
-  // 定義免費方案
-  const freePlan: Plan = {
-    id: 0,
-    title: '免費方案',
-    type: 'free',
-    daily_usage: 3,
-    duration_days: null,
-    created_at: new Date().toISOString(),
-    price: null,
-  };
-
   const fetchSubscriptions = async () => {
     try {
       setLoading(true);
@@ -142,10 +131,7 @@ export default function SettingsPage() {
 
   // 檢查是否為當前方案
   const isCurrentPlan = (planId: number) => {
-    if (!currentPlan) {
-      // 如果沒有付費方案，免費方案就是當前方案
-      return planId === 0; // freePlan.id = 0
-    }
+    if (!currentPlan) return false;
     return currentPlan.plans?.id === planId;
   };
 
@@ -153,13 +139,18 @@ export default function SettingsPage() {
   const canUpgradeToPlan = (plan: Plan) => {
     if (isCurrentPlan(plan.id)) return false;
     
-    const currentDailyUsage = currentPlan?.plans?.daily_usage || freePlan.daily_usage;
+    const currentDailyUsage = currentPlan?.plans?.daily_usage || 0;
     return plan.daily_usage > currentDailyUsage;
   };
 
   const isPlanExpired = (expireAt: string | null) => {
     if (!expireAt) return false;
     return new Date(expireAt) < new Date();
+  };
+
+  // 獲取免費方案
+  const getFreePlan = () => {
+    return allPlans.find(plan => plan.type === 'free');
   };
 
   if (loading) {
@@ -182,6 +173,8 @@ export default function SettingsPage() {
       </div>
     );
   }
+
+  const freePlan = getFreePlan();
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -258,7 +251,7 @@ export default function SettingsPage() {
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
                       {currentPlan.plans?.title || '未知方案'}
                     </span>
-                    {isPlanExpired(currentPlan.expire_at) && (
+                    {currentPlan.id && isPlanExpired(currentPlan.expire_at) && (
                       <Badge variant="destructive">已到期</Badge>
                     )}
                   </div>
@@ -268,46 +261,38 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 
-                {currentPlan.expire_at && (
+                {currentPlan.id && currentPlan.expire_at && (
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <Calendar className="h-4 w-4 mr-2" />
                     到期日：{formatDate(currentPlan.expire_at)}
                   </div>
                 )}
                 
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  訂閱於：{formatDate(currentPlan.created_at)}
-                </div>
+                {!currentPlan.id && (
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <Calendar className="h-4 w-4 mr-2" />
+                    永久有效
+                  </div>
+                )}
+                
+                {currentPlan.id && currentPlan.created_at && (
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    訂閱於：{formatDate(currentPlan.created_at)}
+                  </div>
+                )}
+                
+                {!currentPlan.id && (
+                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      💡 您目前使用的是免費方案。使用序號兌換或購買付費方案來升級，享受更多功能和額度！
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
-              // 顯示免費方案
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <ProBadge 
-                      planType={freePlan.type} 
-                      userPlan="free"
-                    />
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">
-                      {freePlan.title}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <Zap className="h-4 w-4 mr-1" />
-                    每日 {freePlan.daily_usage} 次額度
-                  </div>
-                </div>
-                
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  永久有效
-                </div>
-                
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    💡 您目前使用的是免費方案。使用序號兌換或購買付費方案來升級，享受更多功能和額度！
-                  </p>
-                </div>
+              // Fallback for edge case where no plan is available
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                無法載入方案資訊
               </div>
             )}
           </CardContent>
@@ -323,17 +308,7 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              {/* 顯示免費方案 */}
-              <PlanCard
-                plan={freePlan}
-                isCurrent={isCurrentPlan(freePlan.id)}
-                canUpgrade={false}
-                onUpgrade={handleUpgrade}
-                isUpgrading={false}
-                currentPlanType={currentPlan?.plans?.type || 'free'}
-                freePlanId={freePlan.id}
-              />
-              {/* 其他方案 */}
+              {/* 顯示所有方案，包括免費方案 */}
               {allPlans.map((plan) => (
                 <PlanCard
                   key={plan.id}
@@ -342,8 +317,8 @@ export default function SettingsPage() {
                   canUpgrade={canUpgradeToPlan(plan)}
                   onUpgrade={handleUpgrade}
                   isUpgrading={isUpgrading === plan.id}
-                  currentPlanType={currentPlan?.plans?.type || 'free'}
-                  freePlanId={freePlan.id}
+                  currentPlanType={currentPlan?.plans?.type || 'FREE'}
+                  freePlanId={freePlan?.id || 0}
                 />
               ))}
             </div>

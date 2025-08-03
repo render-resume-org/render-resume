@@ -51,13 +51,31 @@ export async function GET() {
       !sub.expire_at || sub.expire_at > now
     );
 
-    const currentPlan = activeSubscriptions.length > 0 
-      ? activeSubscriptions.reduce((best, current) => {
-          const currentDailyUsage = current.plans?.daily_usage || 0;
-          const bestDailyUsage = best.plans?.daily_usage || 0;
-          return currentDailyUsage > bestDailyUsage ? current : best;
-        })
-      : null;
+    let currentPlan = null;
+    
+    if (activeSubscriptions.length > 0) {
+      // 有有效訂閱，選擇最高級方案
+      currentPlan = activeSubscriptions.reduce((best, current) => {
+        const currentDailyUsage = current.plans?.daily_usage || 0;
+        const bestDailyUsage = best.plans?.daily_usage || 0;
+        return currentDailyUsage > bestDailyUsage ? current : best;
+      });
+    } else {
+      // 沒有有效訂閱，返回免費方案
+      const freePlan = allPlans.find(plan => plan.type === 'FREE');
+      if (freePlan) {
+        currentPlan = {
+          id: null,
+          user_id: currentUser.id,
+          plan_id: freePlan.id,
+          is_active: false,
+          expire_at: null,
+          created_at: null,
+          order_id: null,
+          plans: freePlan
+        };
+      }
+    }
 
     return NextResponse.json({
       subscriptions: activeSubscriptions,
