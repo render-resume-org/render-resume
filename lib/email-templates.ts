@@ -469,7 +469,7 @@ export const emailTemplates = {
             想了解更多？探索我們的功能介紹：
           </p>
           
-          <a href="https://www.render-resume.com/help" class="cta-button">
+                          <a href="https://www.render-resume.com/resume-builder" class="cta-button">
             🔍 探索更多功能
           </a>
         </div>
