@@ -68,7 +68,7 @@ function FailActionButtons() {
 
       <div className="text-center">
         <Button asChild variant="ghost" size="sm">
-          <Link href="/help">
+                        <Link href="/resume-builder">
             需要幫助？聯繫客服
           </Link>
         </Button>

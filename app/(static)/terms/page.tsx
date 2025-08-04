@@ -1,26 +1,18 @@
 import Link from "next/link";
+import Footer from "@/components/footer";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-          <div className="max-w-4xl mx-auto flex p-4 py-8">
-              
-        <Link
-            href="/"
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
-            >
-            返回首頁
-        </Link>
-    </div>
       {/* Main Content */}
-      <main className="container mx-auto px-4 pb-12 max-w-4xl">
+      <main className="container mx-auto px-4 pb-12 max-w-4xl pt-8">
         <div className="prose prose-gray dark:prose-invert max-w-none">
           
           <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                 服務條款
             </h1>
-            最後更新日期：{new Date().toLocaleDateString('zh-TW')}
+            最後更新日期：2025/8/3
           </div>
 
           <div className="space-y-8">
@@ -29,8 +21,10 @@ export default function TermsPage() {
                 1. 服務條款的接受
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                歡迎使用 RenderResume 懶得履歷・AI 履歷生成器（以下簡稱「本服務」）。本服務條款（以下簡稱「本條款」）是您與我們之間具有法律約束力的協議。
-                當您註冊帳戶、使用本服務或存取我們的網站時，即表示您同意受本條款約束。
+                「RenderResume」（以下簡稱「本服務」）是由 RenderResume 團隊（以下簡稱「我們」）所建置並提供的服務。為了保障您的使用權益，所有使用本服務的使用者（包括用戶及會員，以下簡稱「您」或「使用者」），都應詳細閱讀本服務條款（以下簡稱「本條款」或「本合約」）。一旦使用者存取或使用本服務、或註冊時，即視為使用者已閱讀、暸解、並同意接受本服務條款及網站其他條款之所有內容。
+              </p>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
+              我們有權因法律修訂、商業考量或服務內容變更隨時修訂本條款之內容，修訂後之條款，除另有說明者外，自公告時起生效。自生效日起，如您繼續使用本服務，即視為您已閱讀、瞭解、並同意修訂後條款所有內容。如您不同意修改後之內容，使用者應即刻停止使用本服務，我們亦得停止提供本服務，並不因此而對使用者負任何賠償或補償之責任。
               </p>
             </section>
 
@@ -39,7 +33,7 @@ export default function TermsPage() {
                 2. 服務說明
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-                本服務提供基於人工智慧技術的履歷生成和優化功能，包括但不限於：
+                我們將透過 RenderResume 網站向用戶提供服務，包括：
               </p>
               <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 ml-4">
                 <li>AI 驅動的履歷內容建議和優化</li>
@@ -47,6 +41,9 @@ export default function TermsPage() {
                 <li>個人化的職涯建議</li>
                 <li>履歷分析和改進建議</li>
               </ul>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
+                用戶理解並同意，我們可能會根據我們的判斷隨時更改本服務內容（包括但不限於使用者介面、演算法），亦可能不定時提供本服務更新，我們會將服務內容對應之本服務條款變更公告於本服務網站。
+              </p>
             </section>
 
             <section>
@@ -77,7 +74,13 @@ export default function TermsPage() {
                 <li>嘗試破壞或干擾本服務的正常運作</li>
                 <li>未經授權存取他人的帳戶或資料</li>
                 <li>將本服務用於任何商業用途，除非另有書面同意</li>
+                <li>發布任何包含軟體病毒、蠕蟲或任何其他可能侵犯服務系統和資料的有害程式碼的內容</li>
+                <li>追蹤或干擾他人，或為非法目的收集其他用戶的個人資訊</li>
+                <li>其他不當行為</li>
               </ul>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mt-4">
+                如果發生上述任何情況，為保護我們和第三方的權利和利益，或避免損害或擴大爭議，我們可能會直接移除相關資訊，恕不另行通知，限制違規者使用服務。如果違規者有會員帳戶，我們可能會暫停、終止會員帳戶，或刪除會員帳戶中的所有相關資訊、檔案和帳戶權利。
+              </p>
             </section>
 
             <section>
@@ -97,7 +100,7 @@ export default function TermsPage() {
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 我們重視您的隱私。有關我們如何收集、使用和保護您的個人資料的詳細資訊，請參閱我們的
                 <Link href="/privacy" className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4 mx-1">
-                  隱私權政策
+                  隱私政策
                 </Link>
                 。
               </p>
@@ -118,8 +121,7 @@ export default function TermsPage() {
                 8. 免責聲明
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                本服務按「現狀」提供，不提供任何明示或暗示的保證。我們不保證服務的準確性、可靠性或適用性。
-                您使用本服務的風險由您自行承擔。
+                本服務按「現狀」提供，不提供任何明示或暗示的保證。我們不保證服務的準確性、可靠性或適用性。您使用本服務的風險由您自行承擔。
               </p>
             </section>
 
@@ -156,31 +158,10 @@ export default function TermsPage() {
               </div>
             </section>
           </div>
-
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row gap-4 text-center">
-              <Link
-                href="/privacy"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                隱私權政策
-              </Link>
-              <Link
-                href="/auth/login"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                登入
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                註冊
-              </Link>
-            </div>
-          </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 } 
