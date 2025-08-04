@@ -281,23 +281,23 @@ export function useTemplateManager(analysisResult: ResumeAnalysisResult, generat
     ));
   }, []);
 
-  // 從 follow-ups 初始化建議模板
+  // 從 issues 初始化建議模板
   const initializeSuggestionTemplates = useCallback(() => {
-    const followUps = analysisResult?.missing_content?.follow_ups || [];
+    const issues = analysisResult?.issues || [];
     
-    if (followUps.length > 0) {
-      const templates: SuggestionTemplate[] = followUps.map((followUp) => ({
+    if (issues.length > 0) {
+      const templates: SuggestionTemplate[] = issues.map((issue) => ({
         id: generateUniqueId('template'),
-        title: followUp.title,
-        description: followUp.question,
-        category: '深度追問',
+        title: issue.title,
+        description: issue.description,
+        category: '履歷優化',
         status: 'pending' as const,
-        originalFollowUp: followUp.question,
+        originalFollowUp: `${issue.description} 建議改進：${issue.suggested_change}`,
         timestamp: new Date()
       }));
       
       setSuggestionTemplates(templates);
-      console.log(`🎯 [Templates] Initialized ${templates.length} suggestion templates from follow-ups`);
+      console.log(`🎯 [Templates] Initialized ${templates.length} suggestion templates from issues`);
     }
   }, [analysisResult, generateUniqueId]);
 

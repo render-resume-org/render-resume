@@ -71,70 +71,111 @@ export const DEFAULT_CONFIG: AIConfig = {
     maxConcurrency: DEFAULT_AI_CONFIG.maxConcurrency
 };
 
-// 定義回應的 Schema - 簡化版本，符合 OpenAI API 要求
+// 定義回應的 Schema - 新的結構化格式
 export const ResumeAnalysisSchema = z.object({
-    profile: z.object({
-        name: z.string().describe("候選人姓名").optional(),
-        title: z.string().describe("專業頭銜").optional(),
-        brief_introduction: z.string().describe("個人簡介").optional(),
-        email: z.string().describe("電子郵件").optional(),
-        phone: z.string().describe("電話號碼").optional(),
-        location: z.string().describe("所在地點").optional(),
-        linkedin: z.string().describe("LinkedIn連結").optional(),
-        github: z.string().describe("GitHub連結").optional(),
-        website: z.string().describe("個人網站").optional(),
-        portfolio: z.string().describe("作品集連結").optional()
-    }).describe("個人基本資料").optional(),
-    projects: z.array(z.object({
-        name: z.string().describe("項目名稱"),
-        description: z.string().describe("技術挑戰與解決方案"),
-        technologies: z.array(z.string()).describe("使用的技術"),
-        role: z.string().describe("擔任角色"),
-        contribution: z.string().describe("貢獻"),
-        duration: z.string().describe("進行期間")
-    })),
-    expertise: z.array(z.string()).describe("完整技術聯集列表"),
-    projects_summary: z.string().describe("項目摘要"),
-    expertise_summary: z.string().describe("技能摘要"),
-    work_experiences: z.array(z.object({
-        company: z.string().describe("公司名稱"),
-        position: z.string().describe("職位"),
-        duration: z.string().describe("工作期間"),
-        description: z.string().describe("工作描述"),
-        contribution: z.string().describe("個人貢獻"),
-        technologies: z.array(z.string()).describe("使用的技術")
-    })),
-    work_experiences_summary: z.string().describe("工作經驗摘要"),
-    education_background: z.array(z.object({
-        institution: z.string().describe("學校名稱"),
-        degree: z.string().describe("學位"),
-        major: z.string().describe("主修科系"),
-        duration: z.string().describe("在學期間"),
-        gpa: z.string().describe("成績"),
-        courses: z.array(z.string()).describe("相關課程"),
-        achievements: z.array(z.string()).describe("學術成就")
-    })),
-    education_summary: z.string().describe("教育背景摘要"),
-    achievements: z.array(z.string()).describe("成就列表"),
-    achievements_summary: z.string().describe("成就摘要"),
-    missing_content: z.object({
-        critical_missing: z.array(z.string()).describe("關鍵缺失項目"),
-        recommended_additions: z.array(z.string()).describe("建議補充內容"),
-        impact_analysis: z.string().describe("缺失內容對整體評估的影響分析"),
-        priority_suggestions: z.array(z.string()).describe("優先補強建議"),
-        follow_ups: z.array(z.object({
-            title: z.string().describe("問題標題"),
-            question: z.string().describe("互動式問題內容")
-        })).describe("互動式後續問題，協助補齊缺失資料")
-    }).describe("缺失內容分析"),
+    resume: z.object({
+        personalInfo: z.object({
+            name: z.string().describe("候選人姓名").optional(),
+            title: z.string().describe("專業頭銜").optional(),
+            email: z.string().describe("電子郵件").optional(),
+            phone: z.string().describe("電話號碼").optional(),
+            location: z.string().describe("所在地點").optional(),
+            links: z.union([
+                z.object({
+                    linkedin: z.string().describe("LinkedIn連結").optional(),
+                    github: z.string().describe("GitHub連結").optional(),
+                    website: z.string().describe("個人網站").optional(),
+                    portfolio: z.string().describe("作品集連結").optional()
+                }),
+                z.array(z.string()).describe("連結列表")
+            ]).describe("聯絡方式連結").optional()
+        }).describe("個人基本資料").optional(),
+        summary: z.string().describe("個人簡介或職業摘要").optional(),
+        experience: z.array(z.object({
+            title: z.string().describe("職位名稱"),
+            company: z.string().describe("公司名稱"),
+            period: z.string().describe("任職期間"),
+            description: z.string().describe("工作職責描述"),
+            outcomes: z.union([
+                z.string().describe("具體成果與貢獻"),
+                z.array(z.string()).describe("成果列表")
+            ]).describe("具體成果與貢獻")
+        })).describe("工作經驗列表").optional(),
+        education: z.array(z.object({
+            degree: z.string().describe("學位"),
+            school: z.string().describe("學校名稱"),
+            period: z.string().describe("就學期間"),
+            gpa: z.string().describe("學業成績").optional(),
+            relevant_courses: z.union([
+                z.string().describe("相關課程"),
+                z.array(z.string()).describe("課程列表")
+            ]).describe("相關課程").optional(),
+            outcomes: z.union([
+                z.string().describe("學業成果與表現"),
+                z.array(z.string()).describe("成果列表")
+            ]).describe("學業成果與表現").optional()
+        })).describe("教育背景列表").optional(),
+        projects: z.array(z.object({
+            name: z.string().describe("專案名稱"),
+            description: z.string().describe("專案描述與挑戰"),
+            technologies: z.string().describe("使用技術"),
+            outcomes: z.string().describe("專案成果與影響")
+        })).describe("專案列表").optional(),
+        skills: z.array(z.object({
+            category: z.string().describe("技能分類"),
+            items: z.array(z.string()).describe("技能項目列表")
+        })).describe("技能列表").optional(),
+        achievements: z.array(z.object({
+            title: z.string().describe("成就標題"),
+            description: z.string().describe("成就描述"),
+            period: z.string().describe("獲得期間"),
+            organization: z.string().describe("頒發機構"),
+            impact: z.string().describe("影響力描述")
+        })).describe("成就與獎項列表").optional()
+    }).describe("完整履歷內容結構化資料").optional(),
+    highlights: z.array(z.object({
+        title: z.string().describe("亮點標題"),
+        description: z.string().describe("亮點詳細說明"),
+        excerpt: z.string().describe("履歷中的相關摘錄")
+    })).describe("履歷亮點分析列表").optional(),
+    issues: z.array(z.object({
+        title: z.string().describe("問題標題"),
+        description: z.string().describe("問題詳細說明"),
+        suggested_change: z.string().describe("具體改進建議"),
+        missing_information: z.string().describe("缺失的重要資訊"),
+        impact: z.string().describe("對整體履歷的影響"),
+        excerpt: z.string().describe("履歷中的相關摘錄")
+    })).describe("履歷需改進之處列表").optional(),
     scores: z.array(z.object({
         category: z.string().describe("評分類別"),
-        grade: z.enum(['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'] as const).describe('Grade (A+, A, A-, B+, B, B-, C+, C, C-, D, F)'),
+        grade: z.enum(['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'F'] as const).describe('Grade (A+, A, A-, B+, B, B-, C+, C, C-, F)'),
         description: z.string().describe("評分描述"),
         comment: z.string().describe("AI評語"),
-        icon: z.string().describe("圖示表情符號"),
         suggestions: z.array(z.string()).describe("改進建議")
-    })).describe("技術履歷細節完整度評分列表")
+    })).describe("評分列表").optional(),
+    // Add missing properties that components expect
+    missing_content: z.object({
+        critical_missing: z.array(z.string()).describe("關鍵缺失內容").optional(),
+        recommended_additions: z.array(z.string()).describe("建議添加內容").optional(),
+        impact_analysis: z.string().describe("影響分析").optional(),
+        priority_suggestions: z.array(z.string()).describe("優先建議").optional(),
+        follow_ups: z.array(z.object({
+            title: z.string().describe("跟進標題"),
+            question: z.string().describe("跟進問題")
+        })).describe("跟進問題列表").optional()
+    }).describe("缺失內容分析").optional(),
+    profile: z.object({
+        name: z.string().describe("姓名").optional(),
+        title: z.string().describe("職稱").optional(),
+        brief_introduction: z.string().describe("簡介").optional(),
+        email: z.string().describe("電子郵件").optional(),
+        phone: z.string().describe("電話").optional(),
+        location: z.string().describe("地點").optional(),
+        linkedin: z.string().describe("LinkedIn").optional(),
+        github: z.string().describe("GitHub").optional(),
+        website: z.string().describe("網站").optional(),
+        portfolio: z.string().describe("作品集").optional()
+    }).describe("個人資料").optional()
 });
 
 export type ResumeAnalysisResult = z.infer<typeof ResumeAnalysisSchema>;
@@ -534,50 +575,58 @@ export class NativeOpenAIClient {
                 if (parsedResult && typeof parsedResult === 'object' && parsedResult !== null) {
                     const resultObj = parsedResult as Record<string, unknown>;
                     
-                    // 處理 achievements 格式
-                    if (resultObj.achievements && Array.isArray(resultObj.achievements) && 
-                        resultObj.achievements.length > 0 && 
-                        typeof resultObj.achievements[0] === 'object') {
-                        
-                        console.log('🔄 [Native OpenAI Client] Converting achievements from object array to string array');
-                        resultObj.achievements = resultObj.achievements.map((item: unknown) => {
-                            if (typeof item === 'object' && item !== null) {
-                                const achievementObj = item as Record<string, unknown>;
-                                return String(achievementObj.description || achievementObj.achievement || achievementObj.title || achievementObj.name) || JSON.stringify(item);
-                            }
-                            return String(item);
-                        });
-                    }
+                    // 處理新結構的資料格式
+                    console.log('🔄 [Native OpenAI Client] Processing new structured response format');
                     
-                    // 處理 missing_content 中的字符串轉數組
-                    if (resultObj.missing_content && typeof resultObj.missing_content === 'object' && resultObj.missing_content !== null) {
-                        const missingContent = resultObj.missing_content as Record<string, unknown>;
+                    // 處理 resume 結構中的數組轉字符串
+                    if (resultObj.resume) {
+                        const resume = resultObj.resume as Record<string, unknown>;
                         
-                        // 將字符串轉換為數組
-                        const stringToArray = (value: unknown): string[] => {
-                            if (Array.isArray(value)) return value.map(String);
-                            if (typeof value === 'string') {
-                                // 嘗試解析為 JSON 數組或用分隔符拆分
-                                try {
-                                    const parsed = JSON.parse(value);
-                                    if (Array.isArray(parsed)) return parsed.map(String);
-                                } catch {
-                                    // 如果不是 JSON，嘗試用常見分隔符拆分
-                                    if (value.includes(',')) return value.split(',').map(s => s.trim());
-                                    if (value.includes(';')) return value.split(';').map(s => s.trim());
-                                    if (value.includes('、')) return value.split('、').map(s => s.trim());
-                                    return [value]; // 如果無法拆分，作為單個元素
-                                }
+                        // 處理 personalInfo.links
+                        if (resume.personalInfo && typeof resume.personalInfo === 'object') {
+                            const personalInfo = resume.personalInfo as Record<string, unknown>;
+                            if (personalInfo.links && Array.isArray(personalInfo.links)) {
+                                // 將數組轉換為對象格式
+                                const linksArray = personalInfo.links as string[];
+                                personalInfo.links = {
+                                    linkedin: linksArray.find(link => link.includes('linkedin') || link.includes('LinkedIn')) || '',
+                                    github: linksArray.find(link => link.includes('github') || link.includes('GitHub')) || '',
+                                    website: linksArray.find(link => link.includes('website') || link.includes('Website')) || '',
+                                    portfolio: linksArray.find(link => link.includes('portfolio') || link.includes('Portfolio')) || ''
+                                };
                             }
-                            return [];
-                        };
+                        }
                         
-                        missingContent.critical_missing = stringToArray(missingContent.critical_missing);
-                        missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
-                        missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
-                        // follow_ups 现在是对象数组，不需要 stringToArray 处理
+                        // 處理 experience.outcomes
+                        if (resume.experience && Array.isArray(resume.experience)) {
+                            resume.experience = resume.experience.map((exp: unknown) => {
+                                if (typeof exp === 'object' && exp !== null) {
+                                    const experience = exp as Record<string, unknown>;
+                                    if (Array.isArray(experience.outcomes)) {
+                                        experience.outcomes = (experience.outcomes as string[]).join('; ');
+                                    }
+                                    return experience;
+                                }
+                                return exp;
+                            });
+                        }
                         
-                        console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
+                        // 處理 education.relevant_courses 和 education.outcomes
+                        if (resume.education && Array.isArray(resume.education)) {
+                            resume.education = resume.education.map((edu: unknown) => {
+                                if (typeof edu === 'object' && edu !== null) {
+                                    const education = edu as Record<string, unknown>;
+                                    if (Array.isArray(education.relevant_courses)) {
+                                        education.relevant_courses = (education.relevant_courses as string[]).join(', ');
+                                    }
+                                    if (Array.isArray(education.outcomes)) {
+                                        education.outcomes = (education.outcomes as string[]).join('; ');
+                                    }
+                                    return education;
+                                }
+                                return edu;
+                            });
+                        }
                     }
                     
                     // 處理 scores 中的 suggestions 字符串轉數組
@@ -686,35 +735,21 @@ export class NativeOpenAIClient {
                         
                         // 提供預設值以防最終驗證失敗
                         const defaultResult: ResumeAnalysisResult = {
-                            projects: [],
-                            projects_summary: processedObj.projects_summary as string || '尚未提供專案資訊',
-                            expertise: Array.isArray(processedObj.expertise) ? processedObj.expertise as string[] : [],
-                            expertise_summary: processedObj.expertise_summary as string || '尚未提供技能資訊',
-                            work_experiences: [],
-                            work_experiences_summary: processedObj.work_experiences_summary as string || '尚未提供工作經驗',
-                            education_background: [],
-                            education_summary: processedObj.education_summary as string || '尚未提供教育背景',
-                            achievements: Array.isArray(processedObj.achievements) ? processedObj.achievements as string[] : [],
-                            achievements_summary: processedObj.achievements_summary as string || '尚未提供成就資訊',
-                            missing_content: (processedObj.missing_content as {
-                                critical_missing: string[];
-                                recommended_additions: string[];
-                                impact_analysis: string;
-                                priority_suggestions: string[];
-                                follow_ups: { title: string; question: string; }[];
-                            }) || {
-                                critical_missing: ['完整的履歷內容'],
-                                recommended_additions: ['詳細的工作經驗', '專案描述', '技能列表'],
-                                impact_analysis: '缺乏關鍵資訊影響整體評估',
-                                priority_suggestions: ['補充工作經驗詳情', '加強專案描述'],
-                                follow_ups: [{ title: '基本資訊', question: '請提供更多相關資料' }]
+                            resume: {
+                                personalInfo: {},
+                                experience: [],
+                                education: [],
+                                projects: [],
+                                skills: [],
+                                achievements: []
                             },
+                            highlights: [],
+                            issues: [],
                             scores: Array.isArray(processedObj.scores) ? (processedObj.scores as Array<{
                                 category: string;
-                                grade: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D' | 'F';
+                                grade: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'F';
                                 description: string;
                                 comment: string;
-                                icon: string;
                                 suggestions: string[];
                             }>) : []
                         };
@@ -1050,52 +1085,6 @@ export class NativeOpenAIClient {
                         return obj;
                     };
                     
-                    // 處理 achievements 格式
-                    if (resultObj.achievements && Array.isArray(resultObj.achievements) && 
-                        resultObj.achievements.length > 0 && 
-                        typeof resultObj.achievements[0] === 'object') {
-                        
-                        console.log('🔄 [Native OpenAI Client] Converting achievements from object array to string array');
-                        resultObj.achievements = resultObj.achievements.map((item: unknown) => {
-                            if (typeof item === 'object' && item !== null) {
-                                const achievementObj = item as Record<string, unknown>;
-                                return String(achievementObj.description || achievementObj.achievement || achievementObj.title || achievementObj.name) || JSON.stringify(item);
-                            }
-                            return String(item);
-                        });
-                    }
-                    
-                    // 處理 missing_content 中的字符串轉數組
-                    if (resultObj.missing_content && typeof resultObj.missing_content === 'object' && resultObj.missing_content !== null) {
-                        const missingContent = resultObj.missing_content as Record<string, unknown>;
-                        
-                        // 將字符串轉換為數組
-                        const stringToArray = (value: unknown): string[] => {
-                            if (Array.isArray(value)) return value.map(String);
-                            if (typeof value === 'string') {
-                                // 嘗試解析為 JSON 數組或用分隔符拆分
-                                try {
-                                    const parsed = JSON.parse(value);
-                                    if (Array.isArray(parsed)) return parsed.map(String);
-                                } catch {
-                                    // 如果不是 JSON，嘗試用常見分隔符拆分
-                                    if (value.includes(',')) return value.split(',').map(s => s.trim());
-                                    if (value.includes(';')) return value.split(';').map(s => s.trim());
-                                    if (value.includes('、')) return value.split('、').map(s => s.trim());
-                                    return [value]; // 如果無法拆分，作為單個元素
-                                }
-                            }
-                            return [];
-                        };
-                        
-                        missingContent.critical_missing = stringToArray(missingContent.critical_missing);
-                        missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
-                        missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
-                        // follow_ups 现在是对象数组，不需要 stringToArray 处理
-                        
-                        console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
-                    }
-                    
                     // 處理 scores 中的 suggestions 字符串轉數組
                     if (resultObj.scores && Array.isArray(resultObj.scores)) {
                         resultObj.scores = resultObj.scores.map((score: unknown) => {
@@ -1144,23 +1133,16 @@ export class NativeOpenAIClient {
                         
                         // 提供默認值以滿足 required 字段
                         const defaultResult: ResumeAnalysisResult = {
-                            projects: [],
-                            expertise: [],
-                            projects_summary: '無相關資訊',
-                            expertise_summary: '無相關資訊',
-                            work_experiences: [],
-                            work_experiences_summary: '無相關資訊',
-                            education_background: [],
-                            education_summary: '無相關資訊',
-                            achievements: [],
-                            achievements_summary: '無相關資訊',
-                            missing_content: {
-                                critical_missing: ['履歷資訊不完整'],
-                                recommended_additions: ['建議補充更多資訊'],
-                                impact_analysis: '資訊不足，無法進行完整分析',
-                                priority_suggestions: ['請提供更詳細的履歷資訊'],
-                                follow_ups: [{ title: '基本資訊', question: '請提供更多相關資料' }]
+                            resume: {
+                                personalInfo: {},
+                                experience: [],
+                                education: [],
+                                projects: [],
+                                skills: [],
+                                achievements: []
                             },
+                            highlights: [],
+                            issues: [],
                             scores: []
                         };
                         

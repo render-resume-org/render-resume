@@ -399,78 +399,82 @@ export default function DocumentAnalyzer() {
                     </div>
                     
                     {/* 個人資料 */}
-                    {analysisResult.profile && (
+                    {analysisResult.resume?.personalInfo && (
                         <div className="mb-6">
                             <h4 className="text-lg font-semibold text-gray-700 mb-3">個人資料</h4>
                             <div className="bg-gray-50 rounded-lg p-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {analysisResult.profile.name && (
+                                    {analysisResult.resume.personalInfo.name && (
                                         <div>
                                             <span className="text-sm font-medium text-gray-500">姓名: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.name}</span>
+                                            <span className="text-sm text-gray-700">{analysisResult.resume.personalInfo.name}</span>
                                         </div>
                                     )}
-                                    {analysisResult.profile.title && (
+                                    {analysisResult.resume.personalInfo.title && (
                                         <div>
                                             <span className="text-sm font-medium text-gray-500">專業頭銜: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.title}</span>
+                                            <span className="text-sm text-gray-700">{analysisResult.resume.personalInfo.title}</span>
                                         </div>
                                     )}
-                                    {analysisResult.profile.email && (
+                                    {analysisResult.resume.personalInfo.email && (
                                         <div>
                                             <span className="text-sm font-medium text-gray-500">電子郵件: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.email}</span>
+                                            <span className="text-sm text-gray-700">{analysisResult.resume.personalInfo.email}</span>
                                         </div>
                                     )}
-                                    {analysisResult.profile.phone && (
+                                    {analysisResult.resume.personalInfo.phone && (
                                         <div>
                                             <span className="text-sm font-medium text-gray-500">電話: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.phone}</span>
+                                            <span className="text-sm text-gray-700">{analysisResult.resume.personalInfo.phone}</span>
                                         </div>
                                     )}
-                                    {analysisResult.profile.location && (
+                                    {analysisResult.resume.personalInfo.location && (
                                         <div>
                                             <span className="text-sm font-medium text-gray-500">所在地: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.location}</span>
+                                            <span className="text-sm text-gray-700">{analysisResult.resume.personalInfo.location}</span>
                                         </div>
                                     )}
-                                    {analysisResult.profile.linkedin && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">LinkedIn: </span>
-                                            <a href={analysisResult.profile.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.linkedin}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.github && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">GitHub: </span>
-                                            <a href={analysisResult.profile.github} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.github}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.website && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">個人網站: </span>
-                                            <a href={analysisResult.profile.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.website}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.portfolio && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">作品集: </span>
-                                            <a href={analysisResult.profile.portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.portfolio}
-                                            </a>
-                                        </div>
+                                    {analysisResult.resume.personalInfo.links && typeof analysisResult.resume.personalInfo.links === 'object' && !Array.isArray(analysisResult.resume.personalInfo.links) && (
+                                        <>
+                                            {analysisResult.resume.personalInfo.links.linkedin && (
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-500">LinkedIn: </span>
+                                                    <a href={analysisResult.resume.personalInfo.links.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                        {analysisResult.resume.personalInfo.links.linkedin}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {analysisResult.resume.personalInfo.links.github && (
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-500">GitHub: </span>
+                                                    <a href={analysisResult.resume.personalInfo.links.github} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                        {analysisResult.resume.personalInfo.links.github}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {analysisResult.resume.personalInfo.links.website && (
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-500">個人網站: </span>
+                                                    <a href={analysisResult.resume.personalInfo.links.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                        {analysisResult.resume.personalInfo.links.website}
+                                                    </a>
+                                                </div>
+                                            )}
+                                            {analysisResult.resume.personalInfo.links.portfolio && (
+                                                <div>
+                                                    <span className="text-sm font-medium text-gray-500">作品集: </span>
+                                                    <a href={analysisResult.resume.personalInfo.links.portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
+                                                        {analysisResult.resume.personalInfo.links.portfolio}
+                                                    </a>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
-                                {analysisResult.profile.brief_introduction && (
+                                {analysisResult.resume.summary && (
                                     <div className="mt-3 pt-3 border-t border-gray-200">
                                         <span className="text-sm font-medium text-gray-500">個人簡介: </span>
-                                        <p className="text-sm text-gray-700 mt-1">{analysisResult.profile.brief_introduction}</p>
+                                        <p className="text-sm text-gray-700 mt-1">{analysisResult.resume.summary}</p>
                                     </div>
                                 )}
                             </div>
@@ -480,23 +484,19 @@ export default function DocumentAnalyzer() {
                     {/* 項目分析 */}
                     <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-700 mb-3">項目分析</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.projects_summary}</p>
+                        <p className="text-gray-600 mb-4">項目經驗分析</p>
                         <div className="grid gap-4">
-                            {analysisResult.projects.map((project, index) => (
+                            {analysisResult.resume?.projects?.map((project, index) => (
                                 <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
                                     <h5 className="font-medium text-gray-800">{project.name}</h5>
                                     <p className="text-sm text-gray-600 mt-1">{project.description}</p>
                                     <div className="mt-2">
                                         <span className="text-xs font-medium text-gray-500">技術: </span>
-                                        <span className="text-xs text-gray-700">{project.technologies.join(', ')}</span>
+                                        <span className="text-xs text-gray-700">{project.technologies}</span>
                                     </div>
                                     <div className="mt-1">
-                                        <span className="text-xs font-medium text-gray-500">角色: </span>
-                                        <span className="text-xs text-gray-700">{project.role}</span>
-                                    </div>
-                                    <div className="mt-1">
-                                        <span className="text-xs font-medium text-gray-500">貢獻: </span>
-                                        <span className="text-xs text-gray-700">{project.contribution}</span>
+                                        <span className="text-xs font-medium text-gray-500">成果: </span>
+                                        <span className="text-xs text-gray-700">{project.outcomes}</span>
                                     </div>
                                 </div>
                             ))}
@@ -506,15 +506,22 @@ export default function DocumentAnalyzer() {
                     {/* 技能分析 */}
                     <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-700 mb-3">技能分析</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.expertise_summary}</p>
+                        <p className="text-gray-600 mb-4">技能專長分析</p>
                         <div className="flex flex-wrap gap-2">
-                            {analysisResult.expertise.map((skill, index) => (
-                                <span
-                                    key={index}
-                                    className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                                >
-                                    {skill}
-                                </span>
+                            {analysisResult.resume?.skills?.map((skillGroup, index) => (
+                                <div key={index} className="w-full mb-3">
+                                    <h6 className="font-medium text-gray-700 mb-2">{skillGroup.category}</h6>
+                                    <div className="flex flex-wrap gap-2">
+                                        {skillGroup.items.map((skill, skillIndex) => (
+                                            <span
+                                                key={skillIndex}
+                                                className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -522,32 +529,62 @@ export default function DocumentAnalyzer() {
                     {/* 工作經驗 */}
                     <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-700 mb-3">工作經驗</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.work_experiences_summary}</p>
+                        <p className="text-gray-600 mb-4">工作經歷分析</p>
                         <div className="space-y-3">
-                            {analysisResult.work_experiences.map((exp, index) => (
+                            {analysisResult.resume?.experience?.map((exp, index) => (
                                 <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <h5 className="font-medium text-gray-800">{exp.position}</h5>
+                                            <h5 className="font-medium text-gray-800">{exp.title}</h5>
                                             <p className="text-sm text-gray-600">{exp.company}</p>
                                         </div>
-                                        <span className="text-xs text-gray-500">{exp.duration}</span>
+                                        <span className="text-xs text-gray-500">{exp.period}</span>
                                     </div>
                                     <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
+                                    <div className="mt-2">
+                                        <span className="text-xs font-medium text-gray-500">成果: </span>
+                                        <span className="text-xs text-gray-700">{exp.outcomes}</span>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* 成就 */}
-                    <div>
-                        <h4 className="text-lg font-semibold text-gray-700 mb-3">成就</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.achievements_summary}</p>
-                        <ul className="list-disc list-inside space-y-1">
-                            {analysisResult.achievements.map((achievement, index) => (
-                                <li key={index} className="text-gray-700">{achievement}</li>
+                    {/* 教育背景 */}
+                    <div className="mb-6">
+                        <h4 className="text-lg font-semibold text-gray-700 mb-3">教育背景</h4>
+                        <p className="text-gray-600 mb-4">教育經歷分析</p>
+                        <div className="space-y-3">
+                            {analysisResult.resume?.education?.map((edu, index) => (
+                                <div key={index} className="border-l-4 border-purple-500 pl-4 py-2">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h5 className="font-medium text-gray-800">{edu.degree}</h5>
+                                            <p className="text-sm text-gray-600">{edu.school}</p>
+                                        </div>
+                                        <span className="text-xs text-gray-500">{edu.period}</span>
+                                    </div>
+                                    {edu.gpa && (
+                                        <div className="mt-1">
+                                            <span className="text-xs font-medium text-gray-500">GPA: </span>
+                                            <span className="text-xs text-gray-700">{edu.gpa}</span>
+                                        </div>
+                                    )}
+                                    {edu.relevant_courses && (
+                                        <div className="mt-1">
+                                            <span className="text-xs font-medium text-gray-500">相關課程: </span>
+                                            <span className="text-xs text-gray-700">{edu.relevant_courses}</span>
+                                        </div>
+                                    )}
+                                    {edu.outcomes && (
+                                        <div className="mt-1">
+                                            <span className="text-xs font-medium text-gray-500">成果: </span>
+                                            <span className="text-xs text-gray-700">{edu.outcomes}</span>
+                                        </div>
+                                    )}
+                                </div>
                             ))}
-                        </ul>
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,5 +1,5 @@
 // API 請求和回應的型別定義
-import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
+import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 
 export interface AnalysisProject {
     name: string;
@@ -50,35 +50,97 @@ export interface AnalysisScore {
     grade: LetterGrade;
     description: string;
     comment: string;
-    icon: string;
+    icon?: string;
     suggestions: string[];
 }
 
 export interface MissingContent {
-    critical_missing: string[];
-    recommended_additions: string[];
-    impact_analysis: string;
-    priority_suggestions: string[];
-    follow_ups: {
+    critical_missing?: string[];
+    recommended_additions?: string[];
+    impact_analysis?: string;
+    priority_suggestions?: string[];
+    follow_ups?: {
         title: string;
         question: string;
     }[];
 }
 
+// New structured resume data types
+export interface ResumePersonalInfo {
+    name?: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+    location?: string;
+    links?: {
+        linkedin?: string;
+        github?: string;
+        website?: string;
+        portfolio?: string;
+    } | string[];
+}
+
+export interface ResumeExperience {
+    title: string;
+    company: string;
+    period: string;
+    description: string;
+    outcomes: string | string[];
+}
+
+export interface ResumeEducation {
+    degree: string;
+    school: string;
+    period: string;
+    gpa?: string;
+    relevant_courses?: string | string[];
+    outcomes?: string | string[];
+}
+
+export interface ResumeProject {
+    name: string;
+    description: string;
+    technologies: string;
+    outcomes: string;
+}
+
+export interface ResumeSkills {
+    category: string;
+    items: string[];
+}
+
+export interface StructuredResume {
+    personalInfo?: ResumePersonalInfo;
+    summary?: string;
+    experience?: ResumeExperience[];
+    education?: ResumeEducation[];
+    projects?: ResumeProject[];
+    skills?: ResumeSkills[];
+}
+
+// Highlight and issue types
+export interface ResumeHighlight {
+    title: string;
+    description: string;
+    excerpt: string;
+}
+
+export interface ResumeIssue {
+    title: string;
+    description: string;
+    suggested_change: string;
+    missing_information: string;
+    impact: string;
+    excerpt: string;
+}
+
 export interface ResumeAnalysisResult {
-    profile?: Profile;
-    projects: AnalysisProject[];
-    expertise: string[];
-    projects_summary: string;
-    expertise_summary: string;
-    work_experiences: WorkExperience[];
-    work_experiences_summary: string;
-    education_background: EducationBackground[];
-    education_summary: string;
-    achievements: string[];
-    achievements_summary: string;
-    missing_content?: MissingContent;
+    resume?: StructuredResume;
+    highlights?: ResumeHighlight[];
+    issues?: ResumeIssue[];
     scores?: AnalysisScore[];
+    missing_content?: MissingContent;
+    profile?: Profile;
 }
 
 // 文檔上傳相關類型

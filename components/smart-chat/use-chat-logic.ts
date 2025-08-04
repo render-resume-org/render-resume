@@ -5,11 +5,11 @@ import type { UploadedFile } from '@/lib/upload-utils';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
-  useCannedMessages,
-  useInputManager,
-  useScrollManager,
-  useSimilarityCheck,
-  useTemplateManager
+    useCannedMessages,
+    useInputManager,
+    useScrollManager,
+    useSimilarityCheck,
+    useTemplateManager
 } from './hooks';
 import { ChatMessage, SuggestionRecord } from './types';
 import { CHAT_MESSAGE_LIMIT } from "./utils";
@@ -176,15 +176,15 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     // 初始化建議模板
     initializeSuggestionTemplates();
     
-    // 取得 follow-up 問題數量
-    const followUpCount = analysisResult?.missing_content?.follow_ups?.length || 0;
+    // 取得 issues 問題數量
+    const issuesCount = analysisResult?.issues?.length || 0;
 
     const welcomeMessage: ChatMessage = {
       id: generateUniqueId('ai-welcome'),
       type: 'ai',
       content: `嗨，我是你的 AI 履歷優化顧問 Remo！
 
-我已經仔細分析了你的履歷，並準備了 ${followUpCount > 0 ? `${followUpCount} 個深度追問問題` : '幾個專業問題'}來幫你挖掘更多亮點！
+我已經仔細分析了你的履歷，並識別出 ${issuesCount > 0 ? `${issuesCount} 個需要改進的地方` : '一些優化建議'}來幫你提升履歷競爭力！
 
 你可以主動提問，或讓我基於你的履歷背景主動詢問。我會協助你深入了解專案細節、挖掘遺漏的成就，並提供具體可執行的優化建議。
 

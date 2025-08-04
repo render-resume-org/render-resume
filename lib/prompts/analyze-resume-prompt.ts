@@ -19,18 +19,68 @@ ${resumeContent}
 ${additionalText || '無'}
 
 請以 JSON 格式回傳分析結果，包含以下欄位：
-- projects: 專案列表（每個專案包含 name, description, technologies, duration, role, contribution）
-- projects_summary: 專案摘要
-- expertise: 技能列表
-- expertise_summary: 技能摘要
-- work_experiences: 工作經驗列表（每個經驗包含 company, position, duration, description, contribution, technologies）
-- work_experiences_summary: 工作經驗摘要
-- education_background: 教育背景列表（每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements）
-- education_summary: 教育背景摘要
-- achievements: 成就列表
-- achievements_summary: 成就摘要
-- missing_content: 缺失內容分析（包含 critical_missing, recommended_additions, impact_analysis, priority_suggestions, follow_ups）
-- scores: 評分列表（每個評分包含 category, grade, description, comment, icon, suggestions）
+
+**重要：所有字段必須使用正確的格式，字符串字段必須是字符串，數組字段必須是數組**
+
+### resume: 完整履歷內容結構化資料
+包含：
+- personalInfo: 個人基本資料
+  - name: 姓名（字符串）
+  - title: 專業頭銜（字符串）
+  - email: 電子郵件（字符串）
+  - phone: 電話號碼（字符串）
+  - location: 所在地點（字符串）
+  - links: 聯絡方式連結（對象格式，包含 linkedin, github, website, portfolio 字符串）
+- summary: 個人簡介或職業摘要（字符串）
+- experience: 工作經驗列表
+  - title: 職位名稱（字符串）
+  - company: 公司名稱（字符串）
+  - period: 任職期間（字符串）
+  - description: 工作職責描述（字符串）
+  - outcomes: 具體成果與貢獻（字符串，多個成果用分號分隔）
+- education: 教育背景列表
+  - degree: 學位（字符串）
+  - school: 學校名稱（字符串）
+  - period: 就學期間（字符串）
+  - gpa: 學業成績（字符串）
+  - relevant_courses: 相關課程（字符串，多個課程用逗號分隔）
+  - outcomes: 學業成果與表現（字符串，多個成果用分號分隔）
+- projects: 專案列表
+  - name: 專案名稱（字符串）
+  - description: 專案描述與挑戰（字符串）
+  - technologies: 使用技術（字符串）
+  - outcomes: 專案成果與影響（字符串）
+- skills: 技能列表
+  - category: 技能分類（字符串）
+  - items: 技能項目列表（字符串數組）
+
+### highlights: 履歷亮點分析列表
+每個亮點包含：
+- title: 亮點標題（字符串）
+- description: 亮點詳細說明（字符串）
+- excerpt: 履歷中的相關摘錄（字符串）
+
+### issues: 履歷需改進之處列表
+每個需改進處包含：
+- title: 問題標題（字符串，必須包含具體的識別符，如公司名稱、專案名稱、學校名稱等）
+- description: 問題詳細說明（字符串，必須針對履歷中具體的條目進行分析）
+- suggested_change: 具體改進建議（字符串）
+- missing_information: 缺失的重要資訊（字符串）
+- impact: 對整體履歷的影響（字符串）
+- excerpt: 履歷中的相關摘錄（字符串）
+
+**重要：issues 必須針對履歷中的具體條目**
+- 每個 issue 必須針對履歷中實際出現的具體內容（如：特定公司的工作經驗、特定專案、特定學校的教育背景等）
+- title 必須包含識別符（如公司名稱、專案名稱、學校名稱等），讓使用者能立即識別問題針對哪個具體條目
+- 嚴禁產生泛用性的問題，每個問題都必須有明確的參考對象
+
+### scores: 評分列表
+每個評分包含：
+- category: 評分類別（字符串）
+- grade: 使用等第制（A+, A, A-, B+, B, B-, C+, C, C-, F）
+- description: 評分描述（字符串）
+- comment: 必須包含CoT推理過程（字符串）
+- suggestions: 改進建議列表（字符串數組）
 
 **重要提醒 - 必須包含所有 6 個評分類別**：
 scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
@@ -70,23 +120,25 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
 5. 使用 STAR 原則評估項目和工作經驗的完整性
 6. 評分的 comment 欄位必須嚴格遵循 CoT 推理格式，包含【推理過程】、【最終評分】、【改進建議】三個部分
 7. 對於完全無法提取內容的項目，仍要給予評分與回饋，但評分為 F
-8. projects 和 work_experiences 都必須包含 technologies 欄位，並且必須是字串陣列
-9. **missing_content 的 follow_ups 欄位必須包含「5 個（含）以上」具體針對履歷內容（如工作經驗、專案、成就等）的提問。**
+8. **issues 欄位必須包含「5 個（含）以上」具體針對履歷內容的問題與改進建議。**
 
-請務必遵循以下規範，否則將導致履歷補全流程失效：
+請務必遵循以下規範：
 
-- 每個 follow_up 必須針對履歷中實際出現的內容（如：專案名稱、公司名稱、成就名稱、學校名稱、技術名稱等）提出具體、明確的追問，嚴禁產生 general 或模糊的問題。
-- **標題（title）與內容（question）都必須明確包含該 reference（如專案名稱、公司名稱、成就名稱等），讓使用者一眼就能知道這個追問是針對哪一段履歷內容。**
-- 問題內容需具體、明確，必須針對履歷中實際出現的內容設計，不能只問「請補充更多細節」或「請說明你的專案經驗」這類籠統問題。
-- 請以年輕活潑但專業的語氣協助補齊關鍵缺失資訊，避免生成履歷時產生幻覺。
-- 每個 follow_up 都要像這樣：
-  - title: "ABC 電商平台專案細節追問"
-  - question: "你在 ABC 電商平台專案中提到開發了內部工具，能跟我聊聊這個工具為團隊減少了多少開發時間嗎？還有當時遇到的最大技術挑戰是什麼？"
-- 你可以針對同一份履歷的不同專案、不同工作經驗、不同成就、不同教育背景、不同技術能力等，分別設計多個 follow_up。
+- 每個 issue 必須針對履歷中實際出現的具體條目（如：特定公司的特定職位、特定專案名稱、特定學校的特定學位等）提出具體、明確的問題與改進建議。
+- **標題（title）必須包含識別符（如公司名稱、專案名稱、學校名稱等），讓使用者能立即識別問題針對哪個具體條目。**
+- **描述（description）必須針對履歷中具體的條目進行分析，不能是泛用性的描述。**
+- 改進建議需具體、明確，必須針對履歷中實際出現的內容設計，不能只說「請補充更多細節」這類籠統建議。
+- 每個 issue 都要像這樣：
+  - title: "Google 軟體工程師職位描述缺乏量化成果"
+  - description: "在 Google 軟體工程師職位中，工作描述過於籠統，缺乏具體的量化成果和技術貢獻"
+  - suggested_change: "建議補充具體的專案成果、技術改進的量化指標、以及對團隊的具體貢獻"
+  - missing_information: "缺少具體的專案規模、技術改進的影響力數據、團隊貢獻的具體案例"
+  - impact: "影響專業經驗的說服力，降低了職位重要性的展現"
+  - excerpt: "擔任軟體工程師，負責後端開發和系統維護"
+- 你可以針對同一份履歷的不同專案、不同工作經驗、不同成就、不同教育背景、不同技術能力等，分別設計多個 issue。
 - **嚴禁產生與履歷內容無關的泛用問題，也不能只用「請補充」等模糊字眼。**
-- 請務必產生「5 個（含）以上」具體且有 reference 的 follow_up，否則視為不合格。
-
-**強烈提醒：如未嚴格遵守上述規範，將導致履歷補全與智能追問功能失效，請務必逐條檢查！**
+- **每個 issue 都必須有明確的參考對象，標題必須包含識別符。**
+- 請務必產生「5 個（含）以上」具體且有明確參考對象的 issue，否則視為不合格。
 
 **強制 F 評分規則**：
 - 如果「技術深度與廣度」類別完全無法從履歷中提取到任何技能、專案技術棧或工作中使用的技術，必須給予 F 評分
@@ -96,6 +148,14 @@ scores 陣列必須包含以下 6 個評分類別，每個都必須有評分：
 - 如果「成果與驗證」類別完全無法提取到任何成就、獎項或證書，必須給予 F 評分
 - 如果「整體專業形象」類別因為履歷內容嚴重不足無法評估，必須給予 F 評分
 - F 評分的 comment 必須明確說明「完全無法提取相關內容」作為評分理由
+
+**格式要求**：
+- 所有字符串字段必須是字符串，不能是數組
+- 所有數組字段必須是數組，不能是字符串
+- outcomes 字段必須是字符串，多個成果用分號分隔
+- relevant_courses 字段必須是字符串，多個課程用逗號分隔
+- suggestions 字段必須是字符串數組
+- links 字段必須是對象格式，包含 linkedin, github, website, portfolio 字符串
 
 請確保回傳有效的 JSON 格式。`;
 } 

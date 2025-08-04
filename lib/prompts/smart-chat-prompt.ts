@@ -6,7 +6,7 @@ export function generateSmartChatSystemPrompt(
   templates: Array<{ id: string; title: string; description: string; status: string; completedSuggestion?: { title: string; description: string; category: string } }>
 ): string {
   // 構建個人資訊區塊，用於個性化稱呼
-  const profileInfo = analysisResult.profile;
+  const profileInfo = analysisResult.resume?.personalInfo;
   
   const personalAddressing = profileInfo?.name 
     ? `\n- **稱呼規範**：用戶的姓名是「${

@@ -5,7 +5,7 @@ import { AnalysisScores } from "@/components/analysis-scores";
 import { Button } from "@/components/ui/button";
 import type { AnalysisScore, LetterGrade, ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import {
-  ArrowLeft
+    ArrowLeft
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -37,13 +37,27 @@ export default function ResultsPage() {
   // Helper function to extract all skills
   const allSkills = React.useMemo(() => {
     if (!analysisResult) return [];
-    const skills: string[] = analysisResult.expertise;
-    analysisResult.projects.forEach(p => {
-      if (p.technologies) skills.push(...p.technologies);
-    });
-    analysisResult.work_experiences.forEach(w => {
-      if (w.technologies) skills.push(...w.technologies);
-    });
+    const skills: string[] = [];
+    
+    // Extract skills from the new structure
+    if (analysisResult.resume?.skills) {
+      analysisResult.resume.skills.forEach(skillGroup => {
+        if (skillGroup.items) {
+          skills.push(...skillGroup.items);
+        }
+      });
+    }
+    
+    // Extract technologies from projects and experience (if available in new format)
+    if (analysisResult.resume?.projects) {
+      analysisResult.resume.projects.forEach(p => {
+        if (p.technologies && typeof p.technologies === 'string') {
+          // Split comma-separated technologies
+          skills.push(...p.technologies.split(',').map(t => t.trim()));
+        }
+      });
+    }
+    
     return [...new Set(skills)];
   }, [analysisResult]);
 
@@ -82,39 +96,39 @@ export default function ResultsPage() {
       },
       {
         category: "項目複雜度與影響力",
-        grade: numberToGrade(50 + analysisResult.projects.length * 15),
+        grade: numberToGrade(50 + (analysisResult.resume?.projects?.length || 0) * 15),
         description: "項目經驗的複雜度與影響力",
-        comment: `【推理過程】分析候選人的項目經驗，共發現${analysisResult.projects.length}個項目。評估項目的技術複雜度、業務影響力和個人貢獻度。若項目數量≥3個且包含完整的技術棧描述，則認為經驗豐富；若<3個則需要加強。當前狀態：項目數量為${analysisResult.projects.length}個，${analysisResult.projects.length >= 3 ? '達到豐富標準' : '未達到最低要求'}。【最終評分】${numberToGrade(50 + analysisResult.projects.length * 15)} - 項目經驗${analysisResult.projects.length >= 3 ? '豐富，展現良好的實戰能力' : '有待加強，需要更多實際項目經驗'}。【改進建議】${analysisResult.projects.length < 3 ? '強烈建議增加更多項目經驗，詳述每個項目的技術挑戰和解決方案，量化項目成果和業務影響' : '項目經驗豐富，建議加入更多量化數據，如用戶增長、性能提升、成本節約等具體指標'}。`,
+        comment: `【推理過程】分析候選人的項目經驗，共發現${analysisResult.resume?.projects?.length || 0}個項目。評估項目的技術複雜度、業務影響力和個人貢獻度。若項目數量≥3個且包含完整的技術棧描述，則認為經驗豐富；若<3個則需要加強。當前狀態：項目數量為${analysisResult.resume?.projects?.length || 0}個，${(analysisResult.resume?.projects?.length || 0) >= 3 ? '達到豐富標準' : '未達到最低要求'}。【最終評分】${numberToGrade(50 + (analysisResult.resume?.projects?.length || 0) * 15)} - 項目經驗${(analysisResult.resume?.projects?.length || 0) >= 3 ? '豐富，展現良好的實戰能力' : '有待加強，需要更多實際項目經驗'}。【改進建議】${(analysisResult.resume?.projects?.length || 0) < 3 ? '強烈建議增加更多項目經驗，詳述每個項目的技術挑戰和解決方案，量化項目成果和業務影響' : '項目經驗豐富，建議加入更多量化數據，如用戶增長、性能提升、成本節約等具體指標'}。`,
         icon: "🚀",
-        suggestions: analysisResult.projects.length < 3 ? ["建議增加更多項目經驗", "詳述技術挑戰和解決方案"] : ["項目經驗豐富，建議加入量化數據"]
+        suggestions: (analysisResult.resume?.projects?.length || 0) < 3 ? ["建議增加更多項目經驗", "詳述技術挑戰和解決方案"] : ["項目經驗豐富，建議加入量化數據"]
       },
       {
         category: "專業經驗完整度",
-        grade: numberToGrade(55 + analysisResult.work_experiences.length * 20),
+        grade: numberToGrade(55 + (analysisResult.resume?.experience?.length || 0) * 20),
         description: "工作經驗的完整性與相關性",
-        comment: `工作經驗${analysisResult.work_experiences.length >= 2 ? '完整' : '需要補強'}，共${analysisResult.work_experiences.length}段經歷`,
+        comment: `工作經驗${(analysisResult.resume?.experience?.length || 0) >= 2 ? '完整' : '需要補強'}，共${analysisResult.resume?.experience?.length || 0}段經歷`,
         icon: "💼",
-        suggestions: analysisResult.work_experiences.length < 2 ? ["建議補充更多工作經驗", "突出核心職責"] : ["經驗豐富，建議量化工作成果"]
+        suggestions: (analysisResult.resume?.experience?.length || 0) < 2 ? ["建議補充更多工作經驗", "突出核心職責"] : ["經驗豐富，建議量化工作成果"]
       },
       {
         category: "教育背景與專業匹配度",
-        grade: numberToGrade(50 + analysisResult.education_background.length * 25),
+        grade: numberToGrade(50 + (analysisResult.resume?.education?.length || 0) * 25),
         description: "學歷與專業領域的相關性",
-        comment: `教育背景${analysisResult.education_background.length >= 1 ? '完整' : '需要補充'}，共${analysisResult.education_background.length}個學歷`,
+        comment: `教育背景${(analysisResult.resume?.education?.length || 0) >= 1 ? '完整' : '需要補充'}，共${analysisResult.resume?.education?.length || 0}個學歷`,
         icon: "🎓",
-        suggestions: analysisResult.education_background.length < 1 ? ["建議補充教育背景", "加入相關課程和成就"] : ["教育背景良好，建議突出相關課程"]
+        suggestions: (analysisResult.resume?.education?.length || 0) < 1 ? ["建議補充教育背景", "加入相關課程和成就"] : ["教育背景良好，建議突出相關課程"]
       },
       {
-        category: "成就與驗證",
-        grade: numberToGrade(40 + analysisResult.achievements.length * 10),
-        description: "具體成就與第三方驗證",
-        comment: `成就展示${analysisResult.achievements.length >= 5 ? '充分' : '有待加強'}，共${analysisResult.achievements.length}項成就`,
-        icon: "🏆",
-        suggestions: analysisResult.achievements.length < 5 ? ["建議增加量化成果", "加入客戶推薦或認證"] : ["成就豐富，建議突出核心亮點"]
+        category: "技能專長與匹配度",
+        grade: numberToGrade(60 + (allSkills.length * 2)),
+        description: "技能與職位需求的匹配度",
+        comment: `技能專長${allSkills.length >= 10 ? '豐富' : '需要加強'}，共${allSkills.length}項技能`,
+        icon: "⚡",
+        suggestions: allSkills.length < 10 ? ["建議增加更多相關技術技能", "可以按熟練程度分類展示"] : ["技能覆蓋全面，建議突出核心專長"]
       },
       {
         category: "整體專業形象",
-        grade: numberToGrade(65 + (analysisResult.projects.length + analysisResult.work_experiences.length + analysisResult.education_background.length) * 3),
+        grade: numberToGrade(65 + ((analysisResult.resume?.projects?.length || 0) + (analysisResult.resume?.experience?.length || 0) + (analysisResult.resume?.education?.length || 0)) * 3),
         description: "履歷整體專業形象與表達",
         comment: "履歷結構清晰，專業形象良好",
         icon: "👤",
@@ -127,13 +141,7 @@ export default function ResultsPage() {
 
 
 
-  const handleGoToSmartChat = () => {
-    // 確保分析結果已保存到 sessionStorage
-    if (analysisResult) {
-      sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
-    }
-    router.push('/smart-chat');
-  };
+
 
   if (isLoading) {
     return (
@@ -200,23 +208,13 @@ export default function ResultsPage() {
           <div className="flex flex-col md:flex-row gap-4 order-2 md:order-none">
             
             {/* Smart Chat or Suggestions Button */}
-            {analysisResult?.missing_content?.follow_ups && analysisResult.missing_content.follow_ups.length > 0 ? (
-              <Button 
-                onClick={handleGoToSmartChat}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center"
-              >
-                <span className="text-lg mr-2">🤖</span>
-                AI 智慧問答
-              </Button>
-            ) : (
-              <Button 
-                onClick={() => router.push('/suggestions')}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center"
-              >
-                <span className="text-lg mr-2">✨</span>
-                查看優化建議
-              </Button>
-            )}
+            <Button 
+              onClick={() => router.push('/suggestions')}
+              className="bg-cyan-600 hover:bg-cyan-700 text-white flex items-center"
+            >
+              <span className="text-lg mr-2">✨</span>
+              查看優化建議
+            </Button>
           </div>
         </div>
       </div>

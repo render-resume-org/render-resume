@@ -8,13 +8,13 @@ import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-    ArrowRight,
-    Award,
-    Bot,
-    Briefcase,
-    Code,
-    FileText,
-    GraduationCap
+  ArrowRight,
+  Award,
+  Bot,
+  Briefcase,
+  Code,
+  FileText,
+  GraduationCap
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -377,6 +377,14 @@ export default function AnalyzePage() {
   const handleViewResults = () => {
     // 將分析結果存儲到 sessionStorage
     if (analysisResult) {
+      console.log('💾 [Analyze Page] Storing analysisResult to sessionStorage:', {
+        hasResume: !!analysisResult.resume,
+        resumeKeys: analysisResult.resume ? Object.keys(analysisResult.resume) : [],
+        hasAchievements: analysisResult.resume?.achievements ? true : false,
+        achievementsLength: analysisResult.resume?.achievements?.length || 0,
+        achievementsSample: analysisResult.resume?.achievements?.[0] || null
+      });
+      
       sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
       router.push('/results');
     }
@@ -478,25 +486,25 @@ export default function AnalyzePage() {
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                       <p className="font-medium text-gray-900 dark:text-white mb-2">技能專長</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        識別了 {analysisResult.expertise.length} 項技術技能和軟技能
+                        識別了 {analysisResult.resume?.skills?.length || 0} 項技術技能和軟技能
                       </p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                       <p className="font-medium text-gray-900 dark:text-white mb-2">項目經驗</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        整理了 {analysisResult.projects.length} 個主要項目的詳細信息
+                        整理了 {analysisResult.resume?.projects?.length || 0} 個主要項目的詳細信息
                       </p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                       <p className="font-medium text-gray-900 dark:text-white mb-2">成就亮點</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        提取了 {analysisResult.achievements.length} 項量化的工作成果
+                        提取了 {analysisResult.highlights?.length || 0} 項履歷亮點
                       </p>
                     </div>
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                       <p className="font-medium text-gray-900 dark:text-white mb-2">工作經驗</p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        分析了 {analysisResult.work_experiences.length} 段工作經歷
+                        分析了 {analysisResult.resume?.experience?.length || 0} 段工作經歷
                       </p>
                     </div>
                   </div>

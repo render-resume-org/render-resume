@@ -136,19 +136,61 @@ ${categoriesDescription}
 
 ### 輸出格式要求
 使用 JSON 格式，包含以下欄位：
-- profile: 個人基本資料，包含 name（姓名）, title（專業頭銜）, brief_introduction（簡短個人介紹）, email（電子郵件）, phone（電話）, location（所在地）, linkedin（LinkedIn網址）, github（GitHub網址）, website（個人網站）, portfolio（作品集網址）等聯絡方式與基本資訊
-- projects: 項目列表，每個項目包含 name, description, technologies, role, contribution, duration
-- expertise: 完整技術聯集列表（含自動補全）
-- projects_summary: 融合技術等的項目數個複雜專案
-- expertise_summary: 精通核心技術為主的技術領域技能組合
-- work_experiences: 工作經驗列表，每個工作經驗包含 company, position, duration, description, contribution, technologies
-- work_experiences_summary: 工作經驗摘要
-- education_background: 教育背景列表，每個教育經歷包含 institution, degree, major, duration, gpa, courses, achievements
-- education_summary: 教育背景摘要
-- achievements: 成就列表
-- achievements_summary: 成就摘要
-- missing_content: 缺失內容分析，包含關鍵缺失項目和建議補強方向
-- scores: 技術履歷細節完整度評分列表，每個評分包含 category, grade(使用等第制：${SCORE_GRADES.join(', ')}), description, comment（必須包含CoT推理過程）, icon, suggestions
+
+**重要：所有數組字段必須使用正確的JSON數組格式，例如：["項目1", "項目2", "項目3"]**
+
+#### resume: 完整履歷內容結構化資料
+包含：
+- personalInfo: 個人基本資料 (name, title, email, phone, location, links)
+- summary: 個人簡介或職業摘要
+- experience: 工作經驗列表 (title, company, period, description, outcomes)
+- education: 教育背景列表 (degree, school, period, gpa, relevant_courses, outcomes)
+- projects: 專案列表 (name, description, technologies, outcomes)
+- skills: 技能列表 (category, items)
+
+
+#### highlights: 履歷亮點分析列表
+每個亮點包含：
+- title: 亮點標題
+- description: 亮點詳細說明
+- excerpt: 履歷中的相關摘錄
+
+#### issues: 履歷需改進之處列表
+每個需改進處包含：
+- title: 問題標題（必須包含具體的識別符，如公司名稱、專案名稱、學校名稱等）
+- description: 問題詳細說明（必須針對履歷中具體的條目進行分析）
+- suggested_change: 具體改進建議
+- missing_information: 缺失的重要資訊
+- impact: 對整體履歷的影響
+- excerpt: 履歷中的相關摘錄
+
+**重要：issues 必須針對履歷中的具體條目**
+- 每個 issue 必須針對履歷中實際出現的具體內容（如：特定公司的工作經驗、特定專案、特定學校的教育背景等）
+- title 必須包含識別符（如公司名稱、專案名稱、學校名稱等），讓使用者能立即識別問題針對哪個具體條目
+- 嚴禁產生泛用性的問題，每個問題都必須有明確的參考對象
+
+#### scores: 技術履歷細節完整度評分列表
+每個評分包含：
+- category: 評分類別
+- grade: 使用等第制（${SCORE_GRADES.join(', ')}）
+- description: 評分描述
+- comment: 必須包含CoT推理過程
+- suggestions: 改進建議列表（必須是字符串數組格式，例如：["建議1", "建議2", "建議3"]）
+
+**scores格式示例：**
+\`\`\`json
+{
+  "scores": [
+    {
+      "category": "技術能力",
+      "grade": "B+",
+      "description": "技術能力評估",
+      "comment": "Chain of Thought推理過程...",
+      "suggestions": ["建議加入更多技術細節", "可以展示具體項目成果"]
+    }
+  ]
+}
+\`\`\`
 
 在scores的comment欄位中，必須包含完整的Chain of Thought推理過程。
 
