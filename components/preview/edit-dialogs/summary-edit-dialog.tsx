@@ -64,7 +64,6 @@ export default function SummaryEditDialog({
         </div>
 
         <FormTips 
-          title="撰寫建議："
           tips={[
             "控制在 2-3 句話內",
             "突出您的核心技能和經驗",

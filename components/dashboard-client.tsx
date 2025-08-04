@@ -4,9 +4,10 @@ import { useAuth } from "@/components/hooks/use-auth";
 import { LogoutRedirectHandler } from "@/components/logout-redirect-handler";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { clearSmartChatSession, cn } from "@/lib/utils";
 import { FileText, Plus, Upload, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 
 export function DashboardClient() {
@@ -15,6 +16,11 @@ export function DashboardClient() {
   
   // 檢查用戶是否為 Pro 計劃
   const isProUser = user?.currentPlan?.type?.toLowerCase() === 'pro';
+
+  // 清除智慧問答會話數據（用戶返回儀表板表示完成了流程）
+  useEffect(() => {
+    clearSmartChatSession();
+  }, []);
   
   const handleCreateResume = () => {
     if (isProUser) {
@@ -93,22 +99,6 @@ export function DashboardClient() {
             <Button variant="outline" className="w-full" disabled>
               即將推出
             </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Activity */}
-      <div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          最近活動
-        </h3>
-        <Card>
-          <CardContent className="py-8">
-            <div className="text-center text-gray-500 dark:text-gray-400">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>還沒有任何履歷記錄</p>
-              <p className="text-sm">開始創建您的第一份履歷吧！</p>
-            </div>
           </CardContent>
         </Card>
       </div>

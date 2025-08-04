@@ -8,13 +8,13 @@ import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight,
-  Award,
-  Bot,
-  Briefcase,
-  Code,
-  FileText,
-  GraduationCap
+    ArrowRight,
+    Award,
+    Bot,
+    Briefcase,
+    Code,
+    FileText,
+    GraduationCap
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';

@@ -3,10 +3,13 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { ProBadge } from "@/components/ui/pro-badge";
-import { Menu, X } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Menu, TestTubeDiagonal, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserDropdown } from "./user-dropdown";
 
@@ -44,8 +47,8 @@ const AppHeader = () => {
       '/analyze': '分析中',
       '/results': '分析完成',
       '/smart-chat': '智慧問答',
-      '/suggestions': '優化建議（建置中）',
-      '/preview': '履歷生成（建置中）',
+      '/suggestions': '優化建議',
+      '/preview': '履歷生成',
     };
     return stepMap[pathname] || '處理中';
   };
@@ -66,6 +69,17 @@ const AppHeader = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleBetaBadgeClick = () => {
+    toast.info(
+      "歡迎加入 RenderResume Beta！目前我們正在為 waitlist 用戶提供獨家搶先體驗，同時進行系統優化與功能完善。Beta 階段預計持續至 9 月，我們將在正式上線前通知所有用戶。",
+      {
+        duration: 6000,
+        description: "感謝您的參與，您的反饋對我們非常重要 💙",
+        position: "top-center",
+      }
+    );
+  };
+
   return (
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-3 sm:px-4 py-3">
@@ -73,12 +87,34 @@ const AppHeader = () => {
           {/* Brand Logo & Name */}
           <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
             <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-lg sm:text-2xl">✨</span>
+              <Image
+                src="/images/logo-transparent.png"
+                alt="RenderResume Logo"
+                width={1024}
+                height={1024}
+                className="w-full h-full object-contain"
+              />
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                RenderResume
-              </h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                  RenderResume
+                </h1>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span 
+                      className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95"
+                      onClick={handleBetaBadgeClick}
+                    >
+                      <TestTubeDiagonal className="h-3 w-3" />
+                      Beta
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>點擊查看 Beta 詳情</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
                 懶得履歷．AI 履歷生成器
               </p>

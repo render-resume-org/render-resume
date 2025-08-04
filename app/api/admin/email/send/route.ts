@@ -252,7 +252,7 @@ function generateEmailHtml(
           <p>希望這些內容對您的職涯發展有所幫助！</p>
           `}
           <div style="text-align: center; margin-top: 30px;">
-            <a href="https://www.render-resume.com/help" class="cta-button" style="background-color: #7c3aed;">閱讀更多</a>
+                            <a href="https://www.render-resume.com/resume-builder" class="cta-button" style="background-color: #7c3aed;">閱讀更多</a>
           </div>
         </div>
         <div class="footer">

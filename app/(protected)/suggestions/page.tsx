@@ -1,6 +1,7 @@
 "use client";
 
 import { SuggestionRecord } from "@/components/smart-chat";
+import type { SuggestionTemplate } from "@/components/smart-chat/ai-suggestions-sidebar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatMessage } from "@/lib/mock-data";
@@ -23,18 +24,52 @@ export default function SuggestionsPage() {
   const loadData = useCallback(() => {
     try {
       // 讀取聊天記錄
-      const savedHistory = localStorage.getItem('chatHistory');
+      const savedHistory = sessionStorage.getItem('chatHistory');
       if (savedHistory) {
         setChatHistory(JSON.parse(savedHistory));
       }
 
-      // 讀取智慧問答建議
-      const savedSuggestions = localStorage.getItem('chatSuggestions');
+      // 讀取額外建議和追蹤問題建議，並合併
+      const savedSuggestions = sessionStorage.getItem('chatSuggestions');
+      const savedSuggestionTemplates = sessionStorage.getItem('chatSuggestionTemplates');
+      
+      const allSuggestions: SuggestionRecord[] = [];
+      
+      // 添加額外建議
       if (savedSuggestions) {
         const chatSuggestions: SuggestionRecord[] = JSON.parse(savedSuggestions);
-        setSuggestions(chatSuggestions);
-        console.log(`載入了 ${chatSuggestions.length} 個智慧問答建議`);
+        allSuggestions.push(...chatSuggestions);
+        console.log(`載入了 ${chatSuggestions.length} 個額外建議`);
       }
+      
+      // 添加追蹤問題建議
+      if (savedSuggestionTemplates) {
+        const suggestionTemplates: SuggestionTemplate[] = JSON.parse(savedSuggestionTemplates);
+        const templateSuggestions = suggestionTemplates.map(t => {
+          if (t.status === 'completed' && t.completedSuggestion) {
+            return {
+              id: t.id,
+              title: t.completedSuggestion.title,
+              description: t.completedSuggestion.description,
+              category: t.completedSuggestion.category,
+              timestamp: t.timestamp || new Date()
+            };
+          } else {
+            return {
+              id: t.id,
+              title: t.title,
+              description: t.description,
+              category: t.category,
+              timestamp: t.timestamp || new Date()
+            };
+          }
+        });
+        allSuggestions.push(...templateSuggestions);
+        console.log(`載入了 ${templateSuggestions.length} 個追蹤問題建議`);
+      }
+      
+      setSuggestions(allSuggestions);
+      console.log(`總共載入了 ${allSuggestions.length} 個建議`);
       
     } catch (error) {
       console.error('載入建議失敗:', error);
@@ -43,6 +78,8 @@ export default function SuggestionsPage() {
 
   useEffect(() => {
     loadData();
+    // 清除之前的 optimizedResume，確保在選擇建議後會重新生成
+    sessionStorage.removeItem('optimizedResume');
   }, [loadData]);
 
   const toggleSuggestion = (suggestionId: string) => {
@@ -68,7 +105,7 @@ export default function SuggestionsPage() {
   const handleNext = () => {
     // 保存選中的建議
     const selectedSuggestionData = suggestions.filter(s => selectedSuggestions.has(s.id));
-    localStorage.setItem('selectedSuggestions', JSON.stringify(selectedSuggestionData));
+    sessionStorage.setItem('selectedSuggestions', JSON.stringify(selectedSuggestionData));
     
     router.push('/preview');
   };
