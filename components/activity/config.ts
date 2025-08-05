@@ -16,7 +16,7 @@ export const ACTION_LABELS = {
   'view announcement': '查看公告',
   'build resume': '建立履歷',
   'optimize resume': '優化履歷',
-  'view account settings': '查看個人資料',
+  'view account settings': '查看帳戶設定',
   'download resume': '下載履歷',
   'send smart chat message': '發送智能對話',
   'upload smart chat attachment': '上傳附件',
