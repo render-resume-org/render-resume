@@ -111,6 +111,19 @@ export function AccountSettingsInfoCard({
             </div>
           </div>
 
+          {profileUser.created_at && (
+            <div className="grid gap-2">
+              <Label htmlFor="join-date">加入時間</Label>
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-400">
+                {new Date(profileUser.created_at).toLocaleDateString('zh-TW', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="grid gap-2">
             <Label htmlFor="user-id">用戶 ID</Label>
             <div className="px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-md text-sm text-gray-600 dark:text-gray-400 font-mono">

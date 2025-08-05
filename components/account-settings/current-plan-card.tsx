@@ -1,10 +1,12 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProBadge } from "@/components/ui/pro-badge";
 import { Subscription } from "@/types/user";
-import { Crown, Zap } from "lucide-react";
+import { Crown, ExternalLink, Zap } from "lucide-react";
+import Link from "next/link";
 
 interface CurrentPlanCardProps {
   currentPlan: Subscription | null;
@@ -27,13 +29,27 @@ export function CurrentPlanCard({ currentPlan }: CurrentPlanCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Crown className="h-5 w-5 mr-2" />
-          當前訂閱
-        </CardTitle>
-        <CardDescription>
-          您目前的方案資訊和使用限制
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Crown className="h-5 w-5 mr-2" />
+            <div>
+              <CardTitle>當前訂閱</CardTitle>
+              <CardDescription>
+                您目前的方案資訊和使用限制
+              </CardDescription>
+            </div>
+          </div>
+          <Link href="/pricing" target="_blank" rel="noopener noreferrer">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-cyan-600 hover:text-cyan-700 flex-shrink-0"
+            >
+              <ExternalLink className="h-3 w-3 mr-1" />
+              查看方案
+            </Button>
+          </Link>
+        </div>
       </CardHeader>
       <CardContent>
         {currentPlan ? (

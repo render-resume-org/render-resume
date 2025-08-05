@@ -1,18 +1,17 @@
 "use client";
 
-import { useAuth } from "@/components/hooks/use-auth";
-import { 
-  AccountStatsCard,
+import {
   AccountSettingsAvatarCard,
   AccountSettingsErrorState,
   AccountSettingsHeader,
   AccountSettingsInfoCard,
   AccountSettingsSkeleton,
-  RedeemCodeCard,
   CurrentPlanCard,
+  RedeemCodeCard,
   SubscriptionHistoryCard
 } from "@/components/account-settings";
-import { UserProfile, Subscription } from "@/types/user";
+import { useAuth } from "@/components/hooks/use-auth";
+import { Subscription, UserProfile } from "@/types/user";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -198,6 +197,7 @@ export default function AccountSettingsPage() {
             profileUser={profileUser}
             displayName={userDisplayName}
             initials={initials}
+            isOwnProfile={isOwnProfile}
           />
         </div>
 
@@ -220,22 +220,14 @@ export default function AccountSettingsPage() {
       {/* 其他功能區域 - 僅在查看自己的個人資料時顯示 */}
       {isOwnProfile && (
         <div className="mt-8 space-y-8">
-          {/* 帳戶統計和序號兌換 - 對齊上方卡片寬度 */}
-          <div className="grid gap-8 md:grid-cols-3">
-            <div className="md:col-span-1">
-              <AccountStatsCard 
-                profileUser={profileUser}
-                isOwnProfile={isOwnProfile}
-              />
-            </div>
-            <div className="md:col-span-2">
-              <RedeemCodeCard 
-                onRedeemSuccess={async () => {
-                  await fetchSubscriptions();
-                  await refreshUserPlan();
-                }}
-              />
-            </div>
+          {/* 序號兌換 - 現在佔據全寬度 */}
+          <div className="w-full">
+            <RedeemCodeCard 
+              onRedeemSuccess={async () => {
+                await fetchSubscriptions();
+                await refreshUserPlan();
+              }}
+            />
           </div>
 
           {/* 訂閱相關卡片 */}
