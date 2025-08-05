@@ -58,7 +58,7 @@ function FailActionButtons() {
     <>
       <div className="flex flex-col sm:flex-row gap-3">
         <Button asChild className="flex-1">
-          <Link href="/subscription">
+          <Link href="/pricing">
             <RefreshCw className="w-4 h-4 mr-2" />
             重新訂閱
           </Link>

@@ -1,22 +1,25 @@
 "use client";
 
+import {
+  AccountSettingsAvatarCard,
+  AccountSettingsErrorState,
+  AccountSettingsHeader,
+  AccountSettingsInfoCard,
+  AccountSettingsSkeleton,
+  CurrentPlanCard,
+  RedeemCodeCard,
+  SubscriptionHistoryCard
+} from "@/components/account-settings";
 import { useAuth } from "@/components/hooks/use-auth";
-import { AccountStatsCard } from "@/components/profile/account-stats-card";
-import { ProfileAvatarCard } from "@/components/profile/profile-avatar-card";
-import { ProfileErrorState } from "@/components/profile/profile-error-state";
-import { ProfileHeader } from "@/components/profile/profile-header";
-import { ProfileInfoCard } from "@/components/profile/profile-info-card";
-import { ProfilePlanCard } from "@/components/profile/profile-plan-card";
-import { ProfileSkeleton } from "@/components/profile/profile-skeleton";
-import { UserProfile } from "@/types/user";
+import { Subscription, UserProfile } from "@/types/user";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export default function ProfilePage() {
+export default function AccountSettingsPage() {
   const params = useParams();
   const userId = params.id as string;
-  const { user: currentUser, loading: authLoading, updateProfile } = useAuth();
+  const { user: currentUser, loading: authLoading, updateProfile, refreshUserPlan } = useAuth();
   
   // Local state
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
@@ -26,8 +29,13 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // 訂閱相關狀態
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<Subscription | null>(null);
+
   const isOwnProfile = currentUser?.id === userId;
 
+  // 獲取 user data
   const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -58,6 +66,24 @@ export default function ProfilePage() {
     }
   }, [userId]);
 
+  // 獲取訂閱信息
+  const fetchSubscriptions = async () => {
+    try {
+      const response = await fetch('/api/subscriptions');
+      
+      if (!response.ok) {
+        throw new Error('獲取訂閱信息失敗');
+      }
+      
+      const data = await response.json();
+      setSubscriptions(data.subscriptions || []);
+      setCurrentPlan(data.currentPlan || null);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+      toast.error('獲取訂閱信息失敗');
+    }
+  };
+
   useEffect(() => {
     if (authLoading) return;
     
@@ -68,9 +94,10 @@ export default function ProfilePage() {
     }
 
     fetchUserProfile();
-  }, [currentUser, authLoading, fetchUserProfile]);
-
-
+    if (isOwnProfile) {
+      fetchSubscriptions();
+    }
+  }, [currentUser, authLoading, fetchUserProfile, isOwnProfile]);
 
   useEffect(() => {
     if (profileUser) {
@@ -146,36 +173,37 @@ export default function ProfilePage() {
   const userDisplayName = profileUser?.display_name || profileUser?.email?.split('@')[0] || 'User';
   const initials = getInitials(userDisplayName);
 
-  // Show skeleton during loading
-  if (authLoading || loading) {
-    return <ProfileSkeleton />;
-  }
-
   if (error) {
-    return <ProfileErrorState error={error} currentUserId={currentUser?.id} />;
+    return <AccountSettingsErrorState error={error} currentUserId={currentUser?.id} />;
   }
 
   if (!profileUser) {
-    return <ProfileErrorState error="用戶不存在" currentUserId={currentUser?.id} />;
+    // Show skeleton during loading
+    if (authLoading || loading) {
+      return <AccountSettingsSkeleton />;
+    }
+    return <AccountSettingsErrorState error="用戶不存在" currentUserId={currentUser?.id} />;
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ProfileHeader isOwnProfile={isOwnProfile} displayName={userDisplayName} />
+      <AccountSettingsHeader isOwnProfile={isOwnProfile} displayName={userDisplayName} />
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Profile Card */}
+      {/* 帳戶設定區域 */}
+      <div className="grid gap-8 md:grid-cols-3">
+        {/* Account Settings Card */}
         <div className="md:col-span-1">
-          <ProfileAvatarCard 
+          <AccountSettingsAvatarCard 
             profileUser={profileUser}
             displayName={userDisplayName}
             initials={initials}
+            isOwnProfile={isOwnProfile}
           />
         </div>
 
-        {/* Profile Information */}
-        <div className="md:col-span-2 space-y-6">
-          <ProfileInfoCard
+        {/* Account Settings Information */}
+        <div className="md:col-span-2">
+          <AccountSettingsInfoCard
             profileUser={profileUser}
             displayName={displayName}
             isOwnProfile={isOwnProfile}
@@ -186,19 +214,35 @@ export default function ProfilePage() {
             onCancel={handleCancel}
             onDisplayNameChange={setDisplayName}
           />
-
-          <AccountStatsCard 
-            profileUser={profileUser}
-            isOwnProfile={isOwnProfile}
-          />
-
-          {/* 訂閱方案卡片 */}
-          <ProfilePlanCard 
-            profileUser={profileUser}
-            isOwnProfile={isOwnProfile}
-          />
         </div>
       </div>
+
+      {/* 其他功能區域 - 僅在查看自己的個人資料時顯示 */}
+      {isOwnProfile && (
+        <div className="mt-8 space-y-8">
+          {/* 序號兌換 - 現在佔據全寬度 */}
+          <div className="w-full">
+            <RedeemCodeCard 
+              onRedeemSuccess={async () => {
+                await fetchSubscriptions();
+                await refreshUserPlan();
+              }}
+            />
+          </div>
+
+          {/* 訂閱相關卡片 */}
+          <div className="space-y-8">
+            {/* 當前訂閱 */}
+            <CurrentPlanCard currentPlan={currentPlan} />
+
+            {/* 訂閱歷史 */}
+            <SubscriptionHistoryCard 
+              subscriptions={subscriptions}
+              currentPlan={currentPlan}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

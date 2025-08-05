@@ -71,9 +71,9 @@ function ActionButtons() {
         "text-gray-700 dark:text-gray-300",
         "hover:bg-gray-50 dark:hover:bg-gray-800"
       )}>
-        <Link href="/profile">
+        <Link href="/account-settings">
           <User className="w-4 h-4 mr-2" />
-          查看個人資料
+          查看帳戶設定
         </Link>
       </Button>
     </div>

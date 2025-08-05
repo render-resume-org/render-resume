@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-interface ProfileErrorStateProps {
+interface AccountSettingsErrorStateProps {
   error: string;
   currentUserId?: string;
 }
 
-export function ProfileErrorState({ error, currentUserId }: ProfileErrorStateProps) {
+export function AccountSettingsErrorState({ error, currentUserId }: AccountSettingsErrorStateProps) {
   const getErrorIcon = () => {
     if (error === "您沒有權限查看此用戶資料") {
       return (
@@ -128,7 +128,7 @@ export function ProfileErrorState({ error, currentUserId }: ProfileErrorStatePro
                   variant="outline"
                   className="px-6 py-2"
                 >
-                  <Link href={`/profile/${currentUserId}`}>
+                  <Link href={`/account-settings/${currentUserId}`}>
                     查看我的資料
                   </Link>
                 </Button>
