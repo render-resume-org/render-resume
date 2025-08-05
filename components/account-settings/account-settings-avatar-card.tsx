@@ -13,14 +13,6 @@ interface AccountSettingsAvatarCardProps {
 }
 
 export function AccountSettingsAvatarCard({ profileUser, displayName, initials, isOwnProfile }: AccountSettingsAvatarCardProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
   const getDaysUsed = () => {
     if (!profileUser.created_at) return 0;
     return Math.floor((Date.now() - new Date(profileUser.created_at).getTime()) / (1000 * 60 * 60 * 24));
