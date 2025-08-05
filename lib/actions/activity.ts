@@ -425,7 +425,7 @@ export async function logResumeOptimize(detail?: string): Promise<void> {
  * Log when user views their profile
  */
 export async function logProfileView(): Promise<void> {
-  await logUserAction('view profile');
+  await logUserAction('view account settings');
 }
 
 /**

@@ -33,7 +33,7 @@ export default async function DashboardPage() {
             
             {/* Banner Card - 2 columns */}
             <div className="lg:col-span-2 h-full order-1 lg:order-2">
-              <BannerCard imageUrl="/images/renderresume-banner.png" />
+              <BannerCard imageUrl="/images/banner-with-slogan.png" />
             </div>
           </div>
 
