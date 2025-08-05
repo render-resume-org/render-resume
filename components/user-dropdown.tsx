@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 
 export function UserDropdown() {
@@ -65,15 +65,9 @@ export function UserDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}`} className="flex items-center cursor-pointer">
+          <Link href={`/account-settings/${user.id}`} className="flex items-center cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            <span>個人資料</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/subscription" className="flex items-center cursor-pointer">
-            <Settings className="mr-2 h-4 w-4" />
-            <span>訂閱</span>
+            <span>帳戶設定</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

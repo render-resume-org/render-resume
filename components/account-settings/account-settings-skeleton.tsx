@@ -3,44 +3,66 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProfileSkeleton() {
+export function AccountSettingsSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Profile Header Skeleton */}
       <div className="mb-8">
-        <Skeleton className="h-8 w-48 mb-2" />
-        <Skeleton className="h-5 w-64" />
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+          <Skeleton className="h-9 w-24" />
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* 個人資料區域 */}
+      <div className="grid gap-8 md:grid-cols-3">
         {/* Profile Avatar Card Skeleton */}
         <div className="md:col-span-1">
-          <Card>
+          <Card className="h-full">
             <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
+              <div className="flex justify-center">
                 <Skeleton className="h-24 w-24 rounded-full" />
               </div>
               <Skeleton className="h-6 w-32 mx-auto" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-6">
+              {/* User Profile Information - now empty since email and join date moved */}
               <div className="space-y-3">
-                <div className="flex items-center">
+                {/* Empty space for profile info */}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+              {/* Account Statistics */}
+              <div>
+                <div className="flex items-center mb-3">
                   <Skeleton className="h-4 w-4 mr-2" />
-                  <Skeleton className="h-4 flex-1" />
+                  <Skeleton className="h-4 w-16" />
                 </div>
-                <div className="flex items-center">
-                  <Skeleton className="h-4 w-4 mr-2" />
-                  <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-32 mb-4" />
+                
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                    <Skeleton className="h-8 w-8 mb-2" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                    <Skeleton className="h-8 w-8 mb-2" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Profile Information Skeleton */}
-        <div className="md:col-span-2 space-y-6">
-          {/* Profile Info Card Skeleton */}
-          <Card>
+        {/* Profile Information Card Skeleton */}
+        <div className="md:col-span-2">
+          <Card className="h-full">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -64,34 +86,40 @@ export function ProfileSkeleton() {
                   <Skeleton className="h-10 w-full" />
                 </div>
                 <div className="grid gap-2">
-                  <Skeleton className="h-4 w-12" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="grid gap-2">
+                  <Skeleton className="h-4 w-16" />
                   <Skeleton className="h-10 w-full" />
                 </div>
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
 
-          {/* Account Stats Card Skeleton */}
+      {/* 其他功能區域 - 序號兌換 */}
+      <div className="mt-8 space-y-8">
+        {/* Redeem Code Card Skeleton */}
+        <div className="w-full">
           <Card>
             <CardHeader>
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-4 w-40" />
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 rounded-lg">
-                  <Skeleton className="h-8 w-8 mb-2" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-                <div className="p-4 rounded-lg">
-                  <Skeleton className="h-8 w-8 mb-2" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
+              <div className="space-y-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-9 w-24" />
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Profile Plan Card Skeleton */}
+        {/* 訂閱相關卡片 */}
+        <div className="space-y-8">
+          {/* Current Plan Card Skeleton */}
           <Card>
             <CardHeader>
               <Skeleton className="h-6 w-24" />
@@ -111,6 +139,21 @@ export function ProfileSkeleton() {
                   <Skeleton className="h-4 w-3/4" />
                 </div>
                 <Skeleton className="h-9 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription History Card Skeleton */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-4 w-40" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Skeleton className="h-9 w-full" />
+                </div>
               </div>
             </CardContent>
           </Card>
