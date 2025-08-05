@@ -1,5 +1,5 @@
 import { BannerCard, DashboardAnnouncements, RecentActivity, UsageStats } from "@/components/dashboard";
-import { DashboardClient } from "@/components/dashboard-client";
+import { FeatureCards } from "@/components/feature-cards";
 import { getActiveAnnouncements } from "@/lib/actions/announcements";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -19,10 +19,10 @@ export default async function DashboardPage() {
   const announcements = await getActiveAnnouncements();
 
   return (
-    <div className="bg-white dark:bg-gray-900">
+    <div className="bg-white dark:bg-gray-900" style={{ minHeight: 'calc(100vh - 80px)' }}>
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      <main className="container mx-auto px-4 py-8 h-full">
+        <div className="max-w-6xl mx-auto h-full flex flex-col">
 
           {/* First Row - Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -33,12 +33,14 @@ export default async function DashboardPage() {
             
             {/* Banner Card - 2 columns */}
             <div className="lg:col-span-2 h-full order-1 lg:order-2">
-              <BannerCard />
+              <BannerCard imageUrl="/images/renderresume-banner.png" />
             </div>
           </div>
 
-          {/* Dashboard Client Component */}
-          <DashboardClient />
+          {/* Feature Cards Component */}
+          <div className="flex-1">
+            <FeatureCards />
+          </div>
 
           {/* Last Row - 3 Slot Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
