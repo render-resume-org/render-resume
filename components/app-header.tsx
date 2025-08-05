@@ -139,7 +139,7 @@ const AppHeader = () => {
             <ThemeSwitcher />
             {mounted && isAuthenticated && user && (
               <Button asChild variant="ghost" size="sm" className="p-2 flex-shrink-0">
-                <Link href={`/profile/${user.id}`}>
+                <Link href={`/account-settings/${user.id}`}>
                   <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                     <span className="text-white font-medium text-xs">
                       {(user.display_name || user.email?.split('@')[0] || 'U')

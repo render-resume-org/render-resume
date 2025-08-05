@@ -3,19 +3,25 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ProfileSkeleton() {
+export function AccountSettingsSkeleton() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       {/* Profile Header Skeleton */}
       <div className="mb-8">
-        <Skeleton className="h-8 w-48 mb-2" />
-        <Skeleton className="h-5 w-64" />
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-5 w-64" />
+          </div>
+          <Skeleton className="h-9 w-24" />
+        </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* 個人資料區域 */}
+      <div className="grid gap-8 md:grid-cols-3">
         {/* Profile Avatar Card Skeleton */}
         <div className="md:col-span-1">
-          <Card>
+          <Card className="h-full">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
                 <Skeleton className="h-24 w-24 rounded-full" />
@@ -37,10 +43,9 @@ export function ProfileSkeleton() {
           </Card>
         </div>
 
-        {/* Profile Information Skeleton */}
-        <div className="md:col-span-2 space-y-6">
-          {/* Profile Info Card Skeleton */}
-          <Card>
+        {/* Profile Information Card Skeleton */}
+        <div className="md:col-span-2">
+          <Card className="h-full">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -70,28 +75,54 @@ export function ProfileSkeleton() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </div>
 
+      {/* 其他功能區域 - 帳戶統計和序號兌換 */}
+      <div className="mt-8 space-y-8">
+        <div className="grid gap-8 md:grid-cols-3">
           {/* Account Stats Card Skeleton */}
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-6 w-20" />
-              <Skeleton className="h-4 w-32" />
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 rounded-lg">
-                  <Skeleton className="h-8 w-8 mb-2" />
-                  <Skeleton className="h-4 w-16" />
+          <div className="md:col-span-1">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="p-4 rounded-lg">
+                    <Skeleton className="h-8 w-8 mb-2" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <div className="p-4 rounded-lg">
+                    <Skeleton className="h-8 w-8 mb-2" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
                 </div>
-                <div className="p-4 rounded-lg">
-                  <Skeleton className="h-8 w-8 mb-2" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* Profile Plan Card Skeleton */}
+          {/* Redeem Code Card Skeleton */}
+          <div className="md:col-span-2">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-4 w-40" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-9 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* 訂閱相關卡片 */}
+        <div className="space-y-8">
+          {/* Current Plan Card Skeleton */}
           <Card>
             <CardHeader>
               <Skeleton className="h-6 w-24" />
@@ -111,6 +142,21 @@ export function ProfileSkeleton() {
                   <Skeleton className="h-4 w-3/4" />
                 </div>
                 <Skeleton className="h-9 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Subscription History Card Skeleton */}
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-4 w-40" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Skeleton className="h-9 w-full" />
+                </div>
               </div>
             </CardContent>
           </Card>

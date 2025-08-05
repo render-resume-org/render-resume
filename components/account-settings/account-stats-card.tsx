@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserProfile } from "@/types/user";
+import { ChartColumn } from 'lucide-react';
 
 interface AccountStatsCardProps {
   profileUser: UserProfile;
@@ -10,9 +11,12 @@ interface AccountStatsCardProps {
 
 export function AccountStatsCard({ profileUser, isOwnProfile }: AccountStatsCardProps) {
   return (
-    <Card className="mt-6">
+    <Card className="h-full">
       <CardHeader>
-        <CardTitle>帳戶統計</CardTitle>
+        <CardTitle className="flex items-center">
+          <ChartColumn className="h-5 w-5 mr-2" />
+          帳戶統計
+        </CardTitle>
         <CardDescription>
           {isOwnProfile ? '您的帳戶使用情況' : '用戶的帳戶使用情況'}
         </CardDescription>
@@ -24,7 +28,7 @@ export function AccountStatsCard({ profileUser, isOwnProfile }: AccountStatsCard
               0
             </div>
             <div className="text-sm ">
-              已生成履歷
+              生成履歷
             </div>
           </div>
           <div className="p-4 rounded-lg">

@@ -65,9 +65,9 @@ export function UserDropdown() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/profile/${user.id}`} className="flex items-center cursor-pointer">
+          <Link href={`/account-settings/${user.id}`} className="flex items-center cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            <span>個人資料</span>
+            <span>帳戶設定</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

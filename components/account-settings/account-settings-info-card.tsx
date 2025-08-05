@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { UserProfile } from "@/types/user";
 import { Edit3, Save, User, X } from "lucide-react";
 
-interface ProfileInfoCardProps {
+interface AccountSettingsInfoCardProps {
   profileUser: UserProfile;
   displayName: string;
   isOwnProfile: boolean;
@@ -19,7 +19,7 @@ interface ProfileInfoCardProps {
   onDisplayNameChange: (value: string) => void;
 }
 
-export function ProfileInfoCard({
+export function AccountSettingsInfoCard({
   profileUser,
   displayName,
   isOwnProfile,
@@ -29,19 +29,19 @@ export function ProfileInfoCard({
   onSave,
   onCancel,
   onDisplayNameChange,
-}: ProfileInfoCardProps) {
+}: AccountSettingsInfoCardProps) {
   const userDisplayName = profileUser.display_name || profileUser.email?.split('@')[0] || 'User';
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-start justify-between">
+          <div className="flex-1 min-w-0">
             <CardTitle className="flex items-center">
               <User className="h-5 w-5 mr-2" />
               基本資訊
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1">
               {isOwnProfile ? '編輯您的個人基本資訊' : '用戶的基本資訊'}
             </CardDescription>
           </div>
@@ -50,13 +50,13 @@ export function ProfileInfoCard({
               variant="outline"
               size="sm"
               onClick={onEditToggle}
-              className="flex items-center"
+              className="flex items-center flex-shrink-0 ml-4"
             >
               <Edit3 className="h-4 w-4 mr-1" />
               編輯
             </Button>
           ) : isOwnProfile && isEditing ? (
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 flex-shrink-0 ml-4">
               <Button
                 variant="outline"
                 size="sm"

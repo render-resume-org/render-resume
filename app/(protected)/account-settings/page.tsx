@@ -4,7 +4,7 @@ import { useAuth } from "@/components/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-export default function ProfileRedirectPage() {
+export default function AccountSettingsRedirectPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
@@ -16,8 +16,8 @@ export default function ProfileRedirectPage() {
       return;
     }
 
-    // 重定向到用戶自己的個人資料頁面
-    router.replace(`/profile/${user.id}`);
+    // 重定向到用戶自己的帳戶設定頁面
+    router.replace(`/account-settings/${user.id}`);
   }, [user, loading, router]);
 
   if (loading) {

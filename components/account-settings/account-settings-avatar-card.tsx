@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserProfile } from "@/types/user";
 import { Calendar, Mail } from "lucide-react";
 
-interface ProfileAvatarCardProps {
+interface AccountSettingsAvatarCardProps {
   profileUser: UserProfile;
   displayName: string;
   initials: string;
 }
 
-export function ProfileAvatarCard({ profileUser, displayName, initials }: ProfileAvatarCardProps) {
+export function AccountSettingsAvatarCard({ profileUser, displayName, initials }: AccountSettingsAvatarCardProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('zh-TW', {
       year: 'numeric',
@@ -21,7 +21,7 @@ export function ProfileAvatarCard({ profileUser, displayName, initials }: Profil
   };
 
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
           <Avatar className="h-24 w-24">
