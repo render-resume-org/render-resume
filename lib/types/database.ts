@@ -322,7 +322,7 @@ export type Database = {
         | "view announcement"
         | "build resume"
         | "optimize resume"
-        | "view profile"
+        | "view account settings"
         | "download resume"
         | "send smart chat message"
         | "upload smart chat attachment"
@@ -458,7 +458,7 @@ export const Constants = {
         "view announcement",
         "build resume",
         "optimize resume",
-        "view profile",
+        "view account settings",
         "download resume",
         "send smart chat message",
         "upload smart chat attachment",
