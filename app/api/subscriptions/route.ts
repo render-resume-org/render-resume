@@ -36,7 +36,7 @@ export async function GET() {
       .from('plans')
       .select('*')
       .eq('default', true)
-      .order('daily_usage', { ascending: false });
+      .order('daily_usage', { ascending: true });
 
     if (plansError) {
       console.error('Error fetching plans:', plansError);
