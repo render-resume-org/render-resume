@@ -1,5 +1,6 @@
 import { Code, Heart, Lightbulb, Star, Target, Users } from "lucide-react";
 import Link from "next/link";
+import Footer from "@/components/footer";
 
 export default function AboutPage() {
   const visionPoints = [
@@ -27,17 +28,9 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <div className="max-w-4xl mx-auto flex p-4 py-8">
-        <Link
-          href="/"
-          className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
-        >
-          返回首頁
-        </Link>
-      </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pb-12 max-w-4xl">
+      <main className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="prose prose-gray dark:prose-invert max-w-none">
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -85,7 +78,7 @@ export default function AboutPage() {
                 我們的使命
               </h3>
               <p className="text-lg text-gray-700 dark:text-gray-300 text-center leading-relaxed">
-                「讓科技業求職者們，用最短的時間和最少的心力，呈現自己的最大價值，找到理想工作」
+                「幫您在最短時間呈現最大價值，找到理想工作。」
                 <br />
                 <span className="text-cyan-600 dark:text-cyan-400 font-semibold mt-2 block">
                   —— 這就是我們存在的理由
@@ -161,31 +154,9 @@ export default function AboutPage() {
               </Link>
             </div>
           </section>
-
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row gap-4 text-center">
-              <Link
-                href="/privacy"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                隱私權政策
-              </Link>
-              <Link
-                href="/terms"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                服務條款
-              </Link>
-              <Link
-                href="/help"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                使用說明
-              </Link>
-            </div>
-          </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 } 

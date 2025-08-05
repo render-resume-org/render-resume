@@ -1,38 +1,27 @@
-import Link from "next/link";
+import Footer from "@/components/footer";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-
-          
-          <div className="max-w-4xl mx-auto flex p-4 py-8">
-              
-    <Link
-        href="/"
-        className="text-sm text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-cyan-400"
-        >
-        返回首頁
-    </Link>
-        </div>
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-12 max-w-4xl">
+      <main className="container mx-auto px-4 pb-12 max-w-4xl pt-8">
         <div className="prose prose-gray dark:prose-invert max-w-none">
           
           <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                隱私權政策
+                隱私政策
             </h1>
-            最後更新日期：{new Date().toLocaleDateString('zh-TW')}
+            最後更新日期：2025/8/3
           </div>
 
           <div className="space-y-8">
             <section>
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-                1. 隱私權政策概述
+                1. 隱私政策概述
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                我們非常重視您的隱私權。本隱私權政策說明當您使用 AI 履歷生成器時，我們如何收集、使用、儲存和保護您的個人資料。
-                使用我們的服務即表示您同意本隱私權政策中描述的做法。
+                我們非常重視您的隱私權。本隱私政策說明當您使用 AI 履歷生成器時，我們如何收集、使用、儲存和保護您的個人資料。
+                使用我們的服務即表示您同意本隱私政策中描述的做法。
               </p>
             </section>
 
@@ -169,7 +158,7 @@ export default function PrivacyPage() {
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 我們的服務可能包含指向第三方網站的連結，或整合第三方服務（如 Google 登入）。
-                這些第三方有其自己的隱私權政策，我們不對其隱私慣例負責。我們建議您查閱這些第三方的隱私權政策。
+                這些第三方有其自己的隱私政策，我們不對其隱私慣例負責。我們建議您查閱這些第三方的隱私政策。
               </p>
             </section>
 
@@ -198,7 +187,7 @@ export default function PrivacyPage() {
                 12. 政策變更
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                我們可能會不時更新本隱私權政策。重大變更將通過電子郵件或網站公告通知您。
+                我們可能會不時更新本隱私政策。重大變更將通過電子郵件或網站公告通知您。
                 建議您定期查閱本政策以了解最新資訊。
               </p>
             </section>
@@ -208,41 +197,20 @@ export default function PrivacyPage() {
                 13. 聯絡我們
               </h2>
               <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                如果您對本隱私權政策有任何疑問或要行使您的權利，請聯絡我們：
+                如果您對本隱私政策有任何疑問或要行使您的權利，請聯絡我們：
               </p>
               <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <p className="text-gray-700 dark:text-gray-300">
                   電子郵件：info@render-resume.com<br />
-                  服務時間：週一至週五 09:00-18:00<br />
+                  服務時間：週一至週五 09:00-18:00
                 </p>
               </div>
             </section>
           </div>
-
-          <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col sm:flex-row gap-4 text-center">
-              <Link
-                href="/terms"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                服務條款
-              </Link>
-              <Link
-                href="/auth/login"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                登入
-              </Link>
-              <Link
-                href="/auth/sign-up"
-                className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
-              >
-                註冊
-              </Link>
-            </div>
-          </div>
         </div>
       </main>
+      
+      <Footer />
     </div>
   );
 } 
