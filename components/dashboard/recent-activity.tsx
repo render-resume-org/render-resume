@@ -11,16 +11,26 @@ import { getActionDisplayInfo } from "../activity/config";
 export function RecentActivity() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecentActivity = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const result = await getRecentActivityLogs();
-        if (!result.error) {
-          setLogs(result.logs);
+        
+        if (result.error) {
+          console.error('Error fetching recent activity:', result.error);
+          setError(result.error);
+        } else {
+          console.log('Recent activity logs:', result.logs);
+          setLogs(result.logs || []);
         }
       } catch (error) {
         console.error('Failed to fetch recent activity:', error);
+        setError('Failed to fetch recent activity');
       } finally {
         setLoading(false);
       }
@@ -80,10 +90,16 @@ export function RecentActivity() {
               </div>
             ))}
           </div>
+        ) : error ? (
+          <div className="text-center text-gray-500 dark:text-gray-400 py-4">
+            <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">載入失敗</p>
+            <p className="text-xs mt-1">{error}</p>
+          </div>
         ) : logs.length === 0 ? (
           <div className="text-center text-gray-500 dark:text-gray-400 py-4">
             <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">還沒有任何活動記錄</p>
+            <p className="text-sm">近 7 天沒有活動紀錄</p>
           </div>
         ) : (
           <div className="space-y-3">

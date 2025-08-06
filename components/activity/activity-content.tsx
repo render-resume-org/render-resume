@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityLog, getUserActivityLogs } from "@/lib/actions/activity";
+import { getTimeRangeDates } from "@/lib/utils/time-filters";
 import { Activity, ChevronRight, ExternalLink, Home } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import type { ActivityFilters as ActivityFiltersType } from "./activity-filters";
+import { ActivityFilters } from "./activity-filters";
 import { getActionDisplayInfo } from "./config";
 
 // Types
@@ -90,8 +93,6 @@ function ActivitySkeleton() {
   );
 }
 
-
-
 function EmptyState({ icon: Icon, title, description }: { 
   icon: React.ComponentType<{ className?: string }>; 
   title: string; 
@@ -121,6 +122,65 @@ function EmptyState({ icon: Icon, title, description }: {
               查看您的履歷創建和管理活動歷史
             </p>
           </div>
+        </div>
+      </CardHeader>
+      <CardContent className="px-8 py-8">
+        <div className="text-center text-gray-500 dark:text-gray-400">
+          <Icon className="h-16 w-16 mx-auto mb-6 opacity-50" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            {title}
+          </h3>
+          <p className="text-sm mb-6">{description}</p>
+        </div>
+      </CardContent>
+    </div>
+  );
+}
+
+function EmptyStateWithFilters({ 
+  icon: Icon, 
+  title, 
+  description, 
+  filters, 
+  onFiltersChange 
+}: { 
+  icon: React.ComponentType<{ className?: string }>; 
+  title: string; 
+  description: string; 
+  filters: ActivityFiltersType;
+  onFiltersChange: (filters: ActivityFiltersType) => void;
+}) {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+      <CardHeader className="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
+        <div className="space-y-4">
+          {/* Breadcrumb */}
+          <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <Link href="/dashboard" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
+              <Home className="h-4 w-4 mr-1" />
+              儀表板
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground">活動紀錄</span>
+          </nav>
+
+          {/* Title and Subtitle */}
+          <div>
+            <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              <Activity className="w-5 h-5" />
+              <span>活動紀錄</span>
+            </CardTitle>
+            <p className="text-gray-600 dark:text-gray-400">
+              查看您的履歷創建和管理活動歷史
+            </p>
+          </div>
+
+          {/* Filters */}
+          <ActivityFilters 
+            filters={filters} 
+            onFiltersChange={onFiltersChange}
+            className="!mb-0 !mt-6"
+          />
         </div>
       </CardHeader>
       <CardContent className="px-8 py-8">
@@ -213,11 +273,13 @@ function LoadingState() {
   );
 }
 
-function ActivityList({ logs, hasMore, loading, onLoadMore }: {
+function ActivityList({ logs, hasMore, loading, onLoadMore, filters, onFiltersChange }: {
   logs: ActivityLog[];
   hasMore: boolean;
   loading: boolean;
   onLoadMore: () => void;
+  filters: ActivityFiltersType;
+  onFiltersChange: (filters: ActivityFiltersType) => void;
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
@@ -243,6 +305,13 @@ function ActivityList({ logs, hasMore, loading, onLoadMore }: {
               查看您的履歷創建和管理活動歷史
             </p>
           </div>
+
+          {/* Filters */}
+          <ActivityFilters 
+            filters={filters} 
+            onFiltersChange={onFiltersChange}
+            className="!mb-0 !mt-6"
+          />
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -280,10 +349,28 @@ export function ActivityContent() {
     totalCount: 0,
   });
 
-  const fetchLogs = async (pageNum: number = 1) => {
+  const [filters, setFilters] = useState<ActivityFiltersType>({
+    actionTypes: [
+      'build resume',
+      'optimize resume', 
+      'download resume',
+      'send smart chat message',
+      'upload smart chat attachment'
+    ],
+    timeRange: '7days',
+  });
+
+  const fetchLogs = async (pageNum: number = 1, currentFilters?: ActivityFiltersType) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      const result = await getUserActivityLogs(pageNum, 10);
+      
+      const filtersToUse = currentFilters || filters;
+      const timeRange = getTimeRangeDates(filtersToUse.timeRange);
+      
+      const result = await getUserActivityLogs(pageNum, 10, {
+        actionTypes: filtersToUse.actionTypes.length > 0 ? filtersToUse.actionTypes : undefined,
+        timeRange,
+      });
       
       if (result.error) {
         setState(prev => ({ ...prev, error: result.error || null, loading: false }));
@@ -313,6 +400,13 @@ export function ActivityContent() {
     }
   };
 
+  const handleFiltersChange = (newFilters: ActivityFiltersType) => {
+    setFilters(newFilters);
+    // Reset to page 1 when filters change
+    setState(prev => ({ ...prev, page: 1 }));
+    fetchLogs(1, newFilters);
+  };
+
   useEffect(() => {
     fetchLogs();
   }, []);
@@ -327,24 +421,28 @@ export function ActivityContent() {
     return <ErrorState error={state.error} onRetry={() => fetchLogs()} />;
   }
 
-  // Empty state
-  if (state.logs.length === 0) {
+  // Empty state with filters (when filtered results are empty)
+  if (state.logs.length === 0 && !state.loading) {
     return (
-      <EmptyState
+      <EmptyStateWithFilters
         icon={Activity}
-        title="還沒有任何活動記錄"
-        description="當您開始創建和管理履歷時，相關活動將會顯示在這裡"
+        title="沒有找到符合條件的活動記錄"
+        description="請嘗試調整篩選條件或選擇不同的時間範圍"
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
       />
     );
   }
 
-  // Activity list
+  // Activity list with filters
   return (
     <ActivityList
       logs={state.logs}
       hasMore={state.hasMore}
       loading={state.loading}
       onLoadMore={loadMore}
+      filters={filters}
+      onFiltersChange={handleFiltersChange}
     />
   );
 } 
