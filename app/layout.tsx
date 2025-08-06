@@ -123,14 +123,14 @@ export const metadata: Metadata = {
     siteName: "RenderResume",
     images: [
       {
-        url: `${defaultUrl}/images/og-image.png`,
+        url: `${defaultUrl}/images/og-cover.png`,
         width: 1200,
         height: 630,
         alt: "RenderResume - AI 履歷生成器",
         type: "image/png",
       },
       {
-        url: `${defaultUrl}/images/og-image.png`,
+        url: `${defaultUrl}/images/og-cover.png`,
         width: 400,
         height: 400,
         alt: "RenderResume Logo",
@@ -146,7 +146,7 @@ export const metadata: Metadata = {
     creator: "@renderresume",
     title: "RenderResume - AI 履歷生成器",
     description: "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
-    images: [`${defaultUrl}/images/og-image.png`],
+    images: [`${defaultUrl}/images/og-cover.png`],
   },
   
   // Additional metadata for AI agents
