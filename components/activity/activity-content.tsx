@@ -7,7 +7,7 @@ import { ActivityLog, getUserActivityLogs } from "@/lib/actions/activity";
 import { getTimeRangeDates } from "@/lib/utils/time-filters";
 import { Activity, ChevronRight, ExternalLink, Home } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { ActivityFilters as ActivityFiltersType } from "./activity-filters";
 import { ActivityFilters } from "./activity-filters";
 import { getActionDisplayInfo } from "./config";
@@ -93,49 +93,7 @@ function ActivitySkeleton() {
   );
 }
 
-function EmptyState({ icon: Icon, title, description }: { 
-  icon: React.ComponentType<{ className?: string }>; 
-  title: string; 
-  description: string; 
-}) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-      <CardHeader className="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
-        <div className="space-y-4">
-          {/* Breadcrumb */}
-          <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Link href="/dashboard" className="flex items-center font-medium hover:text-cyan-600 transition-colors">
-              <Home className="h-4 w-4 mr-1" />
-              儀表板
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground">活動紀錄</span>
-          </nav>
 
-          {/* Title and Subtitle */}
-          <div>
-            <CardTitle className="flex items-center space-x-3 text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              <Activity className="w-5 h-5" />
-              <span>活動紀錄</span>
-            </CardTitle>
-            <p className="text-gray-600 dark:text-gray-400">
-              查看您的履歷創建和管理活動歷史
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="px-8 py-8">
-        <div className="text-center text-gray-500 dark:text-gray-400">
-          <Icon className="h-16 w-16 mx-auto mb-6 opacity-50" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-            {title}
-          </h3>
-          <p className="text-sm mb-6">{description}</p>
-        </div>
-      </CardContent>
-    </div>
-  );
-}
 
 function EmptyStateWithFilters({ 
   icon: Icon, 
@@ -360,7 +318,7 @@ export function ActivityContent() {
     timeRange: '7days',
   });
 
-  const fetchLogs = async (pageNum: number = 1, currentFilters?: ActivityFiltersType) => {
+  const fetchLogs = useCallback(async (pageNum: number = 1, currentFilters?: ActivityFiltersType) => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
       
@@ -392,7 +350,7 @@ export function ActivityContent() {
         loading: false 
       }));
     }
-  };
+  }, [filters]);
 
   const loadMore = () => {
     if (!state.loading && state.hasMore) {
@@ -409,7 +367,7 @@ export function ActivityContent() {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [fetchLogs]);
 
   // Loading state
   if (state.loading && state.logs.length === 0) {
