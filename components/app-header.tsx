@@ -56,21 +56,25 @@ const AppHeader = () => {
         <div className="flex items-center justify-between min-w-0">
           {/* Brand Logo & Name & Navigation */}
           <div className="flex items-center space-x-6 lg:space-x-8 flex-shrink-0 min-w-0">
-            <Link href="/" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
               <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Image
-                  src="/images/logo-transparent.png"
-                  alt="RenderResume Logo"
-                  width={1024}
-                  height={1024}
-                  className="w-full h-full object-contain"
-                />
+                <Link href="/">
+                  <Image
+                    src="/images/logo-transparent.png"
+                    alt="RenderResume Logo"
+                    width={1024}
+                    height={1024}
+                    className="w-full h-full object-contain"
+                    />
+                </Link>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                    RenderResume
-                  </h1>
+                  <Link href="/">
+                    <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                      RenderResume
+                    </h1>
+                  </Link>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span 
@@ -90,7 +94,7 @@ const AppHeader = () => {
                   懶得履歷．AI 履歷生成器
                 </p>
               </div>
-            </Link>
+            </div>
 
             {/* Navigation Buttons */}
             <div className="hidden sm:flex items-center space-x-4 lg:space-x-4">
