@@ -31,7 +31,7 @@ export function generatePageMetadata({
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構，為求職者提供個性化履歷優化建議。",
   keywords = [],
   canonicalUrl,
-  ogImage = "/og-image.png",
+  ogImage = "/og-cover.png",
   ogType = "website",
   twitterCard = "summary_large_image",
   noIndex = false,
@@ -136,7 +136,7 @@ export function SEOHead({
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
   keywords = [],
   canonicalUrl,
-  ogImage = "/og-image.png",
+  ogImage = "/og-cover.png",
   structuredData,
   noIndex = false,
   noFollow = false
