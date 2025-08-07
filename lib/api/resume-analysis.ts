@@ -27,7 +27,7 @@ export async function analyzeResume(options: ResumeAnalysisOptions): Promise<Res
         const body: AnalyzePostBody = { resume };
         if (text) body.text = text;
 
-        const response = await fetch(`${API_BASE_URL}/analyze`, {
+        const response = await fetch(`${API_BASE_URL}/analyze/create`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -192,8 +192,8 @@ export async function analyzeDocuments(options: {
         formData.append('serviceType', options.serviceType || 'create');
         console.log('🔧 [Frontend API] Service type:', options.serviceType || 'create');
 
-        console.log('🚀 [Frontend API] Sending request to /api/analyze');
-        const response = await fetch('/api/analyze', {
+        console.log(`🚀 [Frontend API] Sending request to /api/analyze/${options.serviceType || 'create'}`);
+        const response = await fetch(`/api/analyze/${options.serviceType || 'create'}`, {
             method: 'POST',
             body: formData,
         });

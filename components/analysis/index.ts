@@ -5,7 +5,8 @@ export { AnalysisScores } from "./analysis-scores";
 export { ActionSection } from "./action-section";
 export { MainAnalysisCard } from "./main-analysis-card";
 export { PreviewDialog } from "./preview-dialog";
-export * from "./results-detailed-sections";
+export { ResultsDetailedSections } from './results-detailed-sections';
+export { UnifiedResultsDetailedSections } from './unified-results-detailed-sections';
 export { ScoreTabsSection } from "./score-tabs-section";
 export { ShareCard } from "./share-card";
 
