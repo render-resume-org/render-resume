@@ -12,7 +12,7 @@ export function AnnouncementDetailCard({ announcement }: AnnouncementDetailCardP
   return (
     <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
       {/* Header */}
-      <div className="px-8 py-8 border-b border-gray-200 dark:border-gray-700">
+      <div className="px-8 pb-8 border-b border-gray-200 dark:border-gray-700">
         <h1 className="text-2xl text-gray-900 dark:text-white leading-tight">
           {announcement.title}
         </h1>
