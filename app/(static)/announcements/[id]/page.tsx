@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { logAnnouncementView } from "@/lib/actions/activity";
 import { getAnnouncementById, incrementAnnouncementViews } from "@/lib/actions/announcements";
 import { AnnouncementTable } from "@/lib/types";
-import { ChevronLeft, ChevronRight, Home, XCircle } from "lucide-react";
+import { ChevronRight, Home, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ function AnnouncementSkeleton() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-          <CardHeader className="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
+          <CardHeader className="px-8 py-6 ">
             <div className="space-y-4">
               {/* Breadcrumb - Static Content */}
               <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
@@ -32,51 +32,42 @@ function AnnouncementSkeleton() {
                 <ChevronRight className="h-4 w-4" />
                 <span className="text-foreground">公告詳情</span>
               </nav>
-
-              {/* Back Button - Static Content */}
-              <div>
-                <Link href="/announcements">
-                  <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
-                    <ChevronLeft className="h-4 w-4 mr-2" />
-                    返回
-                  </Button>
-                </Link>
-              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
             {/* Main Content Skeleton */}
-            <article className="px-8 py-8">
+            <article className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
               {/* Header Skeleton */}
-              <div className="mb-8">
-                <Skeleton className="h-8 w-3/4 mb-2" />
-                <Skeleton className="h-6 w-1/2" />
+              <div className="px-8 pb-8 border-b border-gray-200 dark:border-gray-700">
+                <Skeleton className="h-8 w-3/4" />
               </div>
 
               {/* Content Skeleton */}
-              <div className="space-y-4">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-4/5" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            </article>
-
-            {/* Footer Skeleton */}
-            <div className="px-8 py-6 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-4 w-32" />
-                <div className="flex items-center space-x-1">
-                  <Skeleton className="h-4 w-4" />
-                  <Skeleton className="h-4 w-20" />
+              <div className="px-8 py-8">
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-4/5" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
                 </div>
               </div>
-            </div>
+
+              {/* Footer Skeleton */}
+              <div className="px-8 py-6 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-32" />
+                  <div className="flex items-center space-x-1">
+                    <Skeleton className="h-4 w-4" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                </div>
+              </div>
+            </article>
           </CardContent>
         </div>
       </div>
@@ -138,7 +129,7 @@ export default function AnnouncementDetailPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
-            <CardHeader className="px-8 py-6 border-b border-gray-100 dark:border-gray-700">
+            <CardHeader className="px-8 py-6 ">
               <div className="space-y-4">
                 {/* Breadcrumb */}
                 <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
