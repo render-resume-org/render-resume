@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 export const stats = [
-  { number: "150+", label: "Waitlist 成員", icon: PartyPopper, animate: false },
+  { number: "160+", label: "Waitlist 成員", icon: PartyPopper, animate: false },
   { number: "5 分鐘", label: "優化履歷" },
   { number: "+N%", label: "面試機率" },
 ];
