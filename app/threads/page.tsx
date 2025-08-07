@@ -1,41 +1,63 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
+
+
 import NewThreadForm from "@/components/forum/new-thread-form";
 import ThreadCard, { ThreadData } from "@/components/forum/thread-card";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
-export default async function ThreadsPage({ searchParams }: { searchParams: { sort?: string } }) {
+async function loadThreads(sort: "recommended" | "new"): Promise<ThreadData[]> {
+  const res = await fetch(`/api/threads?sort=${sort}`, { cache: "no-store" });
+  const data = await res.json().catch(() => ({ threads: [] }));
+  return data.threads || [];
+}
+
+export default function ThreadsPage({ searchParams }: { searchParams: { sort?: string } }) {
   const sortParam = (searchParams?.sort === "new" ? "new" : "recommended") as "recommended" | "new";
-  const supabase = await createClient();
+  const [threads, setThreads] = useState<ThreadData[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: rows, error } = await supabase
-    .from("threads")
-    .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count")
-    .is("parent_thread_id", null)
-    .order("created_at", { ascending: false })
-    .limit(50);
+  useEffect(() => {
+    setThreads([]);
+    setPage(1);
+    setHasMore(true);
+  }, [sortParam]);
 
-  if (error) {
-    console.error("Failed to load threads:", error.message);
-  }
+  useEffect(() => {
+    let cancelled = false;
+    const fetchPage = async () => {
+      const items = await loadThreads(sortParam);
+      if (cancelled) return;
+      setThreads(prev => (page === 1 ? items : [...prev, ...items]));
+      setHasMore(items.length > 0);
+    };
+    fetchPage();
+    return () => { cancelled = true; };
+  }, [sortParam, page]);
 
-  const userIds = Array.from(new Set((rows || []).map(r => r.user_id)));
-  const { data: users } = await supabase
-    .from("users")
-    .select("id,display_name,avatar_url")
-    .in("id", userIds);
-  const userMap: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
-  (users || []).forEach(u => { userMap[u.id] = { display_name: u.display_name, avatar_url: u.avatar_url }; });
+  useEffect(() => {
+    if (!loaderRef.current) return;
+    const el = loaderRef.current;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && hasMore) {
+          setPage(p => p + 1);
+        }
+      });
+    });
+    io.observe(el);
+    return () => { io.disconnect(); };
+  }, [hasMore]);
 
-  const scored = (rows || []).map((r) => {
-    const ageHours = Math.max(1, (Date.now() - new Date(r.created_at).getTime()) / 3600000);
-    const popularity = (r.likes_count || 0) * 3 + (r.comments_count || 0) * 2 + (r.views || 0) * 0.5;
-    const recScore = popularity / Math.pow(ageHours, 0.6);
-    return { ...r, recScore, author: userMap[r.user_id] } as ThreadData & { recScore: number };
-  });
+  const handleDeleted = (id: number) => {
+    setThreads(prev => prev.filter(t => t.id !== id));
+  };
 
-  const threads = (sortParam === "recommended"
-    ? scored.sort((a, b) => b.recScore - a.recScore)
-    : scored) as ThreadData[];
+  const handleUpdated = (id: number, content: string) => {
+    setThreads(prev => prev.map(t => (t.id === id ? { ...t, content } : t)));
+  };
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 space-y-4">
@@ -47,14 +69,17 @@ export default async function ThreadsPage({ searchParams }: { searchParams: { so
         </div>
       </div>
 
-      <NewThreadForm />
+      <NewThreadForm onCreated={() => { setPage(1); }} />
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
         {threads.length === 0 ? (
           <div className="p-6 text-center text-gray-500 dark:text-gray-400">暫無貼文</div>
         ) : (
-          threads.map((t) => <ThreadCard key={t.id} thread={t} />)
+          threads.map((t) => (
+            <ThreadCard key={t.id} thread={t} onDeleted={handleDeleted} onUpdated={handleUpdated} />
+          ))
         )}
+        <div ref={loaderRef} className="h-10" />
       </div>
     </div>
   );

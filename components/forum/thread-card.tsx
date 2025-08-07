@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Heart, MessageCircle, Eye } from "lucide-react";
+import { Heart, MessageCircle, Eye, Pencil, Trash2, Check, X } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import Image from "next/image";
 import React from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/components/hooks/use-auth";
 
 export interface ThreadData {
   id: number;
@@ -27,12 +29,19 @@ interface ThreadCardProps {
   thread: ThreadData;
   isComment?: boolean;
   onLikedChanged?: (liked: boolean) => void;
+  onDeleted?: (id: number) => void;
+  onUpdated?: (id: number, content: string) => void;
 }
 
-export default function ThreadCard({ thread, isComment = false, onLikedChanged }: ThreadCardProps) {
+export default function ThreadCard({ thread, isComment = false, onLikedChanged, onDeleted, onUpdated }: ThreadCardProps) {
   const [pending, startTransition] = useTransition();
   const [likes, setLikes] = useState(thread.likes_count || 0);
   const [liked, setLiked] = useState(!!thread.is_liked_by_me);
+  const { user } = useAuth();
+  const isOwner = user?.id === thread.user_id;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(thread.content);
 
   const handleToggleLike = async () => {
     startTransition(async () => {
@@ -47,6 +56,49 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged }
         // noop
       }
     });
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("確定刪除這則貼文？")) return;
+    const prev = thread.content;
+    onDeleted?.(thread.id);
+    try {
+      const res = await fetch(`/api/threads/${thread.id}/delete`, { method: "DELETE", cache: "no-store" });
+      if (!res.ok) throw new Error();
+    } catch {
+      // rollback needs parent to re-fetch; simple alert
+      alert("刪除失敗");
+      onUpdated?.(thread.id, prev);
+    }
+  };
+
+  const handleStartEdit = () => {
+    setEditValue(thread.content);
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditValue(thread.content);
+  };
+
+  const handleSaveEdit = async () => {
+    const newContent = editValue.trim();
+    if (!newContent) return;
+    onUpdated?.(thread.id, newContent);
+    setIsEditing(false);
+    try {
+      const res = await fetch(`/api/threads/${thread.id}/edit`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({ content: newContent }),
+      });
+      if (!res.ok) throw new Error();
+    } catch {
+      alert("更新失敗");
+      onUpdated?.(thread.id, thread.content);
+    }
   };
 
   return (
@@ -72,11 +124,31 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged }
             <span className="text-gray-500 dark:text-gray-400 text-xs">
               {new Date(thread.created_at).toLocaleString()}
             </span>
+            {isOwner && !isComment && (
+              <div className="ml-auto flex items-center gap-2 text-gray-400">
+                {!isEditing ? (
+                  <>
+                    <button onClick={handleStartEdit} className="hover:text-cyan-600" title="編輯"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={handleDelete} className="hover:text-red-600" title="刪除"><Trash2 className="w-4 h-4" /></button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={handleSaveEdit} className="text-cyan-600" title="儲存"><Check className="w-4 h-4" /></button>
+                    <button onClick={handleCancelEdit} className="hover:text-gray-600" title="取消"><X className="w-4 h-4" /></button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-          <p className="text-gray-900 dark:text-gray-100 text-[0.95rem] leading-relaxed whitespace-pre-wrap">
-            {thread.content}
-          </p>
-          {!isComment && (
+          {!isEditing ? (
+            <p className="text-gray-900 dark:text-gray-100 text-[0.95rem] leading-relaxed whitespace-pre-wrap">
+              {thread.content}
+            </p>
+          ) : (
+            <Textarea value={editValue} onChange={(e) => setEditValue(e.target.value)} />
+          )}
+
+          {!isComment && !isEditing && (
             <div className="mt-3 flex items-center gap-4 text-gray-500 dark:text-gray-400">
               <button
                 onClick={handleToggleLike}

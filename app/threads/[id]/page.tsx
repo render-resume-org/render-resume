@@ -1,60 +1,144 @@
+"use client";
+
 import ThreadCard, { ThreadData } from "@/components/forum/thread-card";
 import ViewsTracker from "@/components/forum/views-tracker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { useEffect, useRef, useState } from "react";
 
-export default async function ThreadDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const supabase = await createClient();
+async function fetchThread(id: number) {
+  const res = await fetch(`/api/threads/${id}`, { cache: "no-store" });
+  if (!res.ok) return null;
+  return (await res.json()) as { thread: ThreadData; comments: ThreadData[] };
+}
 
-  const { data: thread } = await supabase
-    .from("threads")
-    .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count")
-    .eq("id", id)
-    .single();
+async function fetchComments(id: number, page: number, limit: number) {
+  const res = await fetch(`/api/threads/${id}/comments?page=${page}&limit=${limit}`, { cache: "no-store" });
+  if (!res.ok) return { comments: [], total: 0 };
+  return (await res.json()) as { comments: ThreadData[]; total: number; page: number; limit: number };
+}
 
-  if (!thread) {
-    return <div className="container mx-auto px-3 sm:px-4 py-6">貼文不存在</div>;
-  }
+export default function ThreadDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [id, setId] = useState<number | null>(null);
+  const [thread, setThread] = useState<ThreadData | null>(null);
+  const [comments, setComments] = useState<ThreadData[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef<HTMLDivElement | null>(null);
 
-  const { data: comments } = await supabase
-    .from("threads")
-    .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count")
-    .eq("parent_thread_id", id)
-    .order("created_at", { ascending: true });
+  useEffect(() => {
+    (async () => {
+      const p = await params;
+      setId(Number(p.id));
+    })();
+  }, [params]);
 
-  const allUserIds = Array.from(new Set([thread.user_id, ...(comments || []).map(c => c.user_id)]));
-  const { data: users } = await supabase
-    .from("users")
-    .select("id,display_name,avatar_url")
-    .in("id", allUserIds);
-  const map: Record<string, { display_name: string | null; avatar_url: string | null }> = {};
-  (users || []).forEach(u => map[u.id] = { display_name: u.display_name, avatar_url: u.avatar_url });
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      const data = await fetchThread(id);
+      if (data) {
+        setThread(data.thread);
+        setComments(data.comments);
+      }
+    })();
+  }, [id]);
 
-  const threadDto: ThreadData = { ...thread, author: map[thread.user_id] } as ThreadData;
-  const commentsDto: ThreadData[] = (comments || []).map(c => ({ ...c, author: map[c.user_id] })) as ThreadData[];
+  useEffect(() => {
+    if (!id) return;
+    setComments([]);
+    setPage(1);
+    setHasMore(true);
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    const run = async () => {
+      const resp = await fetchComments(id, page, 20);
+      if (cancelled) return;
+      setComments(prev => (page === 1 ? resp.comments : [...prev, ...resp.comments]));
+      setHasMore(resp.comments.length > 0);
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [id, page]);
+
+  useEffect(() => {
+    if (!loaderRef.current) return;
+    const el = loaderRef.current;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && hasMore) setPage(p => p + 1);
+      });
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore]);
+
+  if (!id) return null;
+  if (!thread) return <div className="container mx-auto px-3 sm:px-4 py-6">貼文不存在</div>;
+
+  const handleCommentSubmit = async (formData: FormData) => {
+    const content = (formData.get("content") || "").toString().trim();
+    if (!content) return;
+    // optimistic
+    const temp: ThreadData = {
+      id: Date.now(),
+      user_id: "me",
+      content,
+      created_at: new Date().toISOString(),
+      parent_thread_id: id,
+      likes_count: 0,
+      comments_count: 0,
+      views: 0,
+    } as ThreadData;
+    setComments(prev => [temp, ...prev]);
+    setThread(prev => (prev ? { ...prev, comments_count: (prev.comments_count || 0) + 1 } : prev));
+    try {
+      const res = await fetch(`/api/threads/${id}`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error();
+      // refresh from first page to get real data
+      setPage(1);
+    } catch {
+      // rollback
+      setComments(prev => prev.filter(c => c.id !== temp.id));
+      setThread(prev => (prev ? { ...prev, comments_count: Math.max(0, (prev.comments_count || 0) - 1) } : prev));
+    }
+  };
+
+  const handleDeleted = (commentId: number) => {
+    setComments(prev => prev.filter(c => c.id !== commentId));
+    setThread(prev => (prev ? { ...prev, comments_count: Math.max(0, (prev.comments_count || 0) - 1) } : prev));
+  };
+
+  const handleUpdated = (cid: number, content: string) => {
+    setComments(prev => prev.map(c => (c.id === cid ? { ...c, content } : c)));
+  };
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6 space-y-4">
       <ViewsTracker threadId={Number(id)} />
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <ThreadCard thread={threadDto} />
-        {commentsDto.map((c) => (
-          <ThreadCard key={c.id} thread={c} isComment />
+        <ThreadCard thread={thread} onUpdated={(tid, content) => { if (tid === thread.id) setThread({ ...thread, content }); }} />
+        {comments.map((c) => (
+          <ThreadCard key={c.id} thread={c} isComment onDeleted={handleDeleted} onUpdated={handleUpdated} />
         ))}
+        <div ref={loaderRef} className="h-8" />
       </div>
-      <CommentComposer threadId={Number(id)} />
+      <CommentComposer threadId={Number(id)} onSubmit={handleCommentSubmit} />
     </div>
   );
 }
 
-function CommentComposer({ threadId }: { threadId: number }) {
+function CommentComposer({ onSubmit }: { threadId: number; onSubmit: (formData: FormData) => void }) {
   return (
     <form
       className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3"
-      action={`/api/threads/${threadId}`}
-      method="post"
+      action={onSubmit}
     >
       <Textarea name="content" placeholder="發表回應" className="min-h-[5rem]" />
       <div className="flex justify-end">
