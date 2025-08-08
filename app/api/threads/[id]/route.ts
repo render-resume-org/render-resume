@@ -34,7 +34,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
     // Is liked by me
     const { data: authUser } = await supabase.auth.getUser();
-    const likedIds = new Set<number>();
+    const likedIds = new Set<string>();
     if (authUser?.user) {
       const allIds = [thread.id, ...((comments || []).map(c => c.id))];
       if (allIds.length > 0) {
@@ -56,8 +56,8 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
     // Compute likes and children comments count for each comment
     const commentIds = (comments || []).map(c => c.id);
-    const commentLikesCountMap: Record<number, number> = {};
-    const commentChildrenCountMap: Record<number, number> = {};
+    const commentLikesCountMap: Record<string, number> = {};
+    const commentChildrenCountMap: Record<string, number> = {};
     if (commentIds.length > 0) {
       const [{ data: likesRows }, { data: childRows }] = await Promise.all([
         supabase.from("likes").select("thread_id").in("thread_id", commentIds),
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       .insert({
         user_id: auth.user.id,
         content,
-        parent_thread_id: Number(id),
+        parent_thread_id: id,
         views: 0,
       });
 

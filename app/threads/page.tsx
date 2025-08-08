@@ -4,9 +4,10 @@
 import NewThreadForm from "@/components/forum/new-thread-form";
 import ThreadCard, { ThreadData } from "@/components/forum/thread-card";
 import { ThreadSkeleton } from "@/components/forum/thread-skeleton";
-import Link from "next/link";
+import ThreadsTabs from "@/components/forum/threads-tabs";
+import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 const LIMIT = 20;
 
@@ -16,7 +17,7 @@ async function loadThreads(sort: "recommended" | "new", page: number, limit: num
   return data.threads || [];
 }
 
-export default function ThreadsPage() {
+function ThreadsPageContent() {
   const searchParams = useSearchParams();
   const sortParam = (searchParams.get("sort") === "new" ? "new" : "recommended") as "recommended" | "new";
   const [threads, setThreads] = useState<ThreadData[]>([]);
@@ -64,17 +65,17 @@ export default function ThreadsPage() {
     return () => io.disconnect();
   }, [hasMore, loading, appending]);
 
-  const handleDeleted = (id: number) => {
+  const handleDeleted = (id: string) => {
     setThreads(prev => prev.filter(t => t.id !== id));
   };
 
-  const handleUpdated = (id: number, content: string) => {
+  const handleUpdated = (id: string, content: string) => {
     setThreads(prev => prev.map(t => (t.id === id ? { ...t, content } : t)));
   };
 
   // Handle optimistic create lifecycle
   const handleCreatedEvent: NonNullable<React.ComponentProps<typeof NewThreadForm>["onCreated"]> = (e) => {
-    const tempId = -Math.abs(e.clientId);
+      const tempId = String(-Math.abs(e.clientId));
     if (e.state === "created" && e.temp) {
       // Insert temp with pending flag
       const tempItem = { ...e.temp, id: tempId, is_pending: true } as ThreadData;
@@ -101,27 +102,7 @@ export default function ThreadsPage() {
   return (
     <div className="container mx-auto px-3 sm:px-4 py-6">
       <div className="max-w-2xl mx-auto space-y-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">社群論壇</h1>
-          <div className="flex gap-1 p-1 rounded-md border border-gray-200 dark:border-gray-800" role="tablist" aria-label="Threads tabs">
-            <Link
-              role="tab"
-              aria-selected={sortParam === "recommended"}
-              href="/threads?sort=recommended"
-              className={`px-3 py-1 rounded-md text-sm transition-colors ${sortParam === "recommended" ? "bg-cyan-600 text-white" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"}`}
-            >
-              精選
-            </Link>
-            <Link
-              role="tab"
-              aria-selected={sortParam === "new"}
-              href="/threads?sort=new"
-              className={`px-3 py-1 rounded-md text-sm transition-colors ${sortParam === "new" ? "bg-cyan-600 text-white" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"}`}
-            >
-              最新
-            </Link>
-          </div>
-        </div>
+        <ThreadsTabs active={sortParam} />
 
         {/* Unified card container like announcements */}
         <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/70 shadow-sm overflow-hidden">
@@ -129,7 +110,7 @@ export default function ThreadsPage() {
           <NewThreadForm onCreated={handleCreatedEvent} variant="inset" />
 
           {/* Feed body */}
-          <div className="p-0">
+          <motion.div className="p-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
             {loading ? (
               <div>
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -153,9 +134,17 @@ export default function ThreadsPage() {
               </>
             )}
             {threads.length > 0 && <div ref={loaderRef} className="h-10" />}
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ThreadsPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-3 sm:px-4 py-6"><div className="max-w-2xl mx-auto space-y-4"><ThreadSkeleton /></div></div>}>
+      <ThreadsPageContent />
+    </Suspense>
   );
 }

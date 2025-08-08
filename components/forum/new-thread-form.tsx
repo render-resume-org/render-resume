@@ -4,13 +4,15 @@ import { useAuth } from "@/components/hooks/use-auth";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { ThreadData } from "./thread-card";
 
 interface NewThreadFormProps {
-  onCreated?: (e: { clientId: number; state: "created" | "success" | "error"; temp?: ThreadData; serverThread?: Partial<ThreadData> & { id: number } }) => void;
+  onCreated?: (e: { clientId: number; state: "created" | "success" | "error"; temp?: ThreadData; serverThread?: Partial<ThreadData> & { id: string } }) => void;
   variant?: "standalone" | "inset";
 }
 
@@ -28,7 +30,7 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
     const clientId = Date.now();
     // optimistic temp
     const temp: ThreadData = {
-      id: clientId,
+      id: String(clientId),
       user_id: user?.id || "me",
       content: text,
       created_at: new Date().toISOString(),
@@ -56,7 +58,7 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
           return;
         }
         const payload = await res.json().catch(() => null);
-        const serverThread = payload?.thread as (Partial<ThreadData> & { id: number }) | undefined;
+        const serverThread = payload?.thread as (Partial<ThreadData> & { id: string }) | undefined;
         setContent("");
         toast.success("已發佈");
         onCreated?.({ clientId, state: "success", serverThread });
@@ -67,17 +69,18 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
     });
   };
 
-  const outerClass =
+  const outerClass = cn(
     variant === "inset"
       ? "bg-transparent border-0 rounded-none shadow-none"
-      : "rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/80 dark:bg-gray-900/80 shadow-sm backdrop-blur-sm";
-  const innerClass =
-    variant === "inset"
-      ? "p-4 sm:p-5 border-b border-gray-200 dark:border-gray-800"
-      : "p-4 sm:p-5";
+      : "rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/70 dark:bg-gray-900/70 shadow-sm backdrop-blur-sm"
+  );
+  const innerClass = cn(
+    "p-4 sm:p-5",
+    variant === "inset" && "border-b border-gray-200 dark:border-gray-800"
+  );
 
   return (
-    <div className={outerClass}>
+    <motion.div className={outerClass} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
       <div className={innerClass}>
         <div className="flex items-start gap-3 sm:gap-4">
           <Avatar className="w-10 h-10 sm:w-11 sm:h-11">
@@ -94,7 +97,11 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="分享你的求職經驗、履歷問題或面試心得..."
-              className="min-h-[5.5rem] bg-transparent"
+              className={cn(
+                "bg-transparent min-h-[3.25rem]",
+                "rounded-none px-0 border-0 border-b border-gray-200 dark:border-gray-800",
+                "focus-visible:ring-0 focus-visible:border-cyan-600"
+              )}
             />
             <div className="mt-3 flex items-center justify-between">
               <span className="text-xs text-muted-foreground">{content.trim().length}/1000</span>
@@ -105,6 +112,6 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

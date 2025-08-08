@@ -9,7 +9,7 @@ export async function POST(_req: NextRequest, context: { params: Promise<{ id: s
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     const { id } = await context.params;
-    const threadId = Number(id);
+    const threadId = id;
     const userId = auth.user.id;
 
     const supabase = await createClient();

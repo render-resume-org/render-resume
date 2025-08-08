@@ -103,19 +103,19 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          thread_id: number | null
+          thread_id: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
-          thread_id?: number | null
+          thread_id?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
-          thread_id?: number | null
+          thread_id?: string | null
           user_id?: string | null
         }
         Relationships: [
@@ -317,24 +317,24 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
-          id: number
-          parent_thread_id: number | null
+          id: string
+          parent_thread_id: string | null
           user_id: string
           views: number
         }
         Insert: {
           content?: string | null
           created_at?: string
-          id?: number
-          parent_thread_id?: number | null
+          id?: string
+          parent_thread_id?: string | null
           user_id: string
           views?: number
         }
         Update: {
           content?: string | null
           created_at?: string
-          id?: number
-          parent_thread_id?: number | null
+          id?: string
+          parent_thread_id?: string | null
           user_id?: string
           views?: number
         }

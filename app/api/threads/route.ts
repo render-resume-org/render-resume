@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     // Current user (for liked_by_me)
     const { data: authData } = await supabase.auth.getUser();
     const currentUserId = authData?.user?.id || null;
-    const likedSet = new Set<number>();
+    const likedSet = new Set<string>();
     if (currentUserId && threadIds.length > 0) {
       const { data: myLikes } = await supabase
         .from("likes")
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Compute likes_count per thread by fetching likes rows for these threads
-    const likesCountMap: Record<number, number> = {};
+    const likesCountMap: Record<string, number> = {};
     if (threadIds.length > 0) {
       const { data: likesRows } = await supabase
         .from("likes")
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Compute comments_count per thread by fetching child threads for these parents
-    const commentsCountMap: Record<number, number> = {};
+    const commentsCountMap: Record<string, number> = {};
     if (threadIds.length > 0) {
       const { data: commentRows } = await supabase
         .from("threads")

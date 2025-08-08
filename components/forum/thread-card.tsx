@@ -4,6 +4,8 @@ import { useAuth } from "@/components/hooks/use-auth";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Avatar } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Check, Eye, Heart, MessageCircle, Pencil, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,11 +13,11 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 export interface ThreadData {
-  id: number;
+  id: string;
   user_id: string;
   content: string;
   created_at: string;
-  parent_thread_id: number | null;
+  parent_thread_id: string | null;
   likes_count?: number;
   comments_count?: number;
   views: number;
@@ -31,8 +33,8 @@ interface ThreadCardProps {
   thread: ThreadData;
   isComment?: boolean;
   onLikedChanged?: (liked: boolean) => void;
-  onDeleted?: (id: number) => void;
-  onUpdated?: (id: number, content: string) => void;
+  onDeleted?: (id: string) => void;
+  onUpdated?: (id: string, content: string) => void;
 }
 
 export default function ThreadCard({ thread, isComment = false, onLikedChanged, onDeleted, onUpdated }: ThreadCardProps) {
@@ -121,8 +123,19 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged, 
   };
 
   return (
-    <div className={`w-full ${isComment ? "pl-10" : ""}`} role="article" aria-label="thread-card" aria-busy={disabled}>
-      <div className="flex space-x-3 p-4 hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors duration-200 border-b border-gray-100 dark:border-gray-800 last:border-b-0">
+    <motion.article
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className={cn("w-full", isComment && "pl-10")}
+      role="article"
+      aria-label="thread-card"
+      aria-busy={disabled}
+    >
+      <motion.div
+        whileHover={{ backgroundColor: "rgba(0,0,0,0.02)" }}
+        className="flex space-x-3 p-4 dark:hover:bg-gray-800/40 transition-colors duration-200 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
+      >
         <div className="flex-shrink-0 relative">
           <Avatar className="w-10 h-10">
             <Image 
@@ -153,10 +166,10 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged, 
               <div className="ml-auto flex items-center gap-2 text-gray-400">
                 {!isEditing ? (
                   <>
-                    <button onClick={handleStartEdit} disabled={disabled} className={`hover:text-cyan-600 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`} title="編輯"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={handleStartEdit} disabled={disabled} className={cn("hover:text-primary", disabled && "opacity-50 cursor-not-allowed")} title="編輯"><Pencil className="w-4 h-4" /></button>
                     <AlertDialog open={openConfirm} onOpenChange={setOpenConfirm}>
                       <AlertDialogTrigger asChild>
-                        <button disabled={disabled} className={`hover:text-red-600 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`} title="刪除"><Trash2 className="w-4 h-4" /></button>
+                        <button disabled={disabled} className={cn("hover:text-red-600", disabled && "opacity-50 cursor-not-allowed")} title="刪除"><Trash2 className="w-4 h-4" /></button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
@@ -174,7 +187,7 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged, 
                   </>
                 ) : (
                   <>
-                    <button onClick={handleSaveEdit} disabled={disabled} className={`text-cyan-600 ${disabled ? "opacity-50 cursor-not-allowed" : ""}`} title="儲存"><Check className="w-4 h-4" /></button>
+                    <button onClick={handleSaveEdit} disabled={disabled} className={cn("text-primary", disabled && "opacity-50 cursor-not-allowed")} title="儲存"><Check className="w-4 h-4" /></button>
                     <button onClick={handleCancelEdit} className="hover:text-gray-600" title="取消"><X className="w-4 h-4" /></button>
                   </>
                 )}
@@ -195,12 +208,16 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged, 
                 onClick={handleToggleLike}
                 disabled={disabled}
                 aria-busy={disabled}
-                className={`inline-flex items-center gap-1.5 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors ${liked ? "text-cyan-600 dark:text-cyan-400" : ""} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                className={cn(
+                  "inline-flex items-center gap-1.5 transition-colors hover:text-cyan-600 dark:hover:text-cyan-400",
+                  liked && "text-cyan-600 dark:text-cyan-400",
+                  disabled && "opacity-50 cursor-not-allowed"
+                )}
               >
                 <Heart className={`w-4 h-4 ${liked ? "fill-current" : ""}`} />
                 <span className="text-sm">{likes}</span>
               </button>
-              <Link href={`/threads/${thread.id}`} className={`inline-flex items-center gap-1.5 transition-colors ${disabled ? "pointer-events-none opacity-50" : "hover:text-cyan-600 dark:hover:text-cyan-400"}`}>
+              <Link href={`/threads/${thread.id}`} className={cn("inline-flex items-center gap-1.5 transition-colors", disabled ? "pointer-events-none opacity-50" : "hover:text-cyan-600 dark:hover:text-cyan-400") }>
                 <MessageCircle className="w-4 h-4" />
                 <span className="text-sm">{thread.comments_count || 0}</span>
               </Link>
@@ -211,7 +228,7 @@ export default function ThreadCard({ thread, isComment = false, onLikedChanged, 
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.article>
   );
 }

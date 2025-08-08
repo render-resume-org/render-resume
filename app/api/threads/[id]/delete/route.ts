@@ -14,7 +14,7 @@ export async function DELETE(_req: NextRequest, context: { params: Promise<{ id:
     const { data: thread } = await supabase
       .from("threads")
       .select("id,user_id")
-      .eq("id", Number(id))
+      .eq("id", id)
       .single();
     if (!thread || thread.user_id !== auth.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -23,7 +23,7 @@ export async function DELETE(_req: NextRequest, context: { params: Promise<{ id:
     const { error: delErr } = await supabase
       .from("threads")
       .delete()
-      .eq("id", Number(id));
+      .eq("id", id);
 
     if (delErr) {
       return NextResponse.json({ error: delErr.message }, { status: 500 });

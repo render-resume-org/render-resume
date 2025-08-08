@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     const { data: items, error, count } = await supabase
       .from("threads")
       .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count", { count: "exact" })
-      .eq("parent_thread_id", Number(id))
+      .eq("parent_thread_id", id)
       .order("created_at", { ascending: true })
       .range(from, to);
 

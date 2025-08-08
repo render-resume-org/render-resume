@@ -19,7 +19,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const { data: thread } = await supabase
       .from("threads")
       .select("id,user_id")
-      .eq("id", Number(id))
+      .eq("id", id)
       .single();
     if (!thread || thread.user_id !== auth.user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
     const { error: updateErr } = await supabase
       .from("threads")
       .update({ content })
-      .eq("id", Number(id));
+      .eq("id", id);
 
     if (updateErr) {
       return NextResponse.json({ error: updateErr.message }, { status: 500 });

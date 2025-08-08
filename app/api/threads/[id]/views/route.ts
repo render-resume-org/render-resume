@@ -10,14 +10,14 @@ export async function POST(_req: NextRequest, context: { params: Promise<{ id: s
     const { data } = await supabase
       .from("threads")
       .select("views")
-      .eq("id", Number(id))
+      .eq("id", id)
       .single();
 
     const current = data?.views || 0;
     await supabase
       .from("threads")
       .update({ views: current + 1 })
-      .eq("id", Number(id));
+      .eq("id", id);
 
     return NextResponse.json({ views: current + 1 });
   } catch {
