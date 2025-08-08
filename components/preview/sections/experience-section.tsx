@@ -1,6 +1,8 @@
+import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
 import { OptimizedResume } from '@/lib/types/resume';
+import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import { Briefcase } from 'lucide-react';
 import ResumeSection from '../resume-section';
@@ -9,13 +11,15 @@ interface ExperienceSectionProps {
   data: OptimizedResume['experience'];
   template: ResumeTemplate;
   onEdit?: () => void;
+  analysisResult?: UnifiedResumeAnalysisResult | null;
 }
 
-export default function ExperienceSection({ data, template, onEdit }: ExperienceSectionProps) {
+export default function ExperienceSection({ data, template, onEdit, analysisResult }: ExperienceSectionProps) {
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getExperienceStyle(template);
   const isLatex = TemplateStylingService.isTemplateType(template, 'latex');
+  const annotations = buildAnnotationsFromAnalysis(analysisResult);
 
   if (isLatex) {
     return (
@@ -33,19 +37,19 @@ export default function ExperienceSection({ data, template, onEdit }: Experience
             <div key={index}>
               <div className={styles.jobContainer}>
                 <span className={styles.jobTitle}>{job.title}</span>
-                <span>
+                 <span>
                   <span> | </span>
-                  <span className={styles.company}>{job.company}</span>
-                  <span> | {job.period}</span>
+                   <span className={styles.company}>{highlightText(job.company, annotations)}</span>
+                   <span> | {highlightText(job.period, annotations)}</span>
                 </span>
               </div>
-              <ul className={styles.achievementList}>
-                {job.achievements.map((achievement, achIndex) => (
-                  <li key={achIndex} className={styles.achievement}>
-                    {achievement}
-                  </li>
-                ))}
-              </ul>
+               <ul className={styles.achievementList}>
+                 {job.achievements.map((achievement, achIndex) => (
+                   <li key={achIndex} className={styles.achievement}>
+                     {highlightText(achievement, annotations)}
+                   </li>
+                 ))}
+               </ul>
             </div>
           ))}
         </div>
@@ -70,17 +74,17 @@ export default function ExperienceSection({ data, template, onEdit }: Experience
             <div className={styles.jobContainer}>
               <div className="flex justify-between items-center">
                 <h3 className={styles.company}>{job.company}</h3>
-                <span className={styles.period}>{job.period}</span>
+                 <span className={styles.period}>{highlightText(job.period, annotations)}</span>
               </div>
-              <p className={cn(styles.jobTitle, 'italic')}>{job.title}</p>
+               <p className={cn(styles.jobTitle, 'italic')}>{highlightText(job.title, annotations)}</p>
             </div>
-            <ul className={styles.achievementList}>
-              {job.achievements.map((achievement, achIndex) => (
-                <li key={achIndex} className={styles.achievement}>
-                  {achievement}
-                </li>
-              ))}
-            </ul>
+             <ul className={styles.achievementList}>
+               {job.achievements.map((achievement, achIndex) => (
+                 <li key={achIndex} className={styles.achievement}>
+                   {highlightText(achievement, annotations)}
+                 </li>
+               ))}
+             </ul>
           </div>
         ))}
       </div>

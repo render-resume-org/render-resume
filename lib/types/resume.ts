@@ -22,6 +22,12 @@ export interface OptimizedResume {
     category: string;
     items: string[];
   }>;
+  achievements?: Array<{
+    title: string;
+    organization?: string;
+    period?: string;
+    details?: string[];
+  }>;
   experience: Array<{
     title: string;
     company: string;

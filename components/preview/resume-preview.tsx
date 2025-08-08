@@ -1,5 +1,6 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
+import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useEditDialogManager } from './edit-dialogs';
@@ -10,9 +11,11 @@ interface ResumePreviewProps {
   resumeData: OptimizedResume;
   template: ResumeTemplate;
   onUpdateResume?: (updatedResume: OptimizedResume) => void;
+  editable?: boolean;
+  analysisResult?: UnifiedResumeAnalysisResult | null;
 }
 
-export default function ResumePreview({ resumeData, template, onUpdateResume }: ResumePreviewProps) {
+export default function ResumePreview({ resumeData, template, onUpdateResume, editable = true, analysisResult }: ResumePreviewProps) {
   const { font, colors } = template;
 
   // Initialize edit dialog manager
@@ -23,6 +26,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
 
   // Create edit handlers for each section
   const createEditHandler = (sectionName: string) => () => {
+    if (!editable) return;
     if (['summary', 'skills', 'experience', 'projects', 'education'].includes(sectionName)) {
       openEditDialog(sectionName as 'summary' | 'skills' | 'experience' | 'projects' | 'education');
     }
@@ -48,7 +52,9 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
                 sectionName, 
                 resumeData, 
                 template,
-                onEdit: createEditHandler(sectionName),
+                onEdit: editable ? createEditHandler(sectionName) : undefined,
+                // @ts-expect-error pass-through optional analysis for annotation
+                analysisResult,
               })}
             </div>
           ))}

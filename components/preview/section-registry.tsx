@@ -1,13 +1,14 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
 import { memo } from 'react';
+import AchievementsSection from './sections/achievements-section';
 import EducationSection from './sections/education-section';
 import ExperienceSection from './sections/experience-section';
 import ProjectsSection from './sections/projects-section';
 import SkillsSection from './sections/skills-section';
 import SummarySection from './sections/summary-section';
 
-type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education';
+type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education' | 'achievements';
 
 interface SectionProps<T = unknown> {
   data: T;
@@ -23,6 +24,7 @@ const MemoizedSkillsSection = memo(SkillsSection);
 const MemoizedExperienceSection = memo(ExperienceSection);
 const MemoizedProjectsSection = memo(ProjectsSection);
 const MemoizedEducationSection = memo(EducationSection);
+const MemoizedAchievementsSection = memo(AchievementsSection);
 
 const SECTION_REGISTRY: Record<SectionName, SectionComponent> = {
   summary: MemoizedSummarySection as SectionComponent,
@@ -30,6 +32,7 @@ const SECTION_REGISTRY: Record<SectionName, SectionComponent> = {
   experience: MemoizedExperienceSection as SectionComponent,
   projects: MemoizedProjectsSection as SectionComponent,
   education: MemoizedEducationSection as SectionComponent,
+  achievements: MemoizedAchievementsSection as SectionComponent,
 };
 
 interface SectionRendererProps {

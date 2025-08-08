@@ -1,38 +1,120 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireProUser } from '@/lib/auth/server';
-import { checkUsageLimit } from '@/lib/utils/usage-check';
-import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
 import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
-import { UnifiedResumeAnalysisSchema, UnifiedResumeAnalysisResult, UnifiedResume } from '@/lib/types/resume-unified';
-import { generateExtractResumeUserPrompt } from '@/lib/prompts/analyze-extract-prompt';
+import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
+import { requireProUser } from '@/lib/auth/server';
+import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
 import { generateEvaluateResumeUserPrompt } from '@/lib/prompts/analyze-evaluate-prompt';
+import { generateExtractResumeUserPrompt } from '@/lib/prompts/analyze-extract-prompt';
+import { generateUnifiedSystemPrompt } from '@/lib/prompts/unified-system-prompt';
+import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/lib/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
+import { checkUsageLimit } from '@/lib/utils/usage-check';
+import { NextRequest, NextResponse } from 'next/server';
 
-interface OpenAIMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-interface OpenAIChatCompletionChoice { index: number; message: { role: string; content: string }; finish_reason: string; }
-interface OpenAIChatCompletionResponse { id: string; object: string; created: number; model: string; choices: OpenAIChatCompletionChoice[]; usage?: unknown; system_fingerprint?: string; }
+interface AnyObject { [key: string]: unknown }
 
-async function callOpenAIJson<T>(client: ReturnType<typeof createNativeOpenAIClient>, system: string, user: string): Promise<T> {
-  const req = {
-    model: (client as unknown as { config?: { modelName?: string } }).config?.modelName || 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: system } as OpenAIMessage,
-      { role: 'user', content: user } as OpenAIMessage
-    ],
-    temperature: (client as unknown as { config?: { temperature?: number } }).config?.temperature ?? 0.2,
-    response_format: { type: 'json_object' as const }
+function toStringArray(val: unknown): string[] { return Array.isArray(val) ? val.map(String) : []; }
+function asObject(v: unknown): AnyObject { return (v && typeof v === 'object') ? (v as AnyObject) : {}; }
+function normalizeUnifiedOutput(result: unknown): unknown {
+  if (!result || typeof result !== 'object') return result;
+  const obj = asObject(result);
+  const resume = asObject(obj.resume);
+
+  const normalizeAchievements = (arr: unknown): Array<{ title: string; organization?: string; period?: string; description?: string; outcomes: string[] }> => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((a): { title: string; organization?: string; period?: string; description?: string; outcomes: string[] } => {
+      const v = asObject(a);
+      return {
+        title: String(v.title ?? ''),
+        organization: v.organization ? String(v.organization) : (v.orgnization ? String(v.orgnization) : undefined),
+        period: v.period ? String(v.period) : undefined,
+        description: v.description ? String(v.description) : undefined,
+        outcomes: toStringArray(v.outcomes),
+      };
+    });
   };
-  const response = await (client as unknown as { callOpenAI: (r: typeof req) => Promise<OpenAIChatCompletionResponse> }).callOpenAI(req);
-  const content = response?.choices?.[0]?.message?.content as string | undefined;
-  if (!content) throw new Error('OpenAI 回傳內容為空');
-  return JSON.parse(content) as T;
+  const normalizeExperience = (arr: unknown): Array<{ title: string; company?: string; period?: string; description?: string; outcomes: string[] }> => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((x) => {
+      const v = asObject(x);
+      return {
+        title: String(v.title ?? v.position ?? ''),
+        company: v.company ? String(v.company) : undefined,
+        period: v.period ? String(v.period) : (v.duration ? String(v.duration) : undefined),
+        description: v.description ? String(v.description) : undefined,
+        outcomes: toStringArray(v.outcomes),
+      };
+    });
+  };
+  const normalizeEducation = (arr: unknown): Array<{ degree: string; school: string; period?: string; gpa?: string; relevant_courses: string[]; outcomes: string[] }> => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((e) => {
+      const v = asObject(e);
+      return {
+        degree: String(v.degree ?? ''),
+        school: String(v.school ?? v.institution ?? ''),
+        period: v.period ? String(v.period) : (v.duration ? String(v.duration) : undefined),
+        gpa: v.gpa ? String(v.gpa) : undefined,
+        relevant_courses: toStringArray(v.relevant_courses ?? v.courses),
+        outcomes: toStringArray(v.outcomes),
+      };
+    });
+  };
+  const normalizeProjects = (arr: unknown): Array<{ name: string; description?: string; technologies: string[]; outcomes: string[] }> => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((p) => {
+      const v = asObject(p);
+      return {
+        name: String(v.name ?? ''),
+        description: v.description ? String(v.description) : undefined,
+        technologies: toStringArray(v.technologies),
+        outcomes: toStringArray(v.outcomes),
+      };
+    });
+  };
+  const normalizeSkills = (arr: unknown): Array<{ category: string; items: string[] }> => {
+    if (!Array.isArray(arr)) return [];
+    return arr.map((s) => {
+      const v = asObject(s);
+      return {
+        category: String(v.category ?? ''),
+        items: toStringArray(v.items ?? v.skills),
+      };
+    });
+  };
+
+  const normalized = {
+    ...obj,
+    resume: {
+      personalInfo: resume.personalInfo ? {
+        name: asObject(resume.personalInfo).name ? String(asObject(resume.personalInfo).name) : '',
+        title: asObject(resume.personalInfo).title ? String(asObject(resume.personalInfo).title) : '',
+        email: asObject(resume.personalInfo).email ? String(asObject(resume.personalInfo).email) : '',
+        phone: asObject(resume.personalInfo).phone ? String(asObject(resume.personalInfo).phone) : '',
+        location: asObject(resume.personalInfo).location ? String(asObject(resume.personalInfo).location) : '',
+        links: asObject(resume.personalInfo).links ? {
+          linkedin: asObject(asObject(resume.personalInfo).links).linkedin ? String(asObject(asObject(resume.personalInfo).links).linkedin) : '',
+          github: asObject(asObject(resume.personalInfo).links).github ? String(asObject(asObject(resume.personalInfo).links).github) : '',
+          website: asObject(asObject(resume.personalInfo).links).website ? String(asObject(asObject(resume.personalInfo).links).website) : '',
+          portfolio: asObject(asObject(resume.personalInfo).links).portfolio ? String(asObject(asObject(resume.personalInfo).links).portfolio) : ''
+        } : undefined,
+      } : undefined,
+      summary: resume.summary ? String(resume.summary) : '',
+      achievements: normalizeAchievements(resume.achievements),
+      experience: normalizeExperience(resume.experience),
+      education: normalizeEducation(resume.education),
+      projects: normalizeProjects(resume.projects),
+      skills: normalizeSkills(resume.skills),
+    },
+    highlights: Array.isArray(obj.highlights) ? obj.highlights : [],
+    issues: Array.isArray(obj.issues) ? obj.issues : [],
+    scores: Array.isArray(obj.scores) ? obj.scores : [],
+  } as AnyObject;
+
+  return normalized;
 }
 
-function getSystemPrompt(): string {
-  return `你是一位專業的履歷分析專家，請嚴格依指示輸出有效 JSON，嚴禁幻覺與補造資料。`;
+function getSystemPrompt(locale?: string): string {
+  return generateUnifiedSystemPrompt({ locale });
 }
 
 function buildFormDataText(
@@ -71,7 +153,6 @@ function buildFormDataText(
 }
 
 export async function POST(request: NextRequest) {
-  // derive service_type from URL
   const pathname = new URL(request.url).pathname;
   const match = pathname.match(/\/api\/analyze\/(create|optimize)/);
   if (!match) return NextResponse.json({ error: 'invalid service_type' }, { status: 400 });
@@ -101,10 +182,13 @@ export async function POST(request: NextRequest) {
     const isMultipart = (request.headers.get('content-type') || '').includes('multipart/form-data');
 
     let rawText = '';
+    const visionItems: VisionContentItem[] = [];
+    let locale: string = 'zh-tw';
     if (isMultipart) {
       const form = await request.formData();
       const files = form.getAll('files') as File[];
       const additionalText = (form.get('additionalText') as string) || '';
+      locale = ((form.get('locale') as string) || 'zh-tw').toLowerCase();
       const educationData = form.get('education') as string;
       const experienceData = form.get('experience') as string;
       const projectsData = form.get('projects') as string;
@@ -126,54 +210,53 @@ export async function POST(request: NextRequest) {
       try { if (personalInfoData) personalInfo = JSON.parse(personalInfoData); } catch {}
       try { if (linksData) links = JSON.parse(linksData); } catch {}
 
-      // Extract text from text-based files
       let textContent = '';
       for (const file of files) {
         const ext = file.name.split('.').pop()?.toLowerCase();
-        if (ext && (SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(ext)) {
+        if (!ext) continue;
+        if ((SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(ext)) {
           try {
             const content = await processTextFile(file);
             textContent += `檔案 ${file.name}:\n${content}\n\n`;
           } catch {}
+        } else if ((SUPPORTED_FILE_TYPES.IMAGES as readonly string[]).includes(ext) || (SUPPORTED_FILE_TYPES.PDF as readonly string[]).includes(ext)) {
+          try {
+            const base64 = await fileToBase64(file);
+            const mime = file.type || (ext === 'pdf' ? 'application/pdf' : 'image/jpeg');
+            visionItems.push({ type: 'image_url', image_url: { url: `data:${mime};base64,${base64}`, detail: 'high' } });
+          } catch {}
         }
       }
 
-      rawText = `${textContent}${buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links)}`.trim();
+      const ocrResult = visionItems.length
+        ? await callOpenAIJsonWithVision<{ text?: string }>(client, '你是一位專業 OCR 助手。請從使用者提供的圖片或 PDF 中精準擷取履歷文字內容，不要推測或發明內容。僅輸出 JSON 物件：{"text": string}。', visionItems, '請擷取以下所有檔案中的可讀文字，按閱讀順序合併。')
+        : { text: '' };
+
+      rawText = `${textContent}${ocrResult.text || ''}\n\n${buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links)}`.trim();
     } else {
       const body = await request.json().catch(() => ({}));
       rawText = (body.resume as string) || (body.text as string) || '';
+      if (typeof (body as AnyObject).locale === 'string') locale = String((body as AnyObject).locale).toLowerCase();
     }
 
     if (!rawText) {
       return NextResponse.json({ error: '缺少必要參數: resume/text 或無法從檔案中提取文字' }, { status: 400 });
     }
 
-    const systemPrompt = getSystemPrompt();
+    const systemPrompt = getSystemPrompt(locale);
 
-    let unified: UnifiedResumeAnalysisResult;
-
-    if (serviceType === 'create') {
-      const user = generateEvaluateResumeUserPrompt({
-        resume: { personalInfo: {}, summary: '', achievements: [], experience: [], education: [], projects: [], skills: [] } as UnifiedResume,
-        contextNote: `原始輸入：\n${rawText}`,
-      });
-      const result = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, systemPrompt, user);
-      unified = UnifiedResumeAnalysisSchema.parse(result);
-    } else {
-      const extractUser = generateExtractResumeUserPrompt({ rawText });
-      const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, systemPrompt, extractUser);
-
-      const evaluateUser = generateEvaluateResumeUserPrompt({ resume: extracted.resume });
-      const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, systemPrompt, evaluateUser);
-      unified = UnifiedResumeAnalysisSchema.parse(evaluated);
-    }
+    const extractUser = generateExtractResumeUserPrompt({ rawText });
+    const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, systemPrompt, extractUser);
+    const evaluateUser = generateEvaluateResumeUserPrompt({ resume: extracted.resume, contextNote: `locale=${locale}` });
+    const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, systemPrompt, evaluateUser);
+    const unifiedResult = UnifiedResumeAnalysisSchema.parse(normalizeUnifiedOutput(evaluated));
 
     try {
       if (serviceType === 'create') await logResumeBuild(`analyzed ${rawText.length} chars`);
       else await logResumeOptimize(`analyzed ${rawText.length} chars`);
     } catch {}
 
-    return NextResponse.json({ success: true, data: unified, type: 'text_analysis' });
+    return NextResponse.json({ success: true, data: unifiedResult, type: 'text_analysis' });
   } catch (error) {
     const message = error instanceof Error ? error.message : '未知錯誤';
     return NextResponse.json({ error: '履歷分析失敗', details: message }, { status: 500 });

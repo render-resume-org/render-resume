@@ -25,7 +25,7 @@ export interface ResumeTemplate {
     line: string;
   };
   layout: {
-    sections: Array<'summary' | 'skills' | 'experience' | 'projects' | 'education'>;
+    sections: Array<'summary' | 'skills' | 'experience' | 'projects' | 'education' | 'achievements'>;
   };
   styles: {
     header: string;
@@ -61,7 +61,7 @@ export const standardTemplate: ResumeTemplate = {
     line: 'mb-1',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills'],
+    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
   },
   styles: {
     header: 'mb-2',
@@ -98,7 +98,7 @@ export const latexTemplate: ResumeTemplate = {
     line: 'mb-1.5',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills'],
+    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
   },
   styles: {
     header: 'mb-2',
@@ -134,7 +134,7 @@ export const modernTemplate: ResumeTemplate = {
     line: 'mb-1',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills'],
+    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
   },
   styles: {
     header: 'mb-2',
