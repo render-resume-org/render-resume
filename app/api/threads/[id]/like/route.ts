@@ -40,7 +40,6 @@ export async function POST(_req: NextRequest, context: { params: Promise<{ id: s
       .eq("thread_id", threadId);
 
     const likesCount = count || 0;
-    await supabase.from("threads").update({ likes_count: likesCount }).eq("id", threadId);
 
     return NextResponse.json({ liked, likes_count: likesCount });
   } catch {

@@ -9,7 +9,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
     const { data: thread, error } = await supabase
       .from("threads")
-      .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count")
+      .select("id,user_id,content,created_at,parent_thread_id,views")
       .eq("id", id)
       .single();
 
@@ -19,7 +19,7 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
 
     const { data: comments } = await supabase
       .from("threads")
-      .select("id,user_id,content,created_at,parent_thread_id,views,likes_count,comments_count")
+      .select("id,user_id,content,created_at,parent_thread_id,views")
       .eq("parent_thread_id", id)
       .order("created_at", { ascending: true });
 
@@ -36,23 +36,57 @@ export async function GET(_req: NextRequest, context: { params: Promise<{ id: st
     const { data: authUser } = await supabase.auth.getUser();
     const likedIds = new Set<number>();
     if (authUser?.user) {
-      const { data: likes } = await supabase
-        .from("likes")
-        .select("thread_id")
-        .eq("user_id", authUser.user.id)
-        .in("thread_id", [thread.id, ...((comments || []).map(c => c.id))]);
-      (likes || []).forEach(l => likedIds.add(l.thread_id));
+      const allIds = [thread.id, ...((comments || []).map(c => c.id))];
+      if (allIds.length > 0) {
+        const { data: likes } = await supabase
+          .from("likes")
+          .select("thread_id")
+          .eq("user_id", authUser.user.id)
+          .in("thread_id", allIds);
+        (likes || []).forEach(l => l.thread_id && likedIds.add(l.thread_id));
+      }
     }
 
-    const threadDto = { ...thread, author: map[thread.user_id], is_liked_by_me: likedIds.has(thread.id) };
-    const commentsDto = (comments || []).map(c => ({ ...c, author: map[c.user_id], is_liked_by_me: likedIds.has(c.id) }));
+    // Compute likes for thread
+    const { data: likesForThread } = await supabase.from("likes").select("id").eq("thread_id", thread.id);
+    const threadLikes = (likesForThread || []).length;
+    const threadCommentsCount = (comments || []).length;
+
+    const threadDto = { ...thread, author: map[thread.user_id], is_liked_by_me: likedIds.has(thread.id), likes_count: threadLikes, comments_count: threadCommentsCount };
+
+    // Compute likes and children comments count for each comment
+    const commentIds = (comments || []).map(c => c.id);
+    const commentLikesCountMap: Record<number, number> = {};
+    const commentChildrenCountMap: Record<number, number> = {};
+    if (commentIds.length > 0) {
+      const [{ data: likesRows }, { data: childRows }] = await Promise.all([
+        supabase.from("likes").select("thread_id").in("thread_id", commentIds),
+        supabase.from("threads").select("parent_thread_id").in("parent_thread_id", commentIds),
+      ]);
+      (likesRows || []).forEach(l => {
+        if (!l.thread_id) return;
+        commentLikesCountMap[l.thread_id] = (commentLikesCountMap[l.thread_id] || 0) + 1;
+      });
+      (childRows || []).forEach(c => {
+        if (!c.parent_thread_id) return;
+        commentChildrenCountMap[c.parent_thread_id] = (commentChildrenCountMap[c.parent_thread_id] || 0) + 1;
+      });
+    }
+
+    const commentsDto = (comments || []).map(c => ({
+      ...c,
+      author: map[c.user_id],
+      is_liked_by_me: likedIds.has(c.id),
+      likes_count: commentLikesCountMap[c.id] || 0,
+      comments_count: commentChildrenCountMap[c.id] || 0,
+    }));
 
     return NextResponse.json({ thread: threadDto, comments: commentsDto });
-      } catch {
+  } catch {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-  
+
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuthentication();
@@ -82,20 +116,11 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         content,
         parent_thread_id: Number(id),
         views: 0,
-        likes_count: 0,
-        comments_count: 0,
       });
 
     if (insertErr) {
       return NextResponse.json({ error: insertErr.message }, { status: 500 });
     }
-
-    // increment parent comments_count
-    await supabase.rpc("noop"); // placeholder if no RPC; ignore errors
-    await supabase
-      .from("threads")
-      .update({ comments_count: (undefined as unknown as number) }) // will be ignored if no trigger; best-effort via SQL not supported here
-      .eq("id", Number(id));
 
     return NextResponse.json({ success: true });
   } catch {

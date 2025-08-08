@@ -1,9 +1,12 @@
 "use client";
 
 import ThreadCard, { ThreadData } from "@/components/forum/thread-card";
+import { ThreadSkeleton } from "@/components/forum/thread-skeleton";
 import ViewsTracker from "@/components/forum/views-tracker";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 async function fetchThread(id: number) {
@@ -24,6 +27,8 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ id: str
   const [comments, setComments] = useState<ThreadData[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [appending, setAppending] = useState(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -36,11 +41,13 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ id: str
   useEffect(() => {
     if (!id) return;
     (async () => {
+      setLoading(true);
       const data = await fetchThread(id);
       if (data) {
         setThread(data.thread);
         setComments(data.comments);
       }
+      setLoading(false);
     })();
   }, [id]);
 
@@ -55,10 +62,12 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ id: str
     if (!id) return;
     let cancelled = false;
     const run = async () => {
+      if (page > 1) setAppending(true);
       const resp = await fetchComments(id, page, 20);
       if (cancelled) return;
       setComments(prev => (page === 1 ? resp.comments : [...prev, ...resp.comments]));
       setHasMore(resp.comments.length > 0);
+      setAppending(false);
     };
     run();
     return () => { cancelled = true; };
@@ -77,6 +86,19 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ id: str
   }, [hasMore]);
 
   if (!id) return null;
+  if (loading) {
+    return (
+      <div className="container mx-auto px-3 sm:px-4 py-6">
+        <div className="max-w-2xl mx-auto space-y-4">
+          <ThreadSkeleton />
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ThreadSkeleton key={i} isComment />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (!thread) return <div className="container mx-auto px-3 sm:px-4 py-6">貼文不存在</div>;
 
   const handleCommentSubmit = async (formData: FormData) => {
@@ -120,29 +142,50 @@ export default function ThreadDetailPage({ params }: { params: Promise<{ id: str
   };
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 py-6 space-y-4">
-      <ViewsTracker threadId={Number(id)} />
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        <ThreadCard thread={thread} onUpdated={(tid, content) => { if (tid === thread.id) setThread({ ...thread, content }); }} />
-        {comments.map((c) => (
-          <ThreadCard key={c.id} thread={c} isComment onDeleted={handleDeleted} onUpdated={handleUpdated} />
-        ))}
-        <div ref={loaderRef} className="h-8" />
+    <div className="container mx-auto px-3 sm:px-4 py-6">
+      <div className="max-w-2xl mx-auto space-y-4">
+        <div className="flex items-center gap-2">
+          <Link href="/threads" className="inline-flex items-center gap-2 text-gray-600 hover:text-cyan-600 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> 返回
+          </Link>
+        </div>
+        <ViewsTracker threadId={Number(id)} />
+        <div className="rounded-xl overflow-hidden">
+          <ThreadCard thread={thread} onUpdated={(tid, content) => { if (tid === thread.id) setThread({ ...thread, content }); }} />
+          {comments.map((c) => (
+            <ThreadCard key={c.id} thread={c} isComment onDeleted={handleDeleted} onUpdated={handleUpdated} />
+          ))}
+          {appending && (
+            <div>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <ThreadSkeleton key={`append-${i}`} isComment />
+              ))}
+            </div>
+          )}
+          <div ref={loaderRef} className="h-8" />
+        </div>
+        <CommentComposer threadId={Number(id)} onSubmit={handleCommentSubmit} />
       </div>
-      <CommentComposer threadId={Number(id)} onSubmit={handleCommentSubmit} />
     </div>
   );
 }
 
-function CommentComposer({ onSubmit }: { threadId: number; onSubmit: (formData: FormData) => void }) {
+function CommentComposer({ threadId, onSubmit }: { threadId: number; onSubmit: (formData: FormData) => void }) {
+  const [value, setValue] = useState("");
+  const [pending, setPending] = useState(false);
   return (
     <form
-      className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 space-y-3"
-      action={onSubmit}
+      className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 space-y-3"
+      action={async (fd) => {
+        setPending(true);
+        await onSubmit(fd);
+        setPending(false);
+        setValue("");
+      }}
     >
-      <Textarea name="content" placeholder="發表回應" className="min-h-[5rem]" />
+      <Textarea name="content" value={value} onChange={(e) => setValue(e.target.value)} placeholder="發表回應" className="min-h-[4.5rem]" />
       <div className="flex justify-end">
-        <Button type="submit" className="bg-cyan-600 hover:bg-cyan-700">回應</Button>
+        <Button type="submit" disabled={pending} aria-busy={pending} className="bg-cyan-600 hover:bg-cyan-700">{pending ? "回應中..." : "回應"}</Button>
       </div>
     </form>
   );
