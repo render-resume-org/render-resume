@@ -96,7 +96,7 @@ export default function NewThreadForm({ onCreated, variant = "standalone" }: New
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="分享你的求職經驗、履歷問題或面試心得..."
+              placeholder="提出功能回饋、發問使用問題，或與社群夥伴討論你的想法..."
               className={cn(
                 "bg-transparent min-h-[3.25rem]",
                 "rounded-none px-0 border-0 border-b border-gray-200 dark:border-gray-800",

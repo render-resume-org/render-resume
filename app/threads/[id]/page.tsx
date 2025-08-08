@@ -189,7 +189,7 @@ function CommentComposer({ onSubmit }: { onSubmit: (formData: FormData) => void 
         name="content"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="發表回應"
+        placeholder="分享你的看法或補充建議，和社群一起討論..."
         className={cn(
           "bg-transparent min-h-[3rem]",
           "rounded-none px-0 border-0 border-b border-gray-200 dark:border-gray-800",
