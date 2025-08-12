@@ -31,7 +31,7 @@ export function generatePageMetadata({
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構，為求職者提供個性化履歷優化建議。",
   keywords = [],
   canonicalUrl,
-  ogImage = "/og-image.png",
+  ogImage = "/og-cover.png",
   ogType = "website",
   twitterCard = "summary_large_image",
   noIndex = false,
@@ -136,7 +136,7 @@ export function SEOHead({
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
   keywords = [],
   canonicalUrl,
-  ogImage = "/og-image.png",
+  ogImage = "/og-cover.png",
   structuredData,
   noIndex = false,
   noFollow = false
@@ -148,7 +148,65 @@ export function SEOHead({
   const fullOgImage = ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`;
 
   const defaultKeywords = [
-    "AI履歷生成器", "履歷優化", "CV生成", "求職工具", "STAR原則"
+    // Primary AI Resume Builder Keywords
+    "AI resume builder", "AI resume generator", "AI resume maker", "AI resume creator",
+    "AI-powered resume builder", "AI resume writing tool", "AI resume optimization",
+    "AI resume analyzer", "AI resume scanner", "AI resume parser", "AI resume checker",
+    "AI resume grader", "AI resume scorer", "AI resume evaluator", "AI resume reviewer",
+    
+    // AI Resume Builder Dependencies and Related Terms
+    "machine learning resume", "artificial intelligence resume", "AI career tools",
+    "smart resume builder", "intelligent resume maker", "automated resume creation",
+    "AI job application", "AI career assistant", "AI job search tool", "AI hiring tool",
+    "AI recruitment tool", "AI talent acquisition", "AI candidate screening",
+    "AI resume matching", "AI job matching", "AI career optimization",
+    
+    // Advanced AI Resume Features
+    "AI resume templates", "AI resume customization", "AI resume personalization",
+    "AI resume suggestions", "AI resume recommendations", "AI resume improvements",
+    "AI resume enhancement", "AI resume refinement", "AI resume editing",
+    "AI resume formatting", "AI resume design", "AI resume layout",
+    "AI resume structure", "AI resume content", "AI resume keywords",
+    
+    // AI Resume Analysis and Scoring
+    "AI resume analysis", "AI resume assessment", "AI resume evaluation",
+    "AI resume scoring", "AI resume rating", "AI resume grading",
+    "AI resume feedback", "AI resume insights", "AI resume metrics",
+    "AI resume performance", "AI resume quality", "AI resume effectiveness",
+    "AI resume optimization", "AI resume improvement", "AI resume enhancement",
+    
+    // AI Resume Technology Stack
+    "natural language processing resume", "NLP resume builder", "AI text analysis",
+    "machine learning resume builder", "deep learning resume", "AI content generation",
+    "AI writing assistant", "AI career coach", "AI job counselor", "AI career advisor",
+    "AI professional development", "AI skill assessment", "AI competency analysis",
+    
+    // AI Resume Industry Applications
+    "AI resume for tech jobs", "AI resume for software engineers", "AI resume for developers",
+    "AI resume for data scientists", "AI resume for marketing", "AI resume for sales",
+    "AI resume for finance", "AI resume for healthcare", "AI resume for education",
+    "AI resume for consulting", "AI resume for startups", "AI resume for Fortune 500",
+    
+    // AI Resume User Experience
+    "easy AI resume builder", "simple AI resume maker", "quick AI resume generator",
+    "fast AI resume creator", "instant AI resume builder", "one-click AI resume",
+    "automated AI resume", "smart AI resume tool", "intelligent AI resume builder",
+    "user-friendly AI resume", "intuitive AI resume maker", "accessible AI resume builder",
+    
+    // AI Resume Benefits and Outcomes
+    "AI resume success", "AI resume results", "AI resume outcomes", "AI resume impact",
+    "AI resume effectiveness", "AI resume performance", "AI resume quality",
+    "AI resume improvement", "AI resume enhancement", "AI resume optimization",
+    "AI resume refinement", "AI resume perfection",
+    
+    // Chinese/Traditional Chinese keywords
+    "AI履歷生成器", "履歷優化", "CV生成", "求職工具", "STAR原則", 
+    "履歷分析", "AI求職助手", "專業履歷", "履歷模板", "職涯發展",
+    
+    // English resume and job search keywords
+    "resume builder", "CV maker", "AI career tools", "job search",
+    "professional resume", "career development", "resume optimization",
+    "Render Resume", "Render", 'Resume'
   ];
 
   const allKeywords = [...defaultKeywords, ...keywords];
@@ -223,7 +281,7 @@ export const createOrganizationSchema = (baseUrl: string) => ({
   "contactPoint": {
     "@type": "ContactPoint",
     "contactType": "customer service",
-    "email": "support@renderresume.com"
+    "email": "info@render-resume.com"
   }
 });
 
@@ -252,13 +310,85 @@ export const createSoftwareApplicationSchema = (baseUrl: string) => ({
     "STAR methodology framework",
     "Personalized optimization suggestions",
     "Fortune 500 enterprise standards",
-    "Multi-language support"
+    "Multi-language support",
+    "AI resume builder",
+    "AI resume generator",
+    "AI resume maker",
+    "AI resume creator",
+    "AI resume optimization",
+    "AI resume analysis",
+    "AI resume scoring",
+    "AI resume templates",
+    "AI resume customization",
+    "AI resume personalization",
+    "Machine learning resume builder",
+    "Natural language processing resume",
+    "AI career tools",
+    "AI job application",
+    "AI career assistant",
+    "AI job search tool",
+    "AI hiring tool",
+    "AI recruitment tool",
+    "AI talent acquisition",
+    "AI candidate screening",
+    "AI resume matching",
+    "AI job matching",
+    "AI career optimization",
+    "AI writing assistant",
+    "AI career coach",
+    "AI job counselor",
+    "AI career advisor",
+    "AI professional development",
+    "AI skill assessment",
+    "AI competency analysis",
+    "ATS resume optimization",
+    "Applicant tracking system",
+    "Resume keywords",
+    "Job application",
+    "Resume scanner",
+    "Resume parser",
+    "Job matching",
+    "Career coach",
+    "Interview preparation",
+    "Job interview tips",
+    "Resume templates",
+    "Cover letter generator",
+    "LinkedIn optimization",
+    "Job board",
+    "Career advice"
   ],
   "aggregateRating": {
     "@type": "AggregateRating",
     "ratingValue": "4.8",
     "ratingCount": "10000",
     "bestRating": "5"
-  }
+  },
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "name": "AI Technology",
+      "value": "Machine Learning, Natural Language Processing, Artificial Intelligence"
+    },
+    {
+      "@type": "PropertyValue", 
+      "name": "Methodology",
+      "value": "STAR Framework, Fortune 500 Standards, Six-Dimensional Scoring"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Target Audience",
+      "value": "Job seekers, Career professionals, Students, Recent graduates"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Industries Supported",
+      "value": "Technology, Finance, Healthcare, Education, Marketing, Sales, Consulting"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Languages Supported",
+      "value": "Traditional Chinese, English, Simplified Chinese"
+    }
+  ]
 }); 
  

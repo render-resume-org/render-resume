@@ -22,11 +22,16 @@ export default function Footer() {
 
           {/* Features Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">功能</h3>
+            <h3 className="text-lg font-semibold mb-4">產品</h3>
             <ul className="space-y-2">
                 <li>
                 <Link href="/resume-builder" className="text-gray-400 hover:text-cyan-400 transition-colors">
                     AI 履歷編輯器
+                </Link>
+                </li>
+                <li>
+                <Link href="/pricing" className="text-gray-400 hover:text-cyan-400 transition-colors">
+                    價格方案
                 </Link>
                 </li>
             </ul>
@@ -36,11 +41,6 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">團隊</h3>
             <ul className="space-y-2">
-              <li>
-                <Link href="/about" className="text-gray-400 hover:text-cyan-400 transition-colors">
-                  關於我們
-                </Link>
-              </li>
               <li>
                 <Link href="/faq" className="text-gray-400 hover:text-cyan-400 transition-colors">
                   常見問題

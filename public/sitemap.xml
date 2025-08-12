@@ -55,12 +55,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://render-resume.com/about</loc>
-    <lastmod>2025-06-26T00:00:00+00:00</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://render-resume.com/contact</loc>
     <lastmod>2025-06-26T00:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>

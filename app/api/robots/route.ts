@@ -11,7 +11,6 @@ Allow: /auth/login
 Allow: /auth/sign-up
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 Allow: /privacy
 Allow: /terms
 
@@ -35,31 +34,26 @@ User-agent: GPTBot
 Allow: /
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 
 User-agent: ChatGPT-User
 Allow: /
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 
 User-agent: CCBot
 Allow: /
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 
 User-agent: Claude-Web
 Allow: /
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 
 User-agent: anthropic-ai
 Allow: /
 Allow: /faq
 Allow: /resume-builder
-Allow: /about
 
 # Sitemap location
 Sitemap: ${baseUrl}/sitemap.xml

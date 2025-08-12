@@ -91,7 +91,7 @@ export function UsageStats() {
             <BarChart3 className="h-4 w-4" />
             使用統計
           </h3>
-          <Link href="/profile">
+          <Link href="/account-settings">
             <Button
               variant="ghost"
               size="sm"

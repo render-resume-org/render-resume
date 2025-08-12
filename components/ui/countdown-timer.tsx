@@ -35,7 +35,7 @@ const CountdownNumber = ({ value, unit }: { value: number; unit: string }) => {
 };
 
 const CountdownTimer = () => {
-  const launchDate = new Date('2025-08-04T00:00:00+08:00').getTime();
+  const launchDate = new Date('2025-08-04T18:00:00+08:00').getTime();
   const startDate = new Date('2025-06-27T00:00:00+08:00').getTime();
 
   const [timeLeft, setTimeLeft] = useState({

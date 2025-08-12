@@ -21,8 +21,8 @@ export async function GET(
     
     // 如果查看自己的資料，直接返回當前用戶資料
     if (targetUserId === currentUser.id) {
-      // 記錄用戶查看個人資料的活動
-      await logUserAction('view profile', '查看自己的個人資料', `/profile/${targetUserId}`);
+      // 記錄用戶查看帳戶設定的活動
+      await logUserAction('view account settings', '查看自己的帳戶設定', `/account-settings/${targetUserId}`);
 
       // 從 users 表獲取用戶資料
       const { data: dbUser } = await supabase
@@ -114,7 +114,7 @@ export async function GET(
     }
 
     // 記錄管理員查看其他用戶資料的活動
-    await logUserAction('view profile', `查看 ${targetUser.display_name || targetUser.email} 的個人資料`, `/profile/${targetUserId}`);
+    await logUserAction('view account settings', `查看 ${targetUser.display_name || targetUser.email} 的帳戶設定`, `/account-settings/${targetUserId}`);
 
     // 獲取目標用戶的當前方案（管理員查看）
     const { data: subscriptions } = await supabase

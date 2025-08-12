@@ -7,14 +7,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Menu, TestTubeDiagonal, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserDropdown } from "./user-dropdown";
 
+const NAVIGATIONS = [
+  { name: "儀表板", href: "/dashboard" },
+];
+
 const AppHeader = () => {
-  const pathname = usePathname();
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -23,38 +25,6 @@ const AppHeader = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
-  
-  // 計算進度
-  const getProgress = () => {
-    const progressMap: { [key: string]: number } = {
-      '/service-selection': 1,
-      '/upload': 10,
-      '/analyze': 20,
-      '/results': 40,
-      '/smart-chat': 60,
-      '/suggestions': 80,
-      '/preview': 100,
-    };
-    return progressMap[pathname] || -1;
-  };
-
-  const getStepName = () => {
-    const stepMap: { [key: string]: string } = {
-      '/': '歡迎',
-      '/service-selection': '選擇服務',
-      '/upload': '上傳作品',
-      '/analyze': '分析中',
-      '/results': '分析完成',
-      '/smart-chat': '智慧問答',
-      '/suggestions': '優化建議',
-      '/preview': '履歷生成',
-    };
-    return stepMap[pathname] || '處理中';
-  };
-
-  const progress = getProgress();
-  const stepName = getStepName();
 
   const handleSignOut = async () => {
     try {
@@ -84,66 +54,61 @@ const AppHeader = () => {
     <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-3 sm:px-4 py-3">
         <div className="flex items-center justify-between min-w-0">
-          {/* Brand Logo & Name */}
-          <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
-            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Image
-                src="/images/logo-transparent.png"
-                alt="RenderResume Logo"
-                width={1024}
-                height={1024}
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                  RenderResume
-                </h1>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span 
-                      className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95"
-                      onClick={handleBetaBadgeClick}
-                    >
-                      <TestTubeDiagonal className="h-3 w-3" />
-                      Beta
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>點擊查看 Beta 詳情</p>
-                  </TooltipContent>
-                </Tooltip>
+          {/* Brand Logo & Name & Navigation */}
+          <div className="flex items-center space-x-6 lg:space-x-8 flex-shrink-0 min-w-0">
+            <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 min-w-0">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Link href="/">
+                  <Image
+                    src="/images/logo-transparent.png"
+                    alt="RenderResume Logo"
+                    width={1024}
+                    height={1024}
+                    className="w-full h-full object-contain"
+                    />
+                </Link>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                懶得履歷．AI 履歷生成器
-              </p>
-            </div>
-          </Link>
-
-          
-
-          {/* Desktop Progress Section */}
-          {progress >= 0 && (
-            <div className="hidden md:flex flex-1 items-center justify-center max-w-md mx-8 min-w-0">
-              <div className="w-full">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                    {stepName}
-                  </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-                    {progress}%
-                  </span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <Link href="/">
+                    <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                      RenderResume
+                    </h1>
+                  </Link>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span 
+                        className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded flex items-center gap-1 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-300 active:scale-95"
+                        onClick={handleBetaBadgeClick}
+                      >
+                        <TestTubeDiagonal className="h-3 w-3" />
+                        Beta
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>點擊查看 Beta 詳情</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div 
-                    className="bg-cyan-600 h-2 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
-                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
+                  懶得履歷．AI 履歷生成器
+                </p>
               </div>
             </div>
-          )}
+
+            {/* Navigation Buttons */}
+            <div className="hidden sm:flex items-center space-x-4 lg:space-x-4">
+              {NAVIGATIONS.map((nav) => (
+                <Link 
+                  key={nav.href}
+                  href={nav.href}
+                  className="text-gray-700 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-cyan-600 transition-colors"
+                >
+                  {nav.name}
+                </Link>
+              ))}
+            </div>
+          </div>
 
           {/* Desktop Auth Section & Theme Switcher */}
           <div className="hidden md:flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
@@ -175,6 +140,22 @@ const AppHeader = () => {
           {/* Mobile Menu Button & Theme Switcher */}
           <div className="flex md:hidden items-center space-x-1 flex-shrink-0">
             <ThemeSwitcher />
+            {mounted && isAuthenticated && user && (
+              <Button asChild variant="ghost" size="sm" className="p-2 flex-shrink-0">
+                <Link href={`/account-settings/${user.id}`}>
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <span className="text-white font-medium text-xs">
+                      {(user.display_name || user.email?.split('@')[0] || 'U')
+                        .split(' ')
+                        .map(word => word[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
+                    </span>
+                  </div>
+                </Link>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -191,79 +172,35 @@ const AppHeader = () => {
           </div>
         </div>
 
-        {/* Mobile Progress Section */}
-        {progress >= 0 && (
-          <div className="mt-3 md:hidden">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-                {stepName}
-              </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">
-                {Math.round(progress)}%
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-              <div 
-                className="bg-cyan-600 h-2 rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          </div>
-        )}
-
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="mt-4 md:hidden border-t border-gray-200 dark:border-gray-700 pt-4">
+            {/* Mobile Navigation Buttons */}
+            <div className="space-y-2 px-2 mb-4">
+              {NAVIGATIONS.map((nav) => (
+                <Button 
+                  key={nav.href}
+                  asChild 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-base font-medium"
+                >
+                  <Link 
+                    href={nav.href} 
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {nav.name}
+                  </Link>
+                </Button>
+              ))}
+            </div>
+
             {!mounted || loading ? (
               <div className="flex justify-center py-4">
                 <div className="w-6 h-6 border-2 border-gray-300 border-t-cyan-600 rounded-full animate-spin"></div>
               </div>
             ) : isAuthenticated && user ? (
               <div className="space-y-4">
-                {/* User Info Display */}
-                <div className="flex items-center justify-between px-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-medium text-sm">
-                        {(user.display_name || user.email?.split('@')[0] || 'U')
-                          .split(' ')
-                          .map(word => word[0])
-                          .join('')
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                        {user.display_name || user.email?.split('@')[0] || 'User'}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Mobile Pro Badge */}
-                  <ProBadge 
-                    planType={user?.currentPlan?.type} 
-                    userPlan={user?.currentPlan?.type} 
-                    className="flex-shrink-0" 
-                  />
-                </div>
-
-                {/* Navigation Links */}
-                <div className="space-y-2 px-2">
-                  <Button asChild variant="ghost" size="sm" className="w-full justify-start">
-                    <Link href={`/profile/${user.id}`} onClick={() => setIsMobileMenuOpen(false)}>
-                      個人資料
-                    </Link>
-                  </Button>
-                  <Button asChild variant="ghost" size="sm" className="w-full justify-start">
-                    <Link href="/subscription" onClick={() => setIsMobileMenuOpen(false)}>
-                      訂閱
-                    </Link>
-                  </Button>
-                </div>
-
                 <Button
                   variant="outline"
                   size="sm"

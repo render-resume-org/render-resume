@@ -21,18 +21,6 @@ export default function HeroSection({ stats }: HeroSectionProps) {
       <div className="relative container mx-auto px-4 py-16 sm:py-24 text-center">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center flex-col md:flex-row justify-center gap-8">
-            {/* <div className="flex justify-center items-center">
-              <div className="h-32 w-32 p-4 rounded-full flex items-center justify-center">
-                <Image 
-                  src="/images/logo-transparent.png"
-                  alt="RenderResume Logo"
-                  width={1024}
-                  height={1024}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            </div> */}
-            
             <div className="flex flex-col justify-center items-center gap-6">
               <h1 className="text-nowrap text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white" itemProp="name">
                 讓 AI 為您打造
