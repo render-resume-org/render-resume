@@ -1,5 +1,12 @@
 "use client";
 
+/*
+  分析頁面
+  1. 讀取存在 sessionStorage 的履歷資料
+  2. 呼叫後端 `/api/analyze/{serviceType}` 進行 AI 解析，回傳 UnifiedResumeAnalysisResult
+  3. UI 顯示分析進度、成功摘要、錯誤提示與操作按鈕
+*/
+
 import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +36,16 @@ interface StoredFile {
 }
 
 export default function AnalyzePage() {
+  /*
+   頁面核心狀態說明：
+   currentStep：目前顯示的分析步驟（用於 UI 進度展示）
+   analysisComplete：是否完成分析
+   analysisResult：AI 回傳的統一化履歷分析結果
+   error：使用者可讀的錯誤訊息
+   isAnalyzing：是否正在分析（影響計時器與 UI）
+   analysisStartTime / analysisElapsedTime：計時相關
+   isVisible：進場動畫控制
+  */
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [analysisComplete, setAnalysisComplete] = useState(false);
@@ -39,6 +56,7 @@ export default function AnalyzePage() {
   const [analysisElapsedTime, setAnalysisElapsedTime] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
+  // 分析進度步驟：供 UI 展示目前進行到哪個階段
   const steps: { id: string; title: string; description: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'content', title: '內容識別', description: 'AI正在讀取和理解您的作品內容...', icon: FileText },
     { id: 'skills', title: '技能提取', description: '分析技術棧和專業技能...', icon: Code },
@@ -49,7 +67,8 @@ export default function AnalyzePage() {
     { id: 'recommendation', title: '評分與建議', description: '評分您的履歷，並提供建議...', icon: Bot },
     { id: 'optimization', title: '優化追問', description: '生成針對履歷潛在優化的追問...', icon: ArrowRight }
   ];
-
+  
+  // 檢查 FormDate 中的特定物件是否至少有一個非空值。
   const hasNonEmptyValues = (obj: PersonalInfo | Links): boolean => Object.values(obj).some(value => value && value.toString().trim() !== '');
 
   const getErrorMessage = (error: string): string => {
@@ -63,21 +82,33 @@ export default function AnalyzePage() {
     return `分析失敗：${error}。可能原因包括：文件內容無法識別、圖片解析度過低、文件格式不支援等。請檢查上傳的文件是否包含清晰的履歷內容，並考慮使用PDF或文字格式重新上傳。`;
   };
 
+  /*
+    核心分析流程：
+    1. 將 sbase64 檔案還原為 File
+    2. 組裝 FormData
+    3. 呼叫 `/api/analyze/{serviceType}` 並更新狀態。
+  */
   const startAnalysis = useCallback(async (files: StoredFile[], additionalText: string, education: Education[], experience: Experience[], projects: Project[], skills: string, personalInfo: PersonalInfo, links: Links, serviceType: 'create' | 'optimize') => {
     setIsAnalyzing(true);
     setError(null);
     setAnalysisStartTime(Date.now());
     setAnalysisElapsedTime(0);
+
     try {
       const fileObjects = files.map(storedFile => {
-        const base64Data = storedFile.content.split(',')[1];
-        const byteCharacters = atob(base64Data);
+        const base64Data = storedFile.content.split(',')[1]; // 取得純 Base64 字串
+        const byteCharacters = atob(base64Data); // 將 Base64 字串解碼為二進位字串
+
+        // 將二進位字串轉換成 byteArray
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) byteNumbers[i] = byteCharacters.charCodeAt(i);
         const byteArray = new Uint8Array(byteNumbers);
+
+        // 用 byteArray 建立 File object
         return new File([byteArray], storedFile.name, { type: storedFile.type, lastModified: storedFile.lastModified });
       });
 
+      // 組裝 formData
       const formData = new FormData();
       fileObjects.forEach(f => formData.append('files', f));
       if (additionalText) formData.append('additionalText', additionalText);
@@ -90,6 +121,7 @@ export default function AnalyzePage() {
       formData.append('useVision', 'true');
       formData.append('serviceType', serviceType);
 
+      // Call backend API 進行履歷分析，回傳得到 analysisResult
       const res = await fetch(`/api/analyze/${serviceType}`, { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || `HTTP ${res.status}`);
@@ -107,18 +139,26 @@ export default function AnalyzePage() {
     }
   }, [steps.length]);
 
+  // 分析進行中：每秒更新已耗時（mm:ss 顯示用）
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
     if (isAnalyzing && analysisStartTime) intervalId = setInterval(() => setAnalysisElapsedTime(Math.floor((Date.now() - analysisStartTime) / 1000)), 1000);
     return () => { if (intervalId) clearInterval(intervalId); };
   }, [isAnalyzing, analysisStartTime]);
 
+  // 將秒數格式化為 mm:ss。
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  /*
+    初始載入：
+    1. 從 sessionStorage 取得使用者輸入（檔案、補充說明、學經歷、技能、個資、連結、服務類型）
+    2. 若資料存在則立即觸發分析，否則導回 `/service-selection`
+    3. 啟動進場動畫
+  */
   useEffect(() => {
     const storedFilesData = sessionStorage.getItem('uploadedFiles');
     const storedAdditionalText = sessionStorage.getItem('additionalText');
@@ -150,8 +190,10 @@ export default function AnalyzePage() {
     setTimeout(() => setIsVisible(true), 100);
   }, [router, startAnalysis]);
 
+  // 路由切換時自動捲動至頁面頂端（提升視覺連貫性）
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [router]);
 
+  // 查看詳細結果：將分析結果存入 sessionStorage 並導向 `/results`
   const handleViewResults = () => {
     if (analysisResult) {
       sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
@@ -159,6 +201,7 @@ export default function AnalyzePage() {
     }
   };
 
+  // 重新分析：以同一批資料重置狀態後再呼叫分析 API
   const handleRetry = () => {
     const storedFilesData = sessionStorage.getItem('uploadedFiles');
     const storedAdditionalText = sessionStorage.getItem('additionalText') || '';
@@ -187,6 +230,7 @@ export default function AnalyzePage() {
     }
   };
 
+  // 計算技能數量（彙總履歷技能與專案技術，去重）
   const skillsCount = useMemo(() => {
     if (!analysisResult) return 0;
     const s1 = analysisResult.resume.skills?.flatMap(s => s.items || []) || [];
@@ -194,6 +238,7 @@ export default function AnalyzePage() {
     return new Set([...s1, ...s2]).size;
   }, [analysisResult]);
 
+  // 其他統計數字（專案、成就、工作經歷）
   const projectsCount = analysisResult?.resume.projects?.length || 0;
   const achievementsCount = analysisResult?.resume.achievements?.length || 0;
   const experiencesCount = analysisResult?.resume.experience?.length || 0;
@@ -201,6 +246,7 @@ export default function AnalyzePage() {
   return (
     <div className="h-fit py-2 md:py-8">
       <div className="container mx-auto px-4 max-w-4xl">
+        {/* 頂部標頭卡片：標題、分析計時與當前進度提示 */}
         <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 
           <CardHeader className="text-center">
             <div className="w-48 h-48 mx-auto mb-4 flex items-center justify-center transition-all duration-500 delay-300">
@@ -226,6 +272,7 @@ export default function AnalyzePage() {
               </p>}
             </div>
 
+            {/* 分析進行中：顯示當前步驟與動畫 */}
             <AnimatePresence mode="wait">
               {isAnalyzing && !analysisComplete && !error && (
                 <motion.div
@@ -262,6 +309,7 @@ export default function AnalyzePage() {
               )}
             </AnimatePresence>
 
+            {/* 分析完成：顯示統計摘要（技能、專案、成就、經歷） */}
             <AnimatePresence mode="wait">
               {analysisComplete && analysisResult && !error && (
                 <motion.div
@@ -311,6 +359,7 @@ export default function AnalyzePage() {
           </CardHeader>
         </Card>
 
+        {/* 錯誤狀態：顯示友善錯誤文案與操作按鈕 */}
         {error && !isAnalyzing && (
           <Card className="mb-8 border-red-200 dark:border-red-800 transition-all duration-700">
             <CardHeader>
@@ -348,6 +397,7 @@ export default function AnalyzePage() {
           </Card>
         )}
 
+        {/* 底部操作列：返回上傳、查看詳細結果 */}
         <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
           <Button 
             variant="outline" 

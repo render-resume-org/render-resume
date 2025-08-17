@@ -12,8 +12,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 interface AnyObject { [key: string]: unknown }
 
-function toStringArray(val: unknown): string[] { return Array.isArray(val) ? val.map(String) : []; }
+function toStringArray(v: unknown): string[] { return Array.isArray(v) ? v.map(String) : []; }
 function asObject(v: unknown): AnyObject { return (v && typeof v === 'object') ? (v as AnyObject) : {}; }
+/*
+  Normalize AI 回傳結果：
+  1. 修補欄位名稱差異（如 organization/orgnization、period/duration、school/institution）
+  2. 確保各陣列型別欄位皆為陣列
+  3. 字串化未知欄位，避免型別不一致造成驗證失敗
+*/
 function normalizeUnifiedOutput(result: unknown): unknown {
   if (!result || typeof result !== 'object') return result;
   const obj = asObject(result);
@@ -113,10 +119,12 @@ function normalizeUnifiedOutput(result: unknown): unknown {
   return normalized;
 }
 
+// 依據 locale 產生統一的 System Prompt
 function getSystemPrompt(locale?: string): string {
   return generateUnifiedSystemPrompt({ locale });
 }
 
+// 將 multipart 表單中的結構化欄位轉為可閱讀文字
 function buildFormDataText(
   additionalText?: string,
   education?: Education[],
@@ -153,11 +161,13 @@ function buildFormDataText(
 }
 
 export async function POST(request: NextRequest) {
+  // 從路由讀取 service_type(create/optimize)
   const pathname = new URL(request.url).pathname;
   const match = pathname.match(/\/api\/analyze\/(create|optimize)/);
   if (!match) return NextResponse.json({ error: 'invalid service_type' }, { status: 400 });
   const serviceType: 'create' | 'optimize' = match[1] as 'create' | 'optimize';
 
+  // 權限：需為已登入且 Pro 用戶
   const authResult = await requireProUser();
   if (!authResult.isAuthenticated || !authResult.isProUser) {
     return NextResponse.json(
@@ -170,21 +180,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // 用量限制檢查
   const usageResult = await checkUsageLimit();
   if (!usageResult.success) return usageResult.response!;
 
+  // 建立 OpenAI Client
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: 'OpenAI API 配置錯誤' }, { status: 500 });
 
   const client = createNativeOpenAIClient(apiKey);
 
   try {
+    // 根據 Content-Type 分成兩種情況處理：multipart（含檔案上傳）或 JSON（純文字輸入）
     const isMultipart = (request.headers.get('content-type') || '').includes('multipart/form-data');
 
     let rawText = '';
     const visionItems: VisionContentItem[] = [];
     let locale: string = 'zh-tw';
+    
     if (isMultipart) {
+      // 解析表單資料與檔案
       const form = await request.formData();
       const files = form.getAll('files') as File[];
       const additionalText = (form.get('additionalText') as string) || '';
@@ -203,6 +218,7 @@ export async function POST(request: NextRequest) {
       let personalInfo: PersonalInfo | null = null;
       let links: Links | null = null;
 
+      // 嘗試解析字串化的 JSON 欄位
       try { if (educationData) education = JSON.parse(educationData); } catch {}
       try { if (experienceData) experience = JSON.parse(experienceData); } catch {}
       try { if (projectsData) projects = JSON.parse(projectsData); } catch {}
@@ -215,11 +231,13 @@ export async function POST(request: NextRequest) {
         const ext = file.name.split('.').pop()?.toLowerCase();
         if (!ext) continue;
         if ((SUPPORTED_FILE_TYPES.DOCUMENTS as readonly string[]).includes(ext)) {
+          // 純文字文件：先在後端解析內容
           try {
             const content = await processTextFile(file);
             textContent += `檔案 ${file.name}:\n${content}\n\n`;
           } catch {}
         } else if ((SUPPORTED_FILE_TYPES.IMAGES as readonly string[]).includes(ext) || (SUPPORTED_FILE_TYPES.PDF as readonly string[]).includes(ext)) {
+          // 影像/PDF：先轉 base64，稍後用 Vision 進行 OCR 合併
           try {
             const base64 = await fileToBase64(file);
             const mime = file.type || (ext === 'pdf' ? 'application/pdf' : 'image/jpeg');
@@ -228,12 +246,17 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // 若有影像/PDF，使用 Vision 做 OCR 後與文本合併
       const ocrResult = visionItems.length
         ? await callOpenAIJsonWithVision<{ text?: string }>(client, '你是一位專業 OCR 助手。請從使用者提供的圖片或 PDF 中精準擷取履歷文字內容，不要推測或發明內容。僅輸出 JSON 物件：{"text": string}。', visionItems, '請擷取以下所有檔案中的可讀文字，按閱讀順序合併。')
         : { text: '' };
 
-      rawText = `${textContent}${ocrResult.text || ''}\n\n${buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links)}`.trim();
+      // 最終 rawText = 文件文字 + OCR 文字 + 表單結構化文字
+      const ocrText = ocrResult.text || '';
+      const separator = textContent && ocrText ? '\n\n' : '';
+      rawText = `${textContent}${separator}${ocrText}\n\n${buildFormDataText(additionalText, education, experience, projects, skills, personalInfo, links)}`.trim();
     } else {
+      // JSON 模式：從 body 取得 resume/text 與 locale
       const body = await request.json().catch(() => ({}));
       rawText = (body.resume as string) || (body.text as string) || '';
       if (typeof (body as AnyObject).locale === 'string') locale = String((body as AnyObject).locale).toLowerCase();
@@ -245,17 +268,24 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = getSystemPrompt(locale);
 
+    // 抽取（只產出 resume 結構）
     const extractUser = generateExtractResumeUserPrompt({ rawText });
     const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, systemPrompt, extractUser);
+
+    // 評估（產出 highlights/issues/scores，並可能微調 resume）
     const evaluateUser = generateEvaluateResumeUserPrompt({ resume: extracted.resume, contextNote: `locale=${locale}` });
     const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, systemPrompt, evaluateUser);
+
+    // Normalize AI 回傳結果
     const unifiedResult = UnifiedResumeAnalysisSchema.parse(normalizeUnifiedOutput(evaluated));
 
+    // 行為記錄：依 serviceType 分別記錄 build/optimize
     try {
       if (serviceType === 'create') await logResumeBuild(`analyzed ${rawText.length} chars`);
       else await logResumeOptimize(`analyzed ${rawText.length} chars`);
     } catch {}
 
+    // 回傳 unifiedResult
     return NextResponse.json({ success: true, data: unifiedResult, type: 'text_analysis' });
   } catch (error) {
     const message = error instanceof Error ? error.message : '未知錯誤';
