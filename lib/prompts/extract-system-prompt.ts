@@ -6,7 +6,7 @@ import { GRADING_CRITERIA, SCORE_CATEGORIES, SCORE_GRADES } from "@/lib/config/r
  * - Enumerates scoring categories and allowed grades
  * - Avoids prescribing output schemas (those live in user prompts)
  */
-export function generateUnifiedSystemPrompt(opts?: { locale?: string }): string {
+export function generateExtractSystemPrompt(opts?: { locale?: string }): string {
   const locale = (opts?.locale || 'zh-tw').toLowerCase();
   const categoriesList = SCORE_CATEGORIES.map(c => `${c.name}`).join('、');
   const grades = SCORE_GRADES.join(', ');
@@ -60,5 +60,3 @@ export function generateUnifiedSystemPrompt(opts?: { locale?: string }): string 
     `\n\n等第制評分標準：\n${gradeDescriptions}`
   );
 }
-
-

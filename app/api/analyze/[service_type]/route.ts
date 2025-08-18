@@ -2,9 +2,10 @@ import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
 import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
-import { generateEvaluateResumeUserPrompt } from '@/lib/prompts/analyze-evaluate-prompt';
-import { generateExtractResumeUserPrompt } from '@/lib/prompts/analyze-extract-prompt';
-import { generateUnifiedSystemPrompt } from '@/lib/prompts/unified-system-prompt';
+import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt';
+import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
+import { generateEvaluateSystemPrompt } from '@/lib/prompts/evaluate-system-prompt';
+import { generateEvaluateUserPrompt } from '@/lib/prompts/evaluate-user-prompt';
 import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/lib/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 import { checkUsageLimit } from '@/lib/utils/usage-check';
@@ -117,11 +118,6 @@ function normalizeUnifiedOutput(result: unknown): unknown {
   } as AnyObject;
 
   return normalized;
-}
-
-// 依據 locale 產生統一的 System Prompt
-function getSystemPrompt(locale?: string): string {
-  return generateUnifiedSystemPrompt({ locale });
 }
 
 // 將 multipart 表單中的結構化欄位轉為可閱讀文字
@@ -266,15 +262,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '缺少必要參數: resume/text 或無法從檔案中提取文字' }, { status: 400 });
     }
 
-    const systemPrompt = getSystemPrompt(locale);
-
     // 抽取（只產出 resume 結構）
-    const extractUser = generateExtractResumeUserPrompt({ rawText });
-    const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, systemPrompt, extractUser);
+    const extractUser = generateExtractUserPrompt({ rawText });
+    const extractSystem = generateExtractSystemPrompt({ locale });
+    const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, extractSystem, extractUser);
 
     // 評估（產出 highlights/issues/scores，並可能微調 resume）
-    const evaluateUser = generateEvaluateResumeUserPrompt({ resume: extracted.resume, contextNote: `locale=${locale}` });
-    const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, systemPrompt, evaluateUser);
+    const evaluateUser = generateEvaluateUserPrompt({ resume: extracted.resume, contextNote: `locale=${locale}` });
+    const evaluateSystem = generateEvaluateSystemPrompt({ locale });
+    const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, evaluateSystem, evaluateUser);
 
     // Normalize AI 回傳結果
     const unifiedResult = UnifiedResumeAnalysisSchema.parse(normalizeUnifiedOutput(evaluated));

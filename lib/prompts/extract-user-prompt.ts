@@ -1,4 +1,4 @@
-export function generateExtractResumeUserPrompt(input: { rawText?: string; note?: string; }): string {
+export function generateExtractUserPrompt(input: { rawText?: string; note?: string; }): string {
   const { rawText = '', note = '' } = input || {};
   return `請從以下履歷或資料中，精準抽取結構化「完整履歷內容」(resume)。
 嚴禁補造或推測，未知留空或省略。只輸出 JSON 的 resume 欄位，不要任何多餘文字。

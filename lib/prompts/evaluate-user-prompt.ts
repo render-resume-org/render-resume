@@ -1,6 +1,6 @@
 import { UnifiedResume } from '@/lib/types/resume-unified';
 
-export function generateEvaluateResumeUserPrompt(input: {
+export function generateEvaluateUserPrompt(input: {
   resume: UnifiedResume;
   contextNote?: string;
 }): string {
