@@ -1,8 +1,9 @@
 "use client";
 
-import { AnalysisScores } from "@/components/analysis-scores";
-import type { AnalysisScore } from '@/components/analysis/types';
+// import { AnalysisScores } from "@/components/analysis-scores";
+// import type { AnalysisScore } from '@/components/analysis/types';
 import { UnifiedResultsDetailedSections } from '@/components/analysis/unified-results-detailed-sections';
+import { ScoreSummaryCard } from '@/components/analysis/score-summary-card';
 import ResumePreview from '@/components/preview/resume-preview';
 import { Button } from "@/components/ui/button";
 import { getTemplateById } from '@/lib/config/resume-templates';
@@ -34,7 +35,7 @@ export default function ResultsPage() {
 
   // Aggregated skills no longer used directly in this page (preview component renders sections)
 
-  const analysisScores: AnalysisScore[] = (analysisResult?.scores || []) as unknown as AnalysisScore[];
+  // const analysisScores: AnalysisScore[] = (analysisResult?.scores || []) as unknown as AnalysisScore[];
   const previewData = analysisResult ? mapUnifiedToOptimized(analysisResult.resume) : null;
   const template = getTemplateById('standard');
 
@@ -49,9 +50,14 @@ export default function ResultsPage() {
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">AI 深度分析您的履歷內容，提供專業評分與改進建議</p>
         </div>
 
+        {/* AI 評分結果卡片 */}
+        <ScoreSummaryCard analysisResult={analysisResult} />
+
+        {/*
         <section className="mb-10">
           <AnalysisScores scores={analysisScores} />
         </section>
+        */}
 
         {/* Resume Preview (same component used in Preview page) */}
         {previewData && (

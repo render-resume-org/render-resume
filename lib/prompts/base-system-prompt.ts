@@ -12,7 +12,7 @@ ${criteriaText}`;
     }).join('\n\n');
 
     const gradeDescriptions = Object.entries(GRADING_CRITERIA)
-        .map(([grade, info]) => `- **${grade}**：${info.label}，${info.description}`)
+        .map(([grade, info]) => `- **${grade}**：${info.description}`)
         .join('\n');
 
     return `你是全球頂級人力資源諮詢公司的首席履歷分析專家，擁有超過15年的人才評估經驗，專門負責Fortune 500企業的高階主管與技術人才甄選。你的分析將直接影響候選人的職涯發展與企業的人才佈局決策。

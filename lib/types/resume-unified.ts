@@ -62,39 +62,29 @@ export const UnifiedResumeSchema = z.object({
 });
 
 export const UnifiedHighlightSchema = z.object({
+  excerpt: z.string(),
   title: z.string(),
-  description: z.string(),
-  excerpt: z.string().optional().default('')
+  description: z.string()
 });
 
 export const UnifiedIssueSchema = z.object({
+  excerpt: z.string(),
   title: z.string(),
   description: z.string(),
-  suggested_change: z.string(),
-  missing_information: z.string(),
-  impact: z.string(),
-  excerpt: z.string().optional().default('')
+  impact: z.string()
 });
 
 export const LetterGradeSchema = z.enum(['A+','A','A-','B+','B','B-','C+','C','C-','D','F']);
 
-export const UnifiedScoreSchema = z.object({
-  category: z.string(),
-  grade: LetterGradeSchema,
-  description: z.string(),
-  comment: z.string(),
-  suggestions: z.array(z.string()).default([])
-});
-
 export const UnifiedResumeAnalysisSchema = z.object({
   resume: UnifiedResumeSchema,
+  scores: LetterGradeSchema,
+  comment: z.string(),
   highlights: z.array(UnifiedHighlightSchema).default([]),
-  issues: z.array(UnifiedIssueSchema).default([]),
-  scores: z.array(UnifiedScoreSchema).default([])
+  issues: z.array(UnifiedIssueSchema).default([])
 });
 
 export type UnifiedResumeAnalysisResult = z.infer<typeof UnifiedResumeAnalysisSchema>;
 export type UnifiedResume = z.infer<typeof UnifiedResumeSchema>;
-export type UnifiedScore = z.infer<typeof UnifiedScoreSchema>;
 export type UnifiedIssue = z.infer<typeof UnifiedIssueSchema>;
 export type UnifiedHighlight = z.infer<typeof UnifiedHighlightSchema>;

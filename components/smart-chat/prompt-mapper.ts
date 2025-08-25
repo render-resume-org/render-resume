@@ -5,7 +5,7 @@ export function issuesToTemplates(issues: UnifiedIssue[], genId: (p: string) => 
   return (issues || []).map((issue) => ({
     id: genId('template'),
     title: issue.title,
-    description: issue.suggested_change || issue.description,
+    description: issue.description,
     category: '需改進',
     status: 'pending',
     originalFollowUp: issue.description,

@@ -54,8 +54,6 @@ export function UnifiedResultsDetailedSections({ analysisResult, hideResumeCard 
               <div key={i} className="rounded-lg border border-red-200 dark:border-red-900 bg-white dark:bg-gray-900 p-4 shadow-sm">
                 <div className="font-semibold text-gray-900 dark:text-white mb-1">{it.title}</div>
                 <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">{it.description}</p>
-                <div className="text-sm text-gray-800 dark:text-gray-200"><span className="font-medium">建議：</span>{it.suggested_change}</div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1"><span className="font-medium">缺失：</span>{it.missing_information}</div>
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1"><span className="font-medium">影響：</span>{it.impact}</div>
                 {it.excerpt && (
                   <blockquote className="text-xs text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/20 border-l-2 border-red-400 pl-2 py-1 rounded mt-2">

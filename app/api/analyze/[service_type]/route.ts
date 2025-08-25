@@ -114,7 +114,8 @@ function normalizeUnifiedOutput(result: unknown): unknown {
     },
     highlights: Array.isArray(obj.highlights) ? obj.highlights : [],
     issues: Array.isArray(obj.issues) ? obj.issues : [],
-    scores: Array.isArray(obj.scores) ? obj.scores : [],
+    scores: obj.scores ? String(obj.scores) : 'F',
+    comment: obj.comment ? String(obj.comment) : ''
   } as AnyObject;
 
   return normalized;
@@ -264,11 +265,11 @@ export async function POST(request: NextRequest) {
 
     // 抽取（只產出 resume 結構）
     const extractUser = generateExtractUserPrompt({ rawText });
-    const extractSystem = generateExtractSystemPrompt({ locale });
+    const extractSystem = generateExtractSystemPrompt();
     const extracted = await callOpenAIJson<{ resume: UnifiedResume }>(client, extractSystem, extractUser);
 
     // 評估（產出 highlights/issues/scores，並可能微調 resume）
-    const evaluateUser = generateEvaluateUserPrompt({ resume: extracted.resume, contextNote: `locale=${locale}` });
+    const evaluateUser = generateEvaluateUserPrompt(extracted.resume);
     const evaluateSystem = generateEvaluateSystemPrompt({ locale });
     const evaluated = await callOpenAIJson<UnifiedResumeAnalysisResult>(client, evaluateSystem, evaluateUser);
 

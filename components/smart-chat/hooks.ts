@@ -290,7 +290,7 @@ export function useTemplateManager(analysisResult: ResumeAnalysisResult | Unifie
       const templates: SuggestionTemplate[] = issues.map((issue) => ({
         id: generateUniqueId('template'),
         title: issue.title,
-        description: issue.suggested_change || issue.description,
+        description: issue.description,
         category: '需改進',
         status: 'pending' as const,
         originalFollowUp: issue.description,

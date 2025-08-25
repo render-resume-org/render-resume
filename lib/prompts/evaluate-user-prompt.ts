@@ -1,5 +1,25 @@
 import { UnifiedResume } from '@/lib/types/resume-unified';
 
+export function generateEvaluateUserPrompt(resume: UnifiedResume): string {
+  const resumeJson = JSON.stringify({ resume }, null, 2);
+  const userPrompt = `
+Analyze the following resume and produce the final analysis strictly in JSON format, fully aligned with <output_spec> and <language_rules>.
+- The resume field must exactly return the input JSON below without modification or omission.
+- Do not fabricate or alter any resume content.
+- Other fields (scores, comment, highlights, issues) must follow the detailed rules from the system prompt.
+
+Extracted resume:
+\`\`\`json
+${resumeJson}
+\`\`\`
+
+Output only valid JSON. No extra explanations.`;
+
+  return userPrompt;
+}
+
+/*
+暫時保留原始程式碼：
 export function generateEvaluateUserPrompt(input: {
   resume: UnifiedResume;
   contextNote?: string;
@@ -56,11 +76,11 @@ ${resumeJson}
 再次確認 resume 的結構化要求：
 - description 僅保留一句摘要或角色說明；
 - outcomes 為逐條要點清單，保留原量化與技術名詞，不要把多條合併到 description；
- 
+
 Highights 與 Issues 的對齊要求：
 - 所有 highlights 必須「具名」對應履歷細節（例如含專案/公司/技術/數字），description 語句需緊扣證據，excerpt 提供原文引用（1 句或 1 條要點）。
 - 所有 issues 必須指出具體段落缺失或可改善處，suggested_change 提供可直接寫入履歷的改寫句或補充方向；missing_information 僅列出欠缺的關鍵欄位（如規模、量化數據、工具、指標）；impact 說明對 ATS 或招募評估的實際影響；excerpt 引用對應的原文。
- - Issues 的命名需包含對應的實體參照（如專案/公司/角色/技術），並避免模糊、通用的表述；內容必須具體，不能只說「請補充」。若內容充足，至少涵蓋 5 項以上具名且具體的 issues。
+- Issues 的命名需包含對應的實體參照（如專案/公司/角色/技術），並避免模糊、通用的表述；內容必須具體，不能只說「請補充」。若內容充足，至少涵蓋 5 項以上具名且具體的 issues。
 ${ISSUES_FOLLOWUPS_GUIDE}
 
 評分與回覆格式（沿用舊規範，整合精簡）：
@@ -78,3 +98,4 @@ ${ISSUES_FOLLOWUPS_GUIDE}
 - resume 維持原始語言，不做翻譯。
 只輸出 JSON。`;
 }
+*/

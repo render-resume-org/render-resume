@@ -109,6 +109,7 @@ export default function AnalyzePage() {
       });
 
       // 組裝 formData
+      // !! 這裡還沒有加 locale
       const formData = new FormData();
       fileObjects.forEach(f => formData.append('files', f));
       if (additionalText) formData.append('additionalText', additionalText);
