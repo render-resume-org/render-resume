@@ -1,5 +1,5 @@
 // Main component
-export { ResumeScore } from "./resume-score";
+export { ResumeGrade } from "./resume-grade";
 export { ResumeComment } from "./resume-comment";
 
 // Sub-components

@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/hooks/use-auth";
-import { AnalysisIllustration } from "@/components/svg-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useAnimatedScores } from "./hooks";
@@ -10,11 +9,11 @@ import { LetterGrade } from "./types";
 import { getGradeColors, numberToGrade } from "./utils";
 import { Award } from "lucide-react";
 
-export function ResumeScore({ score }: { score: LetterGrade }) {
+export function ResumeGrade({ grade }: { grade: LetterGrade }) {
   const { user } = useAuth();
 
   // 使用自定義 Hooks
-  const { animatedScore, isVisible } = useAnimatedScores(score);
+  const { animatedScore, isVisible } = useAnimatedScores(grade);
 
   const gradeColors = getGradeColors();
 
@@ -73,7 +72,7 @@ export function ResumeScore({ score }: { score: LetterGrade }) {
                   {numberToGrade(animatedScore)}
                 </span>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {getGradeLevel(score)}
+                  {getGradeLevel(grade)}
                 </span>
               </div>
             </div>
@@ -83,7 +82,7 @@ export function ResumeScore({ score }: { score: LetterGrade }) {
         {/* 評語內容 - 置中 */}
         <div className="flex items-center justify-center">
           <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed transition-all duration-500 delay-1200 text-center">
-            {getGradeComment(score)}
+            {getGradeComment(grade)}
           </p>
         </div>
       </CardContent>

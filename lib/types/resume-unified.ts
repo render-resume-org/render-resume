@@ -70,15 +70,14 @@ export const UnifiedHighlightSchema = z.object({
 export const UnifiedIssueSchema = z.object({
   excerpt: z.string(),
   title: z.string(),
-  description: z.string(),
-  impact: z.string()
+  description: z.string()
 });
 
 export const LetterGradeSchema = z.enum(['A+','A','A-','B+','B','B-','C+','C','C-','D','F']);
 
 export const UnifiedResumeAnalysisSchema = z.object({
   resume: UnifiedResumeSchema,
-  scores: LetterGradeSchema,
+  grade: LetterGradeSchema,
   comment: z.string(),
   highlights: z.array(UnifiedHighlightSchema).default([]),
   issues: z.array(UnifiedIssueSchema).default([])

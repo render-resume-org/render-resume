@@ -114,7 +114,7 @@ function normalizeUnifiedOutput(result: unknown): unknown {
     },
     highlights: Array.isArray(obj.highlights) ? obj.highlights : [],
     issues: Array.isArray(obj.issues) ? obj.issues : [],
-    scores: obj.scores ? String(obj.scores) : 'F',
+    grade: obj.grade ? String(obj.grade) : 'F',
     comment: obj.comment ? String(obj.comment) : ''
   } as AnyObject;
 

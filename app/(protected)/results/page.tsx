@@ -1,6 +1,6 @@
 "use client";
 
-import { ResumeScore, ResumeComment } from "@/components/analysis";
+import { ResumeGrade, ResumeComment } from "@/components/analysis";
 import { UnifiedResultsDetailedSections } from '@/components/analysis/unified-results-detailed-sections';
 import ResumePreview from '@/components/preview/resume-preview';
 import { Button } from "@/components/ui/button";
@@ -48,7 +48,7 @@ export default function ResultsPage() {
         <section className="mb-10">
           <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch">
             <div className="lg:w-fit">
-              <ResumeScore score={analysisResult.scores} />
+              <ResumeGrade grade={analysisResult.grade} />
             </div>
             <div className="lg:flex-1">
               <ResumeComment comment={analysisResult.comment} />

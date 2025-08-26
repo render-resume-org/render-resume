@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { ANIMATION_CONFIG, GRADE_MAPPING } from "./constants";
 import { LetterGrade } from "./types";
 
-export function useAnimatedScores(overallGrade: LetterGrade) {
+export function useAnimatedScores(grade: LetterGrade) {
   const [animatedScore, setAnimatedScore] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -12,7 +12,7 @@ export function useAnimatedScores(overallGrade: LetterGrade) {
     setIsVisible(true);
 
     // 從 GRADE_MAPPING 獲取對應的數值
-    const targetScore = GRADE_MAPPING[overallGrade]?.value || 0;
+    const targetScore = GRADE_MAPPING[grade]?.value || 0;
 
     // 動畫整體分數
     const overallTimer = setTimeout(() => {
@@ -34,7 +34,7 @@ export function useAnimatedScores(overallGrade: LetterGrade) {
     return () => {
       clearTimeout(overallTimer);
     };
-  }, [overallGrade]);
+  }, [grade]);
 
   return { animatedScore, isVisible };
 } 
