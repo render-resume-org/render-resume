@@ -5,17 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 interface Props {
   analysisResult: UnifiedResumeAnalysisResult;
-  allSkills?: string[];
-  hideResumeCard?: boolean;
 }
 
-export function UnifiedResultsDetailedSections({ analysisResult, hideResumeCard = false }: Props) {
+export function ResumeHighlightsIssuesSection({ analysisResult }: Props) {
   const { highlights, issues } = analysisResult;
 
   return (
     <div className="space-y-8">
-      {hideResumeCard ? null : null}
-
       {/* Highlights Card */}
       <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <CardHeader>

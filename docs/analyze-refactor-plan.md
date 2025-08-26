@@ -42,7 +42,7 @@
 
 ## Frontend Changes
 - Update client API calls in `lib/api/resume-analysis.ts` to use `/api/analyze/[service_type]`.
-- Refactor `app/(protected)/results/page.tsx` and `components/analysis/results-detailed-sections.tsx` to render new `resume`, `highlights`, `issues`.
+- Refactor `app/(protected)/results/page.tsx` and `components/results/results-detailed-sections.tsx` to render new `resume`, `highlights`, `issues`.
 - Keep `AnalysisScores` unchanged.
 - Smart Chat templates now initialize from `analysisResult.issues`.
 

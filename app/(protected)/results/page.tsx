@@ -1,7 +1,6 @@
 "use client";
 
-import { ResumeGrade, ResumeComment } from "@/components/analysis";
-import { UnifiedResultsDetailedSections } from '@/components/analysis/unified-results-detailed-sections';
+import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/components/results";
 import ResumePreview from '@/components/preview/resume-preview';
 import { Button } from "@/components/ui/button";
 import { getTemplateById } from '@/lib/config/resume-templates';
@@ -64,7 +63,7 @@ export default function ResultsPage() {
                 <ResumePreview resumeData={previewData} template={template} editable={false} analysisResult={analysisResult} />
               </div>
               <div className="lg:w-96">
-                <UnifiedResultsDetailedSections analysisResult={analysisResult} hideResumeCard />
+                <ResumeHighlightsIssuesSection analysisResult={analysisResult} />
               </div>
             </div>
           </section>
