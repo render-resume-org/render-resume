@@ -1,6 +1,7 @@
 // Removed card components in redesign
 import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
 import { AlertTriangle, Lightbulb } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
   analysisResult: UnifiedResumeAnalysisResult;
@@ -15,58 +16,71 @@ export function UnifiedResultsDetailedSections({ analysisResult, hideResumeCard 
     <div className="space-y-8">
       {hideResumeCard ? null : null}
 
-      {/* Highlights - redesigned */}
-      <section>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300">
-            <Lightbulb className="h-4 w-4 mr-1" /> 亮點 Highlights
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Highlights Card */}
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            履歷亮點
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+            基於 AI 深度分析的亮點歸納
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
           {highlights?.length ? (
             highlights.map((h, i) => (
-              <div key={i} className="rounded-lg border border-yellow-200 dark:border-yellow-900 bg-white dark:bg-gray-900 p-4 shadow-sm">
-                <div className="font-semibold text-gray-900 dark:text-white mb-1">{h.title}</div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 leading-relaxed">{h.description}</p>
-                {h.excerpt && (
-                  <blockquote className="text-xs text-gray-600 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 border-l-2 border-yellow-400 pl-2 py-1 rounded">
-                    {h.excerpt}
-                  </blockquote>
-                )}
+              <div key={i} className="flex gap-4">
+                <div className="w-1 bg-yellow-500 rounded-full flex-shrink-0 min-h-[60px]"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="font-semibold text-foreground text-base">{h.title}</div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{h.description}</p>
+                  {h.excerpt && (
+                    <div className="text-xs text-gray-600 dark:text-gray-300 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded mt-3">
+                      {h.excerpt}
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           ) : (
-            <div className="text-sm text-gray-500">尚無亮點</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">尚無履歷亮點</div>
           )}
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      {/* Issues - redesigned */}
-      <section>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-            <AlertTriangle className="h-4 w-4 mr-1" /> 改進建議 Issues
-          </div>
-        </div>
-        <div className="space-y-4">
+      {/* Issues Card */}
+      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+            履歷問題
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-600 dark:text-gray-300">
+            基於 AI 深度分析的問題歸納
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
           {issues?.length ? (
             issues.map((it, i) => (
-              <div key={i} className="rounded-lg border border-red-200 dark:border-red-900 bg-white dark:bg-gray-900 p-4 shadow-sm">
-                <div className="font-semibold text-gray-900 dark:text-white mb-1">{it.title}</div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed mb-2">{it.description}</p>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1"><span className="font-medium">影響：</span>{it.impact}</div>
-                {it.excerpt && (
-                  <blockquote className="text-xs text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-900/20 border-l-2 border-red-400 pl-2 py-1 rounded mt-2">
-                    {it.excerpt}
-                  </blockquote>
-                )}
+              <div key={i} className="flex gap-4">
+                <div className="w-1 bg-red-500 rounded-full flex-shrink-0 min-h-[60px]"></div>
+                <div className="flex-1 space-y-2">
+                  <div className="font-semibold text-foreground text-base">{it.title}</div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{it.description}</p>
+                  {it.excerpt && (
+                    <div className="text-xs text-gray-600 dark:text-gray-300 bg-red-50 dark:bg-red-900/20 p-3 rounded mt-3">
+                      {it.excerpt}
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           ) : (
-            <div className="text-sm text-gray-500">尚無需改進之處</div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">尚無履歷問題</div>
           )}
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </div>
   );
 }

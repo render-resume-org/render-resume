@@ -1,9 +1,5 @@
 import { AnalysisScore, LetterGrade } from "@/lib/types/resume-analysis";
 
-export interface AnalysisScoresProps {
-  scores: AnalysisScore[];
-}
-
 export interface User {
   user_metadata?: {
     full_name?: string;

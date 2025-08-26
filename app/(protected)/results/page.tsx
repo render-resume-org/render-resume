@@ -1,15 +1,13 @@
 "use client";
 
-// import { AnalysisScores } from "@/components/analysis-scores";
-// import type { AnalysisScore } from '@/components/analysis/types';
+import { ResumeScore, ResumeComment } from "@/components/analysis";
 import { UnifiedResultsDetailedSections } from '@/components/analysis/unified-results-detailed-sections';
-import { ScoreSummaryCard } from '@/components/analysis/score-summary-card';
 import ResumePreview from '@/components/preview/resume-preview';
 import { Button } from "@/components/ui/button";
 import { getTemplateById } from '@/lib/config/resume-templates';
 import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -33,9 +31,6 @@ export default function ResultsPage() {
     setIsLoading(false);
   }, [router]);
 
-  // Aggregated skills no longer used directly in this page (preview component renders sections)
-
-  // const analysisScores: AnalysisScore[] = (analysisResult?.scores || []) as unknown as AnalysisScore[];
   const previewData = analysisResult ? mapUnifiedToOptimized(analysisResult.resume) : null;
   const template = getTemplateById('standard');
 
@@ -49,38 +44,48 @@ export default function ResultsPage() {
           <h1 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">履歷分析結果</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">AI 深度分析您的履歷內容，提供專業評分與改進建議</p>
         </div>
-
-        {/* AI 評分結果卡片 */}
-        <ScoreSummaryCard analysisResult={analysisResult} />
-
-        {/*
+        
         <section className="mb-10">
-          <AnalysisScores scores={analysisScores} />
+          <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch">
+            <div className="lg:w-fit">
+              <ResumeScore score={analysisResult.scores} />
+            </div>
+            <div className="lg:flex-1">
+              <ResumeComment comment={analysisResult.comment} />
+            </div>
+          </div>
         </section>
-        */}
 
         {/* Resume Preview (same component used in Preview page) */}
         {previewData && (
           <section className="mb-10">
-            <div className="flex justify-center">
-              <ResumePreview resumeData={previewData} template={template} editable={false} analysisResult={analysisResult} />
+            <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
+              <div className="lg:flex-1">
+                <ResumePreview resumeData={previewData} template={template} editable={false} analysisResult={analysisResult} />
+              </div>
+              <div className="lg:w-96">
+                <UnifiedResultsDetailedSections analysisResult={analysisResult} hideResumeCard />
+              </div>
             </div>
           </section>
         )}
 
-        {/* Highlights + Issues etc. */}
-        <section>
-          <UnifiedResultsDetailedSections analysisResult={analysisResult} hideResumeCard />
-        </section>
-
+        {/* Navigation */}
         <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => router.push('/analyze')}
-            className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-900"
+            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            返回
+            <ArrowLeft className="h-4 w-4" />
+            <span>上一步</span>
+          </Button>
+          <Button
+            onClick={() => router.push('/smart-chat')}
+            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
+          >
+            <span>下一步</span>
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
