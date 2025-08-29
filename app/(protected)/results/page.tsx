@@ -44,6 +44,7 @@ export default function ResultsPage() {
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">AI 深度分析您的履歷內容，提供專業評分與改進建議</p>
         </div>
         
+        {/* Resume grade and comment */}
         <section className="mb-10">
           <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch">
             <div className="lg:w-fit">
