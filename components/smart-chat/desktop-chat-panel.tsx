@@ -8,7 +8,7 @@ import ChatInput from "./chat-input";
 import { FullscreenImagePreview, UploadedFileCard } from "@/components/upload/uploaded-files-list";
 import type { UploadedFile } from "@/lib/upload-utils";
 import type { Variants } from "framer-motion";
-import { useEffect, useRef, useState, useMemo, memo } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
@@ -17,11 +17,8 @@ import type { ChatMessage, SuggestionRecord } from "./types";
 import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "./utils";
 
 interface DesktopChatPanelProps {
-  suggestions: SuggestionRecord[];
   suggestionTemplates: SuggestionTemplate[];
-  onQuote: (s: SuggestionRecord) => void;
   onQuoteTemplate: (t: SuggestionTemplate) => void;
-  onRemove: (id: string) => void;
   onRemoveTemplate: (id: string) => void;
   onComplete: () => void;
   messageCount: number;
@@ -96,14 +93,11 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
   // 直接複製原本 lg:flex 內的內容，將 props 替換為 props.xxx
   // ...
   return (
-    <div className="hidden lg:flex items-start gap-6 h-full">
+    <div className="hidden lg:flex items-stretch gap-6 h-full">
       {/* 左側建議面板 */}
       <AISuggestionsSidebar
-        suggestions={props.suggestions}
         suggestionTemplates={props.suggestionTemplates}
-        onQuote={props.onQuote}
         onQuoteTemplate={props.onQuoteTemplate}
-        onRemove={props.onRemove}
         onRemoveTemplate={props.onRemoveTemplate}
         onComplete={props.onComplete}
         messageCount={props.messageCount}
@@ -112,14 +106,14 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
         onToggleCollapse={props.onToggleSidebar}
       />
       {/* 右側聊天區域 */}
-      <div className="flex-1 h-full">
+      <div className="flex-1 min-w-0 h-full">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col">
           {/* Header */}
           <div className="px-6 py-2 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">AI 智慧問答</h2>
-              </div>
+            <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              自由詢問履歷相關問題，AI 助理 Remo 會記錄並提供具體建議
+            </div>
               <div className="flex items-center space-x-4">
                 <div className="text-sm text-gray-500">
                   {props.messageCount}/{CHAT_MESSAGE_LIMIT} 則對話
@@ -129,9 +123,7 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
                 </Button>
               </div>
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              自由詢問履歷相關問題，AI 助理 Remo 會記錄並提供具體建議
-            </div>
+            
           </div>
           {/* Chat Area */}
           <div className="flex-1 overflow-hidden">

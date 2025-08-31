@@ -2,6 +2,12 @@
 // 型別定義
 // =====================
 
+export interface PatchOp {
+  op: 'set';
+  path: string; // e.g., experience[0].achievements[1]
+  value: string; // full paragraph replacement
+}
+
 export interface ChatMessage {
   id: string;
   type: 'ai' | 'user' | 'file';
@@ -11,6 +17,7 @@ export interface ChatMessage {
     title: string;
     description: string;
     category: string;
+    patchOps?: PatchOp[]; // optional apply-ready operations
   };
   quickResponses?: string[];
   excerpt?: {
@@ -37,4 +44,17 @@ export interface SuggestionRecord {
   description: string;
   category: string;
   timestamp: Date;
+  patchOps?: PatchOp[]; // optional apply-ready operations
+}
+
+export interface SuggestionTemplate {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  originalFollowUp?: string; // 原始的 follow-up 問題
+  completedSuggestion?: SuggestionRecord; // 完成後的建議
+  timestamp: Date;
+  patchOps?: PatchOp[]; // optional apply-ready operations
 } 

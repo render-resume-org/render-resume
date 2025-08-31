@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
 import { Copy, Trash2 } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SuggestionRecord, SuggestionTemplate } from "./ai-suggestions-sidebar";
+import { SuggestionRecord, SuggestionTemplate } from "./types";
 
 const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
   if (!status) return 'bg-transparent';
@@ -29,20 +29,20 @@ const getStatusText = (status: SuggestionTemplate['status']) => {
 };
 
 interface SuggestionCardProps {
-  suggestion?: SuggestionRecord;
-  template?: SuggestionTemplate;
+  suggestion?: (SuggestionRecord & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
+  template?: (SuggestionTemplate & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
   onQuote: (item: SuggestionRecord | SuggestionTemplate) => void;
   onRemove: (id: string) => void;
   forceExpand?: boolean; // 新增
 }
 
 const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, template, onQuote, onRemove, forceExpand }) => {
-  const [collapsed, setCollapsed] = useState(true);
+  const isTemplate = !!template;
+  const [collapsed, setCollapsed] = useState(isTemplate ? true : false);
   const [contentHeight, setContentHeight] = useState<number>(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   // Unified fields
-  const isTemplate = !!template;
   const title = isTemplate
     ? (template!.status === 'completed' && template!.completedSuggestion ? template!.completedSuggestion.title : template!.title)
     : suggestion!.title;
@@ -69,6 +69,19 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, template, o
       setContentHeight(0);
     }
   }, [collapsed, title, description, category]);
+
+  // Auto-preview when patchOps are present (on mount or when they change)
+  const prevOpsStrRef = useRef<string | null>(null);
+  useEffect(() => {
+    try {
+      const patchOps = isTemplate ? template?.patchOps : suggestion?.patchOps;
+      const opsStr = JSON.stringify(patchOps || []);
+      if (patchOps && patchOps.length > 0 && opsStr !== prevOpsStrRef.current) {
+        window.dispatchEvent(new CustomEvent('resume-preview-patchops', { detail: { patchOps } }));
+        prevOpsStrRef.current = opsStr;
+      }
+    } catch {}
+  }, [isTemplate, template?.patchOps, suggestion?.patchOps]);
 
   // Prevent toggle during animation
   const handleAnimationStart = () => setIsAnimating(true);
@@ -153,6 +166,18 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, template, o
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 {description}
               </p>
+              {/* Show patchOps debug display for both suggestion and template */}
+              {((!isTemplate && suggestion?.patchOps && suggestion.patchOps.length > 0) || 
+                (isTemplate && template?.patchOps && template.patchOps.length > 0)) && (
+                <div className="mt-3 text-xs">
+                  <details className="group">
+                    <summary className="cursor-pointer select-none text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">查看 patchOps</summary>
+                    <pre className="mt-2 p-2 rounded bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words max-h-48 overflow-y-auto">
+{JSON.stringify(isTemplate ? template?.patchOps : suggestion?.patchOps, null, 2)}
+                    </pre>
+                  </details>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="flex items-center justify-between px-4 pb-2 pt-4">
               <div className="flex items-center gap-2">
@@ -167,6 +192,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, template, o
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0 ml-2" onClick={e => { e.stopPropagation(); }}>
+                {/* Auto-preview enabled; manual preview button removed */}
                 <Button
                   variant="ghost"
                   size="sm"

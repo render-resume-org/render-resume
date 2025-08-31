@@ -14,6 +14,10 @@ interface SectionProps<T = unknown> {
   data: T;
   template: ResumeTemplate;
   onEdit?: () => void;
+  inlineEditable?: boolean;
+  onInlineChange?: (next: unknown) => void;
+  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 
 type SectionComponent = React.ComponentType<SectionProps>;
@@ -40,13 +44,14 @@ interface SectionRendererProps {
   resumeData: OptimizedResume;
   template: ResumeTemplate;
   onEdit?: () => void;
+  analysisResult?: unknown;
 }
 
 /**
  * 優化的區段渲染器
  * 使用記憶化組件和數據驗證來提升性能
  */
-export function renderSection({ sectionName, resumeData, template, onEdit }: SectionRendererProps) {
+export function renderSection({ sectionName, resumeData, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SectionRendererProps & { inlineEditable?: boolean; onInlineChange?: (next: unknown) => void; highlightForPath?: (path: string) => 'set' | undefined; getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined; }) {
   const SectionComponent = SECTION_REGISTRY[sectionName];
   
   if (!SectionComponent) {
@@ -56,15 +61,100 @@ export function renderSection({ sectionName, resumeData, template, onEdit }: Sec
 
   const sectionData = resumeData[sectionName as keyof OptimizedResume];
   
-  // 檢查數據是否存在和有效
   if (!sectionData || 
       (Array.isArray(sectionData) && sectionData.length === 0) ||
       (typeof sectionData === 'string' && !sectionData.trim()) ||
-      (typeof sectionData === 'object' && Object.keys(sectionData).length === 0)) {
+      (typeof sectionData === 'object' && Object.keys(sectionData as object).length === 0)) {
     return null;
   }
 
-  return <SectionComponent data={sectionData} template={template} onEdit={onEdit} />;
+  if (sectionName === 'experience') {
+    const Experience = SECTION_REGISTRY.experience as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Experience
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        highlightForPath={highlightForPath}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  if (sectionName === 'projects') {
+    const Projects = SECTION_REGISTRY.projects as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Projects
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        highlightForPath={highlightForPath}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  if (sectionName === 'education') {
+    const Education = SECTION_REGISTRY.education as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Education
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  if (sectionName === 'achievements') {
+    const Achievements = SECTION_REGISTRY.achievements as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Achievements
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  if (sectionName === 'skills') {
+    const Skills = SECTION_REGISTRY.skills as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Skills
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  if (sectionName === 'summary') {
+    const Summary = SECTION_REGISTRY.summary as unknown as React.ComponentType<SectionProps>;
+    return (
+      <Summary
+        data={sectionData}
+        template={template}
+        onEdit={onEdit}
+        inlineEditable={inlineEditable}
+        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        getPreviewValueForPath={getPreviewValueForPath}
+      />
+    );
+  }
+
+  return <SectionComponent data={sectionData} template={template} onEdit={onEdit} inlineEditable={inlineEditable} onInlineChange={(next: unknown) => onInlineChange?.(next)} getPreviewValueForPath={getPreviewValueForPath} />;
 }
 
 /**

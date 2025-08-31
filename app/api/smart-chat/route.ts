@@ -1,9 +1,7 @@
-import { SIMILARITY_THRESHOLDS } from '@/components/smart-chat/utils';
 import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/lib/prompts';
-import { calculateCosineSimilarity, getTextVector } from '@/lib/similarity';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -18,16 +16,18 @@ export interface ChatResponse {
     title: string;
     description: string;
     category: string;
+    patchOps?: { op: 'insert' | 'remove'; path: string; value?: string; index?: number }[];
   };
   quickResponses: string[];
   excerpt?: {
     title: string;
     content: string;
     source: string;
+    issue_id?: string;
   };
 }
 
-interface Template {
+interface Issue {
   id: string;
   title: string;
   description: string;
@@ -64,7 +64,10 @@ interface RequestBody {
     description: string;
     category: string;
   }>;
-  templates: Template[];
+  issues?: Issue[]; // 改名：templates -> issues，但保持向後兼容
+  templates?: Issue[]; // 向後兼容：前端可能仍使用 templates
+  resumeDiff?: string | null; // 新增：本輪前後履歷差異摘要
+  currentResume?: unknown; // 新增：目前最新的履歷內容
 }
 
 // 新增描述前端傳來訊息結構的介面
@@ -102,7 +105,7 @@ interface ProcessedMessage {
 interface ProcessedChatResponse {
   messages: ProcessedMessage[];
   cannedOptions: string[];
-  templates: Template[];
+  issues: Issue[]; // 改名：templates -> issues
 }
 
 // 新增 ID 生成函數
@@ -117,25 +120,27 @@ function processAIMessages(
   rawResponse: ChatResponse, 
   lastAiMessage: LastMessage | undefined,
   messages: Array<{ type: 'ai' | 'user'; content: string; timestamp: Date; suggestion?: { title: string; description: string; category: string }; excerpt?: { title: string; content: string; source: string } }>,
-  templates: Template[]
+  issues: Issue[] // 改名：templates -> issues
 ): ProcessedChatResponse {
   const { message, suggestion, quickResponses, excerpt } = rawResponse;
 
   // 檢查上一則 AI message 是否有 suggestion，決定是否阻擋本次 suggestion
   let aiSuggestion = suggestion;
+  let aiExcerpt = excerpt;
   if (lastAiMessage && lastAiMessage.suggestion) {
-    aiSuggestion = undefined;
+    // aiSuggestion = undefined;
+    // aiExcerpt = undefined;
   }
 
-  // 新增：如果有 in_progress template，覆蓋 suggestion title
+  // 新增：如果有 in_progress issue，覆蓋 suggestion title
   if (aiSuggestion) {
-    const inProgressTemplate = templates.find(t => t.status === 'in_progress');
-    if (inProgressTemplate) {
+    const inProgressIssue = issues.find(t => t.status === 'in_progress');
+    if (inProgressIssue) {
       aiSuggestion = {
         ...aiSuggestion,
-        title: inProgressTemplate.title
+        title: inProgressIssue.title
       };
-      console.log('🔄 [Template][Suggestion] Overriding suggestion title with in_progress template:', inProgressTemplate.title);
+      console.log('🔄 [Issue][Suggestion] Overriding suggestion title with in_progress issue:', inProgressIssue.title);
     }
   }
 
@@ -152,7 +157,7 @@ function processAIMessages(
   // 檢查這段期間是否已經有 excerpt
   const hasExcerptInCurrentTopic = aiMessagesSinceLastSuggestion.some(m => m.excerpt);
   // 如果已經有 excerpt，則本次 excerpt 要被阻擋
-  let aiExcerpt = excerpt;
+  
   if (hasExcerptInCurrentTopic) {
     aiExcerpt = undefined;
   }
@@ -212,102 +217,60 @@ function processAIMessages(
     cannedOptions = quickResponses;
   }
 
-  // 更新 shouldBlockNextSuggestion 狀態
-
-  // --- 模板狀態自動更新邏輯（只更新最相似且超過門檻的） ---
-  let updatedTemplates = [...templates];
+  // --- issue 狀態自動更新邏輯（優先使用 AI 返回的 issue_id） ---
+  let updatedIssues = [...issues];
+  let movedIssueId: string | null = null;
+  
   // excerpt 觸發 in_progress
-  let movedTemplateId: string | null = null;
   if (aiExcerpt) {
-    // const excerptText = `${aiExcerpt.title} ${aiExcerpt.content.slice(0, 250)} ${lastAiMessage?.content}`;
-    const excerptText = `${aiExcerpt.title}`;
-    const excerptVec = getTextVector(excerptText);
-    let maxSim = 0;
-    let maxIdx = -1;
-    let allBelowThreshold = true;
-    templates.forEach((t, idx) => {
-      // const templateText = `${t.title} ${t.description}`;
-      const templateText = `${t.title}`;
-      const templateVec = getTextVector(templateText);
-      const sim = calculateCosineSimilarity(excerptVec, templateVec);
-      console.log(`🟦 [Similarity][Excerpt] Excerpt: "${excerptText}" vs Template: "${templateText}" → Cosine: ${sim.toFixed(4)}`);
-      if (sim >= SIMILARITY_THRESHOLDS.templateMatch) {
-        allBelowThreshold = false;
-      }
-      if (t.status === 'pending' && sim > maxSim) {
-        maxSim = sim;
-        maxIdx = idx;
-      }
-    });
-    if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
-      updatedTemplates = updatedTemplates.map((t, idx) => {
-        if (idx === maxIdx) {
-          movedTemplateId = t.id;
-          return { ...t, status: 'in_progress' };
-        }
-        return t;
-      });
-    }
-    // 新增：如果所有模板都低於門檻，append 一個 in_progress template
-    if (allBelowThreshold) {
-      const newTemplate = {
-        id: generateUniqueId('template'),
-        title: aiExcerpt.title,
-        description: aiExcerpt.content,
-        category: aiExcerpt.source,
-        status: 'in_progress'
-      };
-      updatedTemplates = [newTemplate, ...updatedTemplates]; // append to front
-      movedTemplateId = newTemplate.id;
-      console.log('🆕 [Template][Append] Appended new in_progress template from excerpt:', newTemplate);
+    // 僅在 AI 明確提供 issue_id 時更新，並確保全域僅有一個 active（in_progress）
+    if (aiExcerpt.issue_id) {
+      // 將其他 in_progress 關閉為 pending
+      updatedIssues = updatedIssues.map(issue => issue.status === 'in_progress' && issue.id !== aiExcerpt.issue_id
+        ? { ...issue, status: 'pending' }
+        : issue
+      );
+      // 設定目標 issue 為 in_progress
+      updatedIssues = updatedIssues.map(issue => 
+        issue.id === aiExcerpt.issue_id 
+          ? { ...issue, status: 'in_progress' }
+          : issue
+      );
+      movedIssueId = aiExcerpt.issue_id;
+      console.log(`🎯 [Issue] Activated issue via issue_id -> in_progress: ${aiExcerpt.issue_id}`);
     }
   }
-  // suggestion 觸發 completed
+   
+  // suggestion 觸發 completed：關閉唯一 active 的 issue
   if (aiSuggestion) {
-    const suggestionText = `${aiSuggestion.title} ${aiSuggestion.description}`;
-    const suggestionVec = getTextVector(suggestionText);
-    let maxSim = 0;
-    let maxIdx = -1;
-    templates.forEach((t, idx) => {
-      const templateText = `${t.title} ${t.description}`;
-      const templateVec = getTextVector(templateText);
-      const sim = calculateCosineSimilarity(suggestionVec, templateVec);
-      console.log(`🟩 [Similarity][Suggestion] Suggestion: "${suggestionText}" vs Template: "${templateText}" → Cosine: ${sim.toFixed(4)}`);
-      if ((t.status === 'in_progress' || t.status === 'pending') && sim > maxSim) {
-        maxSim = sim;
-        maxIdx = idx;
-      }
-    });
-    if (maxSim >= SIMILARITY_THRESHOLDS.templateMatch && maxIdx !== -1) {
-      const updated = updatedTemplates.map((t, idx) => {
-        if (idx === maxIdx) {
-          movedTemplateId = t.id;
-          return { ...t, status: 'completed', completedSuggestion: aiSuggestion };
-        }
-        return t;
-      });
-      // 將剛完成的 template 移到最前面
-      const moved = updated.find((t, idx) => idx === maxIdx);
-      if (moved) {
-        updatedTemplates = [moved, ...updated.filter((_, idx) => idx !== maxIdx)];
-      } else {
-        updatedTemplates = updated;
-      }
+    const activeIdx = updatedIssues.findIndex(issue => issue.status === 'in_progress');
+    if (activeIdx !== -1) {
+      const activeId = updatedIssues[activeIdx].id;
+      updatedIssues = updatedIssues.map((issue, idx) => idx === activeIdx
+        ? { ...issue, status: 'completed', completedSuggestion: aiSuggestion }
+        : issue
+      );
+      // 移到最前
+      const moved = updatedIssues[activeIdx];
+      updatedIssues = [moved, ...updatedIssues.filter((_, idx) => idx !== activeIdx)];
+      movedIssueId = activeId;
+      console.log(`✅ [Issue] Completed active issue via suggestion: ${activeId}`);
     }
   }
-  // 若有狀態變動或新增，確保該 template 在最前面
-  if (movedTemplateId) {
-    const idx = updatedTemplates.findIndex(t => t.id === movedTemplateId);
+  
+  // 若有狀態變動或新增，確保該 issue 在最前面
+  if (movedIssueId) {
+    const idx = updatedIssues.findIndex(issue => issue.id === movedIssueId);
     if (idx > 0) {
-      const [moved] = updatedTemplates.splice(idx, 1);
-      updatedTemplates = [moved, ...updatedTemplates];
+      const [moved] = updatedIssues.splice(idx, 1);
+      updatedIssues = [moved, ...updatedIssues];
     }
   }
 
   return {
     messages: processedMessages,
     cannedOptions,
-    templates: updatedTemplates
+    issues: updatedIssues // 改名：templates -> issues
   };
 }
 
@@ -340,6 +303,12 @@ function parseAIResponse(completion: string): ChatResponse {
   // 嘗試解析 JSON
   try {
     const parsed = JSON.parse(cleanedCompletion) as ChatResponse;
+    // validate patchOps if present
+    if (parsed.suggestion?.patchOps) {
+      console.log('🔍 [Parser] PatchOps before:', parsed.suggestion.patchOps);
+      parsed.suggestion.patchOps = parsed.suggestion.patchOps.filter(op => op && typeof op.op === 'string' && typeof op.path === 'string');
+      console.log('🔍 [Parser] PatchOps after:', parsed.suggestion.patchOps);
+    }
     
     console.log('✅ [Parser] JSON parsing successful');
     
@@ -446,7 +415,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json() as RequestBody;
-    const { messages, analysisResult, suggestions, templates } = body;
+    const { messages, analysisResult, suggestions, issues, templates, resumeDiff, currentResume: currentResumeRaw } = body;
+    // 允許前端附帶目前的履歷內容（避免 analysisResult 中舊資料過時）
+
+    // 向後兼容：如果沒有 issues，使用 templates
+    const currentIssues = issues || templates || [];
 
     // --- 新增：分離 file message 與對話訊息 ---
     const chatMessages = messages.filter(m => m.type !== 'file');
@@ -478,14 +451,13 @@ export async function POST(request: NextRequest) {
     const existingSuggestions = suggestions?.map(s => `${s.title}: ${s.description}`) || [];
     
     
-    // 建立系統提示，基於分析結果和已有建議與 templates
-    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions, templates);
+    // 建立系統提示，基於分析結果和已有建議與 issues，並附加本輪履歷差異摘要（若有）
+    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions, currentIssues);
     
     // 準備用戶對話內容，包含對話歷史
     const conversationHistory = messages
     .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
       .join('\n\n');
-    
     
     const lastUserMessage = messages.filter(m => m.type === 'user').pop();
     const userPrompt = lastUserMessage?.content || '';
@@ -494,6 +466,24 @@ export async function POST(request: NextRequest) {
       finalUserInput += `\n\n最新訊息：${userPrompt}`;
     } else { 
       finalUserInput += `\n\n最新訊息：用戶沒有輸入文字，只是上傳了圖片`;
+    }
+    // 新增：在 user 訊息中附加本輪履歷差異（若存在），並明確說明其含義
+    console.log('🔍 [API] Resume diff:', resumeDiff);
+    finalUserInput += `\n\n以下為「本輪用戶對履歷的實際修改差異」，以 git 風格 diff 呈現（+ 表示新增、- 表示刪除）。請僅將其作為上下文參考，避免逐字複誦：\n\n`;
+    if (resumeDiff && resumeDiff.trim().length > 0) {
+      finalUserInput += `\`\`\`diff\n${resumeDiff}\n\`\`\``;
+    } else {
+      finalUserInput += `本輪用戶沒有對履歷進行實際修改`;
+    }
+
+    // 新增：附加「目前最新履歷內容」到 user 提示，以避免只使用 analysisResult 初版內容
+    if (currentResumeRaw) {
+      try {
+        const currentResumeStr = typeof currentResumeRaw === 'string' ? currentResumeRaw : JSON.stringify(currentResumeRaw, null, 2);
+        finalUserInput += `\n\n以下為「目前最新的履歷 JSON」供你參考。請以此為準，不要依賴舊版：\n\n\`\`\`json\n${currentResumeStr}\n\`\`\``;
+      } catch {
+        // 忽略序列化錯誤
+      }
     }
 
     // --- 新增：組合 vision 格式 messages ---
@@ -563,7 +553,7 @@ export async function POST(request: NextRequest) {
     
     // 處理訊息邏輯
     // 回傳時，只回傳 AI 處理後的訊息，不回傳 user/file message，避免前端重複渲染
-    const processedResponse = processAIMessages(chatResponse, lastAiMessage, chatMessages, templates);
+    const processedResponse = processAIMessages(chatResponse, lastAiMessage, chatMessages, currentIssues);
 
     // 後端記錄 smart chat message
     try {
@@ -580,7 +570,10 @@ export async function POST(request: NextRequest) {
       success: true,
       data: {
         ...processedResponse,
-        messages: processedResponse.messages
+        messages: processedResponse.messages,
+        // 向後兼容：同時返回 issues 和 templates
+        issues: processedResponse.issues,
+        templates: processedResponse.issues // 前端仍使用 templates
       }
     });
 

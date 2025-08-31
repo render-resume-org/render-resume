@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChatMessage } from "@/lib/mock-data";
 import {
-    ArrowLeft,
-    ArrowRight,
-    CheckCircle,
-    Circle,
-    Lightbulb,
-    MessageSquare
+  ArrowLeft,
+  ArrowRight,
+  CheckCircle,
+  Circle,
+  Lightbulb,
+  MessageSquare
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -29,18 +29,10 @@ export default function SuggestionsPage() {
         setChatHistory(JSON.parse(savedHistory));
       }
 
-      // 讀取額外建議和追蹤問題建議，並合併
-      const savedSuggestions = sessionStorage.getItem('chatSuggestions');
       const savedSuggestionTemplates = sessionStorage.getItem('chatSuggestionTemplates');
       
       const allSuggestions: SuggestionRecord[] = [];
       
-      // 添加額外建議
-      if (savedSuggestions) {
-        const chatSuggestions: SuggestionRecord[] = JSON.parse(savedSuggestions);
-        allSuggestions.push(...chatSuggestions);
-        console.log(`載入了 ${chatSuggestions.length} 個額外建議`);
-      }
       
       // 添加追蹤問題建議
       if (savedSuggestionTemplates) {

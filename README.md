@@ -84,6 +84,7 @@ pnpm dev # 推薦
 # 或 npm run dev / yarn dev
 ```
 
+
 ### 📚 主要功能
 
 - **AI 履歷分析**：支援 PDF、圖片、文字、批次上傳，智能 Q&A、AI 建議
