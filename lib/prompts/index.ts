@@ -3,8 +3,7 @@ import { generateBaseSystemPrompt } from './base-system-prompt';
 import { generateCreateResumeSystemPrompt } from './create-resume-prompt';
 import { generateOptimizeResumeSystemPrompt } from './optimize-resume-prompt';
 
-export * from './analyze-resume-prompt';
-export * from './analyze-upload-prompt';
+
 export { generateBaseSystemPrompt } from './base-system-prompt';
 export { generateCreateResumeSystemPrompt } from './create-resume-prompt';
 export { generateOptimizeResumeSystemPrompt } from './optimize-resume-prompt';

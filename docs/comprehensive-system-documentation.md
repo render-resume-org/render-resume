@@ -675,7 +675,8 @@ export async function middleware(request: NextRequest) {
 - `PUT /api/users/[id]` - 更新用戶資料
 
 #### 履歷分析 API
-- `POST /api/analyze` - 履歷分析（支援文字、文件、批次）
+- `POST /api/analyze/[service_type]` - 履歷分析（支援文字、文件、批次）
+  - `service_type`: `create` 或 `optimize`
 - `GET /api/analyze/history` - 分析歷史記錄
 - `GET /api/analyze/[id]` - 獲取特定分析結果
 
@@ -704,7 +705,7 @@ export async function middleware(request: NextRequest) {
 
 ### 📊 履歷分析 API
 
-#### POST /api/analyze
+#### POST /api/analyze/[service_type]
 
 **功能**: 履歷分析主要端點，支援多種輸入格式
 
