@@ -10,23 +10,19 @@ import { FullscreenImagePreview, UploadedFileCard } from "@/components/upload/up
 import type { UploadedFile } from "@/lib/upload-utils";
 import type { Variants } from "framer-motion";
 import { Lightbulb } from "lucide-react";
-import { useEffect, useRef, useState, useMemo, memo } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
 import DraggableFab from "./draggable-fab";
 import LoadingMessage from "./loading-message";
 import SuggestionCard from "./suggestion-card";
-import SuggestionList from "./suggestion-list";
 import type { ChatMessage, SuggestionRecord } from "./types";
 import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "./utils";
 
 interface MobileChatPanelProps {
-  suggestions: SuggestionRecord[];
   suggestionTemplates: SuggestionTemplate[];
-  onQuote: (s: SuggestionRecord) => void;
   quoteTemplate: (t: SuggestionTemplate) => void;
-  onRemove: (id: string) => void;
   removeTemplate: (id: string) => void;
   onComplete: () => void;
   messageCount: number;
@@ -142,15 +138,6 @@ const MobileChatPanel = memo((props: MobileChatPanelProps) => {
           <div className="text-sm text-gray-600 dark:text-gray-300 my-1">
             自由詢問履歷相關問題，AI 會記錄並提供具體建議
           </div>
-          {/* 移除原 Button trigger */}
-          {/* <Button
-            variant="outline"
-            size="sm"
-            className="px-2 py-1 h-8 text-xs border-cyan-200 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-900 dark:text-cyan-100"
-            onClick={() => props.setShowSuggestionsDrawer(true)}
-          >
-            查看建議 ({props.suggestions.length})
-          </Button> */}
         </div>
         <Separator className="mt-2" />
         {/* Chat Area */}
@@ -246,15 +233,7 @@ const MobileChatPanel = memo((props: MobileChatPanelProps) => {
                 </div>
               </div>
             )}
-            {/* Regular Suggestions 區塊 */}
-            <SuggestionList
-              suggestions={props.suggestions}
-              onQuote={props.onQuote}
-              onRemove={props.onRemove}
-              onComplete={props.onComplete}
-              messageCount={props.messageCount}
-              suggestionsScrollAreaRef={props.suggestionsScrollAreaRef}
-            />
+            {/* Regular Suggestions 區塊移除 */}
           </div>
         </SheetContent>
       </Sheet>

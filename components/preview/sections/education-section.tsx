@@ -4,6 +4,7 @@ import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import { GraduationCap } from 'lucide-react';
+import InlineText from '../inline-text';
 import ResumeSection from '../resume-section';
 
 interface EducationSectionProps {
@@ -11,9 +12,12 @@ interface EducationSectionProps {
   template: ResumeTemplate;
   onEdit?: () => void;
   analysisResult?: UnifiedResumeAnalysisResult | null;
+  inlineEditable?: boolean;
+  onInlineChange?: (payload: { path: string; value: string }) => void;
+  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
 }
 
-export default function EducationSection({ data, template, onEdit, analysisResult }: EducationSectionProps) {
+export default function EducationSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath }: EducationSectionProps) {
   const { font, spacing, styles } = template;
 
   if (!data || data.length === 0) return null;
@@ -39,19 +43,55 @@ export default function EducationSection({ data, template, onEdit, analysisResul
               <div className="flex justify-between items-start">
                 <div>
                   <h4 className={cn(font.sizes.body, 'text-black font-medium')}>
-                    {highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}`, annotations)}
+                    {inlineEditable ? (
+                      <InlineText
+                        text={`${education.degree}${education.major ? `, ${education.major}` : ''}`}
+                        inlineEditable
+                        highlightType={highlightForPath?.(`education[${index}].degreeMajor`)}
+                        onChange={(t) => onInlineChange?.({ path: `education[${index}].degreeMajor`, value: t })}
+                      />
+                    ) : (
+                      highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}`, annotations)
+                    )}
                   </h4>
                   <p className={cn(font.sizes.caption, 'text-black')}>
-                    {education.school}
+                    {inlineEditable ? (
+                      <InlineText 
+                        text={education.school} 
+                        inlineEditable 
+                        highlightType={highlightForPath?.(`education[${index}].school`)}
+                        onChange={(t) => onInlineChange?.({ path: `education[${index}].school`, value: t })} 
+                      />
+                    ) : (
+                      education.school
+                    )}
                   </p>
                 </div>
                  <span className={cn(font.sizes.caption, 'text-black')}>
-                   {highlightText(education.period, annotations)}
+                   {inlineEditable ? (
+                     <InlineText 
+                       text={education.period} 
+                       inlineEditable 
+                       highlightType={highlightForPath?.(`education[${index}].period`)}
+                       onChange={(t) => onInlineChange?.({ path: `education[${index}].period`, value: t })} 
+                     />
+                   ) : (
+                     highlightText(education.period, annotations)
+                   )}
                  </span>
               </div>
               {education.details && education.details.length > 0 && (
                 <p className={cn(font.sizes.caption, 'text-black mt-1')}>
-                  {highlightText(education.details.join(', '), annotations)}
+                  {inlineEditable ? (
+                    <InlineText 
+                      text={education.details.join(', ')} 
+                      inlineEditable 
+                      highlightType={highlightForPath?.(`education[${index}].details`)}
+                      onChange={(t) => onInlineChange?.({ path: `education[${index}].details`, value: t })} 
+                    />
+                  ) : (
+                    highlightText(education.details.join(', '), annotations)
+                  )}
                 </p>
               )}
             </div>
@@ -77,19 +117,45 @@ export default function EducationSection({ data, template, onEdit, analysisResul
           <div key={index}>
             <div className="mb-1">
               <div className="flex justify-between items-center">
-                <h3 className={cn(font.sizes.body, 'text-black font-bold')}>{education.school}</h3>
+                <h3 className={cn(font.sizes.body, 'text-black font-bold')}>
+                  {inlineEditable ? (
+                    <InlineText text={education.school} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].school`, value: t })} />
+                  ) : (
+                    education.school
+                  )}
+                </h3>
                  {education.period && (
-                   <span className={cn(font.sizes.caption, 'text-black')}>{highlightText(education.period, annotations)}</span>
+                   <span className={cn(font.sizes.caption, 'text-black')}>
+                     {inlineEditable ? (
+                       <InlineText text={education.period} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].period`, value: t })} />
+                     ) : (
+                       highlightText(education.period, annotations)
+                     )}
+                   </span>
                  )}
               </div>
             </div>
             <div className="mb-1">
                <p className={cn(font.sizes.body, 'text-black italic')}>
-                 {highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}${education.gpa ? `, GPA: ${education.gpa}` : ''}`, annotations)}
+                 {inlineEditable ? (
+                   <InlineText
+                     text={`${education.degree}${education.major ? `, ${education.major}` : ''}${education.gpa ? `, GPA: ${education.gpa}` : ''}`}
+                     inlineEditable
+                     onChange={(t) => onInlineChange?.({ path: `education[${index}].degreeMajorGpa`, value: t })}
+                   />
+                 ) : (
+                   highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}${education.gpa ? `, GPA: ${education.gpa}` : ''}`, annotations)
+                 )}
                </p>
             </div>
             {education.honor && (
-              <p className={cn(font.sizes.body, 'text-black')}>{education.honor}</p>
+              <p className={cn(font.sizes.body, 'text-black')}>
+                {inlineEditable ? (
+                  <InlineText text={education.honor} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].honor`, value: t })} />
+                ) : (
+                  education.honor
+                )}
+              </p>
             )}
           </div>
         ))}

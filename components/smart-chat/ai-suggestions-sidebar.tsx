@@ -6,14 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import SuggestionCard from "./suggestion-card";
-
-export interface SuggestionRecord {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  timestamp: Date;
-}
+import { PatchOp, SuggestionRecord } from "./types";
 
 export interface SuggestionTemplate {
   id: string;
@@ -24,14 +17,12 @@ export interface SuggestionTemplate {
   originalFollowUp?: string; // 原始的 follow-up 問題
   completedSuggestion?: SuggestionRecord; // 完成後的建議
   timestamp: Date;
+  patchOps?: PatchOp[]; // optional apply-ready operations
 }
 
 interface AISuggestionsSidebarProps {
-  suggestions: SuggestionRecord[];
   suggestionTemplates: SuggestionTemplate[];
-  onQuote: (suggestion: SuggestionRecord) => void;
   onQuoteTemplate: (template: SuggestionTemplate) => void;
-  onRemove: (suggestionId: string) => void;
   onRemoveTemplate: (id: string) => void;
   onComplete: () => void;
   messageCount: number;
@@ -54,11 +45,8 @@ const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
 };
 
 const AISuggestionsSidebar = ({
-  suggestions,
   suggestionTemplates,
-  onQuote,
   onQuoteTemplate,
-  onRemove,
   onRemoveTemplate,
   onComplete,
   messageCount,
@@ -66,7 +54,7 @@ const AISuggestionsSidebar = ({
   isCollapsed,
   onToggleCollapse
 }: AISuggestionsSidebarProps) => {
-  const totalItems = suggestions.length + suggestionTemplates.length;
+  const totalItems = suggestionTemplates.length;
   const completedTemplates = suggestionTemplates.filter(t => t.status === 'completed').length;
 
   // 新增：追蹤需要自動展開的 template id
@@ -181,7 +169,7 @@ const AISuggestionsSidebar = ({
                   <div>
                     <ScrollArea className="h-full" ref={suggestionsScrollAreaRef}>
                       <div className="space-y-2">
-                        {/* Templates */}
+                        {/* Templates only */}
                         {suggestionTemplates.map((template, index) => {
                           // indicator bar color = avatar bg color
                           const barColor = getIndicatorBarColor(template.status);
@@ -209,28 +197,7 @@ const AISuggestionsSidebar = ({
                             </motion.div>
                           );
                         })}
-                        {/* Regular suggestions */}
-                        {suggestions.map((suggestion, index) => (
-                          <motion.div
-                            key={suggestion.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: (suggestionTemplates.length + index) * 0.05 }}
-                            className="flex justify-center"
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onQuote(suggestion)}
-                              className="h-10 w-10 p-0 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-lg flex items-center justify-center"
-                              title={suggestion.title}
-                            >
-                              <Avatar className="size-8">
-                                <AvatarFallback className="bg-green-600 text-white font-bold text-base">{suggestion.title?.[0] || "?"}</AvatarFallback>
-                              </Avatar>
-                            </Button>
-                          </motion.div>
-                        ))}
+                        {/* Regular suggestions removed */}
                       </div>
                     </ScrollArea>
                   </div>
@@ -267,34 +234,7 @@ const AISuggestionsSidebar = ({
                       </div>
                     )}
 
-                    {/* Regular Suggestions Section */}
-                    {suggestions.length > 0 && (
-                      <div>
-                        {suggestionTemplates.length > 0 && (
-                          <div className="border-t border-gray-200 dark:border-gray-700 my-4"></div>
-                        )}
-                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                          <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
-                          額外建議 ({suggestions.length})
-                        </h4>
-                        <div className="space-y-3">
-                          <AnimatePresence mode="popLayout">
-                            {suggestions.map((suggestion) => (
-                              <motion.div
-                                key={suggestion.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -20 }}
-                                layout
-                                transition={{ duration: 0.2, ease: "easeOut" }}
-                              >
-                                <SuggestionCard suggestion={suggestion} onQuote={onQuote} onRemove={onRemove} />
-                              </motion.div>
-                            ))}
-                          </AnimatePresence>
-                        </div>
-                      </div>
-                    )}
+                    {/* Regular Suggestions Section removed */}
                   </div>
                 )}
               </AnimatePresence>

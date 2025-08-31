@@ -24,7 +24,6 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   const {
     // 狀態
     messages,
-    suggestions,
     suggestionTemplates,
     isLoading,
     messageCount,
@@ -49,9 +48,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     handleCannedMessage,
     handleComplete,
     handleToggleSidebar,
-    removeSuggestion,
     removeTemplate,
-    quoteSuggestion,
     quoteTemplate,
     handleSendMessage,
     pendingFiles,
@@ -105,11 +102,8 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
       <div className="flex-1 flex items-center justify-center">
         <div className="w-full lg:max-w-[75vw] h-[80vh]">
           <DesktopChatPanel
-            suggestions={suggestions}
             suggestionTemplates={suggestionTemplates}
-            onQuote={quoteSuggestion}
             onQuoteTemplate={quoteTemplate}
-            onRemove={removeSuggestion}
             onRemoveTemplate={removeTemplate}
             onComplete={handleComplete}
             messageCount={messageCount}
@@ -135,11 +129,8 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
             onRestart={handleRestart}
           />
           <MobileChatPanel
-            suggestions={suggestions}
             suggestionTemplates={suggestionTemplates}
-            onQuote={quoteSuggestion}
             quoteTemplate={quoteTemplate}
-            onRemove={removeSuggestion}
             removeTemplate={removeTemplate}
             onComplete={handleComplete}
             messageCount={messageCount}

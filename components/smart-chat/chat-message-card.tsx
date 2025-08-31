@@ -90,8 +90,11 @@ const ChatMessageCard = ({ message }: ChatMessageCardProps) => {
             <SuggestionCard
               suggestion={{
                 id: 'inline',
-                ...message.suggestion,
-                timestamp: message.timestamp
+                title: message.suggestion.title,
+                description: message.suggestion.description,
+                category: message.suggestion.category,
+                timestamp: message.timestamp as Date,
+                patchOps: message.suggestion.patchOps
               }}
               onQuote={() => {}}
               onRemove={() => {}}

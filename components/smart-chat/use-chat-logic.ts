@@ -2,13 +2,13 @@ import { useFileUpload } from "@/components/hooks/use-file-upload";
 import { logSmartChatAttachment } from "@/lib/actions/activity";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import type { UploadedFile } from '@/lib/upload-utils';
+import { computeResumeDiffSummary } from '@/lib/utils/json-diff';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import {
   useCannedMessages,
   useInputManager,
   useScrollManager,
-  useSimilarityCheck,
   useTemplateManager
 } from './hooks';
 import { ChatMessage, SuggestionRecord } from './types';
@@ -22,12 +22,12 @@ interface UseChatLogicProps {
 
 export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogicProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [suggestions, setSuggestions] = useState<SuggestionRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [messageCount, setMessageCount] = useState(0);
-  const [visibleExcerptIds] = useState<string[]>([]);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showSuggestionsDrawer, setShowSuggestionsDrawer] = useState(false);
+  // Snapshot of resume before current message (initialized at chat start)
+  const [resumeSnapshotBefore, setResumeSnapshotBefore] = useState<unknown | null>(null);
   // 移除 shouldBlockNextSuggestion 相關 state
 
   const generateUniqueId = useCallback((prefix: string) => {
@@ -38,16 +38,10 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     suggestionTemplates,
     setSuggestionTemplates,
     initializeSuggestionTemplates,
-    removeTemplate,
-    updateTemplateStatus
+    removeTemplate
   } = useTemplateManager(analysisResult, generateUniqueId);
 
-  const { isSimilarSuggestion, findMostSimilarTemplate } = useSimilarityCheck(
-    suggestions,
-    messages,
-    visibleExcerptIds,
-    suggestionTemplates
-  );
+  // Removed useSimilarityCheck – suggestions are rendered as-is; backend manages issue states
 
   const {
     scrollAreaRef,
@@ -55,7 +49,6 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     suggestionsScrollAreaRef,
     messagesEndRef,
     messagesEndRefMobile,
-    scrollToBottom,
     smartScrollToBottom
   } = useScrollManager();
 
@@ -141,23 +134,32 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     try {
       // 嘗試從 sessionStorage 恢復狀態
       const savedChatHistory = sessionStorage.getItem('chatHistory');
-      const savedSuggestions = sessionStorage.getItem('chatSuggestions');
       const savedSuggestionTemplates = sessionStorage.getItem('chatSuggestionTemplates');
+      const savedResumeSnapshot = sessionStorage.getItem('resume_snapshot');
 
-      if (savedChatHistory && savedSuggestions && savedSuggestionTemplates) {
+      if (savedChatHistory && savedSuggestionTemplates) {
         // 恢復之前的狀態
         console.log('🔄 恢復之前的智慧問答狀態');
         const chatHistory: ChatMessage[] = JSON.parse(savedChatHistory);
-        const suggestions: SuggestionRecord[] = JSON.parse(savedSuggestions);
         const suggestionTemplates: SuggestionTemplate[] = JSON.parse(savedSuggestionTemplates);
 
         setMessages(chatHistory);
         setMessageCount(chatHistory.length);
-        setSuggestions(suggestions);
         setSuggestionTemplates(suggestionTemplates);
-        
-        console.log(`恢復了 ${chatHistory.length} 個聊天記錄、${suggestions.length} 個額外建議、${suggestionTemplates.length} 個追蹤問題`);
-        
+
+        // 恢復快照（若無則以目前 resume 初始化）
+        if (savedResumeSnapshot) {
+          setResumeSnapshotBefore(JSON.parse(savedResumeSnapshot));
+        } else {
+          try {
+            const storedResume = sessionStorage.getItem('resume');
+            if (storedResume) {
+              setResumeSnapshotBefore(JSON.parse(storedResume));
+              sessionStorage.setItem('resume_snapshot', storedResume);
+            }
+          } catch {}
+        }
+
         // 生成隨機罐頭選項
         initializeCannedMessages();
         return;
@@ -168,14 +170,15 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       sessionStorage.removeItem('chatHistory');
       sessionStorage.removeItem('chatSuggestions');
       sessionStorage.removeItem('chatSuggestionTemplates');
+      sessionStorage.removeItem('resume_snapshot');
     }
 
     // 新開始或恢復失敗時的初始化邏輯
     console.log('🎯 開始新的智慧問答對話');
-    
+
     // 初始化建議模板
     initializeSuggestionTemplates();
-    
+
     // 取得 follow-up 問題數量
     const followUpCount = analysisResult?.missing_content?.follow_ups?.length || 0;
 
@@ -194,10 +197,34 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
     setMessages([welcomeMessage]);
     setMessageCount(1);
-    
+
+    // 初始化快照
+    try {
+      const storedResume = sessionStorage.getItem('resume');
+      if (storedResume) {
+        setResumeSnapshotBefore(JSON.parse(storedResume));
+        sessionStorage.setItem('resume_snapshot', storedResume);
+      }
+    } catch {}
+
     // 生成隨機罐頭選項
     initializeCannedMessages();
-  }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages, setSuggestions, setSuggestionTemplates]);
+  }, [generateUniqueId, analysisResult, initializeSuggestionTemplates, initializeCannedMessages, setSuggestionTemplates]);
+
+  // 初始化快照（立即執行，不等待 initializeChat）
+  useEffect(() => {
+    try {
+      const storedResume = sessionStorage.getItem('resume');
+      if (storedResume && !resumeSnapshotBefore) {
+        const parsedResume = JSON.parse(storedResume);
+        setResumeSnapshotBefore(parsedResume);
+        sessionStorage.setItem('resume_snapshot', storedResume);
+        console.log('📸 初始化履歷快照');
+      }
+    } catch (error) {
+      console.error('初始化履歷快照失敗:', error);
+    }
+  }, [resumeSnapshotBefore]);
 
   // 發送訊息時，將 pendingFiles（檔案訊息）與 user 文字訊息一次性組成，並一起送進 API call
   const handleSendMessage = useCallback(async () => {
@@ -236,10 +263,22 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
     // 4. API call: 一定要包含 fileMessages + userMessage
     setTimeout(() => {
-      smartScrollToBottom(false, suggestions);
+      smartScrollToBottom(false, []);
     }, 50);
 
     try {
+      // Load resume snapshots for diff (before from state snapshot, after from current storage)
+      const resumeBefore = resumeSnapshotBefore;
+      let resumeAfter: unknown = null;
+      try {
+        const stored = sessionStorage.getItem('resume');
+        if (stored) resumeAfter = JSON.parse(stored);
+      } catch {}
+      let diffSummary: string | null = null;
+      try {
+        diffSummary = computeResumeDiffSummary(resumeBefore, resumeAfter);
+      } catch {}
+
       const response = await fetch('/api/smart-chat', {
         method: 'POST',
         headers: {
@@ -248,10 +287,10 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
         body: JSON.stringify({
           messages: [...messages, ...messagesToSend],
           analysisResult,
-          suggestions: [
-            ...suggestions
-          ],
-          templates: suggestionTemplates
+          suggestions: [],
+          templates: suggestionTemplates,
+          resumeDiff: diffSummary,
+          currentResume: resumeAfter ?? null,
         }),
       });
 
@@ -261,7 +300,12 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
       }
 
       const result = await response.json();
-      const { messages: aiMessages, cannedOptions, templates: newTemplates } = result.data as { messages: ChatMessage[], cannedOptions: string[], templates: SuggestionTemplate[] };
+      const { messages: aiMessages, cannedOptions, templates: newTemplates, issues: newIssues } = result.data as { 
+        messages: ChatMessage[], 
+        cannedOptions: string[], 
+        templates: SuggestionTemplate[], 
+        issues?: SuggestionTemplate[] 
+      };
 
       setMessages(prev => [...prev, ...aiMessages]);
       setMessageCount(prev => prev + aiMessages.length);
@@ -271,46 +315,19 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
         updateCannedOptions(cannedOptions, false);
       }
       setSuggestionTemplates(newTemplates);
-
-      for (const aiMessage of aiMessages) {
-        if (aiMessage.suggestion) {
-          if (isSimilarSuggestion(aiMessage.suggestion)) {
-            console.log(`🚫 [Suggestion Blocked] Similar suggestion detected, not adding: "${aiMessage.suggestion.title}"`);
-          } else {
-            const suggestionText = `${aiMessage.suggestion.title} ${aiMessage.suggestion.description}`;
-            let relatedTemplate: SuggestionTemplate | null = null;
-            if (!relatedTemplate) {
-              relatedTemplate = findMostSimilarTemplate(suggestionText, suggestionTemplates) as SuggestionTemplate | null;
-            }
-            if (relatedTemplate && (relatedTemplate.status === 'in_progress' || relatedTemplate.status === 'completed')) {
-              const suggestionRecord: SuggestionRecord = {
-                id: generateUniqueId('suggestion'),
-                title: aiMessage.suggestion.title,
-                description: aiMessage.suggestion.description,
-                category: aiMessage.suggestion.category,
-                timestamp: new Date()
-              };
-              updateTemplateStatus(relatedTemplate.id, 'completed', suggestionRecord);
-            } else {
-              const suggestionRecord: SuggestionRecord = {
-                id: generateUniqueId('suggestion'),
-                title: aiMessage.suggestion.title,
-                description: aiMessage.suggestion.description,
-                category: aiMessage.suggestion.category,
-                timestamp: new Date()
-              };
-              setSuggestions(prev => [...prev, suggestionRecord]);
-            }
-            // 優化滾動邏輯：只保留必要的滾動調用
-            requestAnimationFrame(() => {
-              smartScrollToBottom(false, suggestions);
-            });
-          }
-        }
+      if (newIssues) {
+        // Handle issues if they exist
+        console.log('Received new issues:', newIssues);
       }
-      // 最終確保滾動到底部
+
+      // 更新快照為本輪的 after
+      try {
+        setResumeSnapshotBefore(resumeAfter ?? null);
+        sessionStorage.setItem('resume_snapshot', JSON.stringify(resumeAfter));
+      } catch {}
+
       requestAnimationFrame(() => {
-        smartScrollToBottom(false, suggestions);
+        smartScrollToBottom(false, []);
       });
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -325,7 +342,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     } finally {
       setIsLoading(false);
     }
-  }, [currentInput, pendingFiles, messages, analysisResult, suggestions, suggestionTemplates, updateCannedOptions, isSimilarSuggestion, findMostSimilarTemplate, updateTemplateStatus, setSuggestionTemplates, smartScrollToBottom, generateUniqueId, flattenFilesToMessages, setCurrentInput]);
+  }, [currentInput, pendingFiles, messages, analysisResult, suggestionTemplates, updateCannedOptions, setSuggestionTemplates, smartScrollToBottom, generateUniqueId, flattenFilesToMessages, setCurrentInput, resumeSnapshotBefore]);
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -361,30 +378,19 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   const handleCannedMessage = useCallback((message: string) => {
     setCurrentInput(message);
     // 多次延遲 scroll，確保訊息渲染後手機/桌面都能正確滾動
-    setTimeout(() => smartScrollToBottom(false, suggestions), 100);
-    setTimeout(() => smartScrollToBottom(false, suggestions), 300);
-    setTimeout(() => smartScrollToBottom(false, suggestions), 600);
+    setTimeout(() => smartScrollToBottom(false, []), 100);
+    setTimeout(() => smartScrollToBottom(false, []), 300);
+    setTimeout(() => smartScrollToBottom(false, []), 600);
     // 新增：自動 focus input
     setTimeout(() => focusInput(true, message), 0);
-  }, [smartScrollToBottom, suggestions, setCurrentInput, focusInput]);
+  }, [smartScrollToBottom, setCurrentInput, focusInput]);
 
   const handleComplete = useCallback(() => {
     // 將所有模板也當作 suggestion 傳遞到下一步，completed 用 completedSuggestion
-    onComplete(messages, suggestions, suggestionTemplates);
-  }, [messages, suggestions, suggestionTemplates, onComplete]);
+    onComplete(messages, [], suggestionTemplates);
+  }, [messages, suggestionTemplates, onComplete]);
 
-  const removeSuggestion = useCallback((suggestionId: string) => {
-    setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
-  }, []);
 
-  const quoteSuggestion = useCallback((suggestion: SuggestionRecord) => {
-    const quoteMessage = `關於「${suggestion.title}」這個建議，我想進一步了解：\n\n原建議：${suggestion.description}\n\n我想問：`;
-    setCurrentInput(quoteMessage);
-    // 自動調整高度
-    adjustTextareaHeight(quoteMessage);
-    // Focus input
-    focusInput(true, quoteMessage);
-  }, [setCurrentInput, adjustTextareaHeight, focusInput]);
 
   const quoteTemplate = useCallback((template: SuggestionTemplate) => {
     let quoteMessage = '';
@@ -450,8 +456,8 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
 
   // 優化滾動函數，避免閉包問題
   const scrollToBottomWithSuggestions = useCallback(() => {
-    smartScrollToBottom(false, suggestions);
-  }, [smartScrollToBottom, suggestions]);
+    smartScrollToBottom(false, []);
+  }, [smartScrollToBottom]);
 
   // 處理螢幕尺寸變化
   useEffect(() => {
@@ -485,31 +491,6 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   }, [messages, scrollToBottomWithSuggestions]);
 
   // 當有新建議時，自動滾動建議面板到底部，並確保主聊天區域也滾動
-  useEffect(() => {
-    if (suggestions.length > 0) {
-      console.log('[Suggestions Effect] New suggestions count:', suggestions.length);
-      
-      // 滾動建議面板到底部
-      requestAnimationFrame(() => {
-        scrollToBottom(suggestionsScrollAreaRef, null, true);
-      });
-      
-      // 同時確保主聊天區域滾動到底部（新建議可能影響布局）
-      requestAnimationFrame(() => {
-        scrollToBottomWithSuggestions();
-      });
-      
-      // 建議面板動畫期間確保滾動
-      setTimeout(() => {
-        scrollToBottomWithSuggestions();
-      }, 200);
-      
-      // 建議面板動畫完成後最終確保
-      setTimeout(() => {
-        scrollToBottomWithSuggestions();
-      }, 500);
-    }
-  }, [suggestions.length, scrollToBottom, scrollToBottomWithSuggestions, suggestionsScrollAreaRef]);
 
   // 當載入狀態改變時，確保滾動到底部（顯示載入動畫）
   useEffect(() => {
@@ -523,7 +504,6 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
   return {
     // 狀態
     messages,
-    suggestions,
     suggestionTemplates,
     isLoading,
     messageCount,
@@ -549,9 +529,7 @@ export function useChatLogic({ analysisResult, onComplete, onSkip }: UseChatLogi
     handleCannedMessage,
     handleComplete,
     handleToggleSidebar,
-    removeSuggestion,
     removeTemplate,
-    quoteSuggestion,
     quoteTemplate,
     shouldShowExcerpt,
     onSkip,

@@ -14,13 +14,13 @@ import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  ArrowRight,
-  Award,
-  Bot,
-  Briefcase,
-  Code,
-  FileText,
-  GraduationCap
+    ArrowRight,
+    Award,
+    Bot,
+    Briefcase,
+    Code,
+    FileText,
+    GraduationCap
 } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -197,7 +197,10 @@ export default function AnalyzePage() {
   // 查看詳細結果：將分析結果存入 sessionStorage 並導向 `/results`
   const handleViewResults = () => {
     if (analysisResult) {
+      // Save the full analysis result
       sessionStorage.setItem('analysisResult', JSON.stringify(analysisResult));
+      // Save the resume field separately for easy access and editing
+      sessionStorage.setItem('resume', JSON.stringify(analysisResult.resume));
       router.push('/results');
     }
   };

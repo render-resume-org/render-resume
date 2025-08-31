@@ -3,9 +3,11 @@ import type { UnifiedResume } from '@/lib/types/resume-unified';
 
 function mergeTextAndBullets(text?: string, bullets?: string[]): string[] {
   const items: string[] = [];
+  // Include description only when non-empty
   if (text && text.trim()) items.push(text.trim());
+  // Preserve empties for bullets to support creating new items
   if (Array.isArray(bullets)) {
-    for (const b of bullets) if (b && String(b).trim()) items.push(String(b).trim());
+    for (const b of bullets) items.push(b ?? '');
   }
   return items;
 }
