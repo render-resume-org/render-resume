@@ -1,14 +1,6 @@
 'use client';
 
-import {
-    analyzeDocuments,
-    formatFileSize,
-    getFileTypeCategory,
-    getTotalFileSize,
-    requiresVisionModel,
-    validateFileType
-} from '@/lib/api/resume-analysis';
-import type { DocumentAnalysisOptions, ResumeAnalysisResult } from '@/lib/types/resume-analysis';
+import { formatFileSize, getFileTypeCategory, getTotalFileSize, requiresVisionModel, validateFileType } from '@/lib/client/file-utils';
 import Image from 'next/image';
 import React, { useCallback, useRef, useState } from 'react';
 
@@ -21,7 +13,7 @@ export default function DocumentAnalyzer() {
     const [files, setFiles] = useState<FileWithPreview[]>([]);
     const [additionalText, setAdditionalText] = useState('');
     const [useVision, setUseVision] = useState(true);
-    const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
+    const [analysisResultJson, setAnalysisResultJson] = useState<string>('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
@@ -139,15 +131,15 @@ export default function DocumentAnalyzer() {
 
         setIsLoading(true);
         setError(null);
-        setAnalysisResult(null);
+        setAnalysisResultJson('');
         setUploadProgress(0);
 
         try {
-            const options: DocumentAnalysisOptions = {
-                files: files,
-                additionalText: additionalText.trim() || undefined,
-                useVision
-            };
+            const formData = new FormData();
+            files.forEach(f => formData.append('files', f));
+            if (additionalText) formData.append('additionalText', additionalText);
+            formData.append('useVision', String(useVision));
+            formData.append('serviceType', 'create');
 
             // 模擬上傳進度
             const progressInterval = setInterval(() => {
@@ -160,21 +152,19 @@ export default function DocumentAnalyzer() {
                 });
             }, 200);
 
-            const response = await analyzeDocuments(options);
+            const res = await fetch('/api/analyze/create', { method: 'POST', body: formData });
 
             clearInterval(progressInterval);
             setUploadProgress(100);
 
-            if (response.success && response.data) {
-                setAnalysisResult(response.data);
-                
-                // 顯示成功訊息
-                setTimeout(() => {
-                    setUploadProgress(0);
-                }, 1000);
-            } else {
-                throw new Error(response.error || '分析失敗');
-            }
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.error || `HTTP ${res.status}`);
+            setAnalysisResultJson(JSON.stringify(data.data, null, 2));
+            
+            // 顯示成功訊息
+            setTimeout(() => {
+                setUploadProgress(0);
+            }, 1000);
         } catch (err) {
             console.error('Document analysis error:', err);
             setError(err instanceof Error ? err.message : '文檔分析失敗');
@@ -388,167 +378,10 @@ export default function DocumentAnalyzer() {
             </div>
 
             {/* 分析結果 */}
-            {analysisResult && (
+            {analysisResultJson && (
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-gray-800">分析結果</h3>
-                        <div className="text-sm text-green-600 flex items-center">
-                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                            分析完成
-                        </div>
-                    </div>
-                    
-                    {/* 個人資料 */}
-                    {analysisResult.profile && (
-                        <div className="mb-6">
-                            <h4 className="text-lg font-semibold text-gray-700 mb-3">個人資料</h4>
-                            <div className="bg-gray-50 rounded-lg p-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {analysisResult.profile.name && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">姓名: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.name}</span>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.title && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">專業頭銜: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.title}</span>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.email && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">電子郵件: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.email}</span>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.phone && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">電話: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.phone}</span>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.location && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">所在地: </span>
-                                            <span className="text-sm text-gray-700">{analysisResult.profile.location}</span>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.linkedin && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">LinkedIn: </span>
-                                            <a href={analysisResult.profile.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.linkedin}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.github && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">GitHub: </span>
-                                            <a href={analysisResult.profile.github} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.github}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.website && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">個人網站: </span>
-                                            <a href={analysisResult.profile.website} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.website}
-                                            </a>
-                                        </div>
-                                    )}
-                                    {analysisResult.profile.portfolio && (
-                                        <div>
-                                            <span className="text-sm font-medium text-gray-500">作品集: </span>
-                                            <a href={analysisResult.profile.portfolio} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:text-blue-800 underline">
-                                                {analysisResult.profile.portfolio}
-                                            </a>
-                                        </div>
-                                    )}
-                                </div>
-                                {analysisResult.profile.brief_introduction && (
-                                    <div className="mt-3 pt-3 border-t border-gray-200">
-                                        <span className="text-sm font-medium text-gray-500">個人簡介: </span>
-                                        <p className="text-sm text-gray-700 mt-1">{analysisResult.profile.brief_introduction}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* 項目分析 */}
-                    <div className="mb-6">
-                        <h4 className="text-lg font-semibold text-gray-700 mb-3">項目分析</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.projects_summary}</p>
-                        <div className="grid gap-4">
-                            {analysisResult.projects.map((project, index) => (
-                                <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
-                                    <h5 className="font-medium text-gray-800">{project.name}</h5>
-                                    <p className="text-sm text-gray-600 mt-1">{project.description}</p>
-                                    <div className="mt-2">
-                                        <span className="text-xs font-medium text-gray-500">技術: </span>
-                                        <span className="text-xs text-gray-700">{project.technologies.join(', ')}</span>
-                                    </div>
-                                    <div className="mt-1">
-                                        <span className="text-xs font-medium text-gray-500">角色: </span>
-                                        <span className="text-xs text-gray-700">{project.role}</span>
-                                    </div>
-                                    <div className="mt-1">
-                                        <span className="text-xs font-medium text-gray-500">貢獻: </span>
-                                        <span className="text-xs text-gray-700">{project.contribution}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 技能分析 */}
-                    <div className="mb-6">
-                        <h4 className="text-lg font-semibold text-gray-700 mb-3">技能分析</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.expertise_summary}</p>
-                        <div className="flex flex-wrap gap-2">
-                            {analysisResult.expertise.map((skill, index) => (
-                                <span
-                                    key={index}
-                                    className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                                >
-                                    {skill}
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 工作經驗 */}
-                    <div className="mb-6">
-                        <h4 className="text-lg font-semibold text-gray-700 mb-3">工作經驗</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.work_experiences_summary}</p>
-                        <div className="space-y-3">
-                            {analysisResult.work_experiences.map((exp, index) => (
-                                <div key={index} className="border-l-4 border-green-500 pl-4 py-2">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <h5 className="font-medium text-gray-800">{exp.position}</h5>
-                                            <p className="text-sm text-gray-600">{exp.company}</p>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{exp.duration}</span>
-                                    </div>
-                                    <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* 成就 */}
-                    <div>
-                        <h4 className="text-lg font-semibold text-gray-700 mb-3">成就</h4>
-                        <p className="text-gray-600 mb-4">{analysisResult.achievements_summary}</p>
-                        <ul className="list-disc list-inside space-y-1">
-                            {analysisResult.achievements.map((achievement, index) => (
-                                <li key={index} className="text-gray-700">{achievement}</li>
-                            ))}
-                        </ul>
-                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">分析結果 (JSON)</h3>
+                    <pre className="text-xs whitespace-pre-wrap bg-gray-50 p-3 rounded border border-gray-200">{analysisResultJson}</pre>
                 </div>
             )}
         </div>

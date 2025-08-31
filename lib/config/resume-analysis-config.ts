@@ -17,20 +17,20 @@ export type LetterGrade = 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | '
 export const SCORE_GRADES: LetterGrade[] = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'F'];
 
 // 評分標準定義
-export const GRADING_CRITERIA: Record<LetterGrade, { score: number; label: string; description: string }> = {
-    'A+': { score: 97, label: '卓越表現', description: '業界頂尖水準（95-100分級別）' },
-    'A': { score: 92, label: '優秀表現', description: '高於平均水準（90-94分級別）' },
-    'A-': { score: 87, label: '良好表現', description: '穩定優質水準（85-89分級別）' },
-    'B+': { score: 82, label: '滿意表現', description: '高於基準要求（80-84分級別）' },
-    'B': { score: 77, label: '合格表現', description: '符合基準要求（75-79分級別）' },
-    'B-': { score: 72, label: '基本表現', description: '接近基準要求（70-74分級別）' },
-    'C+': { score: 65, label: '待改進', description: '低於基準要求（60-69分級別）' },
-    'C': { score: 55, label: '需改進', description: '明顯不足（50-59分級別）' },
-    'C-': { score: 45, label: '急需改進', description: '嚴重不足（40-49分級別）' },
-    'F': { score: 20, label: '不合格', description: '完全不符合要求（39分以下級別）' }
+export const GRADING_CRITERIA: Record<LetterGrade, { pr: number; description: string }> = {
+    'A+': { pr: 95, description: 'Exceptional resume quality. Demonstrates outstanding clarity, flawless structure, strong quantified impact (metrics consistently included), and perfect relevance to the target role or industry. Suitable for top-tier roles without further edits.' },
+    'A': { pr: 90, description: 'Excellent resume quality. Very clear and well-structured, with strong impact and relevance; most sentences contain measurable results. Only minor refinements could improve polish.' },
+    'A-': { pr: 85, description: 'Strong resume quality. Generally clear and structured, with multiple quantified achievements and strong relevance. Some sentences may lack precision or consistency, but overall impression remains highly competitive.' },
+    'B+': { pr: 80, description: 'Above-average quality. Clear and structured, but with uneven demonstration of impact or relevance. Some achievements are measurable, others vague. Requires moderate improvement to reach top-tier.' },
+    'B': { pr: 75, description: 'Average quality. Resume is understandable and organized, but many sentences lack metrics, specificity, or strong relevance. Needs noticeable improvement in impact and clarity to stand out.' },
+    'B-': { pr: 70, description: 'Slightly below average. While readable, the resume frequently misses quantified results, shows limited relevance, or lacks strong structure. Multiple sections weaken the overall impression.' },
+    'C+': { pr: 65, description: 'Mediocre quality. Resume contains several vague or generic statements, weak alignment to the target role, and little evidence of impact. Requires substantial rewriting to be competitive.' },
+    'C': { pr: 60, description: 'Weak quality. Resume demonstrates poor clarity or disorganized structure, with minimal quantified achievements and weak relevance. Candidate\'s strengths are not effectively communicated.' },
+    'C-': { pr: 55, description: 'Very weak quality. Resume is hard to follow, mostly generic, and lacks measurable impact. Major sections require rework to be usable.' },
+    'F': { pr: 0, description: 'Failing quality. Resume is incoherent, severely disorganized, or contains fabricated/irrelevant content. Cannot be used in its current form.' }
 };
 
-// 評分項目配置
+// 評分項目配置（已經用不到，待 system prompt 調整好沒問題後即可刪除）
 export const SCORE_CATEGORIES: ScoreCategory[] = [
     {
         id: 'technical_depth',

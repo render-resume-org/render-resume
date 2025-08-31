@@ -7,6 +7,7 @@ import {
     logExcerptVsTemplateContentSimilarity
 } from "@/lib/similarity";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import { ChatMessage, SuggestionRecord } from './types';
@@ -264,7 +265,7 @@ export function useScrollManager() {
 }
 
 // 模板管理的 hook
-export function useTemplateManager(analysisResult: ResumeAnalysisResult, generateUniqueId: (prefix: string) => string) {
+export function useTemplateManager(analysisResult: ResumeAnalysisResult | UnifiedResumeAnalysisResult, generateUniqueId: (prefix: string) => string) {
   const [suggestionTemplates, setSuggestionTemplates] = useState<SuggestionTemplate[]>([]);
 
   // 更新模板狀態
@@ -281,23 +282,23 @@ export function useTemplateManager(analysisResult: ResumeAnalysisResult, generat
     ));
   }, []);
 
-  // 從 follow-ups 初始化建議模板
+  // 從 issues 初始化建議模板
   const initializeSuggestionTemplates = useCallback(() => {
-    const followUps = analysisResult?.missing_content?.follow_ups || [];
-    
-    if (followUps.length > 0) {
-      const templates: SuggestionTemplate[] = followUps.map((followUp) => ({
+    const issues = (analysisResult as UnifiedResumeAnalysisResult | undefined)?.issues || [];
+
+    if (issues.length > 0) {
+      const templates: SuggestionTemplate[] = issues.map((issue) => ({
         id: generateUniqueId('template'),
-        title: followUp.title,
-        description: followUp.question,
-        category: '深度追問',
+        title: issue.title,
+        description: issue.description,
+        category: '需改進',
         status: 'pending' as const,
-        originalFollowUp: followUp.question,
+        originalFollowUp: issue.description,
         timestamp: new Date()
       }));
-      
+
       setSuggestionTemplates(templates);
-      console.log(`🎯 [Templates] Initialized ${templates.length} suggestion templates from follow-ups`);
+      console.log(`🎯 [Templates] Initialized ${templates.length} suggestion templates from issues`);
     }
   }, [analysisResult, generateUniqueId]);
 

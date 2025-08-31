@@ -1,5 +1,6 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
+import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useEditDialogManager } from './edit-dialogs';
@@ -10,19 +11,32 @@ interface ResumePreviewProps {
   resumeData: OptimizedResume;
   template: ResumeTemplate;
   onUpdateResume?: (updatedResume: OptimizedResume) => void;
+  editable?: boolean;
+  analysisResult?: UnifiedResumeAnalysisResult | null;
+  inlineEditable?: boolean;
+  onInlineChange?: (path: string, next: unknown) => void;
+  // Diff preview: list of paths to highlight; for 'set', show before (red) and after (green)
+  previewHighlights?: { type: 'set'; path: string }[];
+  // Optional map of path -> {before, after} to render git-like diff
+  previewDiffs?: Record<string, { before?: string; after?: string }>;
 }
 
-export default function ResumePreview({ resumeData, template, onUpdateResume }: ResumePreviewProps) {
+export default function ResumePreview({ resumeData, template, onUpdateResume, editable = true, analysisResult, inlineEditable, onInlineChange, previewHighlights, previewDiffs }: ResumePreviewProps) {
   const { font, colors } = template;
+  const highlightMap: Record<string, 'set'> = (previewHighlights || []).reduce((acc, h) => {
+    acc[h.path] = h.type;
+    return acc;
+  }, {} as Record<string, 'set'>);
+  const highlightForPath = (path: string): 'set' | undefined => highlightMap[path];
+  const getPreviewValueForPath = (path: string) => previewDiffs?.[path];
 
-  // Initialize edit dialog manager
   const { openEditDialog, renderEditDialog } = useEditDialogManager({
     resumeData,
     onUpdateResume: onUpdateResume || (() => {}),
   });
 
-  // Create edit handlers for each section
   const createEditHandler = (sectionName: string) => () => {
+    if (!editable) return;
     if (['summary', 'skills', 'experience', 'projects', 'education'].includes(sectionName)) {
       openEditDialog(sectionName as 'summary' | 'skills' | 'experience' | 'projects' | 'education');
     }
@@ -30,7 +44,6 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
 
   return (
     <>
-      {/* A4 預覽容器 */}
       <div className="resume-preview-container">
         <div 
           className={cn('resume-content', font.family, colors.background)} 
@@ -40,7 +53,14 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
             color: '#000000'
           }}
         >
-          <ResumeHeader personalInfo={resumeData.personalInfo} template={template} />
+          <ResumeHeader
+            personalInfo={resumeData.personalInfo}
+            template={template}
+            inlineEditable={inlineEditable}
+            onInlineChange={(p) => onInlineChange?.(p.path, p.value)}
+            highlightForPath={(p) => highlightForPath(p)}
+            getPreviewValueForPath={getPreviewValueForPath}
+          />
 
           {template.layout.sections.map(sectionName => (
             <div key={sectionName}>
@@ -48,7 +68,18 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
                 sectionName, 
                 resumeData, 
                 template,
-                onEdit: createEditHandler(sectionName),
+                onEdit: editable ? createEditHandler(sectionName) : undefined,
+                inlineEditable,
+                onInlineChange: onInlineChange && sectionName === 'summary'
+                  ? (next) => onInlineChange('summary', next)
+                  : onInlineChange && sectionName === 'experience'
+                  ? (next) => onInlineChange('experience', next)
+                  : onInlineChange && sectionName === 'projects'
+                  ? (next) => onInlineChange('projects', next)
+                  : undefined,
+                analysisResult,
+                highlightForPath: (p) => highlightForPath(p),
+                getPreviewValueForPath,
               })}
             </div>
           ))}
@@ -64,7 +95,6 @@ export default function ResumePreview({ resumeData, template, onUpdateResume }: 
         </div>
       </div>
 
-      {/* Render edit dialogs */}
       {renderEditDialog()}
     </>
   );

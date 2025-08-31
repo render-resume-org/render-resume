@@ -2,18 +2,21 @@ import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/lib/types/resume';
 import { cn } from '@/lib/utils';
 import { UserCircle } from 'lucide-react';
+import InlineText from '../inline-text';
 import ResumeSection from '../resume-section';
 
 interface SummarySectionProps {
   data: OptimizedResume['summary'];
   template: ResumeTemplate;
   onEdit?: () => void;
+  inlineEditable?: boolean;
+  onInlineChange?: (next: string) => void;
+  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 
-export default function SummarySection({ data, template, onEdit }: SummarySectionProps) {
+export default function SummarySection({ data, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SummarySectionProps) {
   const { font, styles } = template;
-
-  if (!data) return null;
 
   return (
     <ResumeSection
@@ -25,7 +28,18 @@ export default function SummarySection({ data, template, onEdit }: SummarySectio
       showIcon={styles.showSectionIcons}
       onEdit={onEdit}
     >
-      <p className={cn(font.sizes.body, 'text-black leading-relaxed')}>{data}</p>
+      {data ? (
+        <p className={cn(font.sizes.body, 'text-black leading-relaxed')}>
+          <InlineText 
+            text={data} 
+            inlineEditable={inlineEditable} 
+            onChange={onInlineChange} 
+            highlightType={highlightForPath?.('summary')} 
+            previewOriginal={getPreviewValueForPath?.('summary')?.before}
+            previewReplaceWith={getPreviewValueForPath?.('summary')?.after}
+          />
+        </p>
+      ) : null}
     </ResumeSection>
   );
 } 
