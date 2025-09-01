@@ -16,7 +16,7 @@ export interface ChatResponse {
     title: string;
     description: string;
     category: string;
-    patchOps?: { op: 'insert' | 'remove'; path: string; value?: string; index?: number }[];
+    patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: string; index?: number }[];
   };
   quickResponses: string[];
   excerpt?: {
@@ -306,7 +306,20 @@ function parseAIResponse(completion: string): ChatResponse {
     // validate patchOps if present
     if (parsed.suggestion?.patchOps) {
       console.log('🔍 [Parser] PatchOps before:', parsed.suggestion.patchOps);
-      parsed.suggestion.patchOps = parsed.suggestion.patchOps.filter(op => op && typeof op.op === 'string' && typeof op.path === 'string');
+      parsed.suggestion.patchOps = parsed.suggestion.patchOps
+        .filter(op => op && typeof op.op === 'string' && typeof op.path === 'string')
+        .map(op => {
+          if (op.op === 'set') {
+            return { op: 'set', path: op.path, value: String(op.value ?? '') } as const;
+          }
+          if (op.op === 'insert') {
+            return { op: 'insert', path: op.path, value: String(op.value ?? ''), index: typeof op.index === 'number' ? op.index : undefined } as const;
+          }
+          if (op.op === 'remove') {
+            return { op: 'remove', path: op.path, index: typeof op.index === 'number' ? op.index : undefined } as const;
+          }
+          return op as any;
+        });
       console.log('🔍 [Parser] PatchOps after:', parsed.suggestion.patchOps);
     }
     

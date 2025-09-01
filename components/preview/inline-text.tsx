@@ -179,20 +179,23 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
           <span className={cn('cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md')}>
             {previewOriginal}
           </span>
-          <span
-            ref={ref}
-            suppressContentEditableWarning
-            contentEditable={true}
-            onInput={handleInput}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            data-inline-group={groupId}
-            className={cn('cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none')}
-            title={'Click to edit'}
-          >
-            {previewReplaceWith}
-          </span>
+          {/* Only show green "after" block if there's content to show */}
+          {previewReplaceWith && previewReplaceWith.trim() !== '' && (
+            <span
+              ref={ref}
+              suppressContentEditableWarning
+              contentEditable={true}
+              onInput={handleInput}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              data-inline-group={groupId}
+              className={cn('cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none')}
+              title={'Click to edit'}
+            >
+              {previewReplaceWith}
+            </span>
+          )}
         </span>
       ) : (
         <span

@@ -2,11 +2,23 @@
 // 型別定義
 // =====================
 
-export interface PatchOp {
-  op: 'set';
-  path: string; // e.g., experience[0].achievements[1]
-  value: string; // full paragraph replacement
-}
+export type PatchOp =
+  | {
+      op: 'set';
+      path: string; // e.g., experience[0].achievements[1]
+      value: string; // full paragraph replacement
+    }
+  | {
+      op: 'insert';
+      path: string; // array path (e.g., experience[0].achievements)
+      value: string; // bullet to insert
+      index?: number; // optional explicit index (default: append or after matched index)
+    }
+  | {
+      op: 'remove';
+      path: string; // item path (e.g., experience[0].achievements[2]) or array path with index
+      index?: number; // optional explicit index if path is the array path
+    };
 
 export interface ChatMessage {
   id: string;

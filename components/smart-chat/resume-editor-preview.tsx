@@ -18,7 +18,7 @@ interface ResumeEditorPreviewProps {
 export default function ResumeEditorPreview({ template }: ResumeEditorPreviewProps) {
   const [unified, setUnified] = useState<UnifiedResume | null>(null);
   const [optimized, setOptimized] = useState<OptimizedResume | null>(null);
-  const [previewOps, setPreviewOps] = useState<Array<{ op: 'set'; path: string; value: string }> | null>(null);
+  const [previewOps, setPreviewOps] = useState<Array<{ op: 'set'; path: string; value: string } | { op: 'insert'; path: string; value: string; index?: number } | { op: 'remove'; path: string; index?: number }> | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewDiffs, setPreviewDiffs] = useState<Record<string, { before?: string; after?: string }>>({});
 
@@ -254,7 +254,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     const normalizePath = (path: string) =>
       path
         .replace(/\.outcomes\[/g, '.achievements[')
-        .replace(/\.outcomes\./g, '.achievements.');
+        .replace(/\.outcomes\./g, '.achievements.')
+        .replace(/\.outcomes$/g, '.achievements');
 
     const resolveNeighborIndexIfNeeded = (root: unknown, path: string, afterValue: string): string => {
       try {
@@ -297,14 +298,89 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     };
 
     const handler = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ patchOps: Array<{ op: 'set'; path: string; value: string }> }>).detail;
+      const detail = (ev as CustomEvent<{ patchOps: Array<{ op: 'set'; path: string; value: string } | { op: 'insert'; path: string; value: string; index?: number } | { op: 'remove'; path: string; index?: number }> }>).detail;
       if (!detail) return;
 
-      // Normalize and resolve paths
-      const normalizedPatchOps = detail.patchOps.map(op => ({
-        ...op,
-        path: resolveNeighborIndexIfNeeded(optimized, op.path, op.value),
-      }));
+      // Helpers
+      const getByPath = (root: unknown, path: string): unknown => {
+        try {
+          const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
+          const segments = arrPath.split('.').filter(Boolean);
+          let cursor: any = root as any;
+          for (let i = 0; i < segments.length; i++) {
+            if (cursor == null) return undefined;
+            const key = segments[i];
+            cursor = cursor[key as keyof typeof cursor];
+          }
+          return cursor;
+        } catch {
+          return undefined;
+        }
+      };
+
+      const getArrayInfo = (root: unknown, arrayPath: string): { container: any[] | null; lastKey: string | number | null } => {
+        try {
+          const arrPath = arrayPath.replace(/\[(\d+)\]/g, '.$1');
+          const segments = arrPath.split('.').filter(Boolean);
+          let cursor: any = root as any;
+          for (let i = 0; i < segments.length - 1; i++) {
+            const key = segments[i];
+            if (!(key in cursor)) return { container: null, lastKey: null };
+            cursor = cursor[key];
+            if (cursor == null) return { container: null, lastKey: null };
+          }
+          const lastKey = segments[segments.length - 1];
+          const container = Array.isArray(cursor[lastKey]) ? (cursor[lastKey] as any[]) : null;
+          return { container, lastKey };
+        } catch {
+          return { container: null, lastKey: null };
+        }
+      };
+
+      const computeInsertTargetPath = (op: { path: string; value: string; index?: number }): string => {
+        const normPath = normalizePath(op.path);
+        const idxMatch = normPath.match(/\[(\d+)\]$/);
+        if (idxMatch) {
+          const base = normPath.replace(/\[(\d+)\]$/, '');
+          const insertIndex = op.index != null ? op.index : Number(idxMatch[1]) + 1;
+          return `${base}[${insertIndex}]`;
+        }
+        // path is array path without trailing index → append or at provided index
+        const { container } = getArrayInfo(optimized, normPath);
+        const targetIndex = op.index != null ? op.index : (container ? container.length : 0);
+        return `${normPath}[${targetIndex}]`;
+      };
+
+      const computeRemoveTargetPath = (op: { path: string; index?: number }): string | null => {
+        const normPath = normalizePath(op.path);
+        const idxMatch = normPath.match(/\[(\d+)\]$/);
+        if (idxMatch) return normPath;
+        if (typeof op.index === 'number') return `${normPath}[${op.index}]`;
+        // cannot resolve index
+        return null;
+      };
+
+      // Normalize and resolve paths (including neighbor resolution for set/insert)
+      const normalizedPatchOps = detail.patchOps.map(op => {
+        if (op.op === 'set') {
+          return {
+            ...op,
+            path: resolveNeighborIndexIfNeeded(optimized, op.path, op.value),
+          } as typeof op;
+        }
+        if (op.op === 'insert') {
+          const targetPath = computeInsertTargetPath(op);
+          return {
+            ...op,
+            path: resolveNeighborIndexIfNeeded(optimized, targetPath, op.value),
+          } as typeof op;
+        }
+        if (op.op === 'remove') {
+          const targetPath = computeRemoveTargetPath(op);
+          return targetPath ? { ...op, path: targetPath } as typeof op : op;
+        }
+        return op;
+      });
 
       setPreviewOps(normalizedPatchOps);
       // Build preview diffs (before/after) from current optimized state
@@ -312,20 +388,28 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         const diffs: Record<string, { before?: string; after?: string }> = {};
         if (optimized) {
           for (const op of normalizedPatchOps) {
-            if (op.op !== 'set') continue;
-            const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
-            const segments = arrPath.split('.');
-            let cursor: Record<string, unknown> | unknown[] | null = optimized as unknown as Record<string, unknown>;
-            for (let i = 0; i < segments.length; i++) {
-              const key = segments[i];
-              if (i === segments.length - 1) {
-                const currentValue = (cursor as Record<string, unknown>)?.[key as unknown as string];
-                diffs[op.path] = { before: String((currentValue ?? '') as unknown as string), after: op.value };
-              } else {
-                const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as unknown as string];
-                cursor = (typeof nextCursorVal === 'object' && nextCursorVal !== null) ? (nextCursorVal as Record<string, unknown>) : null;
-                if (cursor == null) break;
+            if (op.op === 'set') {
+              const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
+              const segments = arrPath.split('.');
+              let cursor: Record<string, unknown> | unknown[] | null = optimized as unknown as Record<string, unknown>;
+              for (let i = 0; i < segments.length; i++) {
+                const key = segments[i];
+                if (i === segments.length - 1) {
+                  const currentValue = (cursor as Record<string, unknown>)?.[key as unknown as string];
+                  diffs[op.path] = { before: String((currentValue ?? '') as unknown as string), after: op.value };
+                } else {
+                  const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as unknown as string];
+                  cursor = (typeof nextCursorVal === 'object' && nextCursorVal !== null) ? (nextCursorVal as Record<string, unknown>) : null;
+                  if (cursor == null) break;
+                }
               }
+            } else if (op.op === 'insert') {
+              // For insert, show added value as after; before is empty
+              diffs[op.path] = { before: '', after: op.value };
+            } else if (op.op === 'remove') {
+              // For remove, show current content as before; after empty
+              const currentVal = getByPath(optimized, op.path);
+              diffs[op.path] = { before: String((currentVal ?? '') as unknown as string), after: '' };
             }
           }
         }
@@ -341,23 +425,104 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
 
   const getPreviewedResume = useCallback((): OptimizedResume | null => {
     if (!optimized) return optimized;
-    // For set-preview, do not mutate resume; we only render highlights via props
-    return optimized;
-  }, [optimized]);
+    if (!isPreviewing || !previewOps?.length) return optimized;
+    // Build a virtual preview for insert/remove to reflect structure changes visually
+    const virtual: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    for (const op of previewOps) {
+      if (op.op === 'insert') {
+        const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
+        const segments = arrPath.split('.').filter(Boolean);
+        let cursor: any = virtual as any;
+        for (let i = 0; i < segments.length - 1; i++) {
+          const key = segments[i];
+          if (!(key in cursor)) cursor[key] = {};
+          cursor = cursor[key];
+        }
+        const lastKey = segments[segments.length - 1];
+        if (!Array.isArray(cursor[lastKey])) cursor[lastKey] = [];
+        const idxMatch = op.path.match(/\[(\d+)\]$/);
+        const insertIndex = idxMatch ? Number(idxMatch[1]) : (cursor[lastKey] as any[]).length;
+        (cursor[lastKey] as any[]).splice(Math.max(0, Math.min(insertIndex, (cursor[lastKey] as any[]).length)), 0, String(op.value ?? ''));
+      } else if (op.op === 'remove') {
+        // Do not mutate structure for remove during preview; keep the original item visible
+        // so we can render a before/after diff (after will be empty)
+      }
+    }
+    return virtual;
+  }, [optimized, isPreviewing, previewOps]);
 
   const handleAcceptPreview = useCallback(() => {
     if (!optimized || !isPreviewing || !previewOps?.length) return;
     const next: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    // Helper to read current value by path from an object (supports bracket indices)
+    const getByPath = (root: unknown, path: string): unknown => {
+      try {
+        const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
+        const segments = arrPath.split('.').filter(Boolean);
+        let cursor: any = root as any;
+        for (let i = 0; i < segments.length; i++) {
+          if (cursor == null) return undefined;
+          const key = segments[i];
+          cursor = cursor[key as keyof typeof cursor];
+        }
+        return cursor;
+      } catch {
+        return undefined;
+      }
+    };
+
     for (const op of previewOps) {
       if (op.op === 'set') {
-        setByPath(next as unknown as Record<string, unknown>, op.path, op.value as unknown);
+        // Determine whether the user edited this field during preview.
+        const diffs = previewDiffs[op.path];
+        const currentVal = getByPath(optimized, op.path);
+        const beforeVal = diffs?.before ?? '';
+        const aiAfterVal = diffs?.after ?? (op as any).value;
+        const userEdited = String(currentVal ?? '') !== String(beforeVal ?? '');
+        const valueToApply = userEdited ? String(currentVal ?? '') : String(aiAfterVal ?? '');
+        setByPath(next as unknown as Record<string, unknown>, op.path, valueToApply as unknown);
+      } else if (op.op === 'insert') {
+        const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
+        const segments = arrPath.split('.').filter(Boolean);
+        let cursor: any = next as any;
+        for (let i = 0; i < segments.length - 1; i++) {
+          const key = segments[i];
+          if (!(key in cursor)) cursor[key] = {};
+          cursor = cursor[key];
+        }
+        const lastKey = segments[segments.length - 1];
+        if (!Array.isArray(cursor[lastKey])) cursor[lastKey] = [];
+        const idxMatch = op.path.match(/\[(\d+)\]$/);
+        const insertIndex = idxMatch ? Number(idxMatch[1]) : (cursor[lastKey] as any[]).length;
+        (cursor[lastKey] as any[]).splice(Math.max(0, Math.min(insertIndex, (cursor[lastKey] as any[]).length)), 0, (op as any).value);
+      } else if (op.op === 'remove') {
+        const idxMatch = op.path.match(/\[(\d+)\]$/);
+        const targetArrPath = idxMatch ? op.path.replace(/\[(\d+)\]$/, '') : op.path;
+        const arrPath = targetArrPath.replace(/\[(\d+)\]/g, '.$1');
+        const segments = arrPath.split('.').filter(Boolean);
+        let cursor: any = next as any;
+        for (let i = 0; i < segments.length - 1; i++) {
+          const key = segments[i];
+          if (!(key in cursor)) { cursor = null; break; }
+          cursor = cursor[key];
+          if (cursor == null) break;
+        }
+        if (cursor) {
+          const lastKey = segments[segments.length - 1];
+          if (Array.isArray(cursor[lastKey])) {
+            const removeIndex = typeof (op as any).index === 'number' ? (op as any).index : (idxMatch ? Number(idxMatch[1]) : -1);
+            if (removeIndex >= 0 && removeIndex < (cursor[lastKey] as any[]).length) {
+              (cursor[lastKey] as any[]).splice(removeIndex, 1);
+            }
+          }
+        }
       }
     }
     persist(next);
     setIsPreviewing(false);
     setPreviewOps(null);
     setPreviewDiffs({});
-  }, [optimized, isPreviewing, previewOps, persist]);
+  }, [optimized, isPreviewing, previewOps, persist, previewDiffs]);
 
   const handleRejectPreview = useCallback(() => {
     setIsPreviewing(false);
