@@ -21,17 +21,15 @@ export function ResumeComment({ comment }: ResumeCommentProps) {
       </CardHeader>
       <CardContent className="space-y-4 flex-1">
         {/* 評語 */}
-        <div className="py-4">
-          <div className="relative">
-            {/* 左邊的藍色垂直線 */}
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-full"></div>
-            <div className="pl-6">
-              {/* 評語內容 */}
-              <div>
-                <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {comment}
-                </p>
-              </div>
+        <div className="relative">
+          {/* 左邊的藍色垂直線 */}
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-full"></div>
+          <div className="pl-6">
+            {/* 評語內容 */}
+            <div>
+              <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                {comment}
+              </p>
             </div>
           </div>
         </div>

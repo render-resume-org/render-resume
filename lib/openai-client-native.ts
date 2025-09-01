@@ -1,11 +1,9 @@
-import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
-import { z } from 'zod';
+
 import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt
 } from './config/resume-analysis-config';
-import { generateAnalyzeResumeUserPrompt } from './prompts/analyze-resume-prompt';
-import { generateAnalyzeUploadUserPrompt } from './prompts/analyze-upload-prompt';
+
 
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
@@ -33,6 +31,10 @@ interface InternalAIConfig {
     seed?: number;
 }
 
+
+
+
+
 // 支援的文檔類型
 export const SUPPORTED_FILE_TYPES = {
     PDF: ['pdf'],
@@ -42,27 +44,6 @@ export const SUPPORTED_FILE_TYPES = {
 
 export type SupportedFileType = keyof typeof SUPPORTED_FILE_TYPES;
 
-// 文檔上傳介面
-export interface DocumentUpload {
-    file: File | Buffer;
-    fileName: string;
-    fileType: string;
-    content?: string;
-}
-
-export interface FileAnalysisOptions {
-    documents: DocumentUpload[];
-    additionalText?: string;
-    education?: Education[];
-    experience?: Experience[];
-    projects?: Project[];
-    skills?: string;
-    personalInfo?: PersonalInfo;
-    links?: Links;
-    useVision?: boolean;
-    customSystemPrompt?: string;
-}
-
 // 使用動態配置
 export const DEFAULT_CONFIG: AIConfig = {
     modelName: DEFAULT_AI_CONFIG.modelName,
@@ -71,73 +52,7 @@ export const DEFAULT_CONFIG: AIConfig = {
     maxConcurrency: DEFAULT_AI_CONFIG.maxConcurrency
 };
 
-// 定義回應的 Schema - 簡化版本，符合 OpenAI API 要求
-export const ResumeAnalysisSchema = z.object({
-    profile: z.object({
-        name: z.string().describe("候選人姓名").optional(),
-        title: z.string().describe("專業頭銜").optional(),
-        brief_introduction: z.string().describe("個人簡介").optional(),
-        email: z.string().describe("電子郵件").optional(),
-        phone: z.string().describe("電話號碼").optional(),
-        location: z.string().describe("所在地點").optional(),
-        linkedin: z.string().describe("LinkedIn連結").optional(),
-        github: z.string().describe("GitHub連結").optional(),
-        website: z.string().describe("個人網站").optional(),
-        portfolio: z.string().describe("作品集連結").optional()
-    }).describe("個人基本資料").optional(),
-    projects: z.array(z.object({
-        name: z.string().describe("項目名稱"),
-        description: z.string().describe("技術挑戰與解決方案"),
-        technologies: z.array(z.string()).describe("使用的技術"),
-        role: z.string().describe("擔任角色"),
-        contribution: z.string().describe("貢獻"),
-        duration: z.string().describe("進行期間")
-    })),
-    expertise: z.array(z.string()).describe("完整技術聯集列表"),
-    projects_summary: z.string().describe("項目摘要"),
-    expertise_summary: z.string().describe("技能摘要"),
-    work_experiences: z.array(z.object({
-        company: z.string().describe("公司名稱"),
-        position: z.string().describe("職位"),
-        duration: z.string().describe("工作期間"),
-        description: z.string().describe("工作描述"),
-        contribution: z.string().describe("個人貢獻"),
-        technologies: z.array(z.string()).describe("使用的技術")
-    })),
-    work_experiences_summary: z.string().describe("工作經驗摘要"),
-    education_background: z.array(z.object({
-        institution: z.string().describe("學校名稱"),
-        degree: z.string().describe("學位"),
-        major: z.string().describe("主修科系"),
-        duration: z.string().describe("在學期間"),
-        gpa: z.string().describe("成績"),
-        courses: z.array(z.string()).describe("相關課程"),
-        achievements: z.array(z.string()).describe("學術成就")
-    })),
-    education_summary: z.string().describe("教育背景摘要"),
-    achievements: z.array(z.string()).describe("成就列表"),
-    achievements_summary: z.string().describe("成就摘要"),
-    missing_content: z.object({
-        critical_missing: z.array(z.string()).describe("關鍵缺失項目"),
-        recommended_additions: z.array(z.string()).describe("建議補充內容"),
-        impact_analysis: z.string().describe("缺失內容對整體評估的影響分析"),
-        priority_suggestions: z.array(z.string()).describe("優先補強建議"),
-        follow_ups: z.array(z.object({
-            title: z.string().describe("問題標題"),
-            question: z.string().describe("互動式問題內容")
-        })).describe("互動式後續問題，協助補齊缺失資料")
-    }).describe("缺失內容分析"),
-    scores: z.array(z.object({
-        category: z.string().describe("評分類別"),
-        grade: z.enum(['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D', 'F'] as const).describe('Grade (A+, A, A-, B+, B, B-, C+, C, C-, D, F)'),
-        description: z.string().describe("評分描述"),
-        comment: z.string().describe("AI評語"),
-        icon: z.string().describe("圖示表情符號"),
-        suggestions: z.array(z.string()).describe("改進建議")
-    })).describe("技術履歷細節完整度評分列表")
-});
 
-export type ResumeAnalysisResult = z.infer<typeof ResumeAnalysisSchema>;
 
 // OpenAI API 介面定義
 interface OpenAIMessage {
@@ -335,27 +250,7 @@ export class NativeOpenAIClient {
     }
 
     // 檢查文件類型
-    private getFileType(fileName: string): SupportedFileType | null {
-        console.log(`🔍 [Native OpenAI Client] Analyzing file type for: "${fileName}"`);
-        const extension = fileName.split('.').pop()?.toLowerCase();
-        console.log(`🔍 [Native OpenAI Client] Extracted extension: "${extension}"`);
-        
-        if (!extension) {
-            console.log(`❌ [Native OpenAI Client] No extension found for: "${fileName}"`);
-            return null;
-        }
 
-        for (const [type, extensions] of Object.entries(SUPPORTED_FILE_TYPES)) {
-            console.log(`🔍 [Native OpenAI Client] Checking type "${type}" with extensions:`, extensions);
-            if ((extensions as readonly string[]).includes(extension)) {
-                console.log(`✅ [Native OpenAI Client] Match found: "${fileName}" -> type "${type}"`);
-                return type as SupportedFileType;
-            }
-        }
-        
-        console.log(`❌ [Native OpenAI Client] No matching type found for extension "${extension}" in file "${fileName}"`);
-        return null;
-    }
 
     // 將文件轉換為 base64
     private async fileToBase64(file: File): Promise<string> {
@@ -407,331 +302,7 @@ export class NativeOpenAIClient {
         return data;
     }
 
-    async analyzeDocuments(options: FileAnalysisOptions): Promise<ResumeAnalysisResult> {
-        console.log('🚀 [Native OpenAI Client] Starting document analysis with native client');
-        
-        const { documents, additionalText, education, experience, projects, skills, personalInfo, links, useVision = false, customSystemPrompt } = options;
-        
-        if (!documents || documents.length === 0) {
-            throw new Error('沒有提供文件進行分析');
-        }
 
-        try {
-            const messages: OpenAIMessage[] = [
-                {
-                    role: 'system',
-                    content: customSystemPrompt || this.config.systemPrompt
-                }
-            ];
-
-            let hasImages = false;
-            let textContent = '';
-            
-            // 處理文件
-            for (const doc of documents) {
-                const fileType = this.getFileType(doc.fileName);
-                
-                if (!fileType) {
-                    console.warn(`Unsupported file type: ${doc.fileName}`);
-                    continue;
-                }
-
-                if (fileType === 'DOCUMENTS') {
-                    // 文字檔案
-                    if (doc.content) {
-                        textContent += `檔案 ${doc.fileName}:\n${doc.content}\n\n`;
-                    } else if (doc.file instanceof File) {
-                        const content = await processTextFile(doc.file);
-                        textContent += `檔案 ${doc.fileName}:\n${content}\n\n`;
-                    }
-                } else if ((fileType === 'IMAGES' || fileType === 'PDF') && useVision) {
-                    // 圖像或 PDF (使用視覺功能)
-                    hasImages = true;
-                    if (doc.file instanceof File) {
-                        const base64 = await this.fileToBase64(doc.file);
-                        const mimeType = doc.file.type || (fileType === 'PDF' ? 'application/pdf' : 'image/jpeg');
-                        
-                        messages.push({
-                            role: 'user',
-                            content: [
-                                {
-                                    type: 'text',
-                                    text: `請分析檔案 ${doc.fileName}:`
-                                },
-                                {
-                                    type: 'image_url',
-                                    image_url: {
-                                        url: `data:${mimeType};base64,${base64}`,
-                                        detail: 'high'
-                                    }
-                                }
-                            ]
-                        });
-                    }
-                }
-            }
-
-            // 新增主要分析請求
-            const userPrompt = generateAnalyzeUploadUserPrompt({
-                textContent,
-                additionalText,
-                hasImages,
-                education,
-                experience,
-                projects,
-                skills,
-                personalInfo,
-                links
-            });
-
-            messages.push({
-                role: 'user',
-                content: userPrompt
-            });
-
-            console.log('🚀 [Native OpenAI Client] Using JSON object mode for document analysis...');
-            
-            const request: OpenAIChatCompletionRequest = {
-                model: this.config.modelName,
-                messages,
-                temperature: this.config.temperature,
-                response_format: {
-                    type: 'json_object'
-                }
-            };
-
-            // 直接調用 OpenAI API
-            const response = await this.callOpenAI(request);
-            
-            if (!response.choices || response.choices.length === 0) {
-                throw new Error('No choices in OpenAI response');
-            }
-
-            const content = response.choices[0].message.content;
-            if (!content) {
-                throw new Error('No content in OpenAI response');
-            }
-
-            // 解析結果
-            let parsedResult: unknown;
-            try {
-                parsedResult = JSON.parse(content);
-                console.log('✅ [Native OpenAI Client] OpenAI JSON parsing successful');
-            } catch (parseError) {
-                console.warn('⚠️ [Native OpenAI Client] JSON parsing failed, trying smart parsing:', parseError);
-                parsedResult = this.parseAIResponse(content);
-            }
-
-            // 使用 Zod 驗證結果
-            try {
-                const validatedResult = ResumeAnalysisSchema.parse(parsedResult);
-                console.log('✅ [Native OpenAI Client] Zod validation passed');
-                return validatedResult;
-            } catch (zodError) {
-                console.warn('⚠️ [Native OpenAI Client] Zod validation failed, attempting post-processing:', zodError);
-                
-                // 後處理空白欄位和 achievements 格式
-                if (parsedResult && typeof parsedResult === 'object' && parsedResult !== null) {
-                    const resultObj = parsedResult as Record<string, unknown>;
-                    
-                    // 處理 achievements 格式
-                    if (resultObj.achievements && Array.isArray(resultObj.achievements) && 
-                        resultObj.achievements.length > 0 && 
-                        typeof resultObj.achievements[0] === 'object') {
-                        
-                        console.log('🔄 [Native OpenAI Client] Converting achievements from object array to string array');
-                        resultObj.achievements = resultObj.achievements.map((item: unknown) => {
-                            if (typeof item === 'object' && item !== null) {
-                                const achievementObj = item as Record<string, unknown>;
-                                return String(achievementObj.description || achievementObj.achievement || achievementObj.title || achievementObj.name) || JSON.stringify(item);
-                            }
-                            return String(item);
-                        });
-                    }
-                    
-                    // 處理 missing_content 中的字符串轉數組
-                    if (resultObj.missing_content && typeof resultObj.missing_content === 'object' && resultObj.missing_content !== null) {
-                        const missingContent = resultObj.missing_content as Record<string, unknown>;
-                        
-                        // 將字符串轉換為數組
-                        const stringToArray = (value: unknown): string[] => {
-                            if (Array.isArray(value)) return value.map(String);
-                            if (typeof value === 'string') {
-                                // 嘗試解析為 JSON 數組或用分隔符拆分
-                                try {
-                                    const parsed = JSON.parse(value);
-                                    if (Array.isArray(parsed)) return parsed.map(String);
-                                } catch {
-                                    // 如果不是 JSON，嘗試用常見分隔符拆分
-                                    if (value.includes(',')) return value.split(',').map(s => s.trim());
-                                    if (value.includes(';')) return value.split(';').map(s => s.trim());
-                                    if (value.includes('、')) return value.split('、').map(s => s.trim());
-                                    return [value]; // 如果無法拆分，作為單個元素
-                                }
-                            }
-                            return [];
-                        };
-                        
-                        missingContent.critical_missing = stringToArray(missingContent.critical_missing);
-                        missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
-                        missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
-                        // follow_ups 现在是对象数组，不需要 stringToArray 处理
-                        
-                        console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
-                    }
-                    
-                    // 處理 scores 中的 suggestions 字符串轉數組
-                    if (resultObj.scores && Array.isArray(resultObj.scores)) {
-                        resultObj.scores = resultObj.scores.map((score: unknown) => {
-                            if (typeof score === 'object' && score !== null) {
-                                const scoreObj = score as Record<string, unknown>;
-                                if (scoreObj.suggestions && typeof scoreObj.suggestions === 'string') {
-                                    try {
-                                        // 嘗試解析為 JSON
-                                        const parsed = JSON.parse(scoreObj.suggestions as string);
-                                        if (Array.isArray(parsed)) {
-                                            scoreObj.suggestions = parsed.map(String);
-                                        } else {
-                                            scoreObj.suggestions = [String(parsed)];
-                                        }
-                                    } catch {
-                                        // 如果不是 JSON，嘗試用分隔符拆分
-                                        const suggestions = scoreObj.suggestions as string;
-                                        if (suggestions.includes(',')) {
-                                            scoreObj.suggestions = suggestions.split(',').map(s => s.trim());
-                                        } else if (suggestions.includes(';')) {
-                                            scoreObj.suggestions = suggestions.split(';').map(s => s.trim());
-                                        } else if (suggestions.includes('、')) {
-                                            scoreObj.suggestions = suggestions.split('、').map(s => s.trim());
-                                        } else {
-                                            scoreObj.suggestions = [suggestions];
-                                        }
-                                    }
-                                }
-                                return scoreObj;
-                            }
-                            return score;
-                        });
-                        
-                        console.log('🔄 [Native OpenAI Client] Fixed scores suggestions array formats');
-                    }
-                    
-                    // 處理空白欄位
-                    const processEmptyFields = (obj: Record<string, unknown>) => {
-                        if (obj.projects && Array.isArray(obj.projects)) {
-                            obj.projects = obj.projects.map((project: unknown) => {
-                                if (typeof project === 'object' && project !== null) {
-                                    const p = project as Record<string, unknown>;
-                                    return {
-                                        name: p.name || '',
-                                        description: p.description || '',
-                                        technologies: Array.isArray(p.technologies) ? p.technologies : [],
-                                        duration: p.duration || '',
-                                        role: p.role || '',
-                                        contribution: p.contribution || ''
-                                    };
-                                }
-                                return project;
-                            });
-                        }
-                        
-                        if (obj.work_experiences && Array.isArray(obj.work_experiences)) {
-                            obj.work_experiences = obj.work_experiences.map((exp: unknown) => {
-                                if (typeof exp === 'object' && exp !== null) {
-                                    const e = exp as Record<string, unknown>;
-                                    return {
-                                        company: e.company || '',
-                                        position: e.position || '',
-                                        duration: e.duration || '',
-                                        description: e.description || '',
-                                        contribution: e.contribution || '',
-                                        technologies: Array.isArray(e.technologies) ? e.technologies : []
-                                    };
-                                }
-                                return exp;
-                            });
-                        }
-                        
-                        if (obj.education_background && Array.isArray(obj.education_background)) {
-                            obj.education_background = obj.education_background.map((edu: unknown) => {
-                                if (typeof edu === 'object' && edu !== null) {
-                                    const ed = edu as Record<string, unknown>;
-                                    return {
-                                        institution: ed.institution || '',
-                                        degree: ed.degree || '',
-                                        major: ed.major || '',
-                                        duration: ed.duration || '',
-                                        gpa: ed.gpa || '',
-                                        courses: Array.isArray(ed.courses) ? ed.courses : [],
-                                        achievements: Array.isArray(ed.achievements) ? ed.achievements : []
-                                    };
-                                }
-                                return edu;
-                            });
-                        }
-                        
-                        return obj;
-                    };
-                    
-                    // 先處理空白欄位，然後強制 F 評分
-                    const processedObj = this.enforceFailingGradesForMissingContent(processEmptyFields(resultObj));
-                    
-                    // 重新驗證
-                    try {
-                        const revalidatedResult = ResumeAnalysisSchema.parse(processedObj);
-                        console.log('✅ [Native OpenAI Client] Zod validation passed after post-processing');
-                        return revalidatedResult;
-                    } catch {
-                        console.warn('⚠️ [Native OpenAI Client] Final Zod validation failed, providing default values');
-                        
-                        // 提供預設值以防最終驗證失敗
-                        const defaultResult: ResumeAnalysisResult = {
-                            projects: [],
-                            projects_summary: processedObj.projects_summary as string || '尚未提供專案資訊',
-                            expertise: Array.isArray(processedObj.expertise) ? processedObj.expertise as string[] : [],
-                            expertise_summary: processedObj.expertise_summary as string || '尚未提供技能資訊',
-                            work_experiences: [],
-                            work_experiences_summary: processedObj.work_experiences_summary as string || '尚未提供工作經驗',
-                            education_background: [],
-                            education_summary: processedObj.education_summary as string || '尚未提供教育背景',
-                            achievements: Array.isArray(processedObj.achievements) ? processedObj.achievements as string[] : [],
-                            achievements_summary: processedObj.achievements_summary as string || '尚未提供成就資訊',
-                            missing_content: (processedObj.missing_content as {
-                                critical_missing: string[];
-                                recommended_additions: string[];
-                                impact_analysis: string;
-                                priority_suggestions: string[];
-                                follow_ups: { title: string; question: string; }[];
-                            }) || {
-                                critical_missing: ['完整的履歷內容'],
-                                recommended_additions: ['詳細的工作經驗', '專案描述', '技能列表'],
-                                impact_analysis: '缺乏關鍵資訊影響整體評估',
-                                priority_suggestions: ['補充工作經驗詳情', '加強專案描述'],
-                                follow_ups: [{ title: '基本資訊', question: '請提供更多相關資料' }]
-                            },
-                            scores: Array.isArray(processedObj.scores) ? (processedObj.scores as Array<{
-                                category: string;
-                                grade: 'A+' | 'A' | 'A-' | 'B+' | 'B' | 'B-' | 'C+' | 'C' | 'C-' | 'D' | 'F';
-                                description: string;
-                                comment: string;
-                                icon: string;
-                                suggestions: string[];
-                            }>) : []
-                        };
-                        
-                        console.log('🔄 [Native OpenAI Client] Returning default values due to validation failure');
-                        return defaultResult;
-                    }
-                }
-                
-                return parsedResult as ResumeAnalysisResult;
-            }
-            
-        } catch (error) {
-            console.error("Native OpenAI document analysis error:", error);
-            throw new Error(`文件分析失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
-        }
-    }
 
     // 強制對無法提取內容的項目給予 F 評分的通用方法
     private enforceFailingGradesForMissingContent(obj: Record<string, unknown>): Record<string, unknown> {
@@ -980,203 +551,7 @@ export class NativeOpenAIClient {
         return obj;
     }
 
-    async analyzeResume(resumeContent: string, additionalText?: string, customSystemPrompt?: string): Promise<ResumeAnalysisResult> {
-        console.log('🚀 [Native OpenAI Client] Starting resume analysis');
-        
-        const messages: OpenAIMessage[] = [
-            {
-                role: 'system',
-                content: customSystemPrompt || this.config.systemPrompt
-            },
-            {
-                role: 'user',
-                content: generateAnalyzeResumeUserPrompt({ resumeContent, additionalText })
-            }
-        ];
 
-        try {
-            console.log('🚀 [Native OpenAI Client] Using JSON object mode for resume analysis...');
-            
-            const request: OpenAIChatCompletionRequest = {
-                model: this.config.modelName,
-                messages,
-                temperature: this.config.temperature,
-                response_format: {
-                    type: 'json_object'
-                }
-            };
-
-            const response = await this.callOpenAI(request);
-            const content = response.choices[0].message.content;
-            
-            if (!content) {
-                throw new Error('No content in response');
-            }
-
-            let parsedResult: unknown;
-            try {
-                parsedResult = JSON.parse(content);
-                console.log('✅ [Native OpenAI Client] JSON object mode successful for resume analysis');
-            } catch (parseError) {
-                console.warn('⚠️ [Native OpenAI Client] JSON parsing failed, trying smart parsing:', parseError);
-                parsedResult = this.parseAIResponse(content);
-            }
-
-            // 使用 Zod 驗證
-            try {
-                const validatedResult = ResumeAnalysisSchema.parse(parsedResult);
-                console.log('✅ [Native OpenAI Client] Zod validation passed for resume analysis');
-                return validatedResult;
-            } catch (zodError) {
-                console.warn('⚠️ [Native OpenAI Client] Zod validation failed for resume analysis, attempting post-processing:', zodError);
-                
-                // 後處理 achievements
-                if (parsedResult && typeof parsedResult === 'object' && parsedResult !== null) {
-                    const resultObj = parsedResult as Record<string, unknown>;
-                    
-                    // 處理可能為空的字段
-                    const processEmptyFields = (obj: Record<string, unknown>) => {
-                        for (const [key, value] of Object.entries(obj)) {
-                            if (value === null || value === undefined || value === '') {
-                                if (key.includes('summary') || typeof obj[key] === 'string') {
-                                    obj[key] = '無相關資訊';
-                                } else if (Array.isArray(obj[key]) || key.includes('experiences') || key.includes('background') || key.includes('achievements') || key.includes('scores')) {
-                                    obj[key] = [];
-                                } else if (typeof obj[key] === 'object') {
-                                    obj[key] = {};
-                                }
-                            }
-                        }
-                        return obj;
-                    };
-                    
-                    // 處理 achievements 格式
-                    if (resultObj.achievements && Array.isArray(resultObj.achievements) && 
-                        resultObj.achievements.length > 0 && 
-                        typeof resultObj.achievements[0] === 'object') {
-                        
-                        console.log('🔄 [Native OpenAI Client] Converting achievements from object array to string array');
-                        resultObj.achievements = resultObj.achievements.map((item: unknown) => {
-                            if (typeof item === 'object' && item !== null) {
-                                const achievementObj = item as Record<string, unknown>;
-                                return String(achievementObj.description || achievementObj.achievement || achievementObj.title || achievementObj.name) || JSON.stringify(item);
-                            }
-                            return String(item);
-                        });
-                    }
-                    
-                    // 處理 missing_content 中的字符串轉數組
-                    if (resultObj.missing_content && typeof resultObj.missing_content === 'object' && resultObj.missing_content !== null) {
-                        const missingContent = resultObj.missing_content as Record<string, unknown>;
-                        
-                        // 將字符串轉換為數組
-                        const stringToArray = (value: unknown): string[] => {
-                            if (Array.isArray(value)) return value.map(String);
-                            if (typeof value === 'string') {
-                                // 嘗試解析為 JSON 數組或用分隔符拆分
-                                try {
-                                    const parsed = JSON.parse(value);
-                                    if (Array.isArray(parsed)) return parsed.map(String);
-                                } catch {
-                                    // 如果不是 JSON，嘗試用常見分隔符拆分
-                                    if (value.includes(',')) return value.split(',').map(s => s.trim());
-                                    if (value.includes(';')) return value.split(';').map(s => s.trim());
-                                    if (value.includes('、')) return value.split('、').map(s => s.trim());
-                                    return [value]; // 如果無法拆分，作為單個元素
-                                }
-                            }
-                            return [];
-                        };
-                        
-                        missingContent.critical_missing = stringToArray(missingContent.critical_missing);
-                        missingContent.recommended_additions = stringToArray(missingContent.recommended_additions);
-                        missingContent.priority_suggestions = stringToArray(missingContent.priority_suggestions);
-                        // follow_ups 现在是对象数组，不需要 stringToArray 处理
-                        
-                        console.log('🔄 [Native OpenAI Client] Fixed missing_content array formats');
-                    }
-                    
-                    // 處理 scores 中的 suggestions 字符串轉數組
-                    if (resultObj.scores && Array.isArray(resultObj.scores)) {
-                        resultObj.scores = resultObj.scores.map((score: unknown) => {
-                            if (typeof score === 'object' && score !== null) {
-                                const scoreObj = score as Record<string, unknown>;
-                                if (scoreObj.suggestions && typeof scoreObj.suggestions === 'string') {
-                                    try {
-                                        // 嘗試解析為 JSON
-                                        const parsed = JSON.parse(scoreObj.suggestions as string);
-                                        if (Array.isArray(parsed)) {
-                                            scoreObj.suggestions = parsed.map(String);
-                                        } else {
-                                            scoreObj.suggestions = [String(parsed)];
-                                        }
-                                    } catch {
-                                        // 如果不是 JSON，嘗試用分隔符拆分
-                                        const suggestions = scoreObj.suggestions as string;
-                                        if (suggestions.includes(',')) {
-                                            scoreObj.suggestions = suggestions.split(',').map(s => s.trim());
-                                        } else if (suggestions.includes(';')) {
-                                            scoreObj.suggestions = suggestions.split(';').map(s => s.trim());
-                                        } else if (suggestions.includes('、')) {
-                                            scoreObj.suggestions = suggestions.split('、').map(s => s.trim());
-                                        } else {
-                                            scoreObj.suggestions = [suggestions];
-                                        }
-                                    }
-                                }
-                                return scoreObj;
-                            }
-                            return score;
-                        });
-                        
-                        console.log('🔄 [Native OpenAI Client] Fixed scores suggestions array formats');
-                    }
-                    
-                    // 先處理空白欄位，然後強制 F 評分
-                    const processedObj = this.enforceFailingGradesForMissingContent(processEmptyFields(resultObj));
-                    
-                    try {
-                        const revalidatedResult = ResumeAnalysisSchema.parse(processedObj);
-                        console.log('✅ [Native OpenAI Client] Zod validation passed after post-processing for resume analysis');
-                        return revalidatedResult;
-                    } catch {
-                        console.warn('⚠️ [Native OpenAI Client] Final Zod validation failed, providing default values');
-                        
-                        // 提供默認值以滿足 required 字段
-                        const defaultResult: ResumeAnalysisResult = {
-                            projects: [],
-                            expertise: [],
-                            projects_summary: '無相關資訊',
-                            expertise_summary: '無相關資訊',
-                            work_experiences: [],
-                            work_experiences_summary: '無相關資訊',
-                            education_background: [],
-                            education_summary: '無相關資訊',
-                            achievements: [],
-                            achievements_summary: '無相關資訊',
-                            missing_content: {
-                                critical_missing: ['履歷資訊不完整'],
-                                recommended_additions: ['建議補充更多資訊'],
-                                impact_analysis: '資訊不足，無法進行完整分析',
-                                priority_suggestions: ['請提供更詳細的履歷資訊'],
-                                follow_ups: [{ title: '基本資訊', question: '請提供更多相關資料' }]
-                            },
-                            scores: []
-                        };
-                        
-                        // 合併有效的字段
-                        return { ...defaultResult, ...processedObj } as ResumeAnalysisResult;
-                    }
-                }
-                
-                return parsedResult as ResumeAnalysisResult;
-            }
-            
-        } catch (error) {
-            console.error('❌ [Native OpenAI Client] Resume analysis failed:', error);
-            throw new Error(`履歷分析失敗: ${error instanceof Error ? error.message : '未知錯誤'}`);
-        }
-    }
 
     async customPrompt(systemPrompt: string, userInput: string): Promise<string> {
         console.log('🚀 [Native OpenAI Client] Making custom prompt call');
@@ -1253,7 +628,7 @@ export function createNativeOpenAIClient(
             baseURL
         });
     }
-    
+
     // 否則使用新的選項對象簽名
     return new NativeOpenAIClient(optionsOrApiKey);
 }
@@ -1265,14 +640,9 @@ export async function processTextFile(file: File): Promise<string> {
     return buffer.toString('utf-8');
 }
 
-export function validateFileType(fileName: string): boolean {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    if (!extension) return false;
 
-    return Object.values(SUPPORTED_FILE_TYPES).some(types => 
-        (types as readonly string[]).includes(extension)
-    );
-}
+
+
 
 /* 
 使用範例：
