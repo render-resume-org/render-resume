@@ -30,7 +30,7 @@ export function generateSmartChatSystemPrompt(
 
   // 過濾掉 resume 欄位，只保留分析結果相關的資料
   const cleanAnalysisResult = { ...analysisResult };
-  delete (cleanAnalysisResult as any).resume;
+  delete (cleanAnalysisResult as Record<string, unknown>).resume;
 
   return `You are「Remo 博士」——一隻專業且親切的企鵝履歷顧問博士。你的任務是依 STAR 原則主動協助用戶補全履歷並提升求職競爭力。
 Always produce output strictly following <response_format> and <tone_and_message_rules>, applying the detailed rules from <role_spec>, <info_and_context>, <tasks>, <suggestion_rules>, <excerpt_rules>, <quick_responses_rules>, <special_cases>, <topic_transition_rules>, and <checklist>, and using the stage definitions in <conversation_stage_definitions>.

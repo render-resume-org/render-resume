@@ -2,23 +2,46 @@
 // 型別定義
 // =====================
 
-export type PatchOp =
-  | {
-      op: 'set';
-      path: string; // e.g., experience[0].achievements[1]
-      value: string; // full paragraph replacement
-    }
-  | {
-      op: 'insert';
-      path: string; // array path (e.g., experience[0].achievements)
-      value: string; // bullet to insert
-      index?: number; // optional explicit index (default: append or after matched index)
-    }
-  | {
-      op: 'remove';
-      path: string; // item path (e.g., experience[0].achievements[2]) or array path with index
-      index?: number; // optional explicit index if path is the array path
-    };
+export interface PatchOp {
+  op: 'set';
+  path: string; // e.g., experience[0].achievements[1]
+  value: string; // full paragraph replacement
+}
+
+export interface InsertOp {
+  op: 'insert';
+  path: string; // array path (e.g., experience[0].achievements)
+  value: string; // bullet to insert
+  index?: number; // optional explicit index (default: append or after matched index)
+}
+
+export interface RemoveOp {
+  op: 'remove';
+  path: string; // item path (e.g., experience[0].achievements[2]) or array path with index
+  index?: number; // optional explicit index if path is the array path
+}
+
+export type PatchOpUnion = PatchOp | InsertOp | RemoveOp;
+
+// Utility types for path operations
+export type PathCursor = Record<string, unknown> | unknown[] | null;
+export type ArrayContainer = unknown[] | null;
+
+// Type-safe path navigation utilities
+export interface PathNavigationResult {
+  container: ArrayContainer;
+  lastKey: string | number | null;
+}
+
+export interface PathValueResult<T = unknown> {
+  value: T;
+  parent: Record<string, unknown> | unknown[] | null;
+  key: string | number | null;
+}
+
+// Type-safe object property access
+export type SafeKey<T> = T extends Record<string, unknown> ? keyof T : never;
+export type SafeValue<T, K> = K extends keyof T ? T[K] : unknown;
 
 export interface ChatMessage {
   id: string;

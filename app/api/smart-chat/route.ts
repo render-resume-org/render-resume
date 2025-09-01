@@ -1,3 +1,4 @@
+import { InsertOp, PatchOp, RemoveOp } from '@/components/smart-chat/types';
 import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
@@ -318,7 +319,7 @@ function parseAIResponse(completion: string): ChatResponse {
           if (op.op === 'remove') {
             return { op: 'remove', path: op.path, index: typeof op.index === 'number' ? op.index : undefined } as const;
           }
-          return op as any;
+          return op as PatchOp | InsertOp | RemoveOp;
         });
       console.log('🔍 [Parser] PatchOps after:', parsed.suggestion.patchOps);
     }
