@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
 import { Copy, Trash2 } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SuggestionRecord, SuggestionTemplate, PatchOp } from "./types";
+import { PatchOp, SuggestionRecord, SuggestionTemplate } from "./types";
 
 const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
   if (!status) return 'bg-transparent';
