@@ -156,23 +156,6 @@ export default function DownloadPage() {
             </div>
           </div>
         </div>
-
-        {/* Navigation */}
-        <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/smart-chat')}
-            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <span>上一步</span>
-          </Button>
-          <Button
-            onClick={() => router.push('/dashboard')}
-            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
-          >
-            <span>完成</span>
-          </Button>
-        </div>
       </div>
     </div>
   );

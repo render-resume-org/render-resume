@@ -636,7 +636,8 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
 export {
     generateBaseSystemPrompt,
     generateCreateResumeSystemPrompt,
-    generateOptimizeResumeSystemPrompt, generateServiceSpecificSystemPrompt, generateSystemPrompt
+    generateServiceSpecificSystemPrompt, 
+    generateSystemPrompt
 } from '../prompts';
 
 // 評分建議生成器

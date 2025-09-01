@@ -685,11 +685,6 @@ export async function middleware(request: NextRequest) {
 - `GET /api/smart-chat/history` - 對話歷史記錄
 - `DELETE /api/smart-chat/session` - 清除對話記錄
 
-#### 履歷優化 API
-- `POST /api/optimize-resume` - 履歷優化處理
-- `GET /api/optimize-resume/suggestions` - 獲取優化建議
-- `POST /api/optimize-resume/apply` - 應用優化建議
-
 #### 訂閱支付 API
 - `POST /api/payment/checkout` - 創建支付
 - `POST /api/payment/callback` - 支付回調
@@ -825,34 +820,6 @@ interface ChatResponse {
     messages: ChatMessage[];      // AI 回應訊息
     cannedOptions: string[];      // 快速回覆選項
     templates: SuggestionTemplate[]; // 更新的建議模板
-  };
-}
-```
-
-### 🔧 履歷優化 API
-
-#### POST /api/optimize-resume
-
-**功能**: 根據選擇的建議優化履歷內容
-
-**請求參數**:
-```typescript
-interface OptimizeRequest {
-  analysisResult: ResumeAnalysisResult;  // 原始分析結果
-  selectedSuggestions: OptimizationSuggestion[]; // 選擇的建議
-  targetRole?: string;                   // 目標職位
-  targetCompany?: string;               // 目標公司
-}
-```
-
-**回應格式**:
-```typescript
-interface OptimizeResponse {
-  success: boolean;
-  data: {
-    optimizedContent: string;     // 優化後的履歷內容
-    changes: Change[];           // 具體變更記錄
-    improvements: string[];      // 改善說明
   };
 }
 ```

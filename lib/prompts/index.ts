@@ -1,12 +1,10 @@
 import { SCORE_CATEGORIES } from '../config/resume-analysis-config';
 import { generateBaseSystemPrompt } from './base-system-prompt';
 import { generateCreateResumeSystemPrompt } from './create-resume-prompt';
-import { generateOptimizeResumeSystemPrompt } from './optimize-resume-prompt';
 
 
 export { generateBaseSystemPrompt } from './base-system-prompt';
 export { generateCreateResumeSystemPrompt } from './create-resume-prompt';
-export { generateOptimizeResumeSystemPrompt } from './optimize-resume-prompt';
 export { generateSmartChatSystemPrompt } from './smart-chat-prompt';
 
 /**
@@ -19,7 +17,6 @@ export function generateServiceSpecificSystemPrompt(serviceType: 'create' | 'opt
         case 'create':
             return generateCreateResumeSystemPrompt(SCORE_CATEGORIES);
         case 'optimize':
-            return generateOptimizeResumeSystemPrompt(SCORE_CATEGORIES);
         default:
             return generateBaseSystemPrompt(SCORE_CATEGORIES);
     }

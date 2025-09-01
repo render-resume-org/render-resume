@@ -30,7 +30,6 @@ export function clearSessionData() {
     sessionStorage.removeItem('analysisResult');
     sessionStorage.removeItem('chatHistory');
     sessionStorage.removeItem('chatSuggestions');
-    sessionStorage.removeItem('optimizedResume');
     console.log('🧹 清除會話數據完成');
   } catch (error) {
     console.warn('⚠️ 清除會話數據失敗:', error);
