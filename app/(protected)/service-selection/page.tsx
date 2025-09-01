@@ -2,7 +2,7 @@
 
 import { ServiceCard } from "@/components/service-selection/service-card";
 import { CreateResumeIcon, OptimizeResumeIcon } from "@/components/svg-icon";
-import { clearSmartChatSession } from "@/lib/utils";
+import { clearSessionData } from "@/lib/utils";
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -29,7 +29,7 @@ export default function ServiceSelectionPage() {
 
   // 清除之前的智慧問答會話數據
   useEffect(() => {
-    clearSmartChatSession();
+    clearSessionData();
   }, []);
 
   const handleServiceSelect = (serviceType: 'create' | 'optimize') => {

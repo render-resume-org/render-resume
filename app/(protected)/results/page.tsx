@@ -39,7 +39,7 @@ export default function ResultsPage() {
     <div className="min-h-screen bg-white dark:bg-gray-950">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl py-8">
         <div className="mb-8">
-          <div className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">結果總覽</div>
+          <div className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300">分析總覽</div>
           <h1 className="mt-3 text-2xl md:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">履歷分析結果</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">AI 深度分析您的履歷內容，提供專業評分與改進建議</p>
         </div>

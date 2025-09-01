@@ -324,7 +324,7 @@ const template = useMemo(() =>
 - **Section Registry**: `components/preview/section-registry.tsx`
 - **Main Preview**: `components/preview/resume-preview.tsx`
 - **Resume Types**: `lib/types/resume.ts`
-- **Preview Page**: `app/(protected)/preview/page.tsx`
+- **Preview Page**: `app/(protected)/download/page.tsx`
 
 ## 📚 Additional Resources
 

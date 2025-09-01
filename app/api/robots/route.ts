@@ -20,8 +20,7 @@ Disallow: /dashboard
 Disallow: /upload
 Disallow: /analyze
 Disallow: /results
-Disallow: /preview
-Disallow: /suggestions
+Disallow: /download
 Disallow: /smart-chat
 Disallow: /profile
 Disallow: /settings

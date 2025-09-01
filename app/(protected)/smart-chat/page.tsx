@@ -8,6 +8,7 @@ import { getTemplateById } from "@/lib/config/resume-templates";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function SmartChatPage() {
   const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
@@ -110,6 +111,25 @@ export default function SmartChatPage() {
             </div>
           </div>
         )}
+
+        {/* Navigation */}
+        <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
+          <Button
+            variant="outline"
+            onClick={() => router.push('/results')}
+            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>上一步</span>
+          </Button>
+          <Button
+            onClick={() => router.push('/download')}
+            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
+          >
+            <span>下一步</span>
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>
   );

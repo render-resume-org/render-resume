@@ -1,5 +1,4 @@
-import { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
-import { z } from 'zod';
+
 import {
     DEFAULT_AI_CONFIG,
     generateSystemPrompt

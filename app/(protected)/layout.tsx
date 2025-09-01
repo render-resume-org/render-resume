@@ -18,8 +18,7 @@ const PRO_ROUTES = [
   '/upload',
   '/analyze',
   '/smart-chat',
-  '/suggestions',
-  '/preview',
+  '/download',
   // Add more pro routes here as needed
 ];
 
