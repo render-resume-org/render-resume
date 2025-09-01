@@ -84,6 +84,7 @@ pnpm dev # 推薦
 # 或 npm run dev / yarn dev
 ```
 
+
 ### 📚 主要功能
 
 - **AI 履歷分析**：支援 PDF、圖片、文字、批次上傳，智能 Q&A、AI 建議
@@ -94,7 +95,8 @@ pnpm dev # 推薦
 
 ### 🔗 重要 API 端點
 
-- `/api/analyze`：履歷分析（GET/POST，支援文字、文件、批次）
+- `/api/analyze/[service_type]`：履歷分析（GET/POST，支援文字、文件、批次）
+  - `service_type`: `create` 或 `optimize`
 - `/api/payment/checkout`：建立支付
 - `/api/payment/callback`：支付回調
 - `/api/hooks/send-email`：Supabase Auth 郵件 webhook
@@ -231,7 +233,8 @@ pnpm dev # recommended
 
 ### 🔗 Key API Endpoints
 
-- `/api/analyze`: Resume analysis (GET/POST, text, file, batch)
+- `/api/analyze/[service_type]`: Resume analysis (GET/POST, text, file, batch)
+  - `service_type`: `create` or `optimize`
 - `/api/payment/checkout`: Create payment
 - `/api/payment/callback`: Payment callback
 - `/api/hooks/send-email`: Supabase Auth email webhook

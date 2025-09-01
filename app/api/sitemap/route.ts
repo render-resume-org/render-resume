@@ -41,12 +41,6 @@ const staticPages = [
     priority: 0.6,
   },
   {
-    url: '/about',
-    lastModified: new Date('2025-06-26'),
-    changeFrequency: 'monthly' as const,
-    priority: 0.6,
-  },
-  {
     url: '/privacy',
     lastModified: new Date('2025-06-26'),
     changeFrequency: 'monthly' as const,

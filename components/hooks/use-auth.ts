@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { clearSmartChatSession } from "@/lib/utils";
+import { clearSessionData } from "@/lib/utils";
 import { AuthError, User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -426,7 +426,7 @@ export function useAuth() {
         sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key));
         
         // 清除智慧問答會話數據
-        clearSmartChatSession();
+        clearSessionData();
         
         console.log('🧹 [Auth] Local storage cleared');
       } catch (storageError) {

@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/hooks/use-auth";
 import { LogoutRedirectHandler } from "@/components/logout-redirect-handler";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { clearSmartChatSession, cn } from "@/lib/utils";
+import { clearSessionData, cn } from "@/lib/utils";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -151,7 +151,7 @@ export function FeatureCards() {
 
   // Clear smart chat session when user returns to dashboard
   useEffect(() => {
-    clearSmartChatSession();
+    clearSessionData();
   }, []);
 
   // Handle feature card actions

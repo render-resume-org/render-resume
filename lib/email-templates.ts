@@ -526,6 +526,102 @@ export const emailTemplates = {
 
 感謝您對 Render Resume 的信任與支持！🙏`
     };
+  },
+
+  betaRelease: (data: EmailTemplateData): EmailTemplate => {
+    const content = `
+      <div class="header">
+        <div class="logo">RenderResume</div>
+        <h1>Beta 版正式推出！</h1>
+        <p>AI 履歷編輯器正式上線，專屬 Waitlist 回饋等你領取！</p>
+      </div>
+      
+      <div class="content">
+        <p style="font-size: 16px; margin-bottom: 20px; margin: 0 0 20px 0;">
+          親愛的 RenderResume 使用者，
+        </p>
+
+        <p style="font-size: 16px; margin-bottom: 20px; margin: 0 0 20px 0; line-height: 1.7;">
+          在求職的過程中，你是否曾為撰寫履歷所苦，明明有能力卻不知道該如何適當地包裝自己？
+        </p>
+
+        <p style="font-size: 16px; margin-bottom: 20px; margin: 0 0 20px 0; line-height: 1.7;">
+          我們也是深受撰寫履歷所苦的求職者，為了幫助求職者解決撰寫履歷的困難，我們打造了「AI 履歷編輯器」的服務，讓創建履歷的過程變的非常簡單輕鬆！
+        </p>
+
+        <p style="font-size: 16px; margin-bottom: 20px; margin: 0 0 20px 0; line-height: 1.7;">
+          我們很高興宣布 RenderResume Beta 版正式推出！RenderResume 能根據你提供的履歷資料幫你快速建立、分析以及優化履歷。
+        </p>
+
+        <div style="background-color: #ecfeff; border-left: 4px solid ${BRAND_COLORS.primary}; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+          <h3 style="color: ${BRAND_COLORS.primary}; margin-bottom: 15px; margin: 0 0 15px 0;">🤖 AI 履歷分析</h3>
+          <p style="font-size: 16px; margin: 0 0 20px 0; color: ${BRAND_COLORS.text}; line-height: 1.7;">
+            透過最先進的 AI 技術對你提供的履歷資料進行專業分析，清楚呈現履歷的競爭力與優化方向。
+          </p>
+        </div>
+        
+        <div style="background-color: #ecfeff; border-left: 4px solid ${BRAND_COLORS.primary}; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+          <h3 style="color: ${BRAND_COLORS.primary}; margin-bottom: 15px; margin: 15px 0 15px 0;">✏️ AI 履歷編輯器</h3>
+          <p style="font-size: 16px; margin: 0; color: ${BRAND_COLORS.text}; line-height: 1.7;">
+            你可以在編輯履歷的同時和 AI 顧問進行對話，AI 顧問會針對履歷的即時內容提供具體的優化指引，甚至直接幫你在編輯器即時修改履歷。
+          </p>
+        </div>
+
+        <div style="background-color: #fffbeb; border-left: 4px solid ${BRAND_COLORS.warning}; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;">
+          <h3 style="color: ${BRAND_COLORS.warning}; margin-bottom: 15px; margin: 0 0 15px 0;">🎁 專屬 Waitlist 回饋</h3>
+          <p style="font-size: 16px; margin: 0 0 15px 0; color: ${BRAND_COLORS.text}; line-height: 1.7;">
+            非常感謝您加入 waitlist，我們將提供給您專屬的 waitlist 回饋：<strong>一個月的免費 pro 訂閱權限！</strong>
+          </p>
+          <p style="font-size: 16px; margin: 0 0 15px 0; color: ${BRAND_COLORS.text};">
+            請至 RenderResume 的帳戶設定輸入以下兌換碼進行兌換：<strong>${data.token}</strong>
+          </p>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+          <a href="https://www.render-resume.com" class="cta-button">
+            🚀 立即體驗 AI 履歷編輯器！
+          </a>
+        </div>
+
+        <p style="font-size: 16px; margin-bottom: 20px; margin: 20px 0; text-align: center; font-weight: 600;">
+          非常感謝你對 <strong>Render Resume</strong> 的支持！
+        </p>
+        <p style="font-size: 16px; margin-top: 15px; font-style: italic; text-align: right; color: ${BRAND_COLORS.text};">
+          RenderResume 團隊 敬上
+        </p>
+      </div>
+    `;
+    
+    return {
+      subject: '🎉 RenderResume Beta 版正式推出！專屬 Waitlist 回饋等你領取',
+      html: createBaseTemplate(content, 'RenderResume Beta 版正式推出'),
+      text: `🎉 RenderResume Beta 版正式推出！
+
+親愛的 RenderResume 使用者，
+
+在求職的過程中，你是否曾為撰寫履歷所苦，明明有能力卻不知道該如何適當地包裝自己？
+
+我們也是深受撰寫履歷所苦的求職者，為了幫助求職者解決撰寫履歷的困難，我們打造了「AI 履歷編輯器」的服務，讓創建履歷的過程變的非常簡單輕鬆！
+
+我們很高興宣布 RenderResume Beta 版正式推出！RenderResume 能根據你提供的履歷資料幫你快速建立、分析以及優化履歷。
+
+🤖 AI 履歷分析
+透過最先進的 AI 技術對你提供的履歷資料進行專業分析，清楚呈現履歷的競爭力與優化方向。
+
+✏️ AI 履歷編輯器
+你可以在編輯履歷的同時和 AI 顧問進行對話，AI 顧問會針對履歷的即時內容提供具體的優化指引，甚至直接幫你在編輯器即時修改履歷。
+
+🎁 專屬 Waitlist 回饋
+非常感謝您加入 waitlist，我們將提供給您專屬的 waitlist 回饋：一個月的免費 pro 訂閱權限！
+
+請至 RenderResume 的帳戶設定輸入以下兌換碼進行兌換：${data.token}
+
+立即體驗：https://www.render-resume.com
+
+非常感謝你對 Render Resume 的支持！
+
+RenderResume 團隊 敬上`
+    };
   }
 };
 
@@ -578,6 +674,8 @@ export function getEmailTemplate(
       return emailTemplates.emailChange(data);
     case 'waitlist_welcome':
       return emailTemplates.waitlistWelcome(data);
+    case 'beta_release':
+      return emailTemplates.betaRelease(data);
     default:
       // Fallback template
       return {
@@ -622,6 +720,14 @@ export async function getReactEmailTemplate(
         return React.createElement(WaitlistWelcomeEmailTemplate, {
           userName,
           userEmail
+        });
+      }
+      case 'beta_release': {
+        const { BetaReleaseEmailTemplate } = await import('@/components/emails/BetaReleaseEmailTemplate');
+        return React.createElement(BetaReleaseEmailTemplate, {
+          userName,
+          userEmail,
+          redeemCode: token // 使用 token 作為 redeemCode
         });
       }
       default:

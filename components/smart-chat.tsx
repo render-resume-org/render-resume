@@ -71,8 +71,6 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     try {
       sessionStorage.removeItem('chatHistory');
       sessionStorage.removeItem('chatSuggestions');
-      sessionStorage.removeItem('chatSuggestionTemplates');
-      sessionStorage.removeItem('selectedSuggestions');
       console.log('🧹 清除智慧問答會話數據');
     } catch (error) {
       console.warn('⚠️ 清除智慧問答會話數據失敗:', error);

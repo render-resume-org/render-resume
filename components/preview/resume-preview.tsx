@@ -50,7 +50,13 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
           id="resume-content"
           style={{ 
             backgroundColor: 'white',
-            color: '#000000'
+            color: '#000000',
+            // 確保與 PDF 生成使用相同的渲染設定
+            WebkitTextSizeAdjust: 'none',
+            textSizeAdjust: 'none',
+            // 模擬 PDF 的視口環境
+            fontSize: '16px', // 確保基礎字體大小一致
+            lineHeight: '1.5', // 確保行高一致
           }}
         >
           <ResumeHeader
@@ -84,7 +90,15 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
             </div>
           ))}
           
-          <footer className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-black text-center select-none print:mt-8" style={{ letterSpacing: '0.04em' }}>
+          <footer 
+            className="flex w-full items-center justify-center gap-1 mt-12 text-xs text-black text-center select-none print:mt-8" 
+            style={{ 
+              letterSpacing: '0.04em',
+              // 確保 footer 樣式與 PDF 完全一致
+              marginTop: '3rem',
+              width: '100%',
+            }}
+          >
             <Link href="https://www.render-resume.com" target="_blank" className="flex items-center gap-1">
               <p>Powered by</p>
               <p className={cn('font-semibold text-black')}>RenderResume</p>
@@ -99,3 +113,4 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
     </>
   );
 } 
+

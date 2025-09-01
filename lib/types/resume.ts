@@ -1,12 +1,3 @@
-export interface OptimizationSuggestion {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  priority: string;
-  timestamp: string;
-}
-
 export interface OptimizedResume {
   personalInfo: {
     fullName: string;

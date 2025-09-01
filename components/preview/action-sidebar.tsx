@@ -48,7 +48,7 @@ export function ActionSidebar({
   };
 
   return (
-    <div className="md:max-w-xs w-full space-y-6">
+    <div className="w-full space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">選擇模板</CardTitle>
@@ -108,12 +108,12 @@ export function ActionSidebar({
           </Button>
 
           <Button
-            onClick={() => router.push("/suggestions")}
+            onClick={() => router.push("/smart-chat")}
             variant="outline"
             className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <Edit className="w-4 h-4 mr-2" />
-            返回建議
+            返回編輯器
           </Button>
 
           <Button
@@ -122,7 +122,7 @@ export function ActionSidebar({
             className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <UserCircle className="w-4 h-4 mr-2" />
-            返回首頁
+            返回儀表板
           </Button>
         </CardContent>
       </Card>
