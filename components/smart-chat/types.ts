@@ -69,4 +69,19 @@ export interface SuggestionTemplate {
   completedSuggestion?: SuggestionRecord; // 完成後的建議
   timestamp: Date;
   patchOps?: PatchOp[]; // optional apply-ready operations
+}
+
+// Utility types for path operations
+export type PathValue = string | number | boolean | null | undefined;
+export type PathObject = Record<string, unknown>;
+export type PathArray = unknown[];
+
+// Type-safe path navigation
+export interface PathNavigationResult {
+  container: PathArray | null;
+  lastKey: string | number | null;
+}
+
+export interface PathCursor {
+  [key: string]: unknown;
 } 

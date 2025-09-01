@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
 import { Copy, Trash2 } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SuggestionRecord, SuggestionTemplate } from "./types";
+import { SuggestionRecord, SuggestionTemplate, PatchOp } from "./types";
 
 const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
   if (!status) return 'bg-transparent';
@@ -29,8 +29,8 @@ const getStatusText = (status: SuggestionTemplate['status']) => {
 };
 
 interface SuggestionCardProps {
-  suggestion?: (SuggestionRecord & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
-  template?: (SuggestionTemplate & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
+  suggestion?: (SuggestionRecord & { patchOps?: PatchOp[] });
+  template?: (SuggestionTemplate & { patchOps?: PatchOp[] });
   onQuote: (item: SuggestionRecord | SuggestionTemplate) => void;
   onRemove: (id: string) => void;
   forceExpand?: boolean; // 新增

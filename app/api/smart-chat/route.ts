@@ -307,7 +307,7 @@ function parseAIResponse(completion: string): ChatResponse {
     if (parsed.suggestion?.patchOps) {
       console.log('🔍 [Parser] PatchOps before:', parsed.suggestion.patchOps);
       parsed.suggestion.patchOps = parsed.suggestion.patchOps
-        .filter(op => op && typeof op.op === 'string' && typeof op.path === 'string')
+        .filter(op => op && typeof op.path === 'string' && (op.op === 'set' || op.op === 'insert' || op.op === 'remove'))
         .map(op => {
           if (op.op === 'set') {
             return { op: 'set', path: op.path, value: String(op.value ?? '') } as const;
@@ -315,10 +315,8 @@ function parseAIResponse(completion: string): ChatResponse {
           if (op.op === 'insert') {
             return { op: 'insert', path: op.path, value: String(op.value ?? ''), index: typeof op.index === 'number' ? op.index : undefined } as const;
           }
-          if (op.op === 'remove') {
-            return { op: 'remove', path: op.path, index: typeof op.index === 'number' ? op.index : undefined } as const;
-          }
-          return op as any;
+          // remove
+          return { op: 'remove', path: op.path, index: typeof op.index === 'number' ? op.index : undefined } as const;
         });
       console.log('🔍 [Parser] PatchOps after:', parsed.suggestion.patchOps);
     }

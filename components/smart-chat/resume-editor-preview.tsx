@@ -306,11 +306,12 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         try {
           const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
           const segments = arrPath.split('.').filter(Boolean);
-          let cursor: any = root as any;
+          let cursor: unknown = root;
           for (let i = 0; i < segments.length; i++) {
-            if (cursor == null) return undefined;
+            if (cursor == null || typeof cursor !== 'object') return undefined;
             const key = segments[i];
-            cursor = cursor[key as keyof typeof cursor];
+            const rec = cursor as Record<string, unknown>;
+            cursor = rec[key];
           }
           return cursor;
         } catch {
@@ -318,19 +319,24 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         }
       };
 
-      const getArrayInfo = (root: unknown, arrayPath: string): { container: any[] | null; lastKey: string | number | null } => {
+      const getArrayInfo = (root: unknown, arrayPath: string): { container: unknown[] | null; lastKey: string | number | null } => {
         try {
           const arrPath = arrayPath.replace(/\[(\d+)\]/g, '.$1');
           const segments = arrPath.split('.').filter(Boolean);
-          let cursor: any = root as any;
+          let cursor: unknown = root;
           for (let i = 0; i < segments.length - 1; i++) {
+            if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
             const key = segments[i];
-            if (!(key in cursor)) return { container: null, lastKey: null };
-            cursor = cursor[key];
+            const rec = cursor as Record<string, unknown>;
+            if (!(key in rec)) return { container: null, lastKey: null };
+            cursor = rec[key];
             if (cursor == null) return { container: null, lastKey: null };
           }
+          if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
+          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
-          const container = Array.isArray(cursor[lastKey]) ? (cursor[lastKey] as any[]) : null;
+          const val = rec[lastKey];
+          const container = Array.isArray(val) ? (val as unknown[]) : null;
           return { container, lastKey };
         } catch {
           return { container: null, lastKey: null };
@@ -432,17 +438,23 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       if (op.op === 'insert') {
         const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: any = virtual as any;
+        let cursor: unknown = virtual as unknown;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (!(key in cursor)) cursor[key] = {};
-          cursor = cursor[key];
+          if (cursor == null || typeof cursor !== 'object') break;
+          const rec = cursor as Record<string, unknown>;
+          if (!(key in rec)) rec[key] = {};
+          cursor = rec[key];
         }
-        const lastKey = segments[segments.length - 1];
-        if (!Array.isArray(cursor[lastKey])) cursor[lastKey] = [];
-        const idxMatch = op.path.match(/\[(\d+)\]$/);
-        const insertIndex = idxMatch ? Number(idxMatch[1]) : (cursor[lastKey] as any[]).length;
-        (cursor[lastKey] as any[]).splice(Math.max(0, Math.min(insertIndex, (cursor[lastKey] as any[]).length)), 0, String(op.value ?? ''));
+        if (cursor && typeof cursor === 'object') {
+          const rec = cursor as Record<string, unknown>;
+          const lastKey = segments[segments.length - 1];
+          if (!Array.isArray(rec[lastKey])) rec[lastKey] = [];
+          const container = rec[lastKey] as unknown[];
+          const idxMatch = op.path.match(/\[(\d+)\]$/);
+          const insertIndex = idxMatch ? Number(idxMatch[1]) : container.length;
+          container.splice(Math.max(0, Math.min(insertIndex, container.length)), 0, String(op.value ?? ''));
+        }
       } else if (op.op === 'remove') {
         // Do not mutate structure for remove during preview; keep the original item visible
         // so we can render a before/after diff (after will be empty)
@@ -459,11 +471,11 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       try {
         const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: any = root as any;
+        let cursor: unknown = root;
         for (let i = 0; i < segments.length; i++) {
           if (cursor == null) return undefined;
           const key = segments[i];
-          cursor = cursor[key as keyof typeof cursor];
+          cursor = (cursor as Record<string, unknown>)?.[key as string];
         }
         return cursor;
       } catch {
@@ -477,42 +489,54 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         const diffs = previewDiffs[op.path];
         const currentVal = getByPath(optimized, op.path);
         const beforeVal = diffs?.before ?? '';
-        const aiAfterVal = diffs?.after ?? (op as any).value;
+        const aiAfterVal = diffs?.after ?? op.value;
         const userEdited = String(currentVal ?? '') !== String(beforeVal ?? '');
         const valueToApply = userEdited ? String(currentVal ?? '') : String(aiAfterVal ?? '');
         setByPath(next as unknown as Record<string, unknown>, op.path, valueToApply as unknown);
       } else if (op.op === 'insert') {
         const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: any = next as any;
+        let cursor: unknown = next as unknown;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (!(key in cursor)) cursor[key] = {};
-          cursor = cursor[key];
+          if (cursor == null || typeof cursor !== 'object') break;
+          const rec = cursor as Record<string, unknown>;
+          if (!(key in rec)) rec[key] = {};
+          cursor = rec[key];
         }
-        const lastKey = segments[segments.length - 1];
-        if (!Array.isArray(cursor[lastKey])) cursor[lastKey] = [];
-        const idxMatch = op.path.match(/\[(\d+)\]$/);
-        const insertIndex = idxMatch ? Number(idxMatch[1]) : (cursor[lastKey] as any[]).length;
-        (cursor[lastKey] as any[]).splice(Math.max(0, Math.min(insertIndex, (cursor[lastKey] as any[]).length)), 0, (op as any).value);
+        if (cursor && typeof cursor === 'object') {
+          const rec = cursor as Record<string, unknown>;
+          const lastKey = segments[segments.length - 1];
+          if (!Array.isArray(rec[lastKey])) rec[lastKey] = [];
+          const container = rec[lastKey] as unknown[];
+          const idxMatch = op.path.match(/\[(\d+)\]$/);
+          const insertIndex = idxMatch ? Number(idxMatch[1]) : container.length;
+          container.splice(Math.max(0, Math.min(insertIndex, container.length)), 0, op.value);
+        }
       } else if (op.op === 'remove') {
         const idxMatch = op.path.match(/\[(\d+)\]$/);
         const targetArrPath = idxMatch ? op.path.replace(/\[(\d+)\]$/, '') : op.path;
         const arrPath = targetArrPath.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: any = next as any;
+        let cursor: unknown = next as unknown;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (!(key in cursor)) { cursor = null; break; }
-          cursor = cursor[key];
+          if (cursor == null || typeof cursor !== 'object') { cursor = null; break; }
+          const rec = cursor as Record<string, unknown>;
+          cursor = rec[key];
           if (cursor == null) break;
         }
-        if (cursor) {
+        if (cursor && typeof cursor === 'object') {
+          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
-          if (Array.isArray(cursor[lastKey])) {
-            const removeIndex = typeof (op as any).index === 'number' ? (op as any).index : (idxMatch ? Number(idxMatch[1]) : -1);
-            if (removeIndex >= 0 && removeIndex < (cursor[lastKey] as any[]).length) {
-              (cursor[lastKey] as any[]).splice(removeIndex, 1);
+          const val = rec[lastKey];
+          if (Array.isArray(val)) {
+            const container = val as unknown[];
+            const idxFromPath = idxMatch ? Number(idxMatch[1]) : -1;
+            const idxFromOp = typeof (op as { index?: number }).index === 'number' ? (op as { index?: number }).index as number : -1;
+            const removeIndex = idxFromOp >= 0 ? idxFromOp : idxFromPath;
+            if (removeIndex >= 0 && removeIndex < container.length) {
+              container.splice(removeIndex, 1);
             }
           }
         }
