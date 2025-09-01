@@ -2,7 +2,7 @@
 // TODO: Move to environment variables in production
 export const ADMIN_CONFIG = {
   // Admin user IDs - should be moved to environment variables
-  ADMIN_IDS: ['049512f1-9b80-4848-9df3-03adcc8f61c9'] as readonly string[],
+  ADMIN_IDS: ['049512f1-9b80-4848-9df3-03adcc8f61c9', 'c49cf182-621e-4a3f-ae67-53232e585bc9'] as readonly string[],
   
   // Admin permissions
   PERMISSIONS: {
