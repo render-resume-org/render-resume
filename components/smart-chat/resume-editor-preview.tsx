@@ -57,15 +57,6 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
 
   const handleInlineChange = useCallback((path: string, next: unknown) => {
     if (!optimized) return;
-    
-    // If we're in preview mode, don't persist changes immediately
-    // Changes should only be persisted when accepting the preview
-    if (isPreviewing) {
-      // In preview mode, we only update the virtual preview data
-      // but don't persist to the actual resume data
-      return;
-    }
-    
     const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
     if (path === 'summary') {
       updated.summary = String(next ?? '');
@@ -88,11 +79,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          if (updated.experience[idx].achievements.length <= 1) {
-            updated.experience[idx].achievements[0] = '';
-          } else {
-            updated.experience[idx].achievements.splice(removeAt, 1);
-          }
+          updated.experience[idx].achievements.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -135,11 +122,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          if (updated.projects[idx].achievements.length <= 1) {
-            updated.projects[idx].achievements[0] = '';
-          } else {
-            updated.projects[idx].achievements.splice(removeAt, 1);
-          }
+          updated.projects[idx].achievements.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -276,7 +259,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       }
     }
     persist(updated);
-  }, [optimized, persist, isPreviewing]);
+  }, [optimized, persist]);
 
   useEffect(() => {
     const normalizePath = (path: string) =>

@@ -21,6 +21,7 @@ interface InlineTextProps {
 
 export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline' }: InlineTextProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
+  const containerRef = useRef<HTMLSpanElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(text);
   const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
@@ -35,10 +36,27 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   // Update preview editable text when previewReplaceWith changes
   useEffect(() => {
-    if (!isEditing && previewReplaceWith !== undefined) {
-      setPreviewEditableText(previewReplaceWith);
+    if (previewReplaceWith !== undefined) {
+      // Only sync when prop changes meaningfully to avoid overwriting user edits on blur
+      setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
     }
-  }, [previewReplaceWith, isEditing]);
+  }, [previewReplaceWith]);
+
+  // In preview mode, ensure no stray text nodes (e.g., unhighlighted duplicates) remain inside the container
+  useEffect(() => {
+    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    const el = containerRef.current;
+    if (!isPreviewMode || !el) return;
+    // Remove any direct text nodes under the container to avoid duplicated base text
+    try {
+      const childNodes = Array.from(el.childNodes);
+      for (const node of childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          el.removeChild(node);
+        }
+      }
+    } catch {}
+  }, [highlightType, previewOriginal, previewReplaceWith]);
 
   // Preserve cursor position when syncing DOM content
   const preserveCursorAndSyncContent = useCallback((element: HTMLElement, newContent: string) => {
@@ -278,7 +296,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   return (
     <>
       {(highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined) ? (
-        <span className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId}>
+        <span ref={containerRef} className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId}>
           <span className={cn('cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md')}>
             {previewOriginal}
           </span>
@@ -315,9 +333,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
             className
           )}
           title={inlineEditable ? 'Click to edit' : undefined}
-        >
-          {text}
-        </span>
+        />
       )}
     </>
   );
