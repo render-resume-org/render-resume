@@ -1,19 +1,21 @@
 "use client";
 
 import SmartChat from "@/components/smart-chat";
+import PreviewActionPanel from "@/components/smart-chat/preview-action-panel";
 import ResumeEditorPreview from "@/components/smart-chat/resume-editor-preview";
 import { Button } from "@/components/ui/button";
 import { useResumeTemplate } from "@/hooks/use-resume-optimization";
 import { getTemplateById } from "@/lib/config/resume-templates";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function SmartChatPage() {
   const [analysisResult, setAnalysisResult] = useState<ResumeAnalysisResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const router = useRouter();
   
   // Hook: resume template for left-side preview
@@ -45,6 +47,29 @@ export default function SmartChatPage() {
     router.push('/dashboard');
   }, [router]);
 
+  // Listen for preview state changes from the resume editor
+  useEffect(() => {
+    const handlePreviewStateChange = (event: CustomEvent) => {
+      setIsPreviewing(event.detail.isPreviewing);
+    };
+
+    document.addEventListener('resume-preview-state-change', handlePreviewStateChange as EventListener);
+    return () => {
+      document.removeEventListener('resume-preview-state-change', handlePreviewStateChange as EventListener);
+    };
+  }, []);
+
+  // Handle preview actions
+  const handleAcceptPreview = useCallback(() => {
+    // Dispatch accept event to resume editor
+    document.dispatchEvent(new CustomEvent('resume-preview-accept'));
+  }, []);
+
+  const handleRejectPreview = useCallback(() => {
+    // Dispatch reject event to resume editor
+    document.dispatchEvent(new CustomEvent('resume-preview-reject'));
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -68,52 +93,41 @@ export default function SmartChatPage() {
   }
 
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      <div className="h-full flex flex-col">
-        {/* Two-pane layout: Chat on left, Resume editor on right */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 min-h-0">
-          {/* Left pane: Smart chat */}
-          <div className="h-full min-h-0 flex items-center justify-center">
-            <SmartChat
-              analysisResult={analysisResult}
-              onComplete={handleComplete}
-              onSkip={handleSkip}
-            />
-          </div>
-
-          {/* Right pane: Resume editor preview - Scrollable */}
-          <div className="h-full overflow-y-auto pl-2 min-h-0">
-            <ResumeEditorPreview
-              template={currentTemplate}
-              className="h-full"
-            />
-          </div>
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden flex flex-col">
+      {/* Main content area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left pane: Smart chat - Fixed width */}
+        <div className="w-2/5 h-full flex items-center justify-center p-6">
+          <SmartChat
+            analysisResult={analysisResult}
+            onComplete={handleComplete}
+            onSkip={handleSkip}
+          />
         </div>
 
-        {/* Completion state */}
-        {isCompleted && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 text-center">
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                優化完成！
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
-                您的履歷已經過 AI 優化，可以查看結果或繼續編輯。
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button onClick={() => router.push('/results')}>
-                  查看結果
-                </Button>
-                <Button variant="outline" onClick={() => setIsCompleted(false)}>
-                  繼續編輯
-                </Button>
-              </div>
+        {/* Right pane: Resume editor preview - Flexible width with proper fitting */}
+        <div className="w-3/5 h-full flex flex-col py-6 px-0">
+          <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow-lg relative">
+            <div className="h-full overflow-y-auto">
+              <ResumeEditorPreview
+                template={currentTemplate}
+                className="h-full"
+              />
             </div>
+            {/* Accept/reject panel positioned relative to container */}
+            {isPreviewing && (
+              <PreviewActionPanel
+                onAccept={handleAcceptPreview}
+                onReject={handleRejectPreview}
+              />
+            )}
           </div>
-        )}
+        </div>
+      </div>
 
-        {/* Navigation */}
-        <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
+      {/* Fixed bottom navigation bar */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between">
           <Button
             variant="outline"
             onClick={() => router.push('/results')}
@@ -131,6 +145,28 @@ export default function SmartChatPage() {
           </Button>
         </div>
       </div>
+
+      {/* Completion state */}
+      {isCompleted && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 text-center">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              優化完成！
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-6">
+              您的履歷已經過 AI 優化，可以查看結果或繼續編輯。
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={() => router.push('/results')}>
+                查看結果
+              </Button>
+              <Button variant="outline" onClick={() => setIsCompleted(false)}>
+                繼續編輯
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 

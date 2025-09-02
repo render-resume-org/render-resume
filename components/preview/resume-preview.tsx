@@ -51,12 +51,10 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
           style={{ 
             backgroundColor: 'white',
             color: '#000000',
-            // 確保與 PDF 生成使用相同的渲染設定
             WebkitTextSizeAdjust: 'none',
             textSizeAdjust: 'none',
-            // 模擬 PDF 的視口環境
-            fontSize: '16px', // 確保基礎字體大小一致
-            lineHeight: '1.5', // 確保行高一致
+            fontSize: '16px',
+            lineHeight: '1.5', 
           }}
         >
           <ResumeHeader

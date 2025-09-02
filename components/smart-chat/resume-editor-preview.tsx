@@ -48,8 +48,24 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     persist(next);
   }, [persist]);
 
+  // Dispatch preview state changes to parent component
+  useEffect(() => {
+    document.dispatchEvent(new CustomEvent('resume-preview-state-change', { 
+      detail: { isPreviewing } 
+    }));
+  }, [isPreviewing]);
+
   const handleInlineChange = useCallback((path: string, next: unknown) => {
     if (!optimized) return;
+    
+    // If we're in preview mode, don't persist changes immediately
+    // Changes should only be persisted when accepting the preview
+    if (isPreviewing) {
+      // In preview mode, we only update the virtual preview data
+      // but don't persist to the actual resume data
+      return;
+    }
+    
     const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
     if (path === 'summary') {
       updated.summary = String(next ?? '');
@@ -72,7 +88,11 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.experience[idx].achievements.splice(removeAt, 1);
+          if (updated.experience[idx].achievements.length <= 1) {
+            updated.experience[idx].achievements[0] = '';
+          } else {
+            updated.experience[idx].achievements.splice(removeAt, 1);
+          }
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -115,7 +135,11 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.projects[idx].achievements.splice(removeAt, 1);
+          if (updated.projects[idx].achievements.length <= 1) {
+            updated.projects[idx].achievements[0] = '';
+          } else {
+            updated.projects[idx].achievements.splice(removeAt, 1);
+          }
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -192,7 +216,11 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const idx = Number(m[1]);
           const removeAt = payload.index;
           if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          updated.achievements![idx].details!.splice(removeAt, 1);
+          if (updated.achievements![idx].details!.length <= 1) {
+            updated.achievements![idx].details![0] = '';
+          } else {
+            updated.achievements![idx].details!.splice(removeAt, 1);
+          }
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -248,7 +276,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       }
     }
     persist(updated);
-  }, [optimized, persist]);
+  }, [optimized, persist, isPreviewing]);
 
   useEffect(() => {
     const normalizePath = (path: string) =>
@@ -554,6 +582,29 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     setPreviewDiffs({});
   }, []);
 
+  // Listen for accept/reject actions from the preview panel
+  useEffect(() => {
+    const handleAcceptAction = () => {
+      if (isPreviewing) {
+        handleAcceptPreview();
+      }
+    };
+
+    const handleRejectAction = () => {
+      if (isPreviewing) {
+        handleRejectPreview();
+      }
+    };
+
+    document.addEventListener('resume-preview-accept', handleAcceptAction);
+    document.addEventListener('resume-preview-reject', handleRejectAction);
+
+    return () => {
+      document.removeEventListener('resume-preview-accept', handleAcceptAction);
+      document.removeEventListener('resume-preview-reject', handleRejectAction);
+    };
+  }, [isPreviewing, handleAcceptPreview, handleRejectPreview]);
+
   if (!optimized) return null;
 
   return (
@@ -569,15 +620,6 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
       previewDiffs={isPreviewing ? previewDiffs : undefined}
       />
-      {isPreviewing && (
-        <div className="pointer-events-none absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="pointer-events-auto backdrop-blur-sm bg-white/70 dark:bg-gray-900/60 shadow-lg rounded-xl px-3 py-2 flex items-center gap-2 border border-gray-200/60 dark:border-gray-700/60">
-            <span className="text-sm text-gray-700 dark:text-gray-200">預覽變更（段落覆寫）</span>
-            <button onClick={handleAcceptPreview} className="text-sm px-3 py-1 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white">接受</button>
-            <button onClick={handleRejectPreview} className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100">拒絕</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

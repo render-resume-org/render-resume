@@ -24,6 +24,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(text);
   const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
+  const ignoreNextBlurRef = useRef(false);
 
   // Update local text when prop changes (but not during editing)
   useEffect(() => {
@@ -149,9 +150,17 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   const handleBlur = () => {
     setIsEditing(false);
+    if (ignoreNextBlurRef.current) {
+      // Skip committing changes if this blur is caused by a bullet removal
+      // Reset flag in the next tick to avoid swallowing subsequent blurs
+      setTimeout(() => { ignoreNextBlurRef.current = false; }, 0);
+      return;
+    }
     // Ensure the final text is synced
     if (ref.current) {
       const finalText = ref.current.innerText;
+      // Avoid no-op updates when content didn't change
+      if (finalText === text) return;
       const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
       
       if (isPreviewMode) {
@@ -212,6 +221,16 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
+  const triggerRemoveBullet = () => {
+    ignoreNextBlurRef.current = true;
+    try {
+      onRemoveBullet?.();
+    } finally {
+      // Reset after the DOM/react updates have occurred
+      setTimeout(() => { ignoreNextBlurRef.current = false; }, 0);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
 
@@ -250,7 +269,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (isBullet && e.key === 'Backspace') {
       if (isCaretAtStart() && (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '')) {
         e.preventDefault();
-        onRemoveBullet?.();
+        triggerRemoveBullet();
         return;
       }
     }
@@ -296,7 +315,9 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
             className
           )}
           title={inlineEditable ? 'Click to edit' : undefined}
-        />
+        >
+          {text}
+        </span>
       )}
     </>
   );

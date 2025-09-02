@@ -81,7 +81,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="h-full flex flex-col">
       <AlertDialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -96,64 +96,62 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* Full screen container with responsive max-width */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full lg:max-w-[75vw] h-[80vh]">
-          <DesktopChatPanel
-            suggestionTemplates={suggestionTemplates}
-            onQuoteTemplate={quoteTemplate}
-            onRemoveTemplate={removeTemplate}
-            onComplete={handleComplete}
-            messageCount={messageCount}
-            suggestionsScrollAreaRef={suggestionsScrollAreaRef}
-            isSidebarCollapsed={isSidebarCollapsed}
-            onToggleSidebar={handleToggleSidebar}
-            messages={messages}
-            messageVariants={messageVariants}
-            isLoading={isLoading}
-            cannedOptions={cannedOptions}
-            handleCannedMessage={handleCannedMessage}
-            currentInput={currentInput}
-            handleTextareaChange={handleTextareaChange}
-            handleKeyPress={handleKeyPress}
-            handleSendMessage={handleSendMessage}
-            textareaRef={textareaRef}
-            messagesEndRef={messagesEndRef}
-            scrollAreaRef={scrollAreaRef}
-            onSkip={onSkip}
-            onFileUpload={onDrop}
-            pendingFiles={pendingFiles}
-            onRemovePendingFile={removeFile}
-            onRestart={handleRestart}
-          />
-          <MobileChatPanel
-            suggestionTemplates={suggestionTemplates}
-            quoteTemplate={quoteTemplate}
-            removeTemplate={removeTemplate}
-            onComplete={handleComplete}
-            messageCount={messageCount}
-            suggestionsScrollAreaRef={suggestionsScrollAreaRef}
-            messages={messages}
-            messageVariants={messageVariants}
-            isLoading={isLoading}
-            cannedOptions={cannedOptions}
-            handleCannedMessage={handleCannedMessage}
-            currentInput={currentInput}
-            handleTextareaChange={handleTextareaChange}
-            handleKeyPress={handleKeyPress}
-            handleSendMessage={handleSendMessage}
-            textareaRefMobile={textareaRefMobile}
-            messagesEndRefMobile={messagesEndRefMobile}
-            scrollAreaRefMobile={scrollAreaRefMobile}
-            onSkip={onSkip}
-            showSuggestionsDrawer={showSuggestionsDrawer}
-            setShowSuggestionsDrawer={setShowSuggestionsDrawer}
-            onFileUpload={onDrop}
-            pendingFiles={pendingFiles}
-            onRemovePendingFile={removeFile}
-            onRestart={handleRestart}
-          />
-        </div>
+      {/* Full height container */}
+      <div className="h-full">
+        <DesktopChatPanel
+          suggestionTemplates={suggestionTemplates}
+          onQuoteTemplate={quoteTemplate}
+          onRemoveTemplate={removeTemplate}
+          onComplete={handleComplete}
+          messageCount={messageCount}
+          suggestionsScrollAreaRef={suggestionsScrollAreaRef}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={handleToggleSidebar}
+          messages={messages}
+          messageVariants={messageVariants}
+          isLoading={isLoading}
+          cannedOptions={cannedOptions}
+          handleCannedMessage={handleCannedMessage}
+          currentInput={currentInput}
+          handleTextareaChange={handleTextareaChange}
+          handleKeyPress={handleKeyPress}
+          handleSendMessage={handleSendMessage}
+          textareaRef={textareaRef}
+          messagesEndRef={messagesEndRef}
+          scrollAreaRef={scrollAreaRef}
+          onSkip={onSkip}
+          onFileUpload={onDrop}
+          pendingFiles={pendingFiles}
+          onRemovePendingFile={removeFile}
+          onRestart={handleRestart}
+        />
+        <MobileChatPanel
+          suggestionTemplates={suggestionTemplates}
+          quoteTemplate={quoteTemplate}
+          removeTemplate={removeTemplate}
+          onComplete={handleComplete}
+          messageCount={messageCount}
+          suggestionsScrollAreaRef={suggestionsScrollAreaRef}
+          messages={messages}
+          messageVariants={messageVariants}
+          isLoading={isLoading}
+          cannedOptions={cannedOptions}
+          handleCannedMessage={handleCannedMessage}
+          currentInput={currentInput}
+          handleTextareaChange={handleTextareaChange}
+          handleKeyPress={handleKeyPress}
+          handleSendMessage={handleSendMessage}
+          textareaRefMobile={textareaRefMobile}
+          messagesEndRefMobile={messagesEndRefMobile}
+          scrollAreaRefMobile={scrollAreaRefMobile}
+          onSkip={onSkip}
+          showSuggestionsDrawer={showSuggestionsDrawer}
+          setShowSuggestionsDrawer={setShowSuggestionsDrawer}
+          onFileUpload={onDrop}
+          pendingFiles={pendingFiles}
+          onRemovePendingFile={removeFile}
+          onRestart={handleRestart}
+        />
       </div>
     </div>
   );

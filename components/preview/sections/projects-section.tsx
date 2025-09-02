@@ -78,7 +78,12 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                      <li key={achievementIndex}>
                        {inlineEditable ? (
                          <InlineText
-                           text={achievement}
+                           text={
+                             highlightForPath?.(`projects[${index}].achievements[${achievementIndex}]`) === 'set' && 
+                             getPreviewValueForPath?.(`projects[${index}].achievements[${achievementIndex}]`)?.after
+                               ? getPreviewValueForPath?.(`projects[${index}].achievements[${achievementIndex}]`)?.after || ''
+                               : achievement
+                           }
                            inlineEditable
                            isBullet
                            groupId={`projects-${index}-achievements`}

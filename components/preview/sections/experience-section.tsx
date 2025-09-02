@@ -44,7 +44,12 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                 <span className={styles.jobTitle}>
                   {inlineEditable ? (
                     <InlineText
-                      text={job.title}
+                      text={
+                        highlightForPath?.(`experience[${index}].title`) === 'set' && 
+                        getPreviewValueForPath?.(`experience[${index}].title`)?.after
+                          ? getPreviewValueForPath?.(`experience[${index}].title`)?.after || ''
+                          : job.title
+                      }
                       inlineEditable
                       highlightType={highlightForPath?.(`experience[${index}].title`)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].title`)?.before}
@@ -60,7 +65,12 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                    <span className={styles.company}>
                     {inlineEditable ? (
                       <InlineText
-                        text={job.company}
+                        text={
+                          highlightForPath?.(`experience[${index}].company`, undefined) === 'set' && 
+                          getPreviewValueForPath?.(`experience[${index}].company`)?.after
+                            ? getPreviewValueForPath?.(`experience[${index}].company`)?.after || ''
+                            : job.company
+                        }
                         inlineEditable
                         highlightType={highlightForPath?.(`experience[${index}].company`, undefined)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].company`)?.before}
@@ -75,7 +85,12 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     {' | '}
                     {inlineEditable ? (
                       <InlineText
-                        text={job.period}
+                        text={
+                          highlightForPath?.(`experience[${index}].period`, undefined) === 'set' && 
+                          getPreviewValueForPath?.(`experience[${index}].period`)?.after
+                            ? getPreviewValueForPath?.(`experience[${index}].period`)?.after || ''
+                            : job.period
+                        }
                         inlineEditable
                         highlightType={highlightForPath?.(`experience[${index}].period`, undefined)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].period`)?.before}
@@ -93,7 +108,12 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                    <li key={achIndex} className={styles.achievement}>
                      {inlineEditable ? (
                        <InlineText
-                         text={achievement}
+                         text={
+                           highlightForPath?.(`experience[${index}].achievements[${achIndex}]`, achIndex) === 'set' && 
+                           getPreviewValueForPath?.(`experience[${index}].achievements[${achIndex}]`)?.after
+                             ? getPreviewValueForPath?.(`experience[${index}].achievements[${achIndex}]`)?.after || ''
+                             : achievement
+                         }
                          inlineEditable
                          isBullet
                          groupId={`experience-${index}-achievements`}
