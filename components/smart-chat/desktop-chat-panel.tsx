@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatePresence, motion } from "framer-motion";
-import AISuggestionsSidebar from "./ai-suggestions-sidebar";
 import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
@@ -12,6 +11,7 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
+import IssueBar from "./issue-bar";
 import LoadingMessage from "./loading-message";
 import type { ChatMessage, SuggestionRecord } from "./types";
 import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "./utils";
@@ -93,19 +93,8 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
   // 直接複製原本 lg:flex 內的內容，將 props 替換為 props.xxx
   // ...
   return (
-    <div className="hidden lg:flex items-stretch gap-6 h-full">
-      {/* 左側建議面板 */}
-      <AISuggestionsSidebar
-        suggestionTemplates={props.suggestionTemplates}
-        onQuoteTemplate={props.onQuoteTemplate}
-        onRemoveTemplate={props.onRemoveTemplate}
-        onComplete={props.onComplete}
-        messageCount={props.messageCount}
-        suggestionsScrollAreaRef={props.suggestionsScrollAreaRef}
-        isCollapsed={props.isSidebarCollapsed}
-        onToggleCollapse={props.onToggleSidebar}
-      />
-      {/* 右側聊天區域 */}
+    <div className="hidden lg:flex items-stretch h-full">
+      {/* 聊天區域（全寬） */}
       <div className="flex-1 min-w-0 h-full">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col">
           {/* Header */}
@@ -125,9 +114,15 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
             </div>
             
           </div>
+          {/* Issue bar below header */}
+          <IssueBar
+            suggestionTemplates={props.suggestionTemplates}
+            onQuoteTemplate={props.onQuoteTemplate}
+            onRemoveTemplate={props.onRemoveTemplate}
+          />
           {/* Chat Area */}
-          <div className="flex-1 overflow-hidden">
-            <ScrollArea className="h-full px-6" ref={props.scrollAreaRef}>
+          <div className="flex-1 overflow-hidden p-4">
+            <ScrollArea className="h-full" ref={props.scrollAreaRef}>
               <div className="space-y-4 py-4">
                 {messageElements}
                 {props.isLoading && <LoadingMessage />}
@@ -136,7 +131,7 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
             </ScrollArea>
           </div>
           {/* Input Area */}
-          <div className="px-4 py-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
             {/* File preview above input */}
             {filePreviewElements}
             {/* Modal for preview */}

@@ -4,6 +4,7 @@ import SmartChat from "@/components/smart-chat";
 import PreviewActionPanel from "@/components/smart-chat/preview-action-panel";
 import ResumeEditorPreview from "@/components/smart-chat/resume-editor-preview";
 import { Button } from "@/components/ui/button";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useResumeTemplate } from "@/hooks/use-resume-optimization";
 import { getTemplateById } from "@/lib/config/resume-templates";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
@@ -61,12 +62,10 @@ export default function SmartChatPage() {
 
   // Handle preview actions
   const handleAcceptPreview = useCallback(() => {
-    // Dispatch accept event to resume editor
     document.dispatchEvent(new CustomEvent('resume-preview-accept'));
   }, []);
 
   const handleRejectPreview = useCallback(() => {
-    // Dispatch reject event to resume editor
     document.dispatchEvent(new CustomEvent('resume-preview-reject'));
   }, []);
 
@@ -93,45 +92,50 @@ export default function SmartChatPage() {
   }
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden flex flex-col">
-      {/* Main content area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left pane: Smart chat - Fixed width */}
-        <div className="w-2/5 h-full flex items-center justify-center p-6">
-          <SmartChat
-            analysisResult={analysisResult}
-            onComplete={handleComplete}
-            onSkip={handleSkip}
-          />
-        </div>
-
-        {/* Right pane: Resume editor preview - Flexible width with proper fitting */}
-        <div className="w-3/5 h-full flex flex-col py-6 px-0">
-          <div className="flex-1 overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow-lg relative">
-            <div className="h-full overflow-y-auto">
-              <ResumeEditorPreview
-                template={currentTemplate}
-                className="h-full"
+    <div className="h-screen bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
+      {/* Main content area: seamless, no padding/margins */}
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="h-full">
+          {/* Left: Chat */}
+          <ResizablePanel defaultSize={40} minSize={25} maxSize={60} className="h-full">
+            <div className="h-full w-full">
+              <SmartChat
+                analysisResult={analysisResult}
+                onComplete={handleComplete}
+                onSkip={handleSkip}
               />
             </div>
-            {/* Accept/reject panel positioned relative to container */}
-            {isPreviewing && (
-              <PreviewActionPanel
-                onAccept={handleAcceptPreview}
-                onReject={handleRejectPreview}
-              />
-            )}
-          </div>
-        </div>
+          </ResizablePanel>
+
+          <ResizableHandle withHandle className="bg-gray-200 dark:bg-gray-800" />
+
+          {/* Right: Resume editor */}
+          <ResizablePanel defaultSize={60} minSize={40} className="h-full">
+            <div className="h-full relative">
+              <div className="absolute inset-0 overflow-y-auto">
+                <ResumeEditorPreview
+                  template={currentTemplate}
+                  className="h-full"
+                />
+              </div>
+              {isPreviewing && (
+                <PreviewActionPanel
+                  onAccept={handleAcceptPreview}
+                  onReject={handleRejectPreview}
+                />
+              )}
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
 
-      {/* Fixed bottom navigation bar */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+      {/* Bottom navigation bar - keep minimal visual weight */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3">
         <div className="flex items-center justify-between">
           <Button
             variant="outline"
             onClick={() => router.push('/results')}
-            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>上一步</span>
@@ -146,9 +150,8 @@ export default function SmartChatPage() {
         </div>
       </div>
 
-      {/* Completion state */}
       {isCompleted && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4 text-center">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
               優化完成！
@@ -157,12 +160,8 @@ export default function SmartChatPage() {
               您的履歷已經過 AI 優化，可以查看結果或繼續編輯。
             </p>
             <div className="flex gap-3 justify-center">
-              <Button onClick={() => router.push('/results')}>
-                查看結果
-              </Button>
-              <Button variant="outline" onClick={() => setIsCompleted(false)}>
-                繼續編輯
-              </Button>
+              <Button onClick={() => router.push('/results')}>查看結果</Button>
+              <Button variant="outline" onClick={() => setIsCompleted(false)}>繼續編輯</Button>
             </div>
           </div>
         </div>
