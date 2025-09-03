@@ -97,7 +97,7 @@ export default function SmartChatPage() {
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
           {/* Left: Chat */}
-          <ResizablePanel defaultSize={40} minSize={25} maxSize={60} className="h-full">
+          <ResizablePanel defaultSize={50} minSize={25} maxSize={60} className="h-full">
             <div className="h-full w-full">
               <SmartChat
                 analysisResult={analysisResult}
@@ -110,7 +110,7 @@ export default function SmartChatPage() {
           <ResizableHandle withHandle className="bg-gray-200 dark:bg-gray-800" />
 
           {/* Right: Resume editor */}
-          <ResizablePanel defaultSize={60} minSize={40} className="h-full">
+          <ResizablePanel defaultSize={50} minSize={40} className="h-full">
             <div className="h-full relative">
               <div className="absolute inset-0 overflow-auto">
                 <ResumeEditorPreview

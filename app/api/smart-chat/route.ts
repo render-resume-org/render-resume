@@ -1,7 +1,7 @@
 import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
-import { generateSmartChatSystemPrompt } from '@/lib/prompts';
+import { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from '@/lib/prompts';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -462,8 +462,11 @@ export async function POST(request: NextRequest) {
     const existingSuggestions = suggestions?.map(s => `${s.title}: ${s.description}`) || [];
     
     
-    // 建立系統提示，基於分析結果和已有建議與 issues，並附加本輪履歷差異摘要（若有）
-    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions, currentIssues);
+    // 建立系統提示，基於分析結果和已有建議
+    const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions);
+    
+    // 建立用戶提示，包含 issues 狀態（強調進行中的問題）
+    const issuesUserPrompt = generateSmartChatUserPrompt(currentIssues);
     
     // 準備用戶對話內容，包含對話歷史
     const conversationHistory = messages
@@ -478,6 +481,9 @@ export async function POST(request: NextRequest) {
     } else { 
       finalUserInput += `\n\n最新訊息：用戶沒有輸入文字，只是上傳了圖片`;
     }
+    
+    // 添加 issues 狀態到用戶提示（強調進行中的問題）
+    finalUserInput += `\n\n${issuesUserPrompt}`;
     // 新增：在 user 訊息中附加本輪履歷差異（若存在），並明確說明其含義
     console.log('🔍 [API] Resume diff:', resumeDiff);
     finalUserInput += `\n\n以下為「本輪用戶對履歷的實際修改差異」，以 git 風格 diff 呈現（+ 表示新增、- 表示刪除）。請僅將其作為上下文參考，避免逐字複誦：\n\n`;
