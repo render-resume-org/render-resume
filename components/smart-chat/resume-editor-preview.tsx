@@ -674,8 +674,10 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
 
   return (
     <div className="relative h-full">
-      <ZoomToolbar value={scale} onChange={setScale} className="absolute right-4 top-4 z-20" />
       <div className="w-full h-full overflow-visible">
+        <div className="sticky top-0 z-30 flex justify-end pointer-events-none">
+          <ZoomToolbar value={scale} onChange={setScale} className="m-3 pointer-events-auto" />
+        </div>
         <div
           className="flex justify-center pt-6 pb-4"
           onMouseDown={handleMouseDown}
