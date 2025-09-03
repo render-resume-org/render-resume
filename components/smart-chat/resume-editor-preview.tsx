@@ -26,6 +26,10 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const [translate, setTranslate] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
   const dragOriginRef = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
+  const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const mouseUpHandlerRef = useRef<(() => void) | null>(null);
+  const touchMoveHandlerRef = useRef<((e: TouchEvent) => void) | null>(null);
+  const touchEndHandlerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (scale === 1 && (translate.x !== 0 || translate.y !== 0)) {
@@ -48,19 +52,6 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     return false;
   };
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return; // left button only
-    if (scale === 1) return;
-    const target = e.target as HTMLElement | null;
-    if (isInteractiveElement(target)) return;
-    isDraggingRef.current = true;
-    dragOriginRef.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
-    // avoid text selection while dragging
-    document.body.style.userSelect = 'none';
-    window.addEventListener('mousemove', handleMouseMove as any);
-    window.addEventListener('mouseup', handleMouseUp as any);
-  }, [scale, translate.x, translate.y]);
-
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDraggingRef.current || !dragOriginRef.current) return;
     const dx = e.clientX - dragOriginRef.current.startX;
@@ -72,20 +63,28 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     isDraggingRef.current = false;
     dragOriginRef.current = null;
     document.body.style.userSelect = '';
-    window.removeEventListener('mousemove', handleMouseMove as any);
-    window.removeEventListener('mouseup', handleMouseUp as any);
-  }, [handleMouseMove]);
+    if (mouseMoveHandlerRef.current) {
+      window.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+    }
+    if (mouseUpHandlerRef.current) {
+      window.removeEventListener('mouseup', mouseUpHandlerRef.current);
+    }
+  }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return; // left button only
     if (scale === 1) return;
     const target = e.target as HTMLElement | null;
     if (isInteractiveElement(target)) return;
-    const t = e.touches[0];
     isDraggingRef.current = true;
-    dragOriginRef.current = { startX: t.clientX, startY: t.clientY, startTx: translate.x, startTy: translate.y };
-    window.addEventListener('touchmove', handleTouchMove as any, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd as any);
-  }, [scale, translate.x, translate.y]);
+    dragOriginRef.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
+    // avoid text selection while dragging
+    document.body.style.userSelect = 'none';
+    mouseMoveHandlerRef.current = handleMouseMove;
+    mouseUpHandlerRef.current = handleMouseUp;
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [scale, translate.x, translate.y, handleMouseMove, handleMouseUp]);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
     if (!isDraggingRef.current || !dragOriginRef.current) return;
@@ -100,9 +99,26 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const handleTouchEnd = useCallback(() => {
     isDraggingRef.current = false;
     dragOriginRef.current = null;
-    window.removeEventListener('touchmove', handleTouchMove as any);
-    window.removeEventListener('touchend', handleTouchEnd as any);
-  }, [handleTouchMove]);
+    if (touchMoveHandlerRef.current) {
+      window.removeEventListener('touchmove', touchMoveHandlerRef.current);
+    }
+    if (touchEndHandlerRef.current) {
+      window.removeEventListener('touchend', touchEndHandlerRef.current);
+    }
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scale === 1) return;
+    const target = e.target as HTMLElement | null;
+    if (isInteractiveElement(target)) return;
+    const t = e.touches[0];
+    isDraggingRef.current = true;
+    dragOriginRef.current = { startX: t.clientX, startY: t.clientY, startTx: translate.x, startTy: translate.y };
+    touchMoveHandlerRef.current = handleTouchMove;
+    touchEndHandlerRef.current = handleTouchEnd;
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+  }, [scale, translate.x, translate.y, handleTouchMove, handleTouchEnd]);
 
   useEffect(() => {
     try {
@@ -682,7 +698,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           className="flex justify-center pt-6 pb-4"
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
-          style={{ cursor: scale !== 1 ? (isDraggingRef.current ? 'grabbing' : 'grab') as any : 'default' }}
+          style={{ cursor: scale !== 1 ? (isDraggingRef.current ? 'grabbing' : 'grab') : 'default' }}
         >
           <div style={{ transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`, transformOrigin: 'top center' }}>
             <ResumePreview
