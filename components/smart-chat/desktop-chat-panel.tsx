@@ -103,7 +103,7 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
             onRemoveTemplate={props.onRemoveTemplate}
           />
           {/* Chat Area */}
-          <div className="flex-1 overflow-hidden p-4">
+          <div className="flex-1 overflow-hidden px-4">
             <ScrollArea className="h-full" ref={props.scrollAreaRef}>
               <div className="space-y-4 py-4">
                 {messageElements}
