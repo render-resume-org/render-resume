@@ -112,7 +112,7 @@ export default function SmartChatPage() {
           {/* Right: Resume editor */}
           <ResizablePanel defaultSize={60} minSize={40} className="h-full">
             <div className="h-full relative">
-              <div className="absolute inset-0 overflow-y-auto">
+              <div className="absolute inset-0 overflow-auto">
                 <ResumeEditorPreview
                   template={currentTemplate}
                   className="h-full"

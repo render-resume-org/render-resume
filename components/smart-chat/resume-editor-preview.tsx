@@ -1,6 +1,7 @@
 "use client";
 
 import ResumePreview from '@/components/preview/resume-preview';
+import ZoomToolbar from '@/components/smart-chat/zoom-toolbar';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { mapOptimizedToUnified } from '@/lib/mappers/optimized-to-unified';
 import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
@@ -8,7 +9,7 @@ import { calculateStringSimilarity } from '@/lib/similarity';
 import type { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResume } from '@/lib/types/resume-unified';
 import { setByPath } from '@/lib/utils/set-by-path';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface ResumeEditorPreviewProps {
   template: ResumeTemplate;
@@ -21,6 +22,87 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const [previewOps, setPreviewOps] = useState<Array<{ op: 'set'; path: string; value: string } | { op: 'insert'; path: string; value: string; index?: number } | { op: 'remove'; path: string; index?: number }> | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewDiffs, setPreviewDiffs] = useState<Record<string, { before?: string; after?: string }>>({});
+  const [scale, setScale] = useState<number>(1);
+  const [translate, setTranslate] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragOriginRef = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
+
+  useEffect(() => {
+    if (scale === 1 && (translate.x !== 0 || translate.y !== 0)) {
+      setTranslate({ x: 0, y: 0 });
+    }
+  }, [scale, translate.x, translate.y]);
+
+  const isInteractiveElement = (el: HTMLElement | null): boolean => {
+    let node: HTMLElement | null = el;
+    while (node) {
+      const tag = node.tagName.toLowerCase();
+      if (
+        tag === 'input' || tag === 'textarea' || tag === 'button' || tag === 'select' ||
+        node.isContentEditable || node.getAttribute('role') === 'textbox'
+      ) {
+        return true;
+      }
+      node = node.parentElement;
+    }
+    return false;
+  };
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return; // left button only
+    if (scale === 1) return;
+    const target = e.target as HTMLElement | null;
+    if (isInteractiveElement(target)) return;
+    isDraggingRef.current = true;
+    dragOriginRef.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
+    // avoid text selection while dragging
+    document.body.style.userSelect = 'none';
+    window.addEventListener('mousemove', handleMouseMove as any);
+    window.addEventListener('mouseup', handleMouseUp as any);
+  }, [scale, translate.x, translate.y]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDraggingRef.current || !dragOriginRef.current) return;
+    const dx = e.clientX - dragOriginRef.current.startX;
+    const dy = e.clientY - dragOriginRef.current.startY;
+    setTranslate({ x: dragOriginRef.current.startTx + dx, y: dragOriginRef.current.startTy + dy });
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    dragOriginRef.current = null;
+    document.body.style.userSelect = '';
+    window.removeEventListener('mousemove', handleMouseMove as any);
+    window.removeEventListener('mouseup', handleMouseUp as any);
+  }, [handleMouseMove]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scale === 1) return;
+    const target = e.target as HTMLElement | null;
+    if (isInteractiveElement(target)) return;
+    const t = e.touches[0];
+    isDraggingRef.current = true;
+    dragOriginRef.current = { startX: t.clientX, startY: t.clientY, startTx: translate.x, startTy: translate.y };
+    window.addEventListener('touchmove', handleTouchMove as any, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd as any);
+  }, [scale, translate.x, translate.y]);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDraggingRef.current || !dragOriginRef.current) return;
+    const t = e.touches[0];
+    if (!t) return;
+    e.preventDefault();
+    const dx = t.clientX - dragOriginRef.current.startX;
+    const dy = t.clientY - dragOriginRef.current.startY;
+    setTranslate({ x: dragOriginRef.current.startTx + dx, y: dragOriginRef.current.startTy + dy });
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    dragOriginRef.current = null;
+    window.removeEventListener('touchmove', handleTouchMove as any);
+    window.removeEventListener('touchend', handleTouchEnd as any);
+  }, [handleTouchMove]);
 
   useEffect(() => {
     try {
@@ -592,17 +674,29 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
 
   return (
     <div className="relative h-full">
-      <ResumePreview
-      resumeData={getPreviewedResume() || optimized}
-      template={template}
-      onUpdateResume={handleUpdateOptimized}
-      editable
-      analysisResult={null}
-      inlineEditable
-      onInlineChange={handleInlineChange}
-      previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
-      previewDiffs={isPreviewing ? previewDiffs : undefined}
-      />
+      <ZoomToolbar value={scale} onChange={setScale} className="absolute right-4 top-4 z-20" />
+      <div className="w-full h-full overflow-visible">
+        <div
+          className="flex justify-center pt-6 pb-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          style={{ cursor: scale !== 1 ? (isDraggingRef.current ? 'grabbing' : 'grab') as any : 'default' }}
+        >
+          <div style={{ transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`, transformOrigin: 'top center' }}>
+            <ResumePreview
+              resumeData={getPreviewedResume() || optimized}
+              template={template}
+              onUpdateResume={handleUpdateOptimized}
+              editable
+              analysisResult={null}
+              inlineEditable
+              onInlineChange={handleInlineChange}
+              previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
+              previewDiffs={isPreviewing ? previewDiffs : undefined}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

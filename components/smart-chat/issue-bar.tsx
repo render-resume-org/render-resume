@@ -85,7 +85,7 @@ export default function IssueBar({ suggestionTemplates, onQuoteTemplate, onRemov
               <div className={cn("w-1.5 self-stretch rounded-full", getIndicatorBarColor(current.status))} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">{current.title}</div>
-                <div className="text-xs text-gray-500 line-clamp-2 min-h-[2.5rem]">{current.description}</div>
+                <div className="text-xs text-gray-500 line-clamp-2">{current.description}</div>
                 <div className="mt-1 flex items-center gap-2">
                   <Badge variant={current.status === 'completed' ? 'default' : current.status === 'in_progress' ? 'secondary' : 'outline'} className="text-[10px]">
                     {getStatusText(current.status)}

@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AnimatePresence, motion } from "framer-motion";
 import CannedMessages from "./canned-messages";
@@ -97,23 +96,6 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
       {/* 聊天區域（全寬） */}
       <div className="flex-1 min-w-0 h-full">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col">
-          {/* Header */}
-          <div className="px-6 py-2 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              自由詢問履歷相關問題，AI 助理 Remo 會記錄並提供具體建議
-            </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-sm text-gray-500">
-                  {props.messageCount}/{CHAT_MESSAGE_LIMIT} 則對話
-                </div>
-                <Button variant="ghost" size="sm" onClick={props.onRestart} className="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                  重新對話
-                </Button>
-              </div>
-            </div>
-            
-          </div>
           {/* Issue bar below header */}
           <IssueBar
             suggestionTemplates={props.suggestionTemplates}
