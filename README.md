@@ -1,4 +1,4 @@
-# RenderResume - AI 履歷生成器
+# RenderResume - AI 履歷編輯器
 
 *[English](#english) | [繁體中文](#繁體中文)*
 

@@ -13,8 +13,8 @@ const defaultUrl = 'https://render-resume.com'
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: {
-    default: "RenderResume - AI 履歷生成器 | 專業履歷分析與優化平台",
-    template: "%s | RenderResume - AI 履歷生成器"
+    default: "RenderResume - AI 履歷編輯器 | 專業履歷分析與優化平台",
+    template: "%s | RenderResume - AI 履歷編輯器"
   },
   description: "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構，為求職者提供個性化履歷優化建議。免費註冊，3分鐘生成專業履歷。",
   
@@ -169,7 +169,7 @@ export const metadata: Metadata = {
     locale: "zh_TW",
     alternateLocale: ["en_US", "zh_CN"],
     url: defaultUrl,
-    title: "RenderResume - AI 履歷生成器 | 專業履歷分析與優化平台",
+    title: "RenderResume - AI 履歷編輯器 | 專業履歷分析與優化平台",
     description: "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構，為求職者提供個性化履歷優化建議。",
     siteName: "RenderResume",
     images: [
@@ -177,7 +177,7 @@ export const metadata: Metadata = {
         url: `${defaultUrl}/images/og-cover.png`,
         width: 1200,
         height: 630,
-        alt: "RenderResume - AI 履歷生成器",
+        alt: "RenderResume - AI 履歷編輯器",
         type: "image/png",
       },
       {
@@ -195,7 +195,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@renderresume",
     creator: "@renderresume",
-    title: "RenderResume - AI 履歷生成器",
+    title: "RenderResume - AI 履歷編輯器",
     description: "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
     images: [`${defaultUrl}/images/og-cover.png`],
   },

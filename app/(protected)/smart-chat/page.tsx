@@ -92,7 +92,7 @@ export default function SmartChatPage() {
   }
 
   return (
-    <div className="h-screen bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-gray-900 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - var(--app-header-height, 56px))' }}>
       {/* Main content area: seamless, no padding/margins */}
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" className="h-full">
@@ -124,31 +124,33 @@ export default function SmartChatPage() {
                   onReject={handleRejectPreview}
                 />
               )}
+              {/* Right-panel action bar */}
+              <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
+                <div className="pointer-events-auto">
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/results')}
+                    className="text-sm px-3 py-2 rounded-md flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 backdrop-blur-sm bg-white/70 dark:bg-gray-900/60 shadow-lg border-gray-200/60 dark:border-gray-700/60"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>回到分析結果</span>
+                  </Button>
+                </div>
+                <div className="pointer-events-auto">
+                  <Button
+                    onClick={() => router.push('/download')}
+                    className="text-sm px-3 py-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white flex items-center gap-2 backdrop-blur-sm shadow-lg"
+                  >
+                    <span>完成履歷編輯</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-
-      {/* Bottom navigation bar - keep minimal visual weight */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 px-4 py-3">
-        <div className="flex items-center justify-between">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/results')}
-            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>上一步</span>
-          </Button>
-          <Button
-            onClick={() => router.push('/download')}
-            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
-          >
-            <span>下一步</span>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      
 
       {isCompleted && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

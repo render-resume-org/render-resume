@@ -52,7 +52,7 @@ export default function IssueBar({ suggestionTemplates, onQuoteTemplate, onRemov
 
   return (
     <div className={cn("border-b border-gray-200 dark:border-gray-700", className)}>
-      <div className="px-4 py-4">
+      <div className="px-4 py-2">
         <div className="relative">
           {/* Left-side controls (static, seamless) */}
           {total > 1 && (
@@ -67,6 +67,9 @@ export default function IssueBar({ suggestionTemplates, onQuoteTemplate, onRemov
               >
                 <UpIcon className="h-4 w-4" />
               </Button>
+              <div className="text-xs text-gray-500 text-center px-1 py-1 min-w-[2rem]">
+                {clampedIndex + 1}/{total}
+              </div>
               <Button
                 variant="ghost"
                 size="icon"
@@ -87,7 +90,7 @@ export default function IssueBar({ suggestionTemplates, onQuoteTemplate, onRemov
                 <div className="text-sm font-medium truncate text-gray-900 dark:text-gray-100">{current.title}</div>
                 <div className="text-xs text-gray-500 line-clamp-2">{current.description}</div>
                 <div className="mt-1 flex items-center gap-2">
-                  <Badge variant={current.status === 'completed' ? 'default' : current.status === 'in_progress' ? 'secondary' : 'outline'} className="text-[10px]">
+                  <Badge className="text-[10px] shadow-none bg-gray-50 hover:bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
                     {getStatusText(current.status)}
                   </Badge>
                   <span className="text-xs text-gray-400">#{clampedIndex + 1}</span>

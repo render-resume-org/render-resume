@@ -89,13 +89,11 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
     );
   }, [props.pendingFiles, props.onRemovePendingFile]);
 
-  // 直接複製原本 lg:flex 內的內容，將 props 替換為 props.xxx
-  // ...
   return (
     <div className="hidden lg:flex items-stretch h-full">
       {/* 聊天區域（全寬） */}
       <div className="flex-1 min-w-0 h-full">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg h-full flex flex-col">
+        <div className="bg-white dark:bg-gray-800 h-full flex flex-col">
           {/* Issue bar below header */}
           <IssueBar
             suggestionTemplates={props.suggestionTemplates}
@@ -113,7 +111,7 @@ const DesktopChatPanel = memo((props: DesktopChatPanelProps) => {
             </ScrollArea>
           </div>
           {/* Input Area */}
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <div className="px-6 py-2 border-t border-gray-200 dark:border-gray-700 space-y-2">
             {/* File preview above input */}
             {filePreviewElements}
             {/* Modal for preview */}

@@ -15,7 +15,7 @@ export default function LoginPage() {
               歡迎回來
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              登入您的帳戶繼續使用 AI 履歷生成器
+              登入您的帳戶繼續使用 AI 履歷編輯器
             </p>
           </div>
           
