@@ -18,9 +18,7 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       title: a.title || '',
       organization: a.organization,
       period: a.period,
-      // Preserve first line as description followed by outcomes
       details: [
-        ...(a.description ? [a.description] : []),
         ...((a.outcomes || []))
       ],
     })),
@@ -29,16 +27,13 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       company: exp.company || '',
       period: exp.period || '',
       achievements: [
-        ...(exp.description ? [exp.description] : []),
         ...((exp.outcomes || []))
       ],
     })),
     projects: (unified.projects || []).map(p => ({
       name: p.name || '',
       period: '',
-      // Prefer description + outcomes if present, otherwise fall back to technologies
       achievements: [
-        ...(p.description ? [p.description] : []),
         ...((p.outcomes || []).length ? (p.outcomes as string[]) : (p.technologies || []))
       ],
     })),
