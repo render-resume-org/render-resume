@@ -8,10 +8,14 @@ export interface PatchOp {
   value: string; // full paragraph replacement
 }
 
+// Allow inserting either a bullet string into outcomes arrays,
+// or a full section object (experience/projects/achievements/education/skills group)
+export type InsertValue = string | Record<string, unknown>;
+
 export interface InsertOp {
   op: 'insert';
-  path: string; // array path (e.g., experience[0].achievements)
-  value: string; // bullet to insert
+  path: string; // array path (e.g., experience, projects, achievements, education, skills, or *.outcomes)
+  value: InsertValue; // bullet string or section object
   index?: number; // optional explicit index (default: append or after matched index)
 }
 
