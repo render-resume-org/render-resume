@@ -193,6 +193,96 @@ sequenceDiagram
 5. **評分計算** → 六維度評分算法
 6. **結果展示** → React 組件渲染
 
+### 🤖 Smart Chat 智能問答流程
+
+```mermaid
+sequenceDiagram
+    participant U as 用戶
+    participant F as Frontend
+    participant A as Smart Chat API
+    participant O as OpenAI GPT-4
+    participant R as Resume Editor
+    participant D as Database
+
+    U->>F: 發送訊息/上傳檔案
+    F->>A: 聊天請求 (messages, analysisResult, issues)
+    A->>O: AI 對話請求 (system prompt + user prompt)
+    O->>A: 結構化回應 (message, suggestion, excerpt, quickResponses)
+    A->>A: 處理訊息邏輯 (分割 <NEXT_TOPIC>, 更新 issues 狀態)
+    A->>F: 返回處理後訊息
+    F->>R: 應用 patchOps 到履歷編輯器
+    F->>U: 顯示 AI 回應與快速選項
+    A->>D: 記錄活動日誌
+```
+
+#### Smart Chat 核心特性
+
+##### 1. AI 角色系統
+- **Remo 博士**: 企鵝履歷顧問，專業且親切的溝通風格
+- **STAR 原則**: 基於情境、任務、行動、成果進行深度追問
+- **個性化稱呼**: 根據用戶姓名和職位提供適當稱呼
+
+##### 2. 對話狀態管理
+- **Issues 系統**: 管理進行中 (in_progress)、待處理 (pending)、已完成 (completed) 的問題
+- **話題切換**: 使用 `<NEXT_TOPIC>` token 控制話題轉換
+- **狀態同步**: excerpt 觸發 in_progress，suggestion 觸發 completed
+
+##### 3. 結構化回應格式
+```typescript
+interface ChatResponse {
+  message: string;                    // AI 回覆內容
+  suggestion?: {                     // 履歷優化建議
+    title: string;
+    description: string;
+    category: string;
+    patchOps?: PatchOp[];            // 具體修改操作
+  };
+  quickResponses: string[];          // 快速回覆選項
+  excerpt?: {                       // 履歷段落摘錄
+    title: string;
+    content: string;
+    source: string;
+    issue_id?: string;
+  };
+}
+```
+
+##### 4. 履歷整合機制
+- **PatchOps 系統**: 提供 set/insert/remove 操作直接修改履歷
+- **即時同步**: 建議可立即應用到履歷編輯器
+- **差異追蹤**: 記錄用戶對履歷的實際修改
+
+##### 5. 檔案上傳支援
+- **多格式支援**: 圖片、PDF 檔案上傳
+- **視覺分析**: 使用 GPT-4 Vision 進行圖片內容分析
+- **檔案管理**: 自動處理檔案預覽和清理
+
+#### Smart Chat 組件架構
+
+```
+components/smart-chat/
+├── smart-chat.tsx              # 主聊天組件
+├── desktop-chat-panel.tsx       # 桌面版聊天面板
+├── mobile-chat-panel.tsx       # 手機版聊天面板
+├── chat-message-card.tsx       # 訊息卡片組件
+├── chat-input.tsx              # 聊天輸入框
+├── canned-messages.tsx         # 快速回覆選項
+├── ai-suggestions-sidebar.tsx  # AI 建議側邊欄
+├── issue-bar.tsx              # 問題狀態條
+├── use-chat-logic.ts          # 聊天邏輯 Hook
+├── hooks.ts                   # 各種自定義 Hooks
+└── types.ts                  # TypeScript 類型定義
+```
+
+#### Smart Chat 對話階段
+
+1. **[STAGE:TOPIC_INTEREST]** 話題興趣確認
+2. **[STAGE:TOPIC_OPEN]** 主題開啟（產生 excerpt）
+3. **[STAGE:FOLLOWUP]** 深入追問（STAR 原則）
+4. **[STAGE:INFO_CHECK]** 資訊補全檢查
+5. **[STAGE:SUGGESTION]** 建議產生（產生 suggestion）
+6. **[STAGE:TOPIC_TRANSITION]** 話題切換（插入 <NEXT_TOPIC>）
+
 ### 💳 支付訂閱流程
 
 ```mermaid

@@ -24,8 +24,8 @@ export function generateSmartChatSystemPrompt(
       : '- 上下文一致性：檢查對話歷程，避免在同一履歷段落多次摘錄或給出重複建議。';
 
   // 過濾掉 resume 欄位，只保留分析結果相關的資料
-  const cleanAnalysisResult: Record<string, unknown> = { ...(analysisResult as unknown as Record<string, unknown>) };
-  delete cleanAnalysisResult.resume;
+  const cleanAnalysisResult = { ...analysisResult };
+  delete (cleanAnalysisResult as Record<string, unknown>).resume;
 
   return `You are「Remo 博士」——一隻專業且親切的企鵝履歷顧問博士。你的任務是依 STAR 原則主動協助用戶補全履歷並提升求職競爭力。
 Always produce output strictly following <response_format> and <tone_and_message_rules>, applying the detailed rules from <role_spec>, <info_and_context>, <tasks>, <suggestion_rules>, <excerpt_rules>, <quick_responses_rules>, <special_cases>, <topic_transition_rules>, and <checklist>, and using the stage definitions in <conversation_stage_definitions>.
@@ -80,15 +80,15 @@ ${duplicateCheckPrompt}
   - 訊息內容與 \`suggestion\` 必須語意一致。
   - 產生建議時，在說道「接下來，...」引導至下個話題之前，應插入 <NEXT_TOPIC> token 引導至下個話題。
 - 當資訊充分時，請同時輸出 patchOps（支援 set / insert / remove）：提供一組可直接套用的操作，以 path-based 的方式描述如何更新履歷內容。
-  - set: { "op": "set", "path": "experience[0].achievements[2]", "value": "完整的新段落內容" } 將指定 path 的整個段落替換為新的 value（value 為完整字串）
-  - insert: { "op": "insert", "path": "experience[0].achievements", "value": "新增列點", "index": 3 } 在指定陣列 path 插入一個新的列點（若省略 index 則預設插入到陣列末尾；若 path 搭配相鄰元素語境，請盡量推斷最合理位置）
-  - remove: { { "op": "remove", "path": "experience[0].achievements[2]" } 或 { "op": "remove", "path": "experience[0].achievements", "index": 2 } 刪除指定列點
-  - 路徑語義：path 中的 '[...]'（例如 'experience[0].achievements[2]'）表示要操作的具體段落位置（0-based）
+  - set: { "op": "set", "path": "experience[0].outcomes[2]", "value": "完整的新段落內容" } 將指定 path 的整個段落替換為新的 value（value 為完整字串）
+  - insert: { "op": "insert", "path": "experience[0].outcomes", "value": "新增列點", "index": 3 } 在指定陣列 path 插入一個新的列點（若省略 index 則預設插入到陣列末尾；若 path 搭配相鄰元素語境，請盡量推斷最合理位置）
+  - remove: { { "op": "remove", "path": "experience[0].outcomes[2]" } 或 { "op": "remove", "path": "experience[0].outcomes", "index": 2 } 刪除指定列點
+  - 路徑語義：path 中的 '[...]'（例如 'experience[0].outcomes[2]'）表示要操作的具體段落位置（0-based）
   - 範例路徑：
     - 'summary' → 整個摘要段落
     - 'experience[0].title' → 第一個工作經驗的職位標題
-    - 'experience[0].achievements[2]' → 第一個工作經驗的第三個成就項目
-    - 'projects[1].achievements[0]' → 第二個專案的第一個成就項目
+    - 'experience[0].outcomes[2]' → 第一個工作經驗的第三個列點
+    - 'projects[1].outcomes[0]' → 第二個專案的第一個列點
     - 'education[0].details[1]' → 第一個教育背景的第二個詳細項目
   - 語言一致性：生成的 patchOps 內容必須與原履歷的語言保持一致。即使用戶以其他語言對話，patchOps 中的 value 內容必須使用與原履歷相同的語言。請仔細觀察履歷分析結果中的語言，確保生成的內容語言與原履歷完全一致。
 
@@ -143,7 +143,7 @@ ${duplicateCheckPrompt}
     "description": "建議細節",
     "category": "分類",
     "patchOps": [
-      { "op": "set", "path": "experience[0].achievements[2]", "value": "新增具體成果：提升 30%" }
+      { "op": "set", "path": "experience[0].outcomes[2]", "value": "新增具體成果：提升 30%" }
     ]
   },
   "quickResponses": [

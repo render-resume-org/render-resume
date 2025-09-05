@@ -89,47 +89,47 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                 </span>
               </div>
                <ul className={styles.achievementList}>
-                 {job.achievements.map((achievement, achIndex) => (
+                 {job.outcomes.map((achievement, achIndex) => (
                    <li key={achIndex} className={styles.achievement}>
                      {inlineEditable ? (
                        <InlineText
                          text={achievement}
                          inlineEditable
                          isBullet
-                         groupId={`experience-${index}-achievements`}
+                         groupId={`experience-${index}-outcomes`}
                          highlightType={
                            highlightForPath?.(
-                             `experience[${index}].achievements[${achIndex}]`,
+                             `experience[${index}].outcomes[${achIndex}]`,
                              achIndex
                            )
                          }
                          previewOriginal={
                            getPreviewValueForPath?.(
-                             `experience[${index}].achievements[${achIndex}]`
+                             `experience[${index}].outcomes[${achIndex}]`
                            )?.before
                          }
                          previewReplaceWith={
                            getPreviewValueForPath?.(
-                             `experience[${index}].achievements[${achIndex}]`
+                             `experience[${index}].outcomes[${achIndex}]`
                            )?.after
                          }
                          onAddBullet={() =>
                            onInlineChange?.({
                              action: 'addBullet',
-                             path: `experience[${index}].achievements`,
+                             path: `experience[${index}].outcomes`,
                              index: achIndex,
                            })
                          }
                          onRemoveBullet={() =>
                            onInlineChange?.({
                              action: 'removeBullet',
-                             path: `experience[${index}].achievements`,
+                             path: `experience[${index}].outcomes`,
                              index: achIndex,
                            })
                          }
                          onChange={(t) =>
                            onInlineChange?.({
-                             path: `experience[${index}].achievements[${achIndex}]`,
+                             path: `experience[${index}].outcomes[${achIndex}]`,
                              value: t,
                            })
                          }
@@ -208,47 +208,47 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                </p>
             </div>
             <ul className={styles.achievementList}>
-              {job.achievements.map((achievement, achIndex) => (
+              {job.outcomes.map((achievement, achIndex) => (
                 <li key={achIndex} className={styles.achievement}>
                   {inlineEditable ? (
                     <InlineText
                       text={achievement}
                       inlineEditable
                       isBullet
-                      groupId={`experience-${index}-achievements`}
+                      groupId={`experience-${index}-outcomes`}
                       highlightType={
                         highlightForPath?.(
-                          `experience[${index}].achievements[${achIndex}]`,
+                          `experience[${index}].outcomes[${achIndex}]`,
                           achIndex
                         )
                       }
                       previewOriginal={
                         getPreviewValueForPath?.(
-                          `experience[${index}].achievements[${achIndex}]`
+                          `experience[${index}].outcomes[${achIndex}]`
                         )?.before
                       }
                       previewReplaceWith={
                         getPreviewValueForPath?.(
-                          `experience[${index}].achievements[${achIndex}]`
+                          `experience[${index}].outcomes[${achIndex}]`
                         )?.after
                       }
                       onAddBullet={() =>
                         onInlineChange?.({
                           action: 'addBullet',
-                          path: `experience[${index}].achievements`,
+                          path: `experience[${index}].outcomes`,
                           index: achIndex,
                         })
                       }
                       onRemoveBullet={() =>
                         onInlineChange?.({
                           action: 'removeBullet',
-                          path: `experience[${index}].achievements`,
+                          path: `experience[${index}].outcomes`,
                           index: achIndex,
                         })
                       }
                       onChange={(t) =>
                         onInlineChange?.({
-                          path: `experience[${index}].achievements[${achIndex}]`,
+                          path: `experience[${index}].outcomes[${achIndex}]`,
                           value: t,
                         })
                       }

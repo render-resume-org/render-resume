@@ -17,25 +17,25 @@ export interface OptimizedResume {
     title: string;
     organization?: string;
     period?: string;
-    details?: string[];
+    outcomes?: string[];
   }>;
   experience: Array<{
     title: string;
     company: string;
     period: string;
-    achievements: string[];
+    outcomes: string[];
   }>;
   projects: Array<{
     name: string;
     period?: string;
-    achievements: string[];
+    outcomes: string[];
   }>;
   education: Array<{
     degree: string;
     major: string;
     school: string;
     period: string;
-    details?: string[];
+    outcomes?: string[];
     gpa?: string;
     honor?: string;
   }>;

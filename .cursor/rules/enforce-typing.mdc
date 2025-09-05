@@ -1,0 +1,4 @@
+---
+alwaysApply: true
+---
+Unknown and any are disallowed. If multiple files share common types, separate them in a shared file.

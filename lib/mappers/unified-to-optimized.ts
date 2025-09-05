@@ -18,31 +18,25 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       title: a.title || '',
       organization: a.organization,
       period: a.period,
-      details: [
-        ...((a.outcomes || []))
-      ],
+      outcomes: [...(a.outcomes || [])],
     })),
     experience: (unified.experience || []).map(exp => ({
       title: exp.title || '',
       company: exp.company || '',
       period: exp.period || '',
-      achievements: [
-        ...((exp.outcomes || []))
-      ],
+      outcomes: [...(exp.outcomes || [])],
     })),
     projects: (unified.projects || []).map(p => ({
       name: p.name || '',
       period: '',
-      achievements: [
-        ...((p.outcomes || []).length ? (p.outcomes as string[]) : (p.technologies || []))
-      ],
+      outcomes: (p.outcomes && p.outcomes.length ? p.outcomes : (p.technologies || [])) as string[],
     })),
     education: (unified.education || []).map(e => ({
       degree: e.degree || '',
       major: '',
       school: e.school || '',
       period: e.period || '',
-      details: (e.relevant_courses || []).concat(e.outcomes || []),
+      outcomes: (e.relevant_courses || []).concat(e.outcomes || []),
       gpa: e.gpa,
       honor: undefined,
     })),

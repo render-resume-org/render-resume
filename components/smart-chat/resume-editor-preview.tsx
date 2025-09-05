@@ -10,6 +10,14 @@ import type { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResume } from '@/lib/types/resume-unified';
 import { setByPath } from '@/lib/utils/set-by-path';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  ArrayContainer,
+  InsertOp,
+  PatchOp,
+  PathCursor,
+  PathNavigationResult,
+  RemoveOp
+} from './types';
 
 interface ResumeEditorPreviewProps {
   template: ResumeTemplate;
@@ -19,7 +27,7 @@ interface ResumeEditorPreviewProps {
 export default function ResumeEditorPreview({ template }: ResumeEditorPreviewProps) {
   const [unified, setUnified] = useState<UnifiedResume | null>(null);
   const [optimized, setOptimized] = useState<OptimizedResume | null>(null);
-  const [previewOps, setPreviewOps] = useState<Array<{ op: 'set'; path: string; value: string } | { op: 'insert'; path: string; value: string; index?: number } | { op: 'remove'; path: string; index?: number }> | null>(null);
+  const [previewOps, setPreviewOps] = useState<Array<PatchOp | InsertOp | RemoveOp> | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewDiffs, setPreviewDiffs] = useState<Record<string, { before?: string; after?: string }>>({});
   const [scale, setScale] = useState<number>(1);
@@ -161,37 +169,37 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'experience') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.experience[idx].achievements.splice(insertAt, 0, '');
+          updated.experience[idx].outcomes.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.experience[idx].achievements.splice(removeAt, 1);
+          updated.experience[idx].outcomes.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.(title|company|period|achievements\[(\d+)\])$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.(title|company|period|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('achievements') && achIdx != null) {
-            updated.experience[idx].achievements[achIdx] = String(payload.value ?? '');
+          if (field.startsWith('outcomes') && achIdx != null) {
+            updated.experience[idx].outcomes[achIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.experience[idx].title = String(payload.value ?? '');
           } else if (field === 'company') {
@@ -204,37 +212,37 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'projects') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.projects[idx].achievements.splice(insertAt, 0, '');
+          updated.projects[idx].outcomes.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.projects[idx].achievements.splice(removeAt, 1);
+          updated.projects[idx].outcomes.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.(name|period|achievements\[(\d+)\])$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.(name|period|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('achievements') && achIdx != null) {
-            updated.projects[idx].achievements[achIdx] = String(payload.value ?? '');
+          if (field.startsWith('outcomes') && achIdx != null) {
+            updated.projects[idx].outcomes[achIdx] = String(payload.value ?? '');
           } else if (field === 'name') {
             updated.projects[idx].name = String(payload.value ?? '');
           } else if (field === 'period') {
@@ -262,9 +270,9 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const parts = text.split(',').map(s => s.trim());
           updated.education[idx].degree = parts[0] || '';
           updated.education[idx].major = parts[1] || '';
-        } else if (/^education\[\d+\]\.details$/.test(payload.path)) {
+        } else if (/^education\[\d+\]\.outcomes$/.test(payload.path)) {
           const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          updated.education[idx].details = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
+          updated.education[idx].outcomes = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
         } else {
           const m = payload.path.match(/^education\[(\d+)\]\.(school|period|honor)$/);
           if (m) {
@@ -279,32 +287,32 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'achievements') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.details$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          updated.achievements![idx].details!.splice(insertAt, 0, '');
+          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+          updated.achievements![idx].outcomes!.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.details$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          if (updated.achievements![idx].details!.length <= 1) {
-            updated.achievements![idx].details![0] = '';
+          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+          if (updated.achievements![idx].outcomes!.length <= 1) {
+            updated.achievements![idx].outcomes![0] = '';
           } else {
-            updated.achievements![idx].details!.splice(removeAt, 1);
+            updated.achievements![idx].outcomes!.splice(removeAt, 1);
           }
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
@@ -315,7 +323,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const field = m[2];
           const detIdx = m[3] ? Number(m[3]) : undefined;
           if (field.startsWith('details') && detIdx != null) {
-            updated.achievements![idx].details![detIdx] = String(payload.value ?? '');
+            updated.achievements![idx].outcomes![detIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.achievements![idx].title = String(payload.value ?? '');
           } else if (field === 'period') {
@@ -362,9 +370,9 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   useEffect(() => {
     const normalizePath = (path: string) =>
       path
-        .replace(/\.outcomes\[/g, '.achievements[')
-        .replace(/\.outcomes\./g, '.achievements.')
-        .replace(/\.outcomes$/g, '.achievements');
+        .replace(/\.outcomes\[/g, '.outcomes[')
+        .replace(/\.outcomes\./g, '.outcomes.')
+        .replace(/\.outcomes$/g, '.outcomes');
 
     const resolveNeighborIndexIfNeeded = (root: unknown, path: string, afterValue: string): string => {
       try {
@@ -407,7 +415,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     };
 
     const handler = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ patchOps: Array<{ op: 'set'; path: string; value: string } | { op: 'insert'; path: string; value: string; index?: number } | { op: 'remove'; path: string; index?: number }> }>).detail;
+      const detail = (ev as CustomEvent<{ patchOps: Array<PatchOp | InsertOp | RemoveOp> }>).detail;
       if (!detail) return;
 
       // Helpers
@@ -415,12 +423,15 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         try {
           const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
           const segments = arrPath.split('.').filter(Boolean);
-          let cursor: unknown = root;
+          let cursor: PathCursor = root as PathCursor;
           for (let i = 0; i < segments.length; i++) {
             if (cursor == null || typeof cursor !== 'object') return undefined;
             const key = segments[i];
-            const rec = cursor as Record<string, unknown>;
-            cursor = rec[key];
+            if (typeof cursor === 'object' && cursor !== null) {
+              cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+            } else {
+              return undefined;
+            }
           }
           return cursor;
         } catch {
@@ -428,25 +439,29 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         }
       };
 
-      const getArrayInfo = (root: unknown, arrayPath: string): { container: unknown[] | null; lastKey: string | number | null } => {
+      const getArrayInfo = (root: unknown, arrayPath: string): PathNavigationResult => {
         try {
           const arrPath = arrayPath.replace(/\[(\d+)\]/g, '.$1');
           const segments = arrPath.split('.').filter(Boolean);
-          let cursor: unknown = root;
+          let cursor: PathCursor = root as PathCursor;
           for (let i = 0; i < segments.length - 1; i++) {
             if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
             const key = segments[i];
-            const rec = cursor as Record<string, unknown>;
-            if (!(key in rec)) return { container: null, lastKey: null };
-            cursor = rec[key];
+            if (typeof cursor === 'object' && cursor !== null && key in cursor) {
+              cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+            } else {
+              return { container: null, lastKey: null };
+            }
             if (cursor == null) return { container: null, lastKey: null };
           }
           if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
-          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
-          const val = rec[lastKey];
-          const container = Array.isArray(val) ? (val as unknown[]) : null;
-          return { container, lastKey };
+          if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+            const lastValue = (cursor as Record<string, unknown>)[lastKey];
+            const container = Array.isArray(lastValue) ? lastValue as ArrayContainer : null;
+            return { container, lastKey };
+          }
+          return { container: null, lastKey: null };
         } catch {
           return { container: null, lastKey: null };
         }
@@ -510,10 +525,10 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
               for (let i = 0; i < segments.length; i++) {
                 const key = segments[i];
                 if (i === segments.length - 1) {
-                  const currentValue = (cursor as Record<string, unknown>)?.[key as unknown as string];
+                  const currentValue = (cursor as Record<string, unknown>)?.[key as string];
                   diffs[op.path] = { before: String((currentValue ?? '') as unknown as string), after: op.value };
                 } else {
-                  const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as unknown as string];
+                  const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as string];
                   cursor = (typeof nextCursorVal === 'object' && nextCursorVal !== null) ? (nextCursorVal as Record<string, unknown>) : null;
                   if (cursor == null) break;
                 }
@@ -547,22 +562,28 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       if (op.op === 'insert') {
         const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: unknown = virtual as unknown;
+        let cursor: PathCursor = virtual as unknown as PathCursor;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (cursor == null || typeof cursor !== 'object') break;
-          const rec = cursor as Record<string, unknown>;
-          if (!(key in rec)) rec[key] = {};
-          cursor = rec[key];
+          if (typeof cursor === 'object' && cursor !== null && !(key in cursor)) {
+            (cursor as Record<string, unknown>)[key] = {};
+          }
+          if (typeof cursor === 'object' && cursor !== null) {
+            cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+          }
         }
-        if (cursor && typeof cursor === 'object') {
-          const rec = cursor as Record<string, unknown>;
-          const lastKey = segments[segments.length - 1];
-          if (!Array.isArray(rec[lastKey])) rec[lastKey] = [];
-          const container = rec[lastKey] as unknown[];
-          const idxMatch = op.path.match(/\[(\d+)\]$/);
-          const insertIndex = idxMatch ? Number(idxMatch[1]) : container.length;
-          container.splice(Math.max(0, Math.min(insertIndex, container.length)), 0, String(op.value ?? ''));
+        const lastKey = segments[segments.length - 1];
+        if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+          const lastValue = (cursor as Record<string, unknown>)[lastKey];
+          if (!Array.isArray(lastValue)) {
+            (cursor as Record<string, unknown>)[lastKey] = [];
+          }
+          const arrayContainer = (cursor as Record<string, unknown>)[lastKey] as ArrayContainer;
+          if (arrayContainer) {
+            const idxMatch = op.path.match(/\[(\d+)\]$/);
+            const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayContainer.length;
+            arrayContainer.splice(Math.max(0, Math.min(insertIndex, arrayContainer.length)), 0, String(op.value ?? ''));
+          }
         }
       } else if (op.op === 'remove') {
         // Do not mutate structure for remove during preview; keep the original item visible
@@ -580,11 +601,15 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       try {
         const arrPath = path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: unknown = root;
+        let cursor: PathCursor = root as PathCursor;
         for (let i = 0; i < segments.length; i++) {
           if (cursor == null) return undefined;
           const key = segments[i];
-          cursor = (cursor as Record<string, unknown>)?.[key as string];
+          if (typeof cursor === 'object' && cursor !== null) {
+            cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+          } else {
+            return undefined;
+          }
         }
         return cursor;
       } catch {
@@ -605,47 +630,53 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       } else if (op.op === 'insert') {
         const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: unknown = next as unknown;
+        let cursor: PathCursor = next as unknown as PathCursor;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (cursor == null || typeof cursor !== 'object') break;
-          const rec = cursor as Record<string, unknown>;
-          if (!(key in rec)) rec[key] = {};
-          cursor = rec[key];
+          if (typeof cursor === 'object' && cursor !== null && !(key in cursor)) {
+            (cursor as Record<string, unknown>)[key] = {};
+          }
+          if (typeof cursor === 'object' && cursor !== null) {
+            cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+          }
         }
-        if (cursor && typeof cursor === 'object') {
-          const rec = cursor as Record<string, unknown>;
-          const lastKey = segments[segments.length - 1];
-          if (!Array.isArray(rec[lastKey])) rec[lastKey] = [];
-          const container = rec[lastKey] as unknown[];
-          const idxMatch = op.path.match(/\[(\d+)\]$/);
-          const insertIndex = idxMatch ? Number(idxMatch[1]) : container.length;
-          container.splice(Math.max(0, Math.min(insertIndex, container.length)), 0, op.value);
+        const lastKey = segments[segments.length - 1];
+        if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+          const lastValue = (cursor as Record<string, unknown>)[lastKey];
+          if (!Array.isArray(lastValue)) {
+            (cursor as Record<string, unknown>)[lastKey] = [];
+          }
+          const arrayContainer = (cursor as Record<string, unknown>)[lastKey] as ArrayContainer;
+          if (arrayContainer) {
+            const idxMatch = op.path.match(/\[(\d+)\]$/);
+            const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayContainer.length;
+            arrayContainer.splice(Math.max(0, Math.min(insertIndex, arrayContainer.length)), 0, op.value);
+          }
         }
       } else if (op.op === 'remove') {
         const idxMatch = op.path.match(/\[(\d+)\]$/);
         const targetArrPath = idxMatch ? op.path.replace(/\[(\d+)\]$/, '') : op.path;
         const arrPath = targetArrPath.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
-        let cursor: unknown = next as unknown;
+        let cursor: PathCursor = next as unknown as PathCursor;
         for (let i = 0; i < segments.length - 1; i++) {
           const key = segments[i];
-          if (cursor == null || typeof cursor !== 'object') { cursor = null; break; }
-          const rec = cursor as Record<string, unknown>;
-          cursor = rec[key];
+          if (typeof cursor === 'object' && cursor !== null && !(key in cursor)) { cursor = null; break; }
+          if (typeof cursor === 'object' && cursor !== null) {
+            cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
+          }
           if (cursor == null) break;
         }
         if (cursor && typeof cursor === 'object') {
-          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
-          const val = rec[lastKey];
-          if (Array.isArray(val)) {
-            const container = val as unknown[];
-            const idxFromPath = idxMatch ? Number(idxMatch[1]) : -1;
-            const idxFromOp = typeof (op as { index?: number }).index === 'number' ? (op as { index?: number }).index as number : -1;
-            const removeIndex = idxFromOp >= 0 ? idxFromOp : idxFromPath;
-            if (removeIndex >= 0 && removeIndex < container.length) {
-              container.splice(removeIndex, 1);
+          if (lastKey in cursor) {
+            const lastValue = (cursor as Record<string, unknown>)[lastKey];
+            if (Array.isArray(lastValue)) {
+              const arrayContainer = lastValue as ArrayContainer;
+              const removeIndex = typeof op.index === 'number' ? op.index : (idxMatch ? Number(idxMatch[1]) : -1);
+              if (removeIndex >= 0 && removeIndex < (arrayContainer?.length ?? 0)) {
+                arrayContainer?.splice(removeIndex, 1);
+              }
             }
           }
         }

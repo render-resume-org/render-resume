@@ -11,7 +11,7 @@ interface Experience {
   title: string;
   company: string;
   period: string;
-  achievements: string[];
+  outcomes: string[];
 }
 
 interface ExperienceEditDialogProps {
@@ -48,7 +48,7 @@ export default function ExperienceEditDialog({
   };
 
   const addExperience = () => {
-    setExperience([...experience, { title: '', company: '', period: '', achievements: [] }]);
+    setExperience([...experience, { title: '', company: '', period: '', outcomes: [] }]);
   };
 
   const removeExperience = (index: number) => {
@@ -63,19 +63,19 @@ export default function ExperienceEditDialog({
 
   const addAchievement = (experienceIndex: number) => {
     const newExperience = [...experience];
-    newExperience[experienceIndex].achievements.push('');
+    newExperience[experienceIndex].outcomes.push('');
     setExperience(newExperience);
   };
 
   const removeAchievement = (experienceIndex: number, achievementIndex: number) => {
     const newExperience = [...experience];
-    newExperience[experienceIndex].achievements.splice(achievementIndex, 1);
+    newExperience[experienceIndex].outcomes.splice(achievementIndex, 1);
     setExperience(newExperience);
   };
 
   const updateAchievement = (experienceIndex: number, achievementIndex: number, achievement: string) => {
     const newExperience = [...experience];
-    newExperience[experienceIndex].achievements[achievementIndex] = achievement;
+    newExperience[experienceIndex].outcomes[achievementIndex] = achievement;
     setExperience(newExperience);
   };
 
@@ -151,7 +151,7 @@ export default function ExperienceEditDialog({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  工作成就
+                  工作成果
                 </label>
                 <Button
                   variant="outline"
@@ -159,11 +159,11 @@ export default function ExperienceEditDialog({
                   onClick={() => addAchievement(expIndex)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  新增成就
+                  新增成果
                 </Button>
               </div>
 
-              {exp.achievements.map((achievement, achievementIndex) => (
+              {exp.outcomes.map((achievement, achievementIndex) => (
                 <div key={achievementIndex} className="flex items-start space-x-2">
                   <Textarea
                     value={achievement}

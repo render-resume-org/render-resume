@@ -175,7 +175,7 @@ function PdfExperienceSection({ data, template }: { data: OptimizedResume['exper
                 <span className={cnPdf(font.sizes.body, colors.secondary)}> | {job.company} | {job.period}</span>
               </div>
               <ul className="space-y-1">
-                {job.achievements.map((achievement, achIndex) => (
+                {job.outcomes.map((achievement, achIndex) => (
                   <li key={achIndex} className={cnPdf(font.sizes.body, colors.secondary, 'list-disc list-inside')}>
                     {achievement}
                   </li>
@@ -207,7 +207,7 @@ function PdfExperienceSection({ data, template }: { data: OptimizedResume['exper
               <span className={cnPdf(font.sizes.caption, colors.secondary)}>{job.period}</span>
             </div>
             <ul className="space-y-1">
-              {job.achievements.map((achievement, achIndex) => (
+              {job.outcomes.map((achievement, achIndex) => (
                 <li key={achIndex} className={cnPdf(font.sizes.body, colors.secondary, 'flex items-start')}>
                   <span className={cnPdf(colors.primary, 'mr-2 mt-1')}>•</span>
                   {achievement}
@@ -270,9 +270,9 @@ function PdfProjectsSection({ data, template }: { data: OptimizedResume['project
               <div className="mb-1">
                 <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{project.name}</span>
               </div>
-              {project.achievements && project.achievements.length > 0 && (
+              {project.outcomes && project.outcomes.length > 0 && (
                 <ul className="mt-1 space-y-1">
-                  {project.achievements.map((achievement, achIndex) => (
+                  {project.outcomes.map((achievement, achIndex) => (
                     <li key={achIndex} className={cnPdf(font.sizes.body, colors.secondary, 'list-disc list-inside')}>
                       {achievement}
                     </li>
@@ -300,9 +300,9 @@ function PdfProjectsSection({ data, template }: { data: OptimizedResume['project
             <div className="flex justify-between items-start mb-2">
               <h3 className={cnPdf(font.sizes.body, colors.text, 'font-semibold')}>{project.name}</h3>
             </div>
-            {project.achievements && project.achievements.length > 0 && (
+            {project.outcomes && project.outcomes.length > 0 && (
               <ul className="space-y-1">
-                {project.achievements.map((achievement, achIndex) => (
+                {project.outcomes.map((achievement, achIndex) => (
                   <li key={achIndex} className={cnPdf(font.sizes.body, colors.secondary, 'flex items-start')}>
                     <span className={cnPdf(colors.primary, 'mr-2 mt-1')}>•</span>
                     {achievement}
@@ -340,9 +340,9 @@ function PdfEducationSection({ data, template }: { data: OptimizedResume['educat
                 <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{edu.degree}{edu.major && `, ${edu.major}`}</span>
                 <span className={cnPdf(font.sizes.body, colors.secondary)}> | {edu.school} | {edu.period}</span>
               </div>
-              {edu.details && edu.details.length > 0 && (
+              {edu.outcomes && edu.outcomes.length > 0 && (
                 <ul className="space-y-1">
-                  {edu.details.map((detail, detIndex) => (
+                  {edu.outcomes.map((detail, detIndex) => (
                     <li key={detIndex} className={cnPdf(font.sizes.body, colors.secondary, 'list-disc list-inside')}>
                       {detail}
                     </li>
@@ -374,9 +374,9 @@ function PdfEducationSection({ data, template }: { data: OptimizedResume['educat
               </div>
               <span className={cnPdf(font.sizes.caption, colors.secondary)}>{edu.period}</span>
             </div>
-            {edu.details && edu.details.length > 0 && (
+            {edu.outcomes && edu.outcomes.length > 0 && (
               <ul className="space-y-1">
-                {edu.details.map((detail, detIndex) => (
+                {edu.outcomes.map((detail, detIndex) => (
                   <li key={detIndex} className={cnPdf(font.sizes.body, colors.secondary, 'flex items-start')}>
                     <span className={cnPdf(colors.primary, 'mr-2 mt-1')}>•</span>
                     {detail}
