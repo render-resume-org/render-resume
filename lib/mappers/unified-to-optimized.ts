@@ -18,18 +18,29 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       title: a.title || '',
       organization: a.organization,
       period: a.period,
-      details: a.outcomes || [],
+      // Preserve first line as description followed by outcomes
+      details: [
+        ...(a.description ? [a.description] : []),
+        ...((a.outcomes || []))
+      ],
     })),
     experience: (unified.experience || []).map(exp => ({
       title: exp.title || '',
       company: exp.company || '',
       period: exp.period || '',
-      achievements: exp.outcomes || [],
+      achievements: [
+        ...(exp.description ? [exp.description] : []),
+        ...((exp.outcomes || []))
+      ],
     })),
     projects: (unified.projects || []).map(p => ({
       name: p.name || '',
       period: '',
-      achievements: p.outcomes?.length ? p.outcomes : (p.technologies || []),
+      // Prefer description + outcomes if present, otherwise fall back to technologies
+      achievements: [
+        ...(p.description ? [p.description] : []),
+        ...((p.outcomes || []).length ? (p.outcomes as string[]) : (p.technologies || []))
+      ],
     })),
     education: (unified.education || []).map(e => ({
       degree: e.degree || '',

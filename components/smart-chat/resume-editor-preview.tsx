@@ -1,6 +1,7 @@
 "use client";
 
 import ResumePreview from '@/components/preview/resume-preview';
+import ZoomToolbar from '@/components/smart-chat/zoom-toolbar';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { mapOptimizedToUnified } from '@/lib/mappers/optimized-to-unified';
 import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
@@ -29,6 +30,103 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const [previewOps, setPreviewOps] = useState<Array<PatchOp | InsertOp | RemoveOp> | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewDiffs, setPreviewDiffs] = useState<Record<string, { before?: string; after?: string }>>({});
+  const [scale, setScale] = useState<number>(1);
+  const [translate, setTranslate] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const dragOriginRef = useRef<{ startX: number; startY: number; startTx: number; startTy: number } | null>(null);
+  const mouseMoveHandlerRef = useRef<((e: MouseEvent) => void) | null>(null);
+  const mouseUpHandlerRef = useRef<(() => void) | null>(null);
+  const touchMoveHandlerRef = useRef<((e: TouchEvent) => void) | null>(null);
+  const touchEndHandlerRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (scale === 1 && (translate.x !== 0 || translate.y !== 0)) {
+      setTranslate({ x: 0, y: 0 });
+    }
+  }, [scale, translate.x, translate.y]);
+
+  const isInteractiveElement = (el: HTMLElement | null): boolean => {
+    let node: HTMLElement | null = el;
+    while (node) {
+      const tag = node.tagName.toLowerCase();
+      if (
+        tag === 'input' || tag === 'textarea' || tag === 'button' || tag === 'select' ||
+        node.isContentEditable || node.getAttribute('role') === 'textbox'
+      ) {
+        return true;
+      }
+      node = node.parentElement;
+    }
+    return false;
+  };
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isDraggingRef.current || !dragOriginRef.current) return;
+    const dx = e.clientX - dragOriginRef.current.startX;
+    const dy = e.clientY - dragOriginRef.current.startY;
+    setTranslate({ x: dragOriginRef.current.startTx + dx, y: dragOriginRef.current.startTy + dy });
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    dragOriginRef.current = null;
+    document.body.style.userSelect = '';
+    if (mouseMoveHandlerRef.current) {
+      window.removeEventListener('mousemove', mouseMoveHandlerRef.current);
+    }
+    if (mouseUpHandlerRef.current) {
+      window.removeEventListener('mouseup', mouseUpHandlerRef.current);
+    }
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return; // left button only
+    if (scale === 1) return;
+    const target = e.target as HTMLElement | null;
+    if (isInteractiveElement(target)) return;
+    isDraggingRef.current = true;
+    dragOriginRef.current = { startX: e.clientX, startY: e.clientY, startTx: translate.x, startTy: translate.y };
+    // avoid text selection while dragging
+    document.body.style.userSelect = 'none';
+    mouseMoveHandlerRef.current = handleMouseMove;
+    mouseUpHandlerRef.current = handleMouseUp;
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [scale, translate.x, translate.y, handleMouseMove, handleMouseUp]);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isDraggingRef.current || !dragOriginRef.current) return;
+    const t = e.touches[0];
+    if (!t) return;
+    e.preventDefault();
+    const dx = t.clientX - dragOriginRef.current.startX;
+    const dy = t.clientY - dragOriginRef.current.startY;
+    setTranslate({ x: dragOriginRef.current.startTx + dx, y: dragOriginRef.current.startTy + dy });
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    dragOriginRef.current = null;
+    if (touchMoveHandlerRef.current) {
+      window.removeEventListener('touchmove', touchMoveHandlerRef.current);
+    }
+    if (touchEndHandlerRef.current) {
+      window.removeEventListener('touchend', touchEndHandlerRef.current);
+    }
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (scale === 1) return;
+    const target = e.target as HTMLElement | null;
+    if (isInteractiveElement(target)) return;
+    const t = e.touches[0];
+    isDraggingRef.current = true;
+    dragOriginRef.current = { startX: t.clientX, startY: t.clientY, startTx: translate.x, startTy: translate.y };
+    touchMoveHandlerRef.current = handleTouchMove;
+    touchEndHandlerRef.current = handleTouchEnd;
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleTouchEnd);
+  }, [scale, translate.x, translate.y, handleTouchMove, handleTouchEnd]);
 
   useEffect(() => {
     try {
@@ -55,6 +153,13 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const handleUpdateOptimized = useCallback((next: OptimizedResume) => {
     persist(next);
   }, [persist]);
+
+  // Dispatch preview state changes to parent component
+  useEffect(() => {
+    document.dispatchEvent(new CustomEvent('resume-preview-state-change', { 
+      detail: { isPreviewing } 
+    }));
+  }, [isPreviewing]);
 
   const handleInlineChange = useCallback((path: string, next: unknown) => {
     if (!optimized) return;
@@ -200,7 +305,11 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const idx = Number(m[1]);
           const removeAt = payload.index;
           if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          updated.achievements![idx].details!.splice(removeAt, 1);
+          if (updated.achievements![idx].details!.length <= 1) {
+            updated.achievements![idx].details![0] = '';
+          } else {
+            updated.achievements![idx].details!.splice(removeAt, 1);
+          }
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -316,7 +425,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const segments = arrPath.split('.').filter(Boolean);
           let cursor: PathCursor = root as PathCursor;
           for (let i = 0; i < segments.length; i++) {
-            if (cursor == null) return undefined;
+            if (cursor == null || typeof cursor !== 'object') return undefined;
             const key = segments[i];
             if (typeof cursor === 'object' && cursor !== null) {
               cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
@@ -336,6 +445,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const segments = arrPath.split('.').filter(Boolean);
           let cursor: PathCursor = root as PathCursor;
           for (let i = 0; i < segments.length - 1; i++) {
+            if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
             const key = segments[i];
             if (typeof cursor === 'object' && cursor !== null && key in cursor) {
               cursor = (cursor as Record<string, unknown>)[key] as PathCursor;
@@ -344,6 +454,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
             }
             if (cursor == null) return { container: null, lastKey: null };
           }
+          if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
+          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
           if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
             const lastValue = (cursor as Record<string, unknown>)[lastKey];
@@ -513,6 +625,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         const currentVal = getByPath(optimized, op.path);
         const beforeVal = diffs?.before ?? '';
         const aiAfterVal = diffs?.after ?? op.value;
+        const aiAfterVal = diffs?.after ?? op.value;
         const userEdited = String(currentVal ?? '') !== String(beforeVal ?? '');
         const valueToApply = userEdited ? String(currentVal ?? '') : String(aiAfterVal ?? '');
         setByPath(next as unknown as Record<string, unknown>, op.path, valueToApply as unknown);
@@ -583,30 +696,58 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     setPreviewDiffs({});
   }, []);
 
+  // Listen for accept/reject actions from the preview panel
+  useEffect(() => {
+    const handleAcceptAction = () => {
+      if (isPreviewing) {
+        handleAcceptPreview();
+      }
+    };
+
+    const handleRejectAction = () => {
+      if (isPreviewing) {
+        handleRejectPreview();
+      }
+    };
+
+    document.addEventListener('resume-preview-accept', handleAcceptAction);
+    document.addEventListener('resume-preview-reject', handleRejectAction);
+
+    return () => {
+      document.removeEventListener('resume-preview-accept', handleAcceptAction);
+      document.removeEventListener('resume-preview-reject', handleRejectAction);
+    };
+  }, [isPreviewing, handleAcceptPreview, handleRejectPreview]);
+
   if (!optimized) return null;
 
   return (
     <div className="relative h-full">
-      <ResumePreview
-      resumeData={getPreviewedResume() || optimized}
-      template={template}
-      onUpdateResume={handleUpdateOptimized}
-      editable
-      analysisResult={null}
-      inlineEditable
-      onInlineChange={handleInlineChange}
-      previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
-      previewDiffs={isPreviewing ? previewDiffs : undefined}
-      />
-      {isPreviewing && (
-        <div className="pointer-events-none absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="pointer-events-auto backdrop-blur-sm bg-white/70 dark:bg-gray-900/60 shadow-lg rounded-xl px-3 py-2 flex items-center gap-2 border border-gray-200/60 dark:border-gray-700/60">
-            <span className="text-sm text-gray-700 dark:text-gray-200">預覽變更（段落覆寫）</span>
-            <button onClick={handleAcceptPreview} className="text-sm px-3 py-1 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white">接受</button>
-            <button onClick={handleRejectPreview} className="text-sm px-3 py-1 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100">拒絕</button>
+      <div className="w-full h-full overflow-visible">
+        <div className="sticky top-0 z-30 flex justify-end pointer-events-none">
+          <ZoomToolbar value={scale} onChange={setScale} className="m-3 pointer-events-auto" />
+        </div>
+        <div
+          className="flex justify-center pt-6 pb-4"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+          style={{ cursor: scale !== 1 ? (isDraggingRef.current ? 'grabbing' : 'grab') : 'default' }}
+        >
+          <div style={{ transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`, transformOrigin: 'top center' }}>
+            <ResumePreview
+              resumeData={getPreviewedResume() || optimized}
+              template={template}
+              onUpdateResume={handleUpdateOptimized}
+              editable
+              analysisResult={null}
+              inlineEditable
+              onInlineChange={handleInlineChange}
+              previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
+              previewDiffs={isPreviewing ? previewDiffs : undefined}
+            />
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

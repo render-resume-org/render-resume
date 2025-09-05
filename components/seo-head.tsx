@@ -27,7 +27,7 @@ interface GenerateMetadataProps {
 }
 
 export function generatePageMetadata({
-  title = "RenderResume - AI 履歷生成器",
+  title = "RenderResume - AI 履歷編輯器",
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構，為求職者提供個性化履歷優化建議。",
   keywords = [],
   canonicalUrl,
@@ -55,7 +55,7 @@ export function generatePageMetadata({
   return {
     title: {
       default: title,
-      template: "%s | RenderResume - AI 履歷生成器"
+      template: "%s | RenderResume - AI 履歷編輯器"
     },
     description,
     keywords: allKeywords,
@@ -132,7 +132,7 @@ export function generatePageMetadata({
 
 // React component for client-side SEO additions
 export function SEOHead({
-  title = "RenderResume - AI 履歷生成器",
+  title = "RenderResume - AI 履歷編輯器",
   description = "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型。",
   keywords = [],
   canonicalUrl,

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface InlineTextProps {
   text: string;
@@ -21,8 +21,11 @@ interface InlineTextProps {
 
 export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline' }: InlineTextProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
+  const containerRef = useRef<HTMLSpanElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(text);
+  const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
+  const ignoreNextBlurRef = useRef(false);
 
   // Update local text when prop changes (but not during editing)
   useEffect(() => {
@@ -31,12 +34,100 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   }, [text, isEditing, localText]);
 
-  // Sync local text with DOM when not editing
+  // Update preview editable text when previewReplaceWith changes
   useEffect(() => {
-    if (ref.current && !isEditing && ref.current.innerText !== localText) {
-      ref.current.innerText = localText || '';
+    if (previewReplaceWith !== undefined) {
+      // Only sync when prop changes meaningfully to avoid overwriting user edits on blur
+      setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
     }
-  }, [localText, isEditing]);
+  }, [previewReplaceWith]);
+
+  // In preview mode, ensure no stray text nodes (e.g., unhighlighted duplicates) remain inside the container
+  useEffect(() => {
+    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    const el = containerRef.current;
+    if (!isPreviewMode || !el) return;
+    // Remove any direct text nodes under the container to avoid duplicated base text
+    try {
+      const childNodes = Array.from(el.childNodes);
+      for (const node of childNodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          el.removeChild(node);
+        }
+      }
+    } catch {}
+  }, [highlightType, previewOriginal, previewReplaceWith]);
+
+  // Preserve cursor position when syncing DOM content
+  const preserveCursorAndSyncContent = useCallback((element: HTMLElement, newContent: string) => {
+    if (element.innerText === newContent) return; // No need to update
+
+    // Save cursor position
+    const selection = window.getSelection();
+    let cursorOffset = 0;
+    if (selection && selection.rangeCount > 0 && element.contains(selection.anchorNode)) {
+      const range = selection.getRangeAt(0);
+      const preRange = range.cloneRange();
+      preRange.selectNodeContents(element);
+      preRange.setEnd(range.startContainer, range.startOffset);
+      cursorOffset = preRange.toString().length;
+    }
+
+    // Update content
+    element.innerText = newContent;
+
+    // Restore cursor position
+    if (isEditing && document.activeElement === element) {
+      const range = document.createRange();
+      const walker = document.createTreeWalker(
+        element,
+        NodeFilter.SHOW_TEXT
+      );
+      
+      let currentOffset = 0;
+      let targetNode: Node = element;
+      let targetOffset = 0;
+
+      let node;
+      while (node = walker.nextNode()) {
+        const nodeLength = node.textContent?.length || 0;
+        if (currentOffset + nodeLength >= cursorOffset) {
+          targetNode = node;
+          targetOffset = cursorOffset - currentOffset;
+          break;
+        }
+        currentOffset += nodeLength;
+      }
+
+      try {
+        range.setStart(targetNode, Math.min(targetOffset, targetNode.textContent?.length || 0));
+        range.collapse(true);
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      } catch {
+        // Fallback to end of content if cursor restoration fails
+        range.selectNodeContents(element);
+        range.collapse(false);
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+    }
+  }, [isEditing]);
+
+  // Sync local text with DOM when not editing, preserving cursor position
+  useEffect(() => {
+    if (ref.current && !isEditing) {
+      const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+      const targetContent = isPreviewMode ? previewEditableText : localText;
+      preserveCursorAndSyncContent(ref.current, targetContent || '');
+    }
+  }, [localText, previewEditableText, isEditing, highlightType, previewOriginal, previewReplaceWith, preserveCursorAndSyncContent]);
 
   useEffect(() => {
     const handler = (ev: Event) => {
@@ -61,7 +152,13 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (!ref.current) return;
 
     const newText = ref.current.innerText;
-    setLocalText(newText);
+    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    
+    if (isPreviewMode) {
+      setPreviewEditableText(newText);
+    } else {
+      setLocalText(newText);
+    }
     onChange?.(newText);
   };
 
@@ -71,10 +168,24 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   const handleBlur = () => {
     setIsEditing(false);
+    if (ignoreNextBlurRef.current) {
+      // Skip committing changes if this blur is caused by a bullet removal
+      // Reset flag in the next tick to avoid swallowing subsequent blurs
+      setTimeout(() => { ignoreNextBlurRef.current = false; }, 0);
+      return;
+    }
     // Ensure the final text is synced
-    if (ref.current && ref.current.innerText !== localText) {
+    if (ref.current) {
       const finalText = ref.current.innerText;
-      setLocalText(finalText);
+      // Avoid no-op updates when content didn't change
+      if (finalText === text) return;
+      const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+      
+      if (isPreviewMode) {
+        setPreviewEditableText(finalText);
+      } else {
+        setLocalText(finalText);
+      }
       onChange?.(finalText);
     }
   };
@@ -128,6 +239,16 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
+  const triggerRemoveBullet = () => {
+    ignoreNextBlurRef.current = true;
+    try {
+      onRemoveBullet?.();
+    } finally {
+      // Reset after the DOM/react updates have occurred
+      setTimeout(() => { ignoreNextBlurRef.current = false; }, 0);
+    }
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
 
@@ -166,7 +287,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (isBullet && e.key === 'Backspace') {
       if (isCaretAtStart() && (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '')) {
         e.preventDefault();
-        onRemoveBullet?.();
+        triggerRemoveBullet();
         return;
       }
     }
@@ -175,7 +296,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   return (
     <>
       {(highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined) ? (
-        <span className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId}>
+        <span ref={containerRef} className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId}>
           <span className={cn('cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md')}>
             {previewOriginal}
           </span>
@@ -192,9 +313,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
               data-inline-group={groupId}
               className={cn('cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none')}
               title={'Click to edit'}
-            >
-              {previewReplaceWith}
-            </span>
+            />
           )}
         </span>
       ) : (
@@ -214,9 +333,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
             className
           )}
           title={inlineEditable ? 'Click to edit' : undefined}
-        >
-          {text}
-        </span>
+        />
       )}
     </>
   );

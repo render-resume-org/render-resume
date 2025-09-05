@@ -5,7 +5,7 @@ import { generateCreateResumeSystemPrompt } from './create-resume-prompt';
 
 export { generateBaseSystemPrompt } from './base-system-prompt';
 export { generateCreateResumeSystemPrompt } from './create-resume-prompt';
-export { generateSmartChatSystemPrompt } from './smart-chat-prompt';
+export { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from './smart-chat-prompt';
 
 /**
  * 根據服務類型生成對應的系統提示

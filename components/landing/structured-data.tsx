@@ -6,7 +6,7 @@ import { useEffect } from "react";
 const homepageStructuredData = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  "name": "RenderResume - AI 履歷生成器",
+  "name": "RenderResume - AI 履歷編輯器",
   "description": "使用 AI 技術打造專業履歷和作品集。基於 Fortune 500 企業標準的六維度評估模型，採用 STAR 原則架構。",
   "url": typeof window !== 'undefined' ? window.location.origin : '',
   "applicationCategory": "BusinessApplication",

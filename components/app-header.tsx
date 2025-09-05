@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Menu, TestTubeDiagonal, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ThemeSwitcher } from "./theme-switcher";
 import { UserDropdown } from "./user-dropdown";
@@ -20,10 +20,22 @@ const AppHeader = () => {
   const { user, isAuthenticated, signOut, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const headerRef = useRef<HTMLElement | null>(null);
   
   // Prevent hydration mismatch by only rendering auth-dependent content after mount
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  // Expose header height as CSS variable for viewport calculations
+  useEffect(() => {
+    const updateHeaderHeight = () => {
+      const h = headerRef.current?.getBoundingClientRect().height || 0;
+      document.documentElement.style.setProperty('--app-header-height', `${h}px`);
+    };
+    updateHeaderHeight();
+    window.addEventListener('resize', updateHeaderHeight);
+    return () => window.removeEventListener('resize', updateHeaderHeight);
   }, []);
 
   const handleSignOut = async () => {
@@ -51,7 +63,7 @@ const AppHeader = () => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+    <header ref={headerRef} className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       <div className="container mx-auto px-3 sm:px-4 py-3">
         <div className="flex items-center justify-between min-w-0">
           {/* Brand Logo & Name & Navigation */}
@@ -91,7 +103,7 @@ const AppHeader = () => {
                   </Tooltip>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">
-                  懶得履歷．AI 履歷生成器
+                  懶得履歷．AI 履歷編輯器
                 </p>
               </div>
             </div>

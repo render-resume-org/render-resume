@@ -3,7 +3,9 @@ import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { AnimatePresence, motion } from "framer-motion";
 import { Copy, Trash2 } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { SuggestionRecord, SuggestionTemplate } from "./types";
+
+import { parsePatchOpsToHumanReadable } from "@/lib/utils/patch-ops-parser";
+import { PatchOp, SuggestionRecord, SuggestionTemplate } from "./types";
 
 const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
   if (!status) return 'bg-transparent';
@@ -29,8 +31,8 @@ const getStatusText = (status: SuggestionTemplate['status']) => {
 };
 
 interface SuggestionCardProps {
-  suggestion?: (SuggestionRecord & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
-  template?: (SuggestionTemplate & { patchOps?: Array<{ op: 'set'; path: string; value: string }> });
+  suggestion?: (SuggestionRecord & { patchOps?: PatchOp[] });
+  template?: (SuggestionTemplate & { patchOps?: PatchOp[] });
   onQuote: (item: SuggestionRecord | SuggestionTemplate) => void;
   onRemove: (id: string) => void;
   forceExpand?: boolean; // 新增
@@ -166,15 +168,19 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion, template, o
               <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
                 {description}
               </p>
-              {/* Show patchOps debug display for both suggestion and template */}
+              {/* Show patchOps human readable display for both suggestion and template */}
               {((!isTemplate && suggestion?.patchOps && suggestion.patchOps.length > 0) || 
                 (isTemplate && template?.patchOps && template.patchOps.length > 0)) && (
                 <div className="mt-3 text-xs">
                   <details className="group">
-                    <summary className="cursor-pointer select-none text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">查看 patchOps</summary>
-                    <pre className="mt-2 p-2 rounded bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 whitespace-pre-wrap break-words max-h-48 overflow-y-auto">
-{JSON.stringify(isTemplate ? template?.patchOps : suggestion?.patchOps, null, 2)}
-                    </pre>
+                    <summary className="cursor-pointer select-none text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">查看操作指示</summary>
+                    <div className="mt-2 p-2 rounded bg-gray-50 dark:bg-gray-900/40 text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto">
+                      {parsePatchOpsToHumanReadable(isTemplate ? template?.patchOps || [] : suggestion?.patchOps || []).map((instruction, index) => (
+                        <div key={index} className="mb-1 text-sm leading-relaxed">
+                          {instruction}
+                        </div>
+                      ))}
+                    </div>
                   </details>
                 </div>
               )}
