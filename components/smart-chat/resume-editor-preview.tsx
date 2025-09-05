@@ -169,37 +169,37 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'experience') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.experience[idx].achievements.splice(insertAt, 0, '');
+          updated.experience[idx].outcomes.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.experience[idx].achievements.splice(removeAt, 1);
+          updated.experience[idx].outcomes.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^experience\[(\d+)\]\.(title|company|period|achievements\[(\d+)\])$/);
+        const m = payload.path.match(/^experience\[(\d+)\]\.(title|company|period|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('achievements') && achIdx != null) {
-            updated.experience[idx].achievements[achIdx] = String(payload.value ?? '');
+          if (field.startsWith('outcomes') && achIdx != null) {
+            updated.experience[idx].outcomes[achIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.experience[idx].title = String(payload.value ?? '');
           } else if (field === 'company') {
@@ -212,37 +212,37 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'projects') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.projects[idx].achievements.splice(insertAt, 0, '');
+          updated.projects[idx].outcomes.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.achievements$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.projects[idx].achievements.splice(removeAt, 1);
+          updated.projects[idx].outcomes.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-achievements`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^projects\[(\d+)\]\.(name|period|achievements\[(\d+)\])$/);
+        const m = payload.path.match(/^projects\[(\d+)\]\.(name|period|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('achievements') && achIdx != null) {
-            updated.projects[idx].achievements[achIdx] = String(payload.value ?? '');
+          if (field.startsWith('outcomes') && achIdx != null) {
+            updated.projects[idx].outcomes[achIdx] = String(payload.value ?? '');
           } else if (field === 'name') {
             updated.projects[idx].name = String(payload.value ?? '');
           } else if (field === 'period') {
@@ -270,9 +270,9 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const parts = text.split(',').map(s => s.trim());
           updated.education[idx].degree = parts[0] || '';
           updated.education[idx].major = parts[1] || '';
-        } else if (/^education\[\d+\]\.details$/.test(payload.path)) {
+        } else if (/^education\[\d+\]\.outcomes$/.test(payload.path)) {
           const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          updated.education[idx].details = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
+          updated.education[idx].outcomes = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
         } else {
           const m = payload.path.match(/^education\[(\d+)\]\.(school|period|honor)$/);
           if (m) {
@@ -287,32 +287,32 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'achievements') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.details$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          updated.achievements![idx].details!.splice(insertAt, 0, '');
+          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+          updated.achievements![idx].outcomes!.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: insertAt, position: 'start' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: insertAt, position: 'start' } }));
           }, 0);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.details$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          if (!updated.achievements![idx].details) updated.achievements![idx].details = [];
-          if (updated.achievements![idx].details!.length <= 1) {
-            updated.achievements![idx].details![0] = '';
+          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+          if (updated.achievements![idx].outcomes!.length <= 1) {
+            updated.achievements![idx].outcomes![0] = '';
           } else {
-            updated.achievements![idx].details!.splice(removeAt, 1);
+            updated.achievements![idx].outcomes!.splice(removeAt, 1);
           }
           persist(updated);
           setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-details`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
           }, 0);
           return;
         }
@@ -323,7 +323,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const field = m[2];
           const detIdx = m[3] ? Number(m[3]) : undefined;
           if (field.startsWith('details') && detIdx != null) {
-            updated.achievements![idx].details![detIdx] = String(payload.value ?? '');
+            updated.achievements![idx].outcomes![detIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.achievements![idx].title = String(payload.value ?? '');
           } else if (field === 'period') {
@@ -370,9 +370,9 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   useEffect(() => {
     const normalizePath = (path: string) =>
       path
-        .replace(/\.outcomes\[/g, '.achievements[')
-        .replace(/\.outcomes\./g, '.achievements.')
-        .replace(/\.outcomes$/g, '.achievements');
+        .replace(/\.outcomes\[/g, '.outcomes[')
+        .replace(/\.outcomes\./g, '.outcomes.')
+        .replace(/\.outcomes$/g, '.outcomes');
 
     const resolveNeighborIndexIfNeeded = (root: unknown, path: string, afterValue: string): string => {
       try {

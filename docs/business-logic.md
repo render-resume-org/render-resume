@@ -12,6 +12,7 @@
 4. [評分等級制度](#評分等級制度)
 5. [定價與訂閱模式](#定價與訂閱模式)
 6. [AI 分析流程](#ai-分析流程)
+7. [Smart Chat 智能問答系統](#smart-chat-智能問答系統)
 
 ---
 
@@ -570,6 +571,210 @@ interface Score {
 2. **一致性檢查**: 確保評分標準的一致性
 3. **偏差檢測**: 檢測和修正 AI 偏見
 4. **透明度**: 提供評分理由的詳細說明
+
+---
+
+## Smart Chat 智能問答系統
+
+Smart Chat 是 RenderResume 的核心互動功能，提供基於 AI 的履歷優化對話體驗。
+
+### 🎯 系統目標
+
+#### 核心使命
+- **深度優化**: 基於 STAR 原則進行深度履歷優化
+- **個性化指導**: 根據用戶背景提供客製化建議
+- **即時整合**: 建議可立即應用到履歷編輯器
+- **專業體驗**: 模擬專業履歷顧問的互動體驗
+
+#### 業務價值
+- **提升用戶參與度**: 互動式體驗增加用戶黏性
+- **提高履歷品質**: 深度追問確保履歷完整性
+- **降低使用門檻**: 引導式對話降低用戶認知負擔
+- **建立專業形象**: 專業顧問角色提升產品可信度
+
+### 🤖 AI 角色設計
+
+#### Remo 博士 - 企鵝履歷顧問
+- **角色定位**: 專業且親切的企鵝履歷顧問博士
+- **專業背景**: 人力資源與職涯規劃博士學位
+- **溝通風格**: 友善、鼓舞、略帶可愛語助詞
+- **個性特質**: 平衡專業與親和力，避免過度賣萌
+
+#### 個性化稱呼系統
+```typescript
+// 根據用戶資訊提供適當稱呼
+const personalAddressing = profileInfo?.name 
+  ? `用戶的姓名是「${profileInfo.name}」，請根據這個姓名自行判斷最合適、親暱但不冒犯的稱呼方式。基於其專業頭銜「${profileInfo.title || '專業人士'}」提供相應的建議。`
+  : '由於未獲得用戶姓名，可以用「你」或「夥伴」等親切稱呼。';
+```
+
+### 📋 對話流程設計
+
+#### 六階段對話模型
+
+1. **[STAGE:TOPIC_INTEREST]** 話題興趣確認
+   - 確認用戶對新主題的興趣和需求
+   - 不產生 excerpt，僅進行興趣確認
+
+2. **[STAGE:TOPIC_OPEN]** 主題開啟
+   - 正式進入主題討論
+   - **必須產生 excerpt** 摘錄履歷段落
+   - 簡要說明該段落重點
+
+3. **[STAGE:FOLLOWUP]** 深入追問
+   - 基於 STAR 原則逐步追問
+   - 每次僅問一個明確問題
+   - 不得重複履歷已有資訊
+
+4. **[STAGE:INFO_CHECK]** 資訊補全檢查
+   - 檢查是否已具備 STAR 所需資訊
+   - 若已齊全則不可重複追問
+
+5. **[STAGE:SUGGESTION]** 建議產生
+   - 當資訊充分時產生結論性建議
+   - 包含具體的 patchOps 操作
+   - 進行六維度分類
+
+6. **[STAGE:TOPIC_TRANSITION]** 話題切換
+   - 總結前一話題並產生 suggestion
+   - 插入 `<NEXT_TOPIC>` token
+   - 開啟新話題引導
+
+#### 話題切換規則
+```typescript
+// 強制流程：每次切換話題必須依序執行
+1. 先用自然語言總結前一話題建議結論（切換時必須產生 suggestion）
+2. 必須插入 <NEXT_TOPIC> token（此 token 絕不可遺漏）
+3. token 後必須才開始新話題開頭引導並確認用戶興趣
+4. 新話題必須產生 excerpt
+```
+
+### 🔄 Issues 狀態管理系統
+
+#### 三種狀態類型
+- **in_progress**: 進行中的問題（最高優先處理）
+- **pending**: 待處理的問題
+- **completed**: 已完成的問題
+
+#### 狀態轉換規則
+```typescript
+// excerpt 觸發 in_progress
+if (aiExcerpt && aiExcerpt.issue_id) {
+  // 將其他 in_progress 關閉為 pending
+  // 設定目標 issue 為 in_progress
+}
+
+// suggestion 觸發 completed
+if (aiSuggestion) {
+  // 關閉唯一 active 的 issue
+  // 標記為 completed 並保存建議
+}
+```
+
+#### 優先級管理
+- **最高優先**: 只要存在 in_progress 狀態，嚴禁切換話題
+- **狀態同步**: 確保全域僅有一個 active（in_progress）issue
+- **自動排序**: 狀態變動的 issue 自動移到最前面
+
+### 📝 結構化回應系統
+
+#### ChatResponse 格式
+```typescript
+interface ChatResponse {
+  message: string;                    // AI 回覆內容（3-4句話）
+  suggestion?: {                     // 履歷優化建議
+    title: string;                   // 建議標題
+    description: string;             // 建議細節（包含所有時間、職責、數據等）
+    category: string;                // 六維度分類之一
+    patchOps?: PatchOp[];            // 具體修改操作
+  };
+  quickResponses: string[];          // 快速回覆選項（至少4個）
+  excerpt?: {                       // 履歷段落摘錄
+    title: string;                   // 段落標題（15字內）
+    content: string;                 // 摘錄內容（中文，用 \n 換行）
+    source: string;                  // 來源分類（工作經驗/專案經驗/技能專長/教育背景）
+    issue_id?: string;               // 關聯的 issue ID
+  };
+}
+```
+
+#### PatchOps 操作系統
+```typescript
+interface PatchOp {
+  op: 'set' | 'insert' | 'remove';
+  path: string;                      // 履歷路徑（如 'experience[0].achievements[2]'）
+  value?: string;                    // 新內容（set/insert 時使用）
+  index?: number;                    // 插入/刪除位置（可選）
+}
+```
+
+#### 操作範例
+```typescript
+// set: 替換整個段落
+{ "op": "set", "path": "experience[0].achievements[2]", "value": "完整的新段落內容" }
+
+// insert: 在陣列中插入新項目
+{ "op": "insert", "path": "experience[0].achievements", "value": "新增列點", "index": 3 }
+
+// remove: 刪除指定項目
+{ "op": "remove", "path": "experience[0].achievements[2]" }
+```
+
+### 🎨 用戶體驗設計
+
+#### 雙面板布局
+- **左側**: 聊天對話面板
+- **右側**: 履歷編輯器預覽
+- **即時同步**: 建議可立即應用到履歷
+
+#### 快速回覆系統
+- **具體答案**: 提供與履歷內容密切相關的具體選項
+- **禁止抽象**: 不得提供「還有嗎」、「下一題」等抽象選項
+- **最少4個**: 每次必須生成至少4個具體答案
+
+#### 檔案上傳支援
+- **多格式**: 支援圖片、PDF 檔案上傳
+- **視覺分析**: 使用 GPT-4 Vision 進行內容分析
+- **檔案管理**: 自動處理預覽和清理
+
+### 🔒 品質控制機制
+
+#### 重複檢查系統
+```typescript
+// 檢查對話歷程，避免重複建議
+const duplicateCheckPrompt = existingSuggestions.length > 0
+  ? `以下是本次對話中已經產出的建議，絕對不可產出高度相似的建議：\n${existingSuggestions
+      .map((suggestion, index) => `${index + 1}. ${suggestion}`)
+      .join('\n')}`
+  : '檢查對話歷程，避免在同一履歷段落多次摘錄或給出重複建議。';
+```
+
+#### 資訊充分性判斷
+- **重點不是輪數**: 而是資訊是否足夠具體、完整
+- **嚴格判斷**: 產生 suggestion 前必須確保所有細節明確
+- **禁止臆測**: 只要有任何資訊不明確，必須繼續追問
+
+#### 格式驗證
+- **JSON 格式**: 嚴格遵循回應格式要求
+- **欄位驗證**: 驗證必要欄位存在且格式正確
+- **錯誤處理**: 提供 fallback 機制處理解析失敗
+
+### 📊 業務指標
+
+#### 用戶參與度指標
+- **對話輪數**: 平均每用戶對話輪數
+- **建議採納率**: 用戶採納 AI 建議的比例
+- **話題完成率**: 完整完成話題討論的比例
+
+#### 履歷品質指標
+- **STAR 完整度**: 履歷中 STAR 要素的完整程度
+- **評分提升**: 優化前後的六維度評分變化
+- **用戶滿意度**: 對 Smart Chat 體驗的滿意度
+
+#### 系統效能指標
+- **回應時間**: AI 回應的平均時間
+- **成功率**: 成功解析 AI 回應的比例
+- **錯誤率**: 系統錯誤的發生頻率
 
 ---
 

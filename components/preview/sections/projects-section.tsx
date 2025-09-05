@@ -72,22 +72,22 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                    </span>
                  )}
               </div>
-              {project.achievements && project.achievements.length > 0 && (
+              {project.outcomes && project.outcomes.length > 0 && (
                 <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'mt-1 list-disc list-inside')}>
-                   {project.achievements.map((achievement, achievementIndex) => (
+                   {project.outcomes.map((achievement, achievementIndex) => (
                      <li key={achievementIndex}>
                        {inlineEditable ? (
                          <InlineText
                            text={achievement}
                            inlineEditable
                            isBullet
-                           groupId={`projects-${index}-achievements`}
-                           highlightType={highlightForPath?.(`projects[${index}].achievements[${achievementIndex}]`)}
-                           previewOriginal={getPreviewValueForPath?.(`projects[${index}].achievements[${achievementIndex}]`)?.before}
-                           previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].achievements[${achievementIndex}]`)?.after}
-                           onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].achievements`, index: achievementIndex })}
-                           onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].achievements`, index: achievementIndex })}
-                           onChange={(t) => onInlineChange?.({ path: `projects[${index}].achievements[${achievementIndex}]`, value: t })}
+                           groupId={`projects-${index}-outcomes`}
+                           highlightType={highlightForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)}
+                           previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.before}
+                           previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.after}
+                           onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].outcomes`, index: achievementIndex })}
+                           onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, index: achievementIndex })}
+                           onChange={(t) => onInlineChange?.({ path: `projects[${index}].outcomes[${achievementIndex}]`, value: t })}
                          />
                        ) : (
                          highlightText(achievement, annotations)
@@ -148,22 +148,22 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                  )}
               </div>
             </div>
-               {project.achievements && project.achievements.length > 0 && (
+               {project.outcomes && project.outcomes.length > 0 && (
                <ul className={styles.achievementList}>
-                 {project.achievements.map((achievement, achIndex) => (
+                 {project.outcomes.map((achievement, achIndex) => (
                    <li key={achIndex} className={styles.achievement}>
                      {inlineEditable ? (
                        <InlineText
                          text={achievement}
                          inlineEditable
                          isBullet
-                         groupId={`projects-${index}-achievements`}
-                         highlightType={highlightForPath?.(`projects[${index}].achievements[${achIndex}]`)}
-                         previewOriginal={getPreviewValueForPath?.(`projects[${index}].achievements[${achIndex}]`)?.before}
-                         previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].achievements[${achIndex}]`)?.after}
-                         onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].achievements`, index: achIndex })}
-                         onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].achievements`, index: achIndex })}
-                         onChange={(t) => onInlineChange?.({ path: `projects[${index}].achievements[${achIndex}]`, value: t })}
+                         groupId={`projects-${index}-outcomes`}
+                         highlightType={highlightForPath?.(`projects[${index}].outcomes[${achIndex}]`)}
+                         previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.before}
+                         previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.after}
+                         onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].outcomes`, index: achIndex })}
+                         onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, index: achIndex })}
+                         onChange={(t) => onInlineChange?.({ path: `projects[${index}].outcomes[${achIndex}]`, value: t })}
                        />
                      ) : (
                        highlightText(achievement, annotations)

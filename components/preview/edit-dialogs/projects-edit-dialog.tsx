@@ -26,7 +26,7 @@ export default function ProjectsEditDialog({
     setProjects([...projects, {
       name: '',
       period: '',
-      achievements: [],
+      outcomes: [],
     }]);
   };
 
@@ -42,19 +42,19 @@ export default function ProjectsEditDialog({
 
   const addAchievement = (projectIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].achievements.push('');
+    updatedProjects[projectIndex].outcomes.push('');
     setProjects(updatedProjects);
   };
 
   const removeAchievement = (projectIndex: number, achievementIndex: number) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].achievements.splice(achievementIndex, 1);
+    updatedProjects[projectIndex].outcomes.splice(achievementIndex, 1);
     setProjects(updatedProjects);
   };
 
   const updateAchievement = (projectIndex: number, achievementIndex: number, value: string) => {
     const updatedProjects = [...projects];
-    updatedProjects[projectIndex].achievements[achievementIndex] = value;
+    updatedProjects[projectIndex].outcomes[achievementIndex] = value;
     setProjects(updatedProjects);
   };
 
@@ -110,9 +110,9 @@ export default function ProjectsEditDialog({
               </div>
 
               <div>
-                <Label>主要成就</Label>
+                <Label>主要成果</Label>
                 <div className="space-y-2">
-                  {project.achievements.map((achievement, achievementIndex) => (
+                  {project.outcomes.map((achievement, achievementIndex) => (
                     <div key={achievementIndex} className="flex items-center space-x-2">
                       <Textarea
                         value={achievement}
@@ -137,7 +137,7 @@ export default function ProjectsEditDialog({
                     className="w-full"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    新增成就
+                    新增成果
                   </Button>
                 </div>
               </div>

@@ -80,20 +80,20 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                   )}
                 </p>
               )}
-              {a.details && a.details.length > 0 && (
+              {a.outcomes && a.outcomes.length > 0 && (
                 <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'list-disc list-inside mt-1')}>
-                  {a.details.map((d, idx) => (
+                  {a.outcomes.map((d, idx) => (
                     <li key={idx}>
                       {inlineEditable ? (
                         <InlineText 
                           text={d} 
                           inlineEditable 
                           isBullet 
-                          groupId={`achievements-${i}-details`} 
-                          highlightType={highlightForPath?.(`achievements[${i}].details[${idx}]`, idx)}
-                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].details`, index: idx })} 
-                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].details`, index: idx })} 
-                          onChange={(t) => onInlineChange?.({ path: `achievements[${i}].details[${idx}]`, value: t })} 
+                          groupId={`achievements-${i}-outcomes`} 
+                          highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`, idx)}
+                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} 
+                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} 
+                          onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} 
                         />
                       ) : (
                         d
@@ -149,12 +149,12 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                 )}
               </p>
             )}
-            {a.details && a.details.length > 0 && (
+            {a.outcomes && a.outcomes.length > 0 && (
               <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'list-disc list-inside mt-1')}>
-                {a.details.map((d, idx) => (
+                {a.outcomes.map((d, idx) => (
                   <li key={idx}>
                     {inlineEditable ? (
-                      <InlineText text={d} inlineEditable isBullet groupId={`achievements-${i}-details`} onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].details`, index: idx })} onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].details`, index: idx })} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].details[${idx}]`, value: t })} />
+                      <InlineText text={d} inlineEditable isBullet groupId={`achievements-${i}-outcomes`} onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} />
                     ) : (
                       d
                     )}

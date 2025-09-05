@@ -42,7 +42,7 @@ function parsePath(path: string): { humanReadable: string } {
     .replace(/^title$/, '職位標題')
     .replace(/^company$/, '公司名稱')
     .replace(/^duration$/, '工作期間')
-    .replace(/^achievements$/, '成就項目')
+    .replace(/^achievements$/, '（舊）成就項目')
     .replace(/^outcomes$/, '列點')
     .replace(/^responsibilities$/, '職責描述')
     .replace(/^details$/, '詳細資訊')
