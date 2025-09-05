@@ -9,7 +9,7 @@ import { calculateStringSimilarity } from '@/lib/similarity';
 import type { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResume } from '@/lib/types/resume-unified';
 import { setByPath } from '@/lib/utils/set-by-path';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ArrayContainer,
   InsertOp,
@@ -455,7 +455,6 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
             if (cursor == null) return { container: null, lastKey: null };
           }
           if (cursor == null || typeof cursor !== 'object') return { container: null, lastKey: null };
-          const rec = cursor as Record<string, unknown>;
           const lastKey = segments[segments.length - 1];
           if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
             const lastValue = (cursor as Record<string, unknown>)[lastKey];
@@ -624,7 +623,6 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         const diffs = previewDiffs[op.path];
         const currentVal = getByPath(optimized, op.path);
         const beforeVal = diffs?.before ?? '';
-        const aiAfterVal = diffs?.after ?? op.value;
         const aiAfterVal = diffs?.after ?? op.value;
         const userEdited = String(currentVal ?? '') !== String(beforeVal ?? '');
         const valueToApply = userEdited ? String(currentVal ?? '') : String(aiAfterVal ?? '');

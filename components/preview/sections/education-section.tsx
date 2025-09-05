@@ -80,17 +80,17 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                    )}
                  </span>
               </div>
-              {education.details && education.details.length > 0 && (
+              {education.outcomes && education.outcomes.length > 0 && (
                 <p className={cn(font.sizes.caption, 'text-black mt-1')}>
                   {inlineEditable ? (
                     <InlineText 
-                      text={education.details.join(', ')} 
+                      text={education.outcomes.join(', ')} 
                       inlineEditable 
-                      highlightType={highlightForPath?.(`education[${index}].details`)}
-                      onChange={(t) => onInlineChange?.({ path: `education[${index}].details`, value: t })} 
+                      highlightType={highlightForPath?.(`education[${index}].outcomes`)}
+                      onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes`, value: t })} 
                     />
                   ) : (
-                    highlightText(education.details.join(', '), annotations)
+                    highlightText(education.outcomes.join(', '), annotations)
                   )}
                 </p>
               )}

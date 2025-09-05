@@ -100,11 +100,4 @@ export type PathObject = Record<string, unknown>;
 export type PathArray = unknown[];
 
 // Type-safe path navigation
-export interface PathNavigationResult {
-  container: PathArray | null;
-  lastKey: string | number | null;
-}
-
-export interface PathCursor {
-  [key: string]: unknown;
-} 
+// (removed duplicate PathNavigationResult and PathCursor definitions; use the versions above)

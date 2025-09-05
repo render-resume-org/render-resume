@@ -1,9 +1,9 @@
-import { PatchOp } from '@/components/smart-chat/types';
+import { PatchOpUnion } from '@/components/smart-chat/types';
 
 /**
  * 将 patchOps 解析成人类可读的操作指示
  */
-export function parsePatchOpsToHumanReadable(patchOps: PatchOp[]): string[] {
+export function parsePatchOpsToHumanReadable(patchOps: PatchOpUnion[]): string[] {
   return patchOps.map((op, index) => {
     const pathParts = parsePath(op.path);
     
@@ -62,7 +62,7 @@ function parsePath(path: string): { humanReadable: string } {
 /**
  * 获取操作类型的简短描述
  */
-export function getOperationTypeDescription(op: PatchOp): string {
+export function getOperationTypeDescription(op: PatchOpUnion): string {
   switch (op.op) {
     case 'set':
       return '修改';
