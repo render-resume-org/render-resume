@@ -1,70 +1,63 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import CountdownTimer from "@/components/ui/countdown-timer";
-import { ScrollText } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import Image from "next/image";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
-interface HeroSectionProps {
-  stats: Array<{
-    number: string;
-    label: string;
-    icon?: React.ComponentType<{ className?: string }>;
-    animate?: boolean;
-  }>;
-}
+export default function HeroSection() {
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
-export default function HeroSection({ stats }: HeroSectionProps) {
+  // useEffect only runs on the client, so now we can safely show the UI
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Determine which image to show based on theme
+  const getImageSrc = () => {
+    if (!mounted) return "/images/editor-light.png"; // Default to light theme during SSR
+    
+    const currentTheme = resolvedTheme || theme;
+    return currentTheme === "dark" ? "/images/editor-dark.png" : "/images/editor-light.png";
+  };
+
   return (
-    <section className="relative overflow-hidden bg-white dark:bg-gray-900" itemScope itemType="https://schema.org/WebApplication">
+    <section className="relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 w-full py-16 sm:py-24 text-center" itemScope itemType="https://schema.org/WebApplication">
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Title & Slogan */}
+        <div className="flex flex-col justify-center items-center gap-6 mb-12">
+          <h1 className="text-nowrap text-6xl lg:text-7xl font-bold tracking-tight text-white" itemProp="name">
+            AI 履歷編輯器
+          </h1>
+          <p className="text-xl text-white/90 max-w-2xl mx-auto" itemProp="description">
+            讓你獲得頂尖的履歷撰寫能力，取得更多工作機會。
+          </p>
+        </div>
 
-      <div className="relative container mx-auto px-4 py-16 sm:py-24 text-center">
-        <div className="mx-auto max-w-4xl">
-          <div className="flex items-center flex-col md:flex-row justify-center gap-8">
-            <div className="flex flex-col justify-center items-center gap-6">
-              <h1 className="text-nowrap text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white" itemProp="name">
-                讓 AI 為您打造
-                <span className="text-cyan-600 dark:text-cyan-400">
-                  專業履歷
-                </span>
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto italic" itemProp="description">
-                RenderResume 幫您在最短時間呈現最大價值，找到理想工作
-              </p>
-            </div>
-          </div>
+        {/* Primary Button */}
+        <div className="flex justify-center">
+          <Link href="/auth/sign-up">
+              <Button size="lg" className="bg-white text-cyan-600 hover:bg-gray-100 px-6 py-6 text-lg font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:scale-105" itemProp="potentialAction" itemScope itemType="https://schema.org/Action">
+              <span itemProp="name">立即建立履歷 - 免費！</span>
+            </Button>
+          </Link>
+        </div>
 
-          <CountdownTimer />
-          
-          {/* Stats */}
-          <div className="mt-12 grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto" itemScope itemType="https://schema.org/ItemList">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center" itemScope itemType="https://schema.org/Statistic">
-                <div className="flex items-center justify-center gap-2">
-                  {stat.icon && (
-                    <stat.icon 
-                      className={`h-6 w-6 text-cyan-600 dark:text-cyan-400 ${stat.animate ? 'animate-bounce' : ''}`} 
-                    />
-                  )}
-                  <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400" itemProp="value">
-                    {stat.number}
-                  </div>
-                </div>
-                <div className="text-md text-gray-600 dark:text-gray-300" itemProp="name">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
-            <Link href="/auth/sign-up">
-              <Button size="lg" className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 text-lg font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:scale-105" itemProp="potentialAction" itemScope itemType="https://schema.org/Action">
-                <span itemProp="name">加入 Waitlist 搶先體驗</span>
-                <ScrollText className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
+        {/* Primary Image Component */}
+        <div className="flex justify-center mt-16">
+          <Card className="p-0 overflow-hidden border-0 shadow-2xl max-w-6xl w-full">
+            <Image
+              src={getImageSrc()}
+              alt="RenderResume 編輯器預覽"
+              width={1600}
+              height={1200}
+              className="w-full h-auto object-cover"
+              priority
+            />
+          </Card>
         </div>
       </div>
     </section>

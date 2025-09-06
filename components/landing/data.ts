@@ -2,55 +2,9 @@ import {
   BarChart3,
   Brain,
   MessageSquare,
-  PartyPopper,
   Star,
   Upload,
 } from "lucide-react";
-
-export const stats = [
-  { number: "160+", label: "Waitlist 成員", icon: PartyPopper, animate: false },
-  { number: "5 分鐘", label: "優化履歷" },
-  { number: "+N%", label: "面試機率" },
-];
-
-export const scoreCategories = [
-  {
-    icon: "💻",
-    name: "技術深度與廣度",
-    description: "評估技術棧掌握程度、架構設計能力與創新突破",
-    weight: "25%"
-  },
-  {
-    icon: "🚀", 
-    name: "項目複雜度與影響力",
-    description: "分析項目規模、技術挑戰與可量化的商業成果",
-    weight: "25%"
-  },
-  {
-    icon: "💼",
-    name: "專業經驗完整度", 
-    description: "評估職涯發展軌跡、領導能力與管理經驗",
-    weight: "20%"
-  },
-  {
-    icon: "🎓",
-    name: "教育背景匹配度",
-    description: "分析學歷與專業相關性、持續學習能力",
-    weight: "15%"
-  },
-  {
-    icon: "🏆",
-    name: "成果與驗證",
-    description: "識別專業成就、外部認可與量化影響力",
-    weight: "10%"
-  },
-  {
-    icon: "✨",
-    name: "整體專業形象",
-    description: "評估履歷呈現、溝通能力與個人品牌",
-    weight: "5%"
-  }
-];
 
 // Core features data
 export const coreFeatures = [
