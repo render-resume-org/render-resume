@@ -26,15 +26,8 @@ const ResumeSection = ({
 }: ResumeSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
 
-  const handleDoubleClick: React.MouseEventHandler<HTMLElement> = (e) => {
-    e.stopPropagation();
-    if (onEdit) {
-      onEdit();
-    }
-  };
-
   return (
-    <section ref={sectionRef} onDoubleClick={handleDoubleClick} className={cn('resume-section group relative', className)}>
+    <section ref={sectionRef} className={cn('resume-section group relative', className)}>
       <h3 className={cn('resume-section-title', titleClassName)}>
         {Icon && showIcon && <Icon className={cn('resume-section-icon mr-2', iconClassName)} />}
         {title}
