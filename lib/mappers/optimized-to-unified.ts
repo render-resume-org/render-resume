@@ -30,6 +30,7 @@ export function mapOptimizedToUnified(optimized: OptimizedResume): UnifiedResume
     })),
     projects: (optimized.projects || []).map(p => ({
       name: p.name,
+      period: p.period,
       outcomes: p.outcomes || [],
     })),
     education: (optimized.education || []).map(ed => ({

@@ -25,6 +25,9 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
   const styles = TemplateStylingService.getExperienceStyle(template);
   const isLatex = TemplateStylingService.isTemplateType(template, 'latex');
   const annotations = buildAnnotationsFromAnalysis(analysisResult);
+  // Global navigation ordering base for this section
+  const sectionIndex = template.layout.sections.indexOf('experience');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   if (isLatex) {
     return (
@@ -46,6 +49,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     <InlineText
                       text={job.title}
                       inlineEditable
+                      navOrder={sectionBase + index * 10000 + 30}
                       highlightType={highlightForPath?.(`experience[${index}].title`)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].title`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].title`)?.after}
@@ -62,6 +66,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       <InlineText
                         text={job.company}
                         inlineEditable
+                        navOrder={sectionBase + index * 10000 + 10}
                         highlightType={highlightForPath?.(`experience[${index}].company`, undefined)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].company`)?.before}
                         previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].company`)?.after}
@@ -77,6 +82,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       <InlineText
                         text={job.period}
                         inlineEditable
+                        navOrder={sectionBase + index * 10000 + 20}
                         highlightType={highlightForPath?.(`experience[${index}].period`, undefined)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].period`)?.before}
                         previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].period`)?.after}
@@ -96,7 +102,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                          text={achievement}
                          inlineEditable
                          isBullet
-                         groupId={`experience-${index}-outcomes`}
+                         navOrder={sectionBase + index * 10000 + 100 + achIndex}
                          highlightType={
                            highlightForPath?.(
                              `experience[${index}].outcomes[${achIndex}]`,
@@ -168,6 +174,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     <InlineText
                       text={job.company}
                       inlineEditable
+                      navOrder={sectionBase + index * 10000 + 10}
                       highlightType={highlightForPath?.(`experience[${index}].company`, undefined)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].company`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].company`)?.after}
@@ -182,6 +189,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     <InlineText
                       text={job.period}
                       inlineEditable
+                      navOrder={sectionBase + index * 10000 + 20}
                       highlightType={highlightForPath?.(`experience[${index}].period`, undefined)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].period`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].period`)?.after}
@@ -197,6 +205,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                   <InlineText
                     text={job.title}
                     inlineEditable
+                    navOrder={sectionBase + index * 10000 + 30}
                     highlightType={highlightForPath?.(`experience[${index}].title`, undefined)}
                     previewOriginal={getPreviewValueForPath?.(`experience[${index}].title`)?.before}
                     previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].title`)?.after}
@@ -215,7 +224,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       text={achievement}
                       inlineEditable
                       isBullet
-                      groupId={`experience-${index}-outcomes`}
+                      navOrder={sectionBase + index * 10000 + 100 + achIndex}
                       highlightType={
                         highlightForPath?.(
                           `experience[${index}].outcomes[${achIndex}]`,

@@ -61,7 +61,7 @@ export const standardTemplate: ResumeTemplate = {
     line: 'mb-1',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
+    sections: ['summary', 'education', 'experience', 'projects', 'achievements', 'skills'],
   },
   styles: {
     header: 'mb-2',
@@ -98,7 +98,7 @@ export const latexTemplate: ResumeTemplate = {
     line: 'mb-1.5',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
+    sections: ['summary', 'education', 'experience', 'projects', 'achievements', 'skills'],
   },
   styles: {
     header: 'mb-2',
@@ -134,7 +134,7 @@ export const modernTemplate: ResumeTemplate = {
     line: 'mb-1',
   },
   layout: {
-    sections: ['summary', 'experience', 'projects', 'education', 'skills', 'achievements'],
+    sections: ['summary', 'education', 'experience', 'projects', 'achievements', 'skills'],
   },
   styles: {
     header: 'mb-2',

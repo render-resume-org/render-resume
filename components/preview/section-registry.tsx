@@ -32,11 +32,11 @@ const MemoizedAchievementsSection = memo(AchievementsSection);
 
 const SECTION_REGISTRY: Record<SectionName, SectionComponent> = {
   summary: MemoizedSummarySection as SectionComponent,
-  skills: MemoizedSkillsSection as SectionComponent,
   experience: MemoizedExperienceSection as SectionComponent,
   projects: MemoizedProjectsSection as SectionComponent,
-  education: MemoizedEducationSection as SectionComponent,
   achievements: MemoizedAchievementsSection as SectionComponent,
+  education: MemoizedEducationSection as SectionComponent,
+  skills: MemoizedSkillsSection as SectionComponent,
 };
 
 interface SectionRendererProps {

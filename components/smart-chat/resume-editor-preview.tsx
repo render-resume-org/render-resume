@@ -253,34 +253,26 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'education') {
       const payload = next as { path?: string; value?: string };
       if (payload?.path) {
-        // Map composite edits for degree/major/gpa and details comma-separated
-        if (/^education\[\d+\]\.degreeMajorGpa$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          const text = String(payload.value ?? '');
-          // naive parse: split by comma
-          const parts = text.split(',').map(s => s.trim());
-          updated.education[idx].degree = parts[0] || '';
-          const majorPart = parts.find(p => p && !p.toLowerCase().startsWith('gpa'));
-          if (majorPart && majorPart !== parts[0]) updated.education[idx].major = majorPart.replace(/^,\s*/, '');
-          const gpaPart = parts.find(p => /^gpa/i.test(p));
-          updated.education[idx].gpa = gpaPart ? gpaPart.replace(/^(gpa: ?)/i, '') : updated.education[idx].gpa;
-        } else if (/^education\[\d+\]\.degreeMajor$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          const text = String(payload.value ?? '');
-          const parts = text.split(',').map(s => s.trim());
-          updated.education[idx].degree = parts[0] || '';
-          updated.education[idx].major = parts[1] || '';
-        } else if (/^education\[\d+\]\.outcomes$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          updated.education[idx].outcomes = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
-        } else {
-          const m = payload.path.match(/^education\[(\d+)\]\.(school|period|honor)$/);
-          if (m) {
-            const idx = Number(m[1]);
-            const field = m[2] as 'school' | 'period' | 'honor';
-            if (field === 'school') updated.education[idx].school = String(payload.value ?? '');
-            if (field === 'period') updated.education[idx].period = String(payload.value ?? '');
-            if (field === 'honor') updated.education[idx].honor = String(payload.value ?? '');
+        const m = payload.path.match(/^education\[(\d+)\]\.(degree|major|school|period|gpa|honor|outcomes\[(\d+)\])$/);
+        if (m) {
+          const idx = Number(m[1]);
+          const field = m[2];
+          const outcomeIdx = m[3] ? Number(m[3]) : undefined;
+          
+          if (field.startsWith('outcomes') && outcomeIdx != null) {
+            updated.education[idx].outcomes![outcomeIdx] = String(payload.value ?? '');
+          } else if (field === 'degree') {
+            updated.education[idx].degree = String(payload.value ?? '');
+          } else if (field === 'major') {
+            updated.education[idx].major = String(payload.value ?? '');
+          } else if (field === 'school') {
+            updated.education[idx].school = String(payload.value ?? '');
+          } else if (field === 'period') {
+            updated.education[idx].period = String(payload.value ?? '');
+          } else if (field === 'gpa') {
+            updated.education[idx].gpa = String(payload.value ?? '');
+          } else if (field === 'honor') {
+            updated.education[idx].honor = String(payload.value ?? '');
           }
         }
       }
@@ -317,13 +309,13 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.(title|period|organization|details\[(\d+)\])$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.(title|period|organization|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
-          const detIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('details') && detIdx != null) {
-            updated.achievements![idx].outcomes![detIdx] = String(payload.value ?? '');
+          const outcomeIdx = m[3] ? Number(m[3]) : undefined;
+          if (field.startsWith('outcomes') && outcomeIdx != null) {
+            updated.achievements![idx].outcomes![outcomeIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.achievements![idx].title = String(payload.value ?? '');
           } else if (field === 'period') {
@@ -467,7 +459,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         }
       };
 
-      const computeInsertTargetPath = (op: { path: string; value: string; index?: number }): string => {
+      const computeInsertTargetPath = (op: { path: string; value: unknown; index?: number }): string => {
         const normPath = normalizePath(op.path);
         const idxMatch = normPath.match(/\[(\d+)\]$/);
         if (idxMatch) {
@@ -495,14 +487,14 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (op.op === 'set') {
           return {
             ...op,
-            path: resolveNeighborIndexIfNeeded(optimized, op.path, op.value),
+            path: resolveNeighborIndexIfNeeded(optimized, op.path, String(op.value ?? '')),
           } as typeof op;
         }
         if (op.op === 'insert') {
           const targetPath = computeInsertTargetPath(op);
           return {
             ...op,
-            path: resolveNeighborIndexIfNeeded(optimized, targetPath, op.value),
+            path: resolveNeighborIndexIfNeeded(optimized, targetPath, typeof op.value === 'string' ? op.value : ''),
           } as typeof op;
         }
         if (op.op === 'remove') {
@@ -526,7 +518,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
                 const key = segments[i];
                 if (i === segments.length - 1) {
                   const currentValue = (cursor as Record<string, unknown>)?.[key as string];
-                  diffs[op.path] = { before: String((currentValue ?? '') as unknown as string), after: op.value };
+                  diffs[op.path] = { before: String((currentValue ?? '') as unknown as string), after: String(op.value as string ?? '') };
                 } else {
                   const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as string];
                   cursor = (typeof nextCursorVal === 'object' && nextCursorVal !== null) ? (nextCursorVal as Record<string, unknown>) : null;
@@ -535,7 +527,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
               }
             } else if (op.op === 'insert') {
               // For insert, show added value as after; before is empty
-              diffs[op.path] = { before: '', after: op.value };
+              diffs[op.path] = { before: '', after: typeof op.value === 'string' ? op.value : '[新增段落]' };
             } else if (op.op === 'remove') {
               // For remove, show current content as before; after empty
               const currentVal = getByPath(optimized, op.path);
@@ -617,6 +609,55 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       }
     };
 
+    const withDefaults = (containerName: string, value: unknown): unknown => {
+      if (containerName === 'experience') {
+        const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), company: '', period: '', outcomes: [] }) as Record<string, unknown>;
+        return {
+          title: String(v.title ?? ''),
+          company: String(v.company ?? ''),
+          period: String(v.period ?? ''),
+          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+        };
+      }
+      if (containerName === 'projects') {
+        const v = (typeof value === 'object' && value !== null ? value : { name: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
+        return {
+          name: String(v.name ?? ''),
+          period: String(v.period ?? ''),
+          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+        };
+      }
+      if (containerName === 'achievements') {
+        const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), organization: '', period: '', outcomes: [] }) as Record<string, unknown>;
+        return {
+          title: String(v.title ?? ''),
+          organization: String(v.organization ?? ''),
+          period: String(v.period ?? ''),
+          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+        };
+      }
+      if (containerName === 'education') {
+        const v = (typeof value === 'object' && value !== null ? value : { degree: '', major: '', school: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
+        return {
+          degree: String(v.degree ?? ''),
+          major: String(v.major ?? ''),
+          school: String(v.school ?? ''),
+          period: String(v.period ?? ''),
+          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : [],
+          gpa: typeof v.gpa === 'string' ? v.gpa : undefined,
+          honor: typeof v.honor === 'string' ? v.honor : undefined
+        };
+      }
+      if (containerName === 'skills') {
+        const v = (typeof value === 'object' && value !== null ? value : { category: String(value ?? ''), items: [] }) as Record<string, unknown>;
+        return {
+          category: String(v.category ?? ''),
+          items: Array.isArray(v.items) ? v.items.map(s => String(s ?? '')) : []
+        };
+      }
+      return value;
+    };
+
     for (const op of previewOps) {
       if (op.op === 'set') {
         // Determine whether the user edited this field during preview.
@@ -641,16 +682,32 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           }
         }
         const lastKey = segments[segments.length - 1];
-        if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+        const numericIndex = Number.isFinite(Number(lastKey)) ? Number(lastKey) : null;
+        // Case 1: op.path ends with an index (e.g., projects[2] or experience[0].outcomes[3])
+        if (numericIndex !== null && Array.isArray(cursor)) {
+          const arrayItems = cursor as unknown[];
+          const parentKey = segments[segments.length - 2] || '';
+          const isBulletArray = /outcomes$/.test(parentKey) || /items$/.test(parentKey);
+          const valueToInsert = isBulletArray
+            ? String(op.value as string ?? '')
+            : withDefaults(parentKey, op.value);
+          const insertIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
+          arrayItems.splice(insertIndex, 0, valueToInsert as unknown);
+        } else if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+          // Case 2: op.path ends with an array key (fallback)
           const lastValue = (cursor as Record<string, unknown>)[lastKey];
           if (!Array.isArray(lastValue)) {
             (cursor as Record<string, unknown>)[lastKey] = [];
           }
-          const arrayContainer = (cursor as Record<string, unknown>)[lastKey] as ArrayContainer;
-          if (arrayContainer) {
+          const arrayItems = (cursor as Record<string, unknown>)[lastKey] as unknown[];
+          if (Array.isArray(arrayItems)) {
             const idxMatch = op.path.match(/\[(\d+)\]$/);
-            const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayContainer.length;
-            arrayContainer.splice(Math.max(0, Math.min(insertIndex, arrayContainer.length)), 0, op.value);
+            const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayItems.length;
+            const isBulletArray = /outcomes$/.test(String(lastKey)) || /items$/.test(String(lastKey));
+            const valueToInsert = isBulletArray
+              ? String(op.value as string ?? '')
+              : withDefaults(String(lastKey), op.value);
+            arrayItems.splice(Math.max(0, Math.min(insertIndex, arrayItems.length)), 0, valueToInsert as unknown);
           }
         }
       } else if (op.op === 'remove') {

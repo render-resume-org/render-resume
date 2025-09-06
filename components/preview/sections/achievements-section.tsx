@@ -21,6 +21,9 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getProjectStyle(template);
+  // Global navigation ordering base for this section
+  const sectionIndex = template.layout.sections.indexOf('achievements');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   const isLatex = TemplateStylingService.isTemplateType(template, 'latex');
 
@@ -44,6 +47,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                     <InlineText 
                       text={a.title} 
                       inlineEditable 
+                      navOrder={sectionBase + i * 10000 + 10}
                       highlightType={highlightForPath?.(`achievements[${i}].title`)}
                       onChange={(t) => onInlineChange?.({ path: `achievements[${i}].title`, value: t })} 
                     />
@@ -57,6 +61,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                       <InlineText 
                         text={a.period} 
                         inlineEditable 
+                        navOrder={sectionBase + i * 10000 + 20}
                         highlightType={highlightForPath?.(`achievements[${i}].period`)}
                         onChange={(t) => onInlineChange?.({ path: `achievements[${i}].period`, value: t })} 
                       />
@@ -72,6 +77,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                     <InlineText 
                       text={a.organization} 
                       inlineEditable 
+                      navOrder={sectionBase + i * 10000 + 30}
                       highlightType={highlightForPath?.(`achievements[${i}].organization`)}
                       onChange={(t) => onInlineChange?.({ path: `achievements[${i}].organization`, value: t })} 
                     />
@@ -90,6 +96,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                           inlineEditable 
                           isBullet 
                           groupId={`achievements-${i}-outcomes`} 
+                          navOrder={sectionBase + i * 10000 + 100 + idx}
                           highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`, idx)}
                           onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} 
                           onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} 
@@ -125,7 +132,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
             <div className="flex justify-between items-center">
               <h3 className={styles.projectName}>
                 {inlineEditable ? (
-                  <InlineText text={a.title} inlineEditable onChange={(t) => onInlineChange?.({ path: `achievements[${i}].title`, value: t })} />
+                  <InlineText text={a.title} inlineEditable navOrder={sectionBase + i * 10000 + 10} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].title`, value: t })} />
                 ) : (
                   a.title
                 )}
@@ -133,7 +140,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
               {a.period && (
                 <span className={styles.period}>
                   {inlineEditable ? (
-                    <InlineText text={a.period} inlineEditable onChange={(t) => onInlineChange?.({ path: `achievements[${i}].period`, value: t })} />
+                    <InlineText text={a.period} inlineEditable navOrder={sectionBase + i * 10000 + 20} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].period`, value: t })} />
                   ) : (
                     a.period
                   )}
@@ -143,7 +150,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
             {a.organization && (
               <p className={cn(TemplateStylingService.getCaptionStyle(template))}>
                 {inlineEditable ? (
-                  <InlineText text={a.organization} inlineEditable onChange={(t) => onInlineChange?.({ path: `achievements[${i}].organization`, value: t })} />
+                  <InlineText text={a.organization} inlineEditable navOrder={sectionBase + i * 10000 + 30} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].organization`, value: t })} />
                 ) : (
                   a.organization
                 )}
@@ -154,7 +161,7 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                 {a.outcomes.map((d, idx) => (
                   <li key={idx}>
                     {inlineEditable ? (
-                      <InlineText text={d} inlineEditable isBullet groupId={`achievements-${i}-outcomes`} onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} />
+                      <InlineText text={d} inlineEditable isBullet groupId={`achievements-${i}-outcomes`} navOrder={sectionBase + i * 10000 + 100 + idx} onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} />
                     ) : (
                       d
                     )}

@@ -11,7 +11,7 @@ export function generateExtractSystemPrompt(): string {
 - 僅輸出有效 JSON（結構由 user prompt 指定），勿輸出多餘文字。
 
 結構化抽取規則（極重要）：
-- Experience / Projects / Achievements 欄位中：
+- Experience / Projects / Achievements 欄位中（若有 period，請填入 period）：
   - description：僅放置該段的「一句話摘要／角色說明」(例如小標題或斜體引導語)，不得把條列內容串接進來。
   - outcomes：將每一條條列（包含 •、-、–、數字編號、或換行分隔的陳述）逐條放入陣列；每一條保留原本量化數字、金額（如 $1.2mm / $1.2 million）、百分比與技術名詞，不進行合併或改寫。
   - 若來源是長段落但語意上為多條事蹟，請依句點或分號等明顯邊界切分為多條 outcomes。

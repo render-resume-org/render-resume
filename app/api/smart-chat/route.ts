@@ -17,7 +17,7 @@ export interface ChatResponse {
     title: string;
     description: string;
     category: string;
-    patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: string; index?: number }[];
+    patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: unknown; index?: number }[];
   };
   quickResponses: string[];
   excerpt?: {
@@ -307,20 +307,59 @@ function parseAIResponse(completion: string): ChatResponse {
     // validate patchOps if present
     if (parsed.suggestion?.patchOps) {
       console.log('🔍 [Parser] PatchOps before:', parsed.suggestion.patchOps);
-      parsed.suggestion.patchOps = parsed.suggestion.patchOps
+      // Normalize ops and coerce common mistakes (e.g., using set on array paths)
+      const normalized = parsed.suggestion.patchOps
         .filter(op => op && typeof op.path === 'string' && (op.op === 'set' || op.op === 'insert' || op.op === 'remove'))
         .map(op => {
-          if (op.op === 'set') {
-            return { op: 'set', path: op.path, value: String(op.value ?? '') } as const;
+          // Helper: path predicates
+          const isArrayContainerPath = (p: string) => /(outcomes|items)$/.test(p) || /^(experience|projects|achievements|education|skills)$/.test(p);
+
+          // Coerce misuse: set on an array container → insert
+          if (op.op === 'set' && isArrayContainerPath(op.path)) {
+            const opWithIndex = op as PatchOp & { index?: number };
+            return {
+              op: 'insert' as const,
+              path: op.path,
+              value: op.value,
+              index: typeof opWithIndex.index === 'number' ? opWithIndex.index : undefined
+            };
           }
+          // Ensure insert keeps object values as-is; strings remain strings
           if (op.op === 'insert') {
-            return { op: 'insert', path: op.path, value: String(op.value ?? ''), index: typeof op.index === 'number' ? op.index : undefined } as const;
+            return {
+              op: 'insert' as const,
+              path: op.path,
+              value: op.value,
+              index: typeof op.index === 'number' ? op.index : undefined
+            };
+          }
+          if (op.op === 'set') {
+            // Preserve set for scalar fields only
+            return { op: 'set' as const, path: op.path, value: op.value };
           }
           if (op.op === 'remove') {
-            return { op: 'remove', path: op.path, index: typeof op.index === 'number' ? op.index : undefined } as const;
+            return { op: 'remove' as const, path: op.path, index: typeof op.index === 'number' ? op.index : undefined };
           }
           return op as PatchOp | InsertOp | RemoveOp;
         });
+
+      // Additional coercion: set on section arrays with string/object → insert section object
+      parsed.suggestion.patchOps = normalized.map(op => {
+        if (op.op === 'set' && /^(experience|projects|achievements|education|skills)$/.test(op.path)) {
+          const section = op.path as 'experience' | 'projects' | 'achievements' | 'education' | 'skills';
+          const v = op.value;
+          let value: unknown = v;
+          if (typeof v === 'string') {
+            if (section === 'experience') value = { title: v, company: '', period: '', outcomes: [] };
+            else if (section === 'projects') value = { name: v, period: '', outcomes: [] };
+            else if (section === 'achievements') value = { title: v, organization: '', period: '', outcomes: [] };
+            else if (section === 'education') value = { degree: '', major: '', school: v, period: '', outcomes: [] };
+            else value = v;
+          }
+          return { op: 'insert' as const, path: op.path, value };
+        }
+        return op;
+      });
       console.log('🔍 [Parser] PatchOps after:', parsed.suggestion.patchOps);
     }
     

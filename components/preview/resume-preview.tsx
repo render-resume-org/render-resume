@@ -74,12 +74,8 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
                 template,
                 onEdit: editable ? createEditHandler(sectionName) : undefined,
                 inlineEditable,
-                onInlineChange: onInlineChange && sectionName === 'summary'
-                  ? (next) => onInlineChange('summary', next)
-                  : onInlineChange && sectionName === 'experience'
-                  ? (next) => onInlineChange('experience', next)
-                  : onInlineChange && sectionName === 'projects'
-                  ? (next) => onInlineChange('projects', next)
+                onInlineChange: onInlineChange 
+                  ? (next) => onInlineChange(sectionName, next)
                   : undefined,
                 analysisResult,
                 highlightForPath: (p) => highlightForPath(p),

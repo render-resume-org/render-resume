@@ -28,8 +28,8 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
     })),
     projects: (unified.projects || []).map(p => ({
       name: p.name || '',
-      period: '',
-      outcomes: (p.outcomes && p.outcomes.length ? p.outcomes : (p.technologies || [])) as string[],
+      period: p.period || '',
+      outcomes: p.outcomes || [],
     })),
     education: (unified.education || []).map(e => ({
       degree: e.degree || '',
