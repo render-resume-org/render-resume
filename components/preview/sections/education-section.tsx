@@ -23,6 +23,9 @@ export default function EducationSection({ data, template, onEdit, analysisResul
   if (!data || data.length === 0) return null;
 
   const annotations = buildAnnotationsFromAnalysis(analysisResult);
+  // Global navigation ordering base for this section
+  const sectionIndex = template.layout.sections.indexOf('education');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   const isLatexTemplate = template.id === 'latex';
 
@@ -45,13 +48,30 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                   <h4 className={cn(font.sizes.body, 'text-black font-medium')}>
                     {inlineEditable ? (
                       <InlineText
-                        text={`${education.degree}${education.major ? `, ${education.major}` : ''}`}
+                        text={education.degree}
                         inlineEditable
-                        highlightType={highlightForPath?.(`education[${index}].degreeMajor`)}
-                        onChange={(t) => onInlineChange?.({ path: `education[${index}].degreeMajor`, value: t })}
+                        navOrder={sectionBase + index * 10000 + 10}
+                        highlightType={highlightForPath?.(`education[${index}].degree`)}
+                        onChange={(t) => onInlineChange?.({ path: `education[${index}].degree`, value: t })}
                       />
                     ) : (
-                      highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}`, annotations)
+                      highlightText(education.degree, annotations)
+                    )}
+                    {education.major && (
+                      <>
+                        {', '}
+                        {inlineEditable ? (
+                          <InlineText
+                            text={education.major}
+                            inlineEditable
+                            navOrder={sectionBase + index * 10000 + 11}
+                            highlightType={highlightForPath?.(`education[${index}].major`)}
+                            onChange={(t) => onInlineChange?.({ path: `education[${index}].major`, value: t })}
+                          />
+                        ) : (
+                          highlightText(education.major, annotations)
+                        )}
+                      </>
                     )}
                   </h4>
                   <p className={cn(font.sizes.caption, 'text-black')}>
@@ -59,6 +79,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                       <InlineText 
                         text={education.school} 
                         inlineEditable 
+                        navOrder={sectionBase + index * 10000 + 20}
                         highlightType={highlightForPath?.(`education[${index}].school`)}
                         onChange={(t) => onInlineChange?.({ path: `education[${index}].school`, value: t })} 
                       />
@@ -72,6 +93,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                      <InlineText 
                        text={education.period} 
                        inlineEditable 
+                       navOrder={sectionBase + index * 10000 + 30}
                        highlightType={highlightForPath?.(`education[${index}].period`)}
                        onChange={(t) => onInlineChange?.({ path: `education[${index}].period`, value: t })} 
                      />
@@ -81,18 +103,24 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                  </span>
               </div>
               {education.outcomes && education.outcomes.length > 0 && (
-                <p className={cn(font.sizes.caption, 'text-black mt-1')}>
-                  {inlineEditable ? (
-                    <InlineText 
-                      text={education.outcomes.join(', ')} 
-                      inlineEditable 
-                      highlightType={highlightForPath?.(`education[${index}].outcomes`)}
-                      onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes`, value: t })} 
-                    />
-                  ) : (
-                    highlightText(education.outcomes.join(', '), annotations)
-                  )}
-                </p>
+                <ul className={cn(font.sizes.caption, 'text-black mt-1 list-disc list-inside')}>
+                  {education.outcomes.map((outcome, outcomeIndex) => (
+                    <li key={outcomeIndex}>
+                      {inlineEditable ? (
+                        <InlineText 
+                          text={outcome} 
+                          inlineEditable 
+                          isBullet
+                          navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
+                          highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
+                          onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
+                        />
+                      ) : (
+                        highlightText(outcome, annotations)
+                      )}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           ))}
@@ -119,7 +147,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
               <div className="flex justify-between items-center">
                 <h3 className={cn(font.sizes.body, 'text-black font-bold')}>
                   {inlineEditable ? (
-                    <InlineText text={education.school} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].school`, value: t })} />
+                    <InlineText text={education.school} inlineEditable navOrder={sectionBase + index * 10000 + 10} onChange={(t) => onInlineChange?.({ path: `education[${index}].school`, value: t })} />
                   ) : (
                     education.school
                   )}
@@ -127,7 +155,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                  {education.period && (
                    <span className={cn(font.sizes.caption, 'text-black')}>
                      {inlineEditable ? (
-                       <InlineText text={education.period} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].period`, value: t })} />
+                       <InlineText text={education.period} inlineEditable navOrder={sectionBase + index * 10000 + 20} onChange={(t) => onInlineChange?.({ path: `education[${index}].period`, value: t })} />
                      ) : (
                        highlightText(education.period, annotations)
                      )}
@@ -139,19 +167,50 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                <p className={cn(font.sizes.body, 'text-black italic')}>
                  {inlineEditable ? (
                    <InlineText
-                     text={`${education.degree}${education.major ? `, ${education.major}` : ''}${education.gpa ? `, GPA: ${education.gpa}` : ''}`}
+                     text={education.degree}
                      inlineEditable
-                     onChange={(t) => onInlineChange?.({ path: `education[${index}].degreeMajorGpa`, value: t })}
+                     navOrder={sectionBase + index * 10000 + 30}
+                     onChange={(t) => onInlineChange?.({ path: `education[${index}].degree`, value: t })}
                    />
                  ) : (
-                   highlightText(`${education.degree}${education.major ? `, ${education.major}` : ''}${education.gpa ? `, GPA: ${education.gpa}` : ''}`, annotations)
+                   highlightText(education.degree, annotations)
+                 )}
+                 {education.major && (
+                   <>
+                     {', '}
+                     {inlineEditable ? (
+                       <InlineText
+                         text={education.major}
+                         inlineEditable
+                         navOrder={sectionBase + index * 10000 + 31}
+                         onChange={(t) => onInlineChange?.({ path: `education[${index}].major`, value: t })}
+                       />
+                     ) : (
+                       highlightText(education.major, annotations)
+                     )}
+                   </>
+                 )}
+                 {education.gpa && (
+                   <>
+                     {', GPA: '}
+                     {inlineEditable ? (
+                       <InlineText
+                         text={education.gpa}
+                         inlineEditable
+                         navOrder={sectionBase + index * 10000 + 32}
+                         onChange={(t) => onInlineChange?.({ path: `education[${index}].gpa`, value: t })}
+                       />
+                     ) : (
+                       highlightText(education.gpa, annotations)
+                     )}
+                   </>
                  )}
                </p>
             </div>
             {education.honor && (
               <p className={cn(font.sizes.body, 'text-black')}>
                 {inlineEditable ? (
-                  <InlineText text={education.honor} inlineEditable onChange={(t) => onInlineChange?.({ path: `education[${index}].honor`, value: t })} />
+                  <InlineText text={education.honor} inlineEditable navOrder={sectionBase + index * 10000 + 100} onChange={(t) => onInlineChange?.({ path: `education[${index}].honor`, value: t })} />
                 ) : (
                   education.honor
                 )}

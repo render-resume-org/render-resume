@@ -2,10 +2,10 @@ import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
 import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
-import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt';
-import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
 import { generateEvaluateSystemPrompt } from '@/lib/prompts/evaluate-system-prompt';
 import { generateEvaluateUserPrompt } from '@/lib/prompts/evaluate-user-prompt';
+import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt';
+import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
 import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/lib/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
 import { checkUsageLimit } from '@/lib/utils/usage-check';
@@ -66,12 +66,13 @@ function normalizeUnifiedOutput(result: unknown): unknown {
       };
     });
   };
-  const normalizeProjects = (arr: unknown): Array<{ name: string; description?: string; technologies: string[]; outcomes: string[] }> => {
+  const normalizeProjects = (arr: unknown): Array<{ name: string; period?: string; description?: string; technologies: string[]; outcomes: string[] }> => {
     if (!Array.isArray(arr)) return [];
     return arr.map((p) => {
       const v = asObject(p);
       return {
         name: String(v.name ?? ''),
+        period: v.period ? String(v.period) : undefined,
         description: v.description ? String(v.description) : undefined,
         technologies: toStringArray(v.technologies),
         outcomes: toStringArray(v.outcomes),

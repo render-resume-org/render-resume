@@ -41,6 +41,7 @@ export const UnifiedResumeBlockSchemas = {
   }),
   project: z.object({
     name: z.string(),
+    period: z.string().optional(),
     description: z.string().optional(),
     technologies: z.array(z.string()).optional(),
     outcomes: z.array(z.string()).optional()

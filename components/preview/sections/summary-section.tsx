@@ -17,6 +17,9 @@ interface SummarySectionProps {
 
 export default function SummarySection({ data, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SummarySectionProps) {
   const { font, styles } = template;
+  // Global navigation ordering base for this section
+  const sectionIndex = template.layout.sections.indexOf('summary');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   return (
     <ResumeSection
@@ -33,6 +36,7 @@ export default function SummarySection({ data, template, onEdit, inlineEditable,
           <InlineText 
             text={data} 
             inlineEditable={inlineEditable} 
+            navOrder={sectionBase + 10}
             onChange={onInlineChange} 
             highlightType={highlightForPath?.('summary')} 
             previewOriginal={getPreviewValueForPath?.('summary')?.before}

@@ -17,9 +17,11 @@ interface InlineTextProps {
   onRemoveBullet?: () => void;
   // Navigation grouping
   groupId?: string;
+  // Global navigation order across resume; smaller first. When omitted, DOM order is used
+  navOrder?: number;
 }
 
-export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline' }: InlineTextProps) {
+export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline', navOrder }: InlineTextProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLSpanElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -231,12 +233,36 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const moveToSibling = (direction: 'prev' | 'next') => {
     const el = ref.current;
     if (!el) return;
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
+    // Global navigation across all inline nodes respecting explicit navOrder
+    const allNodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group]`))
+      .filter((node) => node.dataset.inlineOrder !== undefined);
+    const nodes = allNodes
+      .map((node, i) => ({
+        node,
+        i,
+        order: Number(node.dataset.inlineOrder)
+      }))
+      .sort((a, b) => (a.order - b.order) || (a.i - b.i))
+      .map(n => n.node);
     const idx = nodes.indexOf(el);
     const target = direction === 'prev' ? nodes[idx - 1] : nodes[idx + 1];
     if (target) {
       focusElement(target, direction === 'prev' ? 'end' : 'start');
     }
+  };
+
+  const dispatchFocusEvent = (targetGroupId: string, index: number, position: 'start' | 'end') => {
+    document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: targetGroupId, index, position } }));
+  };
+
+  const focusAfterMutation = (deltaIndex: number, position: 'start' | 'end') => {
+    const el = ref.current;
+    if (!el) return;
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
+    const idx = nodes.indexOf(el);
+    const targetIndex = idx + deltaIndex;
+    // Defer to allow React state update and DOM insertion/removal
+    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 0);
   };
 
   const triggerRemoveBullet = () => {
@@ -267,6 +293,8 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       if (isCaretAtEnd()) {
         e.preventDefault();
         onAddBullet?.();
+        // Move caret to the newly added bullet line (next index)
+        focusAfterMutation(1, 'start');
         return;
       }
       // Insert a line break without resetting contenteditable state
@@ -287,7 +315,9 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (isBullet && e.key === 'Backspace') {
       if (isCaretAtStart() && (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '')) {
         e.preventDefault();
+        // After removal, move caret to previous bullet line
         triggerRemoveBullet();
+        focusAfterMutation(-1, 'end');
         return;
       }
     }
@@ -296,7 +326,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   return (
     <>
       {(highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined) ? (
-        <span ref={containerRef} className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId}>
+        <span ref={containerRef} className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId} data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}>
           <span className={cn('cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md')}>
             {previewOriginal}
           </span>
@@ -311,6 +341,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
               data-inline-group={groupId}
+              data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
               className={cn('cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none')}
               title={'Click to edit'}
             />
@@ -326,6 +357,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
           data-inline-group={groupId}
+          data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
           className={cn(
             'outline-none',
             inlineEditable && 'cursor-text hover:bg-blue-50 hover:border-b-2 hover:border-blue-200 transition-all duration-200',

@@ -20,6 +20,9 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getSkillStyle(template);
+  // Global navigation ordering base for this section
+  const sectionIndex = template.layout.sections.indexOf('skills');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   return (
     <ResumeSection
@@ -40,6 +43,7 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
                   <InlineText
                     text={skillGroup.category}
                     inlineEditable
+                    navOrder={sectionBase + index * 10000 + 10}
                     highlightType={highlightForPath?.(`skills[${index}].category`)}
                     previewOriginal={getPreviewValueForPath?.(`skills[${index}].category`)?.before}
                     previewReplaceWith={getPreviewValueForPath?.(`skills[${index}].category`)?.after}
@@ -56,6 +60,7 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
                     <InlineText
                       text={item}
                       inlineEditable
+                      navOrder={sectionBase + index * 10000 + 100 + itemIdx}
                       highlightType={highlightForPath?.(`skills[${index}].items[${itemIdx}]`)}
                       previewOriginal={getPreviewValueForPath?.(`skills[${index}].items[${itemIdx}]`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`skills[${index}].items[${itemIdx}]`)?.after}

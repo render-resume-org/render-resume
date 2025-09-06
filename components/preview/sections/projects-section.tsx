@@ -25,6 +25,8 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
   const styles = TemplateStylingService.getProjectStyle(template);
   const isLatex = TemplateStylingService.isTemplateType(template, 'latex');
   const annotations = buildAnnotationsFromAnalysis(analysisResult);
+  const sectionIndex = template.layout.sections.indexOf('projects');
+  const sectionBase = Math.max(0, sectionIndex) * 1000000;
 
   if (isLatex) {
     return (
@@ -46,6 +48,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                      <InlineText
                        text={project.name}
                        inlineEditable
+                       navOrder={sectionBase + index * 10000 + 20}
                        highlightType={highlightForPath?.(`projects[${index}].name`)}
                        previewOriginal={getPreviewValueForPath?.(`projects[${index}].name`)?.before}
                        previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].name`)?.after}
@@ -61,6 +64,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                        <InlineText
                          text={project.period}
                          inlineEditable
+                         navOrder={sectionBase + index * 10000 + 10}
                          highlightType={highlightForPath?.(`projects[${index}].period`)}
                          previewOriginal={getPreviewValueForPath?.(`projects[${index}].period`)?.before}
                          previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].period`)?.after}
@@ -81,7 +85,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                            text={achievement}
                            inlineEditable
                            isBullet
-                           groupId={`projects-${index}-outcomes`}
+                           navOrder={sectionBase + index * 10000 + 100 + achievementIndex}
                            highlightType={highlightForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)}
                            previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.before}
                            previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.after}
@@ -124,6 +128,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                     <InlineText
                       text={project.name}
                       inlineEditable
+                      navOrder={sectionBase + index * 10000 + 10}
                       onChange={(t) => onInlineChange?.({ path: `projects[${index}].name`, value: t })}
                     />
                   ) : (
@@ -136,6 +141,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                        <InlineText
                          text={project.period}
                          inlineEditable
+                         navOrder={sectionBase + index * 10000 + 20}
                          highlightType={highlightForPath?.(`projects[${index}].period`)}
                          previewOriginal={getPreviewValueForPath?.(`projects[${index}].period`)?.before}
                          previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].period`)?.after}
@@ -158,6 +164,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                          inlineEditable
                          isBullet
                          groupId={`projects-${index}-outcomes`}
+                         navOrder={sectionBase + index * 10000 + 100 + achIndex}
                          highlightType={highlightForPath?.(`projects[${index}].outcomes[${achIndex}]`)}
                          previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.before}
                          previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.after}

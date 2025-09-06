@@ -313,15 +313,15 @@ function parseAIResponse(completion: string): ChatResponse {
         .map(op => {
           // Helper: path predicates
           const isArrayContainerPath = (p: string) => /(outcomes|items)$/.test(p) || /^(experience|projects|achievements|education|skills)$/.test(p);
-          const isTopLevelSectionArray = (p: string) => /^(experience|projects|achievements|education|skills)$/.test(p);
 
           // Coerce misuse: set on an array container → insert
           if (op.op === 'set' && isArrayContainerPath(op.path)) {
+            const opWithIndex = op as PatchOp & { index?: number };
             return {
               op: 'insert' as const,
               path: op.path,
               value: op.value,
-              index: typeof (op as any).index === 'number' ? (op as any).index : undefined
+              index: typeof opWithIndex.index === 'number' ? opWithIndex.index : undefined
             };
           }
           // Ensure insert keeps object values as-is; strings remain strings
@@ -347,7 +347,7 @@ function parseAIResponse(completion: string): ChatResponse {
       parsed.suggestion.patchOps = normalized.map(op => {
         if (op.op === 'set' && /^(experience|projects|achievements|education|skills)$/.test(op.path)) {
           const section = op.path as 'experience' | 'projects' | 'achievements' | 'education' | 'skills';
-          const v = op.value as any;
+          const v = op.value;
           let value: unknown = v;
           if (typeof v === 'string') {
             if (section === 'experience') value = { title: v, company: '', period: '', outcomes: [] };

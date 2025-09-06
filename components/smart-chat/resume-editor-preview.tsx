@@ -253,34 +253,26 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     } else if (path === 'education') {
       const payload = next as { path?: string; value?: string };
       if (payload?.path) {
-        // Map composite edits for degree/major/gpa and details comma-separated
-        if (/^education\[\d+\]\.degreeMajorGpa$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          const text = String(payload.value ?? '');
-          // naive parse: split by comma
-          const parts = text.split(',').map(s => s.trim());
-          updated.education[idx].degree = parts[0] || '';
-          const majorPart = parts.find(p => p && !p.toLowerCase().startsWith('gpa'));
-          if (majorPart && majorPart !== parts[0]) updated.education[idx].major = majorPart.replace(/^,\s*/, '');
-          const gpaPart = parts.find(p => /^gpa/i.test(p));
-          updated.education[idx].gpa = gpaPart ? gpaPart.replace(/^(gpa: ?)/i, '') : updated.education[idx].gpa;
-        } else if (/^education\[\d+\]\.degreeMajor$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          const text = String(payload.value ?? '');
-          const parts = text.split(',').map(s => s.trim());
-          updated.education[idx].degree = parts[0] || '';
-          updated.education[idx].major = parts[1] || '';
-        } else if (/^education\[\d+\]\.outcomes$/.test(payload.path)) {
-          const idx = Number(payload.path.match(/^education\[(\d+)\]/)?.[1] || 0);
-          updated.education[idx].outcomes = String(payload.value ?? '').split(',').map(s => s.trim()).filter(Boolean);
-        } else {
-          const m = payload.path.match(/^education\[(\d+)\]\.(school|period|honor)$/);
-          if (m) {
-            const idx = Number(m[1]);
-            const field = m[2] as 'school' | 'period' | 'honor';
-            if (field === 'school') updated.education[idx].school = String(payload.value ?? '');
-            if (field === 'period') updated.education[idx].period = String(payload.value ?? '');
-            if (field === 'honor') updated.education[idx].honor = String(payload.value ?? '');
+        const m = payload.path.match(/^education\[(\d+)\]\.(degree|major|school|period|gpa|honor|outcomes\[(\d+)\])$/);
+        if (m) {
+          const idx = Number(m[1]);
+          const field = m[2];
+          const outcomeIdx = m[3] ? Number(m[3]) : undefined;
+          
+          if (field.startsWith('outcomes') && outcomeIdx != null) {
+            updated.education[idx].outcomes![outcomeIdx] = String(payload.value ?? '');
+          } else if (field === 'degree') {
+            updated.education[idx].degree = String(payload.value ?? '');
+          } else if (field === 'major') {
+            updated.education[idx].major = String(payload.value ?? '');
+          } else if (field === 'school') {
+            updated.education[idx].school = String(payload.value ?? '');
+          } else if (field === 'period') {
+            updated.education[idx].period = String(payload.value ?? '');
+          } else if (field === 'gpa') {
+            updated.education[idx].gpa = String(payload.value ?? '');
+          } else if (field === 'honor') {
+            updated.education[idx].honor = String(payload.value ?? '');
           }
         }
       }
@@ -317,13 +309,13 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           return;
         }
       } else if (payload?.path) {
-        const m = payload.path.match(/^achievements\[(\d+)\]\.(title|period|organization|details\[(\d+)\])$/);
+        const m = payload.path.match(/^achievements\[(\d+)\]\.(title|period|organization|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
-          const detIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('details') && detIdx != null) {
-            updated.achievements![idx].outcomes![detIdx] = String(payload.value ?? '');
+          const outcomeIdx = m[3] ? Number(m[3]) : undefined;
+          if (field.startsWith('outcomes') && outcomeIdx != null) {
+            updated.achievements![idx].outcomes![outcomeIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.achievements![idx].title = String(payload.value ?? '');
           } else if (field === 'period') {
