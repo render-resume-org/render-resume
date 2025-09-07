@@ -46,9 +46,9 @@ export default function HeroSection() {
           </Link>
         </div>
 
-        {/* Primary Image Component */}
-        <div className="flex justify-center mt-16">
-          <Card className="p-0 overflow-hidden border-0 shadow-2xl max-w-6xl w-full">
+        {/* Primary Image */}
+        <div className="flex justify-center mt-16 -mx-4">
+          <Card className="p-0 overflow-hidden border-0 shadow-2xl w-full max-w-none">
             <Image
               src={getImageSrc()}
               alt="RenderResume 編輯器預覽"
