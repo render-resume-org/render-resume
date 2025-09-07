@@ -1,4 +1,4 @@
-// Threads posts data for before section
+// Pain points section data
 export const threadsPosts = [
   {
     author: {
@@ -90,21 +90,8 @@ export const threadsPosts = [
   }
 ];
 
-// Before & After section data
+// After section data
 export const beforeAfterData = {
-  before: {
-    title: "使用 RenderResume 之前",
-    subtitle: "傳統履歷的常見問題",
-    imagePlaceholder: "before-resume-placeholder.jpg",
-    issues: [
-      "經驗描述空泛，缺乏具體量化成果",
-      "技能列表雜亂，無法突出核心競爭力",
-      "工作經歷平鋪直敘，沒有故事性",
-      "缺乏行業關鍵字，ATS 系統難以識別",
-      "版面設計老舊，缺乏現代感",
-      "沒有明確的職涯目標定位"
-    ]
-  },
   after: {
     title: "使用 RenderResume 之後",
     subtitle: "AI 優化後的專業履歷",
@@ -114,8 +101,7 @@ export const beforeAfterData = {
       "技能分類清晰，核心競爭力一目了然",
       "量化成果突出，具體數據展現價值",
       "行業關鍵字優化，ATS 通過率大幅提升",
-      "專業版面設計，符合現代審美標準",
-      "精準職涯定位，目標明確具體"
+      "專業版面設計，符合現代審美標準"
     ]
   }
 }; 

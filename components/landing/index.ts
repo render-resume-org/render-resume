@@ -1,4 +1,4 @@
-export { default as AfterSection } from "./after-section";
+export { default as ResumeDemoSection } from "./resume-demo-section";
 export { default as PainPointsSection } from "./pain-points-section";
 export { default as BubbleTreads } from "./bubble-treads";
 export { default as CelebrationBanner } from "./celebration-banner";
