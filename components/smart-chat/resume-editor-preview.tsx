@@ -177,7 +177,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 0);
+          }, 50);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
@@ -220,7 +220,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 0);
+          }, 50);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
@@ -251,8 +251,38 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         }
       }
     } else if (path === 'education') {
-      const payload = next as { path?: string; value?: string };
-      if (payload?.path) {
+      const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
+        const m = payload.path.match(/^education\[(\d+)\]\.outcomes$/);
+        if (m) {
+          const idx = Number(m[1]);
+          const insertAt = payload.index + 1;
+          if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
+          updated.education[idx].outcomes!.splice(insertAt, 0, '');
+          persist(updated);
+          setTimeout(() => {
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `education-${idx}-outcomes`, index: insertAt, position: 'start' } }));
+          }, 50);
+          return;
+        }
+      } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
+        const m = payload.path.match(/^education\[(\d+)\]\.outcomes$/);
+        if (m) {
+          const idx = Number(m[1]);
+          const removeAt = payload.index;
+          if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
+          if (updated.education[idx].outcomes!.length <= 1) {
+            updated.education[idx].outcomes![0] = '';
+          } else {
+            updated.education[idx].outcomes!.splice(removeAt, 1);
+          }
+          persist(updated);
+          setTimeout(() => {
+            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `education-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
+          }, 50);
+          return;
+        }
+      } else if (payload?.path) {
         const m = payload.path.match(/^education\[(\d+)\]\.(degree|major|school|period|gpa|honor|outcomes\[(\d+)\])$/);
         if (m) {
           const idx = Number(m[1]);
@@ -288,7 +318,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 0);
+          }, 50);
           return;
         }
       } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
@@ -325,20 +355,18 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           }
         }
       }
-    } else if (path === 'personalInfo') {
-      const payload = next as { path?: string; value?: string };
-      if (payload?.path) {
-        const m = payload.path.match(/^personalInfo\.(fullName|email|phone|linkedin|github|website)$/);
-        if (m) {
-          const field = m[1] as keyof OptimizedResume['personalInfo'];
-          const value = String(payload.value ?? '');
-          if (field === 'fullName') updated.personalInfo.fullName = value;
-          if (field === 'email') updated.personalInfo.email = value;
-          if (field === 'phone') updated.personalInfo.phone = value;
-          if (field === 'linkedin') updated.personalInfo.linkedin = value;
-          if (field === 'github') updated.personalInfo.github = value;
-          if (field === 'website') updated.personalInfo.website = value;
-        }
+    } else if (path.startsWith('personalInfo.')) {
+      const m = path.match(/^personalInfo\.(fullName|email|phone|location|linkedin|github|website)$/);
+      if (m) {
+        const field = m[1] as keyof OptimizedResume['personalInfo'];
+        const value = String(next ?? '');
+        if (field === 'fullName') updated.personalInfo.fullName = value;
+        if (field === 'email') updated.personalInfo.email = value;
+        if (field === 'phone') updated.personalInfo.phone = value;
+        if (field === 'location') updated.personalInfo.location = value;
+        if (field === 'linkedin') updated.personalInfo.linkedin = value;
+        if (field === 'github') updated.personalInfo.github = value;
+        if (field === 'website') updated.personalInfo.website = value;
       }
     } else if (path === 'skills') {
       const payload = next as { path?: string; value?: string };

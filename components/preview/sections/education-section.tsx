@@ -111,8 +111,11 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                           text={outcome} 
                           inlineEditable 
                           isBullet
+                          groupId={`education-${index}-outcomes`}
                           navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
                           highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
+                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `education[${index}].outcomes`, index: outcomeIndex } as any)}
+                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `education[${index}].outcomes`, index: outcomeIndex } as any)}
                           onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
                         />
                       ) : (

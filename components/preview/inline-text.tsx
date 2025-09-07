@@ -261,8 +261,8 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
     const idx = nodes.indexOf(el);
     const targetIndex = idx + deltaIndex;
-    // Defer to allow React state update and DOM insertion/removal
-    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 0);
+    // Use longer delay to ensure React state update and DOM insertion/removal are complete
+    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 50);
   };
 
   const triggerRemoveBullet = () => {
@@ -313,11 +313,12 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
 
     if (isBullet && e.key === 'Backspace') {
-      if (isCaretAtStart() && (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '')) {
+      // Remove bullet when empty regardless of caret position to avoid cross-line deletion
+      const isEmpty = (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '');
+      if (isEmpty) {
         e.preventDefault();
-        // After removal, move caret to previous bullet line
         triggerRemoveBullet();
-        focusAfterMutation(-1, 'end');
+        setTimeout(() => focusAfterMutation(-1, 'end'), 10);
         return;
       }
     }

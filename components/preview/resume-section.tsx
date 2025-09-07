@@ -25,7 +25,6 @@ const ResumeSection = ({
   inlineEditable,
 }: ResumeSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-
   return (
     <section ref={sectionRef} className={cn('resume-section group relative', className)}>
       <h3 className={cn('resume-section-title', titleClassName)}>
