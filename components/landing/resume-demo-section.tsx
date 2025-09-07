@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Image from "next/image";
-import { beforeAfterData } from "./data";
+import { highlights } from "./data";
 
 function ResumeOptimizedSection() {
   return (
@@ -28,8 +28,6 @@ function ResumeOptimizedSection() {
 }
 
 function HighlightsSection() {
-  const highlights = beforeAfterData.after.highlights;
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}

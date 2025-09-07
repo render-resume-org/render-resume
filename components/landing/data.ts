@@ -10,6 +10,11 @@ export const threadsPosts = [
     replies: 89,
     reposts: 23,
     shares: 45,
+    position: {
+      top: '5%',
+      left: '5%',
+      rotate: -4
+    }
   },
   {
     author: {
@@ -21,6 +26,11 @@ export const threadsPosts = [
     replies: 45,
     reposts: 12,
     shares: 23,
+    position: {
+      top: '20%',
+      left: '66%',
+      rotate: 3
+    }
   },
   {
     author: {
@@ -32,6 +42,11 @@ export const threadsPosts = [
     replies: 67,
     reposts: 8,
     shares: 15,
+    position: {
+      top: '35%',
+      left: '5%',
+      rotate: 2
+    }
   },
   {
     author: {
@@ -43,6 +58,11 @@ export const threadsPosts = [
     replies: 34,
     reposts: 15,
     shares: 28,
+    position: {
+      top: '5%',
+      left: '35%',
+      rotate: 3
+    }
   },
   {
     author: {
@@ -54,6 +74,11 @@ export const threadsPosts = [
     replies: 28,
     reposts: 9,
     shares: 12,
+    position: {
+      top: '60%',
+      left: '61%',
+      rotate: -3
+    }
   },
   {
     author: {
@@ -65,6 +90,11 @@ export const threadsPosts = [
     replies: 42,
     reposts: 11,
     shares: 18,
+    position: {
+      top: '70%',
+      left: '20%',
+      rotate: -2
+    }
   },
   {
     author: {
@@ -76,6 +106,11 @@ export const threadsPosts = [
     replies: 56,
     reposts: 18,
     shares: 31,
+    position: {
+      top: '28%',
+      left: '39%',
+      rotate: -3
+    }
   },
   {
     author: {
@@ -87,21 +122,39 @@ export const threadsPosts = [
     replies: 73,
     reposts: 24,
     shares: 42,
+    position: {
+      top: '50%',
+      left: '32%',
+      rotate: 1
+    }
   }
 ];
 
-// After section data
-export const beforeAfterData = {
-  after: {
-    title: "使用 RenderResume 之後",
-    subtitle: "AI 優化後的專業履歷",
-    imagePlaceholder: "after-resume-placeholder.jpg",
-    highlights: [
-      "STAR 原則重構，每段經歷都有說服力",
-      "技能分類清晰，核心競爭力一目了然",
-      "量化成果突出，具體數據展現價值",
-      "行業關鍵字優化，ATS 通過率大幅提升",
-      "專業版面設計，符合現代審美標準"
-    ]
+// Resume demo section data
+export const highlights = [
+  "STAR 原則重構，每段經歷都有說服力",
+  "技能分類清晰，核心競爭力一目了然",
+  "量化成果突出，具體數據展現價值",
+  "行業關鍵字優化，ATS 通過率大幅提升",
+  "專業版面設計，符合現代審美標準"
+]
+
+// FAQ section data
+export const faqs = [
+  {
+    question: "什麼是專業履歷？撰寫履歷的目的是什麼？",
+    answer: "專業履歷是您過往經歷、技能與成就的摘要，能幫助您展現自身能力並說服招聘者錄用您。撰寫履歷的目的是吸引招聘者的注意，並從應聘候選人中脫穎而出。"
+  },
+  {
+    question: "什麼是 AI 履歷編輯器？",
+    answer: "AI 履歷編輯器是一款可以幫助您快速打造專業簡歷的工具。寫履歷有很多麻煩的地方，例如研究履歷撰寫原則、設計履歷格式、調整內容呈現形式、反覆修飾文句等，這些過程非常惱人且費時，但 AI 履歷編輯器能為您代勞，您不需要任何先備知識，透過 AI 履歷顧問的引導，就能快速創建極具競爭力的履歷。"
+  },
+  {
+    question: "能使用 ChatGPT 創建履歷嗎？RenderResume 有何優勢？",
+    answer: "如今大多數求職者都在求職過程中使用了 AI，但是並不建議單純使用 ChatGPT 創建簡歷。ChatGPT 是一款通用的 LLM，並不精通於為您量身定制專業履歷。RenderResume 的 AI 履歷編輯器使用 ChatGPT 的 AI 模型，並經過專業的履歷撰寫訓練，精通於為您量身定制專業履歷，並確保履歷寫法都遵循業界的最佳實踐。"
+  },
+  {
+    question: "上傳的個人資料會被如何處理？",
+    answer: "我們非常注重用戶隱私，您上傳的一切資料都僅用於分析產生針對您個人履歷的優化建議。我們不會將您的資料用於訓練我們的模型，也不會用於任何其他用途。所有資料的傳輸與儲存都會經過妥善加密保護。"
   }
-}; 
+];
