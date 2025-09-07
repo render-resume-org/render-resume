@@ -4,7 +4,7 @@ import Footer from "@/components/footer";
 import {
   ResumeDemoSection,
   PainPointsSection,
-  CTASection,
+  FAQSection,
   FeaturesSection,
   HeroSection,
   StructuredData
@@ -23,7 +23,7 @@ export default function Home() {
       
       <ResumeDemoSection />
       
-      <CTASection />
+      <FAQSection />
 
       <Footer />
     </div>
