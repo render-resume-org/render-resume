@@ -3,7 +3,7 @@
 import Footer from "@/components/footer";
 import {
   AfterSection,
-  BeforeSection,
+  PainPointsSection,
   CTASection,
   FeaturesSection,
   HeroSection,
@@ -17,7 +17,7 @@ export default function Home() {
 
       <HeroSection />
       
-      <BeforeSection />
+      <PainPointsSection />
       
       <FeaturesSection />
       

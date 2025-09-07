@@ -11,7 +11,7 @@ export default function HeroSection() {
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // useEffect only runs on the client, so now we can safely show the UI
+  // useEffect only runs on the client, so now we can safely show the UI (avoid hydration mismatch)
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -27,7 +27,7 @@ export default function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 w-full py-16 sm:py-24 text-center" itemScope itemType="https://schema.org/WebApplication">
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Title & Slogan */}
+        {/* Header */}
         <div className="flex flex-col justify-center items-center gap-6 mb-12">
           <h1 className="text-nowrap text-6xl lg:text-7xl font-bold tracking-tight text-white" itemProp="name">
             AI 履歷編輯器

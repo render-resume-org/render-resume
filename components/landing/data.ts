@@ -84,102 +84,91 @@ export const coreFeatures = [
 export const threadsPosts = [
   {
     author: {
-      name: "陳小雅",
+      name: "小雅",
       handle: "xiaoya_dev",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      verified: true
     },
-    content: "不知道有沒有人也是這樣，有東西能放作品集，但一直懶得整理😩 每次要寫履歷的時候才發現，明明做過很多專案，但就是不知道怎麼包裝...",
-    timestamp: "2h",
+    content: "不知道有沒有人也是這樣，有東西能放作品集，但一直懶得整理😰 明明做過很多專案，卻不知道怎麼呈現比較好...",
     likes: 342,
     replies: 89,
     reposts: 23,
     shares: 45,
-    isThread: true,
-    isLastInThread: false,
-    index: 0
   },
   {
     author: {
-      name: "陳小雅",
-      handle: "xiaoya_dev",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      verified: true
+      name: "阿哲",
+      handle: "azhe_dev",
     },
-    content: "而且每次投履歷都石沉大海，不知道是不是履歷寫得太爛了...感覺自己明明有實力，但就是不會包裝 😭 有人推薦好的履歷工具嗎？",
-    timestamp: "2h",
+    content: "每次投履歷都石沉大海，不知道是不是履歷寫得太爛了...感覺自己明明有實力，但就是不太會包裝😭",
     likes: 156,
     replies: 45,
     reposts: 12,
     shares: 23,
-    isThread: true,
-    isLastInThread: false,
-    index: 1
   },
   {
     author: {
-      name: "陳小雅",
-      handle: "xiaoya_dev",
-      avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
-      verified: true
+      name: "大貓",
+      handle: "damao_dev",
     },
-    content: "真的不想再被履歷搞到焦慮了... #求職焦慮 #履歷困擾",
-    timestamp: "2h",
+    content: "看到別人的漂亮履歷就覺得自己寫的好醜😢 而且不知道該突出什麼重點，感覺什麼都想寫但什麼都寫不好",
     likes: 89,
     replies: 67,
     reposts: 8,
     shares: 15,
-    isThread: true,
-    isLastInThread: true,
-    index: 2
   },
   {
     author: {
       name: "阿傑",
       handle: "ajay_fullstack",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face"
     },
-    content: "完全懂！我之前也是這樣，寫履歷的時候總覺得自己很厲害，但寫出來就變得很平淡...後來發現是沒有用對方法",
-    timestamp: "1h",
+    content: "看了好多求職分享文還是不知道從何開始，我的經歷不多，要怎麼寫才能被看見啊？",
     likes: 234,
     replies: 34,
     reposts: 15,
     shares: 28,
-    isThread: false,
-    isLastInThread: false,
-    index: 3
   },
   {
     author: {
       name: "小卡",
       handle: "caca_ui_designer",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face"
     },
-    content: "我也是！每次看到別人漂亮的履歷就覺得自己寫的好醜...而且不知道該突出什麼重點，感覺什麼都想寫但什麼都寫不好",
-    timestamp: "45m",
+    content: "好不容易寫完履歷，但也不知道寫出來的履歷有沒有競爭力…",
     likes: 189,
     replies: 28,
     reposts: 9,
     shares: 12,
-    isThread: false,
-    isLastInThread: false,
-    index: 4
   },
   {
     author: {
       name: "阿明",
       handle: "ming_backend",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face"
     },
-    content: "最煩的是每次都要根據不同職位調整履歷，但改來改去感覺都差不多...有沒有什麼工具可以自動優化履歷的？",
-    timestamp: "30m",
+    content: "最煩的是每次都要根據不同職位調整履歷，超級麻煩又花時間！",
     likes: 156,
     replies: 42,
     reposts: 11,
     shares: 18,
-    isThread: false,
-    isLastInThread: false,
-    index: 5
+  },
+  {
+    author: {
+      name: "小美",
+      handle: "mei_product_manager",
+    },
+    content: "每次寫履歷都要花很多心力在調整版面設計，有沒有專業又富有設計感的履歷模板啊？",
+    likes: 203,
+    replies: 56,
+    reposts: 18,
+    shares: 31,
+  },
+  {
+    author: {
+      name: "大雄",
+      handle: "daxiong_data_analyst",
+    },
+    content: "對於哪種履歷格式較合適好像眾說紛紜，到底要用怎樣的格式比較好啊？",
+    likes: 278,
+    replies: 73,
+    reposts: 24,
+    shares: 42,
   }
 ];
 
@@ -188,7 +177,7 @@ export const beforeAfterData = {
   before: {
     title: "使用 RenderResume 之前",
     subtitle: "傳統履歷的常見問題",
-    imagePlaceholder: "before-resume-placeholder.jpg", // 用戶會自己放圖片
+    imagePlaceholder: "before-resume-placeholder.jpg",
     issues: [
       "經驗描述空泛，缺乏具體量化成果",
       "技能列表雜亂，無法突出核心競爭力",
@@ -201,7 +190,7 @@ export const beforeAfterData = {
   after: {
     title: "使用 RenderResume 之後",
     subtitle: "AI 優化後的專業履歷",
-    imagePlaceholder: "after-resume-placeholder.jpg", // 用戶會自己放圖片
+    imagePlaceholder: "after-resume-placeholder.jpg",
     highlights: [
       "STAR 原則重構，每段經歷都有說服力",
       "技能分類清晰，核心競爭力一目了然",
