@@ -1,4 +1,4 @@
-import { InsertOp, PatchOp, RemoveOp } from '@/components/smart-chat/types';
+import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/components/smart-chat/types';
 import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireProUser } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
@@ -17,14 +17,14 @@ export interface ChatResponse {
     title: string;
     description: string;
     category: string;
-    patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: unknown; index?: number }[];
+    patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: unknown; index?: number }[]; // 保持原始格式以兼容 AI 回應
   };
   quickResponses: string[];
   excerpt?: {
     title: string;
     content: string;
     source: string;
-    issue_id?: string;
+    issue_id?: string; // 新增：用於追蹤 issue 關聯
   };
 }
 
@@ -37,7 +37,9 @@ interface Issue {
     title: string;
     description: string;
     category: string;
+    patchOps?: PatchOpUnion[]; // 新增：支援 patchOps
   };
+  patchOps?: PatchOpUnion[]; // 新增：issue 本身的 patchOps
 }
 
 interface RequestBody {
@@ -50,12 +52,16 @@ interface RequestBody {
           title: string;
           description: string;
           category: string;
+          patchOps?: PatchOpUnion[]; // 使用統一的 PatchOpUnion 類型
         };
         excerpt?: {
           title: string;
           content: string;
           source: string;
+          issue_id?: string; // 新增：用於追蹤 issue 關聯
         };
+        quickResponses?: string[]; // 新增：快速回覆選項
+        excerptId?: string; // 新增：用於追蹤 excerpt 的唯一 ID
       }
     | FileMessage
   >;
@@ -64,6 +70,7 @@ interface RequestBody {
     title: string;
     description: string;
     category: string;
+    patchOps?: PatchOpUnion[]; // 使用統一的 PatchOpUnion 類型
   }>;
   issues?: Issue[]; // 改名：templates -> issues，但保持向後兼容
   templates?: Issue[]; // 向後兼容：前端可能仍使用 templates
@@ -80,7 +87,16 @@ interface LastMessage {
     title: string;
     description: string;
     category: string;
+    patchOps?: PatchOpUnion[]; // 使用統一的 PatchOpUnion 類型
   };
+  excerpt?: {
+    title: string;
+    content: string;
+    source: string;
+    issue_id?: string; // 新增：用於追蹤 issue 關聯
+  };
+  quickResponses?: string[]; // 新增：快速回覆選項
+  excerptId?: string; // 新增：用於追蹤 excerpt 的唯一 ID
 }
 
 // 新增處理訊息的介面
@@ -93,14 +109,16 @@ interface ProcessedMessage {
     title: string;
     description: string;
     category: string;
+    patchOps?: PatchOpUnion[]; // 使用統一的 PatchOpUnion 類型
   };
   quickResponses: string[];
   excerpt?: {
     title: string;
     content: string;
     source: string;
+    issue_id?: string; // 新增：用於追蹤 issue 關聯
   };
-  excerptId?: string;
+  excerptId?: string; // 用於追蹤 excerpt 的唯一 ID
 }
 
 interface ProcessedChatResponse {
@@ -115,6 +133,23 @@ function generateUniqueId(prefix: string): string {
 }
 
 
+
+// 新增：轉換 patchOps 格式的輔助函數
+function convertPatchOpsToUnion(patchOps?: { op: 'set' | 'insert' | 'remove'; path: string; value?: unknown; index?: number }[]): PatchOpUnion[] | undefined {
+  if (!patchOps) return undefined;
+  return patchOps.map(op => {
+    switch (op.op) {
+      case 'set':
+        return { op: 'set', path: op.path, value: op.value } as PatchOp;
+      case 'insert':
+        return { op: 'insert', path: op.path, value: op.value, index: op.index } as InsertOp;
+      case 'remove':
+        return { op: 'remove', path: op.path, index: op.index } as RemoveOp;
+      default:
+        return op as PatchOpUnion;
+    }
+  });
+}
 
 // 新增訊息處理邏輯
 function processAIMessages(
@@ -139,9 +174,15 @@ function processAIMessages(
     if (inProgressIssue) {
       aiSuggestion = {
         ...aiSuggestion,
-        title: inProgressIssue.title
+        title: inProgressIssue.title,
+        patchOps: convertPatchOpsToUnion(aiSuggestion.patchOps) // 轉換 patchOps 格式
       };
       console.log('🔄 [Issue][Suggestion] Overriding suggestion title with in_progress issue:', inProgressIssue.title);
+    } else {
+      aiSuggestion = {
+        ...aiSuggestion,
+        patchOps: convertPatchOpsToUnion(aiSuggestion.patchOps) // 轉換 patchOps 格式
+      };
     }
   }
 
@@ -178,7 +219,12 @@ function processAIMessages(
         type: 'ai',
         content: before.trim(),
         timestamp: new Date(),
-        suggestion: aiSuggestion,
+        suggestion: aiSuggestion ? {
+          title: aiSuggestion.title,
+          description: aiSuggestion.description,
+          category: aiSuggestion.category,
+          patchOps: convertPatchOpsToUnion(aiSuggestion.patchOps)
+        } : undefined,
         quickResponses,
         excerpt: aiExcerpt,
         excerptId
@@ -203,7 +249,12 @@ function processAIMessages(
       type: 'ai',
       content: messageToProcess,
       timestamp: new Date(),
-      suggestion: aiSuggestion,
+      suggestion: aiSuggestion ? {
+        title: aiSuggestion.title,
+        description: aiSuggestion.description,
+        category: aiSuggestion.category,
+        patchOps: convertPatchOpsToUnion(aiSuggestion.patchOps)
+      } : undefined,
       quickResponses,
       excerpt: aiExcerpt,
       excerptId
@@ -248,7 +299,12 @@ function processAIMessages(
     if (activeIdx !== -1) {
       const activeId = updatedIssues[activeIdx].id;
       updatedIssues = updatedIssues.map((issue, idx) => idx === activeIdx
-        ? { ...issue, status: 'completed', completedSuggestion: aiSuggestion }
+        ? { ...issue, status: 'completed', completedSuggestion: aiSuggestion ? {
+            title: aiSuggestion.title,
+            description: aiSuggestion.description,
+            category: aiSuggestion.category,
+            patchOps: convertPatchOpsToUnion(aiSuggestion.patchOps)
+          } : undefined }
         : issue
       );
       // 移到最前
@@ -507,43 +563,13 @@ export async function POST(request: NextRequest) {
     // 建立系統提示，基於分析結果和已有建議
     const systemPrompt = generateSmartChatSystemPrompt(analysisResult, existingSuggestions);
     
-    // 建立用戶提示，包含 issues 狀態（強調進行中的問題）
-    const issuesUserPrompt = generateSmartChatUserPrompt(currentIssues);
-    
-    // 準備用戶對話內容，包含對話歷史
-    const conversationHistory = messages
-    .map(msg => `${msg.type === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
-      .join('\n\n');
-    
-    const lastUserMessage = messages.filter(m => m.type === 'user').pop();
-    const userPrompt = lastUserMessage?.content || '';
-    let finalUserInput = `對話歷史：\n${conversationHistory}`;
-    if (messages[messages.length - 1].type === 'user') {
-      finalUserInput += `\n\n最新訊息：${userPrompt}`;
-    } else { 
-      finalUserInput += `\n\n最新訊息：用戶沒有輸入文字，只是上傳了圖片`;
-    }
-    
-    // 添加 issues 狀態到用戶提示（強調進行中的問題）
-    finalUserInput += `\n\n${issuesUserPrompt}`;
-    // 新增：在 user 訊息中附加本輪履歷差異（若存在），並明確說明其含義
-    console.log('🔍 [API] Resume diff:', resumeDiff);
-    finalUserInput += `\n\n以下為「本輪用戶對履歷的實際修改差異」，以 git 風格 diff 呈現（+ 表示新增、- 表示刪除）。請僅將其作為上下文參考，避免逐字複誦：\n\n`;
-    if (resumeDiff && resumeDiff.trim().length > 0) {
-      finalUserInput += `\`\`\`diff\n${resumeDiff}\n\`\`\``;
-    } else {
-      finalUserInput += `本輪用戶沒有對履歷進行實際修改`;
-    }
-
-    // 新增：附加「目前最新履歷內容」到 user 提示，以避免只使用 analysisResult 初版內容
-    if (currentResumeRaw) {
-      try {
-        const currentResumeStr = typeof currentResumeRaw === 'string' ? currentResumeRaw : JSON.stringify(currentResumeRaw, null, 2);
-        finalUserInput += `\n\n以下為「目前最新的履歷 JSON」供你參考。請以此為準，不要依賴舊版：\n\n\`\`\`json\n${currentResumeStr}\n\`\`\``;
-      } catch {
-        // 忽略序列化錯誤
-      }
-    }
+    // 建立完整的用戶提示，包含所有上下文
+    const finalUserInput = generateSmartChatUserPrompt({
+      issues: currentIssues,
+      messages: chatMessages,
+      resumeDiff,
+      currentResume: currentResumeRaw
+    });
 
     // --- 新增：組合 vision 格式 messages ---
     // 找出最後一則 ai 訊息的 index
@@ -586,7 +612,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🤖 [API] Creating OpenAI client for smart chat (vision)');
     const client = createNativeOpenAIClient(apiKey, {
-      modelName: 'gpt-4.1-mini',
+      modelName: 'gpt-4o-mini',
     });
 
     // 調用 customPromptWithFiles 方法
@@ -616,7 +642,8 @@ export async function POST(request: NextRequest) {
 
     // 後端記錄 smart chat message
     try {
-      const messageContent = userPrompt || '圖片上傳';
+      const lastUserMessage = chatMessages.filter(m => m.type === 'user').pop()?.content;
+      const messageContent = lastUserMessage || '圖片上傳';
       const aiResponse = chatResponse.message || completion;
       const detail = `用戶訊息：「${messageContent}」(${messageContent.length} 字元)\nAI 回應：「${aiResponse.substring(0, 100)}${aiResponse.length > 100 ? '...' : ''}」(${aiResponse.length} 字元)`;
       await logSmartChatMessage(messageContent.length, detail);

@@ -1,6 +1,7 @@
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
+import type { InlineChangeHandler } from '@/lib/types/inline-edit';
 import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
@@ -14,8 +15,8 @@ interface ProjectsSectionProps {
   onEdit?: () => void;
   analysisResult?: UnifiedResumeAnalysisResult | null;
   inlineEditable?: boolean;
-  onInlineChange?: (payload: { path: string; value: string } | { action: 'addBullet' | 'removeBullet'; path: string; index: number }) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  onInlineChange?: InlineChangeHandler;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
   getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 

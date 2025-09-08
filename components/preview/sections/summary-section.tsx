@@ -11,7 +11,7 @@ interface SummarySectionProps {
   onEdit?: () => void;
   inlineEditable?: boolean;
   onInlineChange?: (next: string) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
   getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 

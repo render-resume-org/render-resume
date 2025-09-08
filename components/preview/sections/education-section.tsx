@@ -1,5 +1,6 @@
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
+import type { InlineChangeHandler } from '@/lib/types/inline-edit';
 import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
@@ -13,11 +14,12 @@ interface EducationSectionProps {
   onEdit?: () => void;
   analysisResult?: UnifiedResumeAnalysisResult | null;
   inlineEditable?: boolean;
-  onInlineChange?: (payload: { path: string; value: string }) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  onInlineChange?: InlineChangeHandler;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
+  getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 
-export default function EducationSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath }: EducationSectionProps) {
+export default function EducationSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: EducationSectionProps) {
   const { font, spacing, styles } = template;
 
   if (!data || data.length === 0) return null;
@@ -111,8 +113,13 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                           text={outcome} 
                           inlineEditable 
                           isBullet
+                          groupId={`education-${index}-outcomes`}
                           navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
                           highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
+                          previewOriginal={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.before}
+                          previewReplaceWith={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.after}
+                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
+                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
                           onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
                         />
                       ) : (

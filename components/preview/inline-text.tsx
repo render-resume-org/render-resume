@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import InlineHighlightPreview from './highlights/inline-highlight-preview';
 
 interface InlineTextProps {
   text: string;
@@ -7,7 +8,7 @@ interface InlineTextProps {
   inlineEditable?: boolean;
   onChange?: (next: string) => void;
   // Highlight for preview/diff
-  highlightType?: 'set';
+  highlightType?: 'set' | 'insert';
   // Optional git-like diff rendering when previewing a replacement
   previewOriginal?: string;
   previewReplaceWith?: string;
@@ -27,6 +28,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(text);
   const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
+  const [isComposing, setIsComposing] = useState(false);
   const ignoreNextBlurRef = useRef(false);
 
   // Update local text when prop changes (but not during editing)
@@ -39,14 +41,20 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   // Update preview editable text when previewReplaceWith changes
   useEffect(() => {
     if (previewReplaceWith !== undefined) {
-      // Only sync when prop changes meaningfully to avoid overwriting user edits on blur
-      setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
+      // For insert mode, always sync with the synthesized value
+      // For set mode, only sync when prop changes meaningfully to avoid overwriting user edits
+      const isInsertMode = highlightType === 'insert';
+      if (isInsertMode) {
+        setPreviewEditableText(previewReplaceWith);
+      } else {
+        setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
+      }
     }
-  }, [previewReplaceWith]);
+  }, [previewReplaceWith, highlightType]);
 
   // In preview mode, ensure no stray text nodes (e.g., unhighlighted duplicates) remain inside the container
   useEffect(() => {
-    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
     const el = containerRef.current;
     if (!isPreviewMode || !el) return;
     // Remove any direct text nodes under the container to avoid duplicated base text
@@ -125,7 +133,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   // Sync local text with DOM when not editing, preserving cursor position
   useEffect(() => {
     if (ref.current && !isEditing) {
-      const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+      const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
       const targetContent = isPreviewMode ? previewEditableText : localText;
       preserveCursorAndSyncContent(ref.current, targetContent || '');
     }
@@ -154,7 +162,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (!ref.current) return;
 
     const newText = ref.current.innerText;
-    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
     
     if (isPreviewMode) {
       setPreviewEditableText(newText);
@@ -181,7 +189,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       const finalText = ref.current.innerText;
       // Avoid no-op updates when content didn't change
       if (finalText === text) return;
-      const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+      const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
       
       if (isPreviewMode) {
         setPreviewEditableText(finalText);
@@ -261,8 +269,8 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
     const idx = nodes.indexOf(el);
     const targetIndex = idx + deltaIndex;
-    // Defer to allow React state update and DOM insertion/removal
-    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 0);
+    // Use longer delay to ensure React state update and DOM insertion/removal are complete
+    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 50);
   };
 
   const triggerRemoveBullet = () => {
@@ -275,8 +283,21 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
+
+    // Don't handle Enter key during Chinese composition
+    if (isComposing && e.key === 'Enter') {
+      return;
+    }
 
     if (e.key === 'ArrowUp' && isCaretAtStart()) {
       e.preventDefault();
@@ -313,60 +334,71 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
 
     if (isBullet && e.key === 'Backspace') {
-      if (isCaretAtStart() && (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '')) {
+      // Remove bullet when empty regardless of caret position to avoid cross-line deletion
+      const isEmpty = (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '');
+      if (isEmpty) {
         e.preventDefault();
-        // After removal, move caret to previous bullet line
         triggerRemoveBullet();
-        focusAfterMutation(-1, 'end');
+        setTimeout(() => focusAfterMutation(-1, 'end'), 10);
         return;
       }
     }
   };
 
+  const isPreview = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
+
+  if (isPreview) {
+    // Derive preview mode: insert => green only; set => red + green; remove => red only when after is empty
+    const afterText = previewReplaceWith || '';
+    const mode = highlightType === 'insert' ? 'insert' : (afterText.trim() === '' ? 'remove' : 'set');
+
+    return (
+      <InlineHighlightPreview
+        mode={mode}
+        beforeText={previewOriginal}
+        afterText={previewEditableText}
+        containerRef={containerRef as unknown as React.Ref<HTMLSpanElement>}
+        afterRef={ref as unknown as React.Ref<HTMLSpanElement>}
+        className={className}
+        containerProps={{
+          'data-inline-group': groupId,
+          'data-inline-order': navOrder !== undefined ? String(navOrder) : undefined,
+        }}
+        afterProps={{
+          onInput: handleInput as unknown as React.FormEventHandler<HTMLSpanElement>,
+          onFocus: handleFocus as unknown as React.FocusEventHandler<HTMLSpanElement>,
+          onBlur: handleBlur as unknown as React.FocusEventHandler<HTMLSpanElement>,
+          onKeyDown: handleKeyDown as unknown as React.KeyboardEventHandler<HTMLSpanElement>,
+          onCompositionStart: handleCompositionStart as unknown as React.CompositionEventHandler<HTMLSpanElement>,
+          onCompositionEnd: handleCompositionEnd as unknown as React.CompositionEventHandler<HTMLSpanElement>,
+          title: 'Click to edit',
+          'data-inline-group': groupId,
+          'data-inline-order': navOrder !== undefined ? String(navOrder) : undefined,
+        }}
+      />
+    );
+  }
+
   return (
-    <>
-      {(highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined) ? (
-        <span ref={containerRef} className={cn('inline-flex flex-col gap-3', className)} data-inline-group={groupId} data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}>
-          <span className={cn('cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md')}>
-            {previewOriginal}
-          </span>
-          {/* Only show green "after" block if there's content to show */}
-          {previewReplaceWith && previewReplaceWith.trim() !== '' && (
-            <span
-              ref={ref}
-              suppressContentEditableWarning
-              contentEditable={true}
-              onInput={handleInput}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              onKeyDown={handleKeyDown}
-              data-inline-group={groupId}
-              data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
-              className={cn('cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none')}
-              title={'Click to edit'}
-            />
-          )}
-        </span>
-      ) : (
-        <span
-          ref={ref}
-          suppressContentEditableWarning
-          contentEditable={!!inlineEditable}
-          onInput={handleInput}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          data-inline-group={groupId}
-          data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
-          className={cn(
-            'outline-none',
-            inlineEditable && 'cursor-text hover:bg-blue-50 hover:border-b-2 hover:border-blue-200 transition-all duration-200',
-            highlightType === 'set' && 'bg-yellow-50 ring-1 ring-yellow-300 dark:bg-yellow-900/30 dark:ring-yellow-600 rounded-sm',
-            className
-          )}
-          title={inlineEditable ? 'Click to edit' : undefined}
-        />
+    <span
+      ref={ref}
+      suppressContentEditableWarning
+      contentEditable={!!inlineEditable}
+      onInput={handleInput}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
+      data-inline-group={groupId}
+      data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
+      className={cn(
+        'outline-none',
+        inlineEditable && 'cursor-text hover:bg-blue-50 hover:border-b-2 hover:border-blue-200 transition-all duration-200',
+        highlightType === 'set' && 'bg-yellow-50 ring-1 ring-yellow-300 dark:bg-yellow-900/30 dark:ring-yellow-600 rounded-sm',
+        className
       )}
-    </>
+      title={inlineEditable ? 'Click to edit' : undefined}
+    />
   );
 }
