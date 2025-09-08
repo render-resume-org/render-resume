@@ -164,16 +164,35 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const handleInlineChange = useCallback((path: string, next: unknown) => {
     if (!optimized) return;
     const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    
+    // Helper: detect whether a path is inside an inserted preview (so base data may not exist yet)
+    const isPathUnderInsert = (p: string): boolean => {
+      if (!isPreviewing || !previewOps?.length) return false;
+      return previewOps.some(op => op.op === 'insert' && (p === op.path || p.startsWith(op.path + '.')));
+    };
+    // Helper: when editing preview-only content, store edits in previewDiffs instead of mutating base
+    const writePreviewOnlyEdit = (p: string, value: string) => {
+      setPreviewDiffs(prev => ({
+        ...prev,
+        [p]: { before: '', after: value }
+      }));
+    };
     if (path === 'summary') {
       updated.summary = String(next ?? '');
     } else if (path === 'experience') {
       const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      // Redirect edits to preview store if they target preview-only inserted content
+      if (payload?.path && isPathUnderInsert(payload.path) && payload.value !== undefined) {
+        writePreviewOnlyEdit(payload.path, String(payload.value ?? ''));
+        return;
+      }
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
         const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.experience[idx].outcomes.splice(insertAt, 0, '');
+          if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
+          updated.experience[idx].outcomes!.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' } }));
@@ -185,7 +204,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.experience[idx].outcomes.splice(removeAt, 1);
+          if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
+          updated.experience[idx].outcomes!.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -199,7 +219,13 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
           if (field.startsWith('outcomes') && achIdx != null) {
-            updated.experience[idx].outcomes[achIdx] = String(payload.value ?? '');
+            if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
+            const arr = updated.experience[idx].outcomes!;
+            if (achIdx >= arr.length) {
+              arr.length = achIdx + 1;
+              for (let i = 0; i < arr.length; i++) { if (arr[i] === undefined) arr[i] = ''; }
+            }
+            arr[achIdx] = String(payload.value ?? '');
           } else if (field === 'title') {
             updated.experience[idx].title = String(payload.value ?? '');
           } else if (field === 'company') {
@@ -216,7 +242,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          updated.projects[idx].outcomes.splice(insertAt, 0, '');
+          if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
+          updated.projects[idx].outcomes!.splice(insertAt, 0, '');
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' } }));
@@ -228,7 +255,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
         if (m) {
           const idx = Number(m[1]);
           const removeAt = payload.index;
-          updated.projects[idx].outcomes.splice(removeAt, 1);
+          if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
+          updated.projects[idx].outcomes!.splice(removeAt, 1);
           persist(updated);
           setTimeout(() => {
             document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
@@ -242,7 +270,13 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const field = m[2];
           const achIdx = m[3] ? Number(m[3]) : undefined;
           if (field.startsWith('outcomes') && achIdx != null) {
-            updated.projects[idx].outcomes[achIdx] = String(payload.value ?? '');
+            if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
+            const arr = updated.projects[idx].outcomes!;
+            if (achIdx >= arr.length) {
+              arr.length = achIdx + 1;
+              for (let i = 0; i < arr.length; i++) { if (arr[i] === undefined) arr[i] = ''; }
+            }
+            arr[achIdx] = String(payload.value ?? '');
           } else if (field === 'name') {
             updated.projects[idx].name = String(payload.value ?? '');
           } else if (field === 'period') {

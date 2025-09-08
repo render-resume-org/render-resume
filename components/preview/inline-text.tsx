@@ -40,10 +40,16 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   // Update preview editable text when previewReplaceWith changes
   useEffect(() => {
     if (previewReplaceWith !== undefined) {
-      // Only sync when prop changes meaningfully to avoid overwriting user edits on blur
-      setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
+      // For insert mode, always sync with the synthesized value
+      // For set mode, only sync when prop changes meaningfully to avoid overwriting user edits
+      const isInsertMode = highlightType === 'insert';
+      if (isInsertMode) {
+        setPreviewEditableText(previewReplaceWith);
+      } else {
+        setPreviewEditableText(prev => (prev === previewReplaceWith ? prev : previewReplaceWith));
+      }
     }
-  }, [previewReplaceWith]);
+  }, [previewReplaceWith, highlightType]);
 
   // In preview mode, ensure no stray text nodes (e.g., unhighlighted duplicates) remain inside the container
   useEffect(() => {
@@ -155,7 +161,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     if (!ref.current) return;
 
     const newText = ref.current.innerText;
-    const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+    const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
     
     if (isPreviewMode) {
       setPreviewEditableText(newText);
@@ -182,7 +188,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       const finalText = ref.current.innerText;
       // Avoid no-op updates when content didn't change
       if (finalText === text) return;
-      const isPreviewMode = highlightType === 'set' && previewOriginal !== undefined && previewReplaceWith !== undefined;
+      const isPreviewMode = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
       
       if (isPreviewMode) {
         setPreviewEditableText(finalText);
