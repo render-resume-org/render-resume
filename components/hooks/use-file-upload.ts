@@ -27,6 +27,7 @@ export function useFileUpload(serviceType: 'create' | 'optimize' = 'create') {
     { name: "", description: "", startMonth: "", startYear: "", endMonth: "", endYear: "", isCurrent: false }
   ]);
   const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
+    name: "",
     address: "",
     phone: "",
     email: ""

@@ -33,6 +33,7 @@ export interface Project {
 }
 
 export interface PersonalInfo {
+  name: string;
   address: string;
   phone: string;
   email: string;

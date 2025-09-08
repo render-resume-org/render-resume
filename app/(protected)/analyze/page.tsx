@@ -179,7 +179,7 @@ export default function AnalyzePage() {
         const experience: Experience[] = storedExperience ? JSON.parse(storedExperience) : [];
         const projects: Project[] = storedProjects ? JSON.parse(storedProjects) : [];
         const skills: string = storedSkills || '';
-        const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { address: '', phone: '', email: '' };
+        const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { name: '', address: '', phone: '', email: '' };
         const links: Links = storedLinks ? JSON.parse(storedLinks) : { linkedin: '', github: '', portfolio: '' };
         const serviceType: 'create' | 'optimize' = (storedServiceType as 'create' | 'optimize') || 'create';
         startAnalysis(files, additionalText, education, experience, projects, skills, personalInfo, links, serviceType);
@@ -223,7 +223,7 @@ export default function AnalyzePage() {
       const education: Education[] = storedEducation ? JSON.parse(storedEducation) : [];
       const experience: Experience[] = storedExperience ? JSON.parse(storedExperience) : [];
       const projects: Project[] = storedProjects ? JSON.parse(storedProjects) : [];
-      const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { address: '', phone: '', email: '' };
+      const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { name: '', address: '', phone: '', email: '' };
       const links: Links = storedLinks ? JSON.parse(storedLinks) : { linkedin: '', github: '', portfolio: '' };
       setCurrentStep(0);
       setAnalysisComplete(false);
