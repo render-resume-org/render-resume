@@ -70,7 +70,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
     }
   };
 
-  const highlightForPath = (path: string, _index?: number): 'set' | 'insert' | undefined => {
+  const highlightForPath = (path: string): 'set' | 'insert' | undefined => {
     // direct match first
     if (highlightMap[path]) return highlightMap[path];
     // inherit from ancestors (e.g., experience[0] -> experience[0].title)
@@ -143,7 +143,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
                 onInlineChange?.(p.path, p.value);
               }
             }}
-            highlightForPath={(p) => highlightForPath(p)}
+            highlightForPath={highlightForPath}
             getPreviewValueForPath={getPreviewValueForPath}
           />
 
@@ -159,7 +159,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
                   ? (next) => onInlineChange(sectionName, next)
                   : undefined,
                 analysisResult,
-                highlightForPath: (p, _index) => highlightForPath(p), // eslint-disable-line @typescript-eslint/no-unused-vars
+                highlightForPath,
                 getPreviewValueForPath,
               })}
             </div>
