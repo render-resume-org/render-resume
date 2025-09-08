@@ -15,19 +15,19 @@ interface ResumePreviewProps {
   analysisResult?: UnifiedResumeAnalysisResult | null;
   inlineEditable?: boolean;
   onInlineChange?: (path: string, next: unknown) => void;
-  // Diff preview: list of paths to highlight; for 'set', show before (red) and after (green)
-  previewHighlights?: { type: 'set'; path: string }[];
+  // Diff preview: list of paths to highlight; for 'set', show before (red) and after (green); for 'insert', show only green
+  previewHighlights?: { type: 'set' | 'insert'; path: string }[];
   // Optional map of path -> {before, after} to render git-like diff
   previewDiffs?: Record<string, { before?: string; after?: string }>;
 }
 
 export default function ResumePreview({ resumeData, template, onUpdateResume, editable = true, analysisResult, inlineEditable, onInlineChange, previewHighlights, previewDiffs }: ResumePreviewProps) {
   const { font, colors } = template;
-  const highlightMap: Record<string, 'set'> = (previewHighlights || []).reduce((acc, h) => {
+  const highlightMap: Record<string, 'set' | 'insert'> = (previewHighlights || []).reduce((acc, h) => {
     acc[h.path] = h.type;
     return acc;
-  }, {} as Record<string, 'set'>);
-  const highlightForPath = (path: string): 'set' | undefined => highlightMap[path];
+  }, {} as Record<string, 'set' | 'insert'>);
+  const highlightForPath = (path: string, _index?: number): 'set' | 'insert' | undefined => highlightMap[path]; // eslint-disable-line @typescript-eslint/no-unused-vars
   const getPreviewValueForPath = (path: string) => previewDiffs?.[path];
 
   const { openEditDialog, renderEditDialog } = useEditDialogManager({
@@ -61,7 +61,11 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
             personalInfo={resumeData.personalInfo}
             template={template}
             inlineEditable={inlineEditable}
-            onInlineChange={(p) => onInlineChange?.(p.path, p.value)}
+            onInlineChange={(p) => {
+              if ('value' in p) {
+                onInlineChange?.(p.path, p.value);
+              }
+            }}
             highlightForPath={(p) => highlightForPath(p)}
             getPreviewValueForPath={getPreviewValueForPath}
           />
@@ -78,7 +82,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
                   ? (next) => onInlineChange(sectionName, next)
                   : undefined,
                 analysisResult,
-                highlightForPath: (p) => highlightForPath(p),
+                highlightForPath: (p, _index) => highlightForPath(p), // eslint-disable-line @typescript-eslint/no-unused-vars
                 getPreviewValueForPath,
               })}
             </div>

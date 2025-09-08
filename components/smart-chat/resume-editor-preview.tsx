@@ -387,6 +387,55 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     persist(updated);
   }, [optimized, persist]);
 
+  const getDefaultInsertValue = useCallback((containerName: string, value: unknown): unknown => {
+    if (containerName === 'experience') {
+      const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), company: '', period: '', outcomes: [] }) as Record<string, unknown>;
+      return {
+        title: String(v.title ?? ''),
+        company: String(v.company ?? ''),
+        period: String(v.period ?? ''),
+        outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+      };
+    }
+    if (containerName === 'projects') {
+      const v = (typeof value === 'object' && value !== null ? value : { name: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
+      return {
+        name: String(v.name ?? ''),
+        period: String(v.period ?? ''),
+        outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+      };
+    }
+    if (containerName === 'achievements') {
+      const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), organization: '', period: '', outcomes: [] }) as Record<string, unknown>;
+      return {
+        title: String(v.title ?? ''),
+        organization: String(v.organization ?? ''),
+        period: String(v.period ?? ''),
+        outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
+      };
+    }
+    if (containerName === 'education') {
+      const v = (typeof value === 'object' && value !== null ? value : { degree: '', major: '', school: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
+      return {
+        degree: String(v.degree ?? ''),
+        major: String(v.major ?? ''),
+        school: String(v.school ?? ''),
+        period: String(v.period ?? ''),
+        outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : [],
+        gpa: typeof v.gpa === 'string' ? v.gpa : undefined,
+        honor: typeof v.honor === 'string' ? v.honor : undefined
+      };
+    }
+    if (containerName === 'skills') {
+      const v = (typeof value === 'object' && value !== null ? value : { category: String(value ?? ''), items: [] }) as Record<string, unknown>;
+      return {
+        category: String(v.category ?? ''),
+        items: Array.isArray(v.items) ? v.items.map(s => String(s ?? '')) : []
+      };
+    }
+    return value;
+  }, []);
+
   useEffect(() => {
     const normalizePath = (path: string) =>
       path
@@ -576,10 +625,29 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
   const getPreviewedResume = useCallback((): OptimizedResume | null => {
     if (!optimized) return optimized;
     if (!isPreviewing || !previewOps?.length) return optimized;
-    // Build a virtual preview for insert/remove to reflect structure changes visually
+    // Build a virtual preview for set/insert/remove to reflect structure changes visually
     const virtual: OptimizedResume = JSON.parse(JSON.stringify(optimized));
     for (const op of previewOps) {
-      if (op.op === 'insert') {
+      if (op.op === 'set') {
+        // Apply set operations to the virtual resume for preview
+        const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
+        const segments = arrPath.split('.');
+        let cursor: Record<string, unknown> | unknown[] | null = virtual as unknown as Record<string, unknown>;
+        for (let i = 0; i < segments.length; i++) {
+          const key = segments[i];
+          if (i === segments.length - 1) {
+            // Set the final value
+            if (typeof cursor === 'object' && cursor !== null) {
+              (cursor as Record<string, unknown>)[key as string] = op.value;
+            }
+          } else {
+            // Navigate to the parent object
+            const nextCursorVal: unknown = (cursor as Record<string, unknown>)?.[key as string];
+            cursor = (typeof nextCursorVal === 'object' && nextCursorVal !== null) ? (nextCursorVal as Record<string, unknown>) : null;
+            if (cursor == null) break;
+          }
+        }
+      } else if (op.op === 'insert') {
         const arrPath = op.path.replace(/\[(\d+)\]/g, '.$1');
         const segments = arrPath.split('.').filter(Boolean);
         let cursor: PathCursor = virtual as unknown as PathCursor;
@@ -593,17 +661,30 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           }
         }
         const lastKey = segments[segments.length - 1];
-        if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
+        const numericIndex = Number.isFinite(Number(lastKey)) ? Number(lastKey) : null;
+        if (numericIndex !== null && Array.isArray(cursor)) {
+          const arrayItems = cursor as unknown[];
+          const parentKey = segments[segments.length - 2] || '';
+          const isBulletArray = /outcomes$/.test(parentKey) || /items$/.test(parentKey);
+          const valueToInsert = isBulletArray
+            ? String(op.value as string ?? '')
+            : getDefaultInsertValue(parentKey, op.value);
+          const boundedIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
+          arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
+        } else if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
           const lastValue = (cursor as Record<string, unknown>)[lastKey];
           if (!Array.isArray(lastValue)) {
             (cursor as Record<string, unknown>)[lastKey] = [];
           }
-          const arrayContainer = (cursor as Record<string, unknown>)[lastKey] as ArrayContainer;
-          if (arrayContainer) {
-            const idxMatch = op.path.match(/\[(\d+)\]$/);
-            const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayContainer.length;
-            arrayContainer.splice(Math.max(0, Math.min(insertIndex, arrayContainer.length)), 0, String(op.value ?? ''));
-          }
+          const arrayItems = (cursor as Record<string, unknown>)[lastKey] as unknown[];
+          const idxMatch = op.path.match(/\[(\d+)\]$/);
+          const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayItems.length;
+          const isBulletArray = /outcomes$/.test(String(lastKey)) || /items$/.test(String(lastKey));
+          const valueToInsert = isBulletArray
+            ? String(op.value as string ?? '')
+            : getDefaultInsertValue(String(lastKey), op.value);
+          const boundedIndex = Math.max(0, Math.min(insertIndex, arrayItems.length));
+          arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
         }
       } else if (op.op === 'remove') {
         // Do not mutate structure for remove during preview; keep the original item visible
@@ -611,7 +692,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       }
     }
     return virtual;
-  }, [optimized, isPreviewing, previewOps]);
+  }, [optimized, isPreviewing, previewOps, getDefaultInsertValue]);
 
   const handleAcceptPreview = useCallback(() => {
     if (!optimized || !isPreviewing || !previewOps?.length) return;
@@ -637,54 +718,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
       }
     };
 
-    const withDefaults = (containerName: string, value: unknown): unknown => {
-      if (containerName === 'experience') {
-        const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), company: '', period: '', outcomes: [] }) as Record<string, unknown>;
-        return {
-          title: String(v.title ?? ''),
-          company: String(v.company ?? ''),
-          period: String(v.period ?? ''),
-          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
-        };
-      }
-      if (containerName === 'projects') {
-        const v = (typeof value === 'object' && value !== null ? value : { name: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
-        return {
-          name: String(v.name ?? ''),
-          period: String(v.period ?? ''),
-          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
-        };
-      }
-      if (containerName === 'achievements') {
-        const v = (typeof value === 'object' && value !== null ? value : { title: String(value ?? ''), organization: '', period: '', outcomes: [] }) as Record<string, unknown>;
-        return {
-          title: String(v.title ?? ''),
-          organization: String(v.organization ?? ''),
-          period: String(v.period ?? ''),
-          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : []
-        };
-      }
-      if (containerName === 'education') {
-        const v = (typeof value === 'object' && value !== null ? value : { degree: '', major: '', school: String(value ?? ''), period: '', outcomes: [] }) as Record<string, unknown>;
-        return {
-          degree: String(v.degree ?? ''),
-          major: String(v.major ?? ''),
-          school: String(v.school ?? ''),
-          period: String(v.period ?? ''),
-          outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : [],
-          gpa: typeof v.gpa === 'string' ? v.gpa : undefined,
-          honor: typeof v.honor === 'string' ? v.honor : undefined
-        };
-      }
-      if (containerName === 'skills') {
-        const v = (typeof value === 'object' && value !== null ? value : { category: String(value ?? ''), items: [] }) as Record<string, unknown>;
-        return {
-          category: String(v.category ?? ''),
-          items: Array.isArray(v.items) ? v.items.map(s => String(s ?? '')) : []
-        };
-      }
-      return value;
-    };
+    const withDefaults = getDefaultInsertValue;
 
     for (const op of previewOps) {
       if (op.op === 'set') {
@@ -719,8 +753,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
           const valueToInsert = isBulletArray
             ? String(op.value as string ?? '')
             : withDefaults(parentKey, op.value);
-          const insertIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
-          arrayItems.splice(insertIndex, 0, valueToInsert as unknown);
+          const boundedIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
+          arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
         } else if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
           // Case 2: op.path ends with an array key (fallback)
           const lastValue = (cursor as Record<string, unknown>)[lastKey];
@@ -735,7 +769,8 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
             const valueToInsert = isBulletArray
               ? String(op.value as string ?? '')
               : withDefaults(String(lastKey), op.value);
-            arrayItems.splice(Math.max(0, Math.min(insertIndex, arrayItems.length)), 0, valueToInsert as unknown);
+            const boundedIndex = Math.max(0, Math.min(insertIndex, arrayItems.length));
+            arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
           }
         }
       } else if (op.op === 'remove') {
@@ -771,7 +806,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
     setIsPreviewing(false);
     setPreviewOps(null);
     setPreviewDiffs({});
-  }, [optimized, isPreviewing, previewOps, persist, previewDiffs]);
+  }, [optimized, isPreviewing, previewOps, persist, previewDiffs, getDefaultInsertValue]);
 
   const handleRejectPreview = useCallback(() => {
     setIsPreviewing(false);
@@ -825,7 +860,7 @@ export default function ResumeEditorPreview({ template }: ResumeEditorPreviewPro
               analysisResult={null}
               inlineEditable
               onInlineChange={handleInlineChange}
-              previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: 'set' as const, path: op.path })) : undefined}
+              previewHighlights={isPreviewing ? (previewOps || []).map(op => ({ type: op.op === 'insert' ? 'insert' as const : 'set' as const, path: op.path })) : undefined}
               previewDiffs={isPreviewing ? previewDiffs : undefined}
             />
           </div>

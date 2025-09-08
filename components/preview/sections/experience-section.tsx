@@ -1,6 +1,7 @@
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
+import type { InlineChangeHandler } from '@/lib/types/inline-edit';
 import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
@@ -14,8 +15,8 @@ interface ExperienceSectionProps {
   onEdit?: () => void;
   analysisResult?: UnifiedResumeAnalysisResult | null;
   inlineEditable?: boolean;
-  onInlineChange?: (payload: { path: string; value: string } | { action: 'addBullet' | 'removeBullet'; path: string; index: number }) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  onInlineChange?: InlineChangeHandler;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
   getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 
@@ -67,7 +68,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                         text={job.company}
                         inlineEditable
                         navOrder={sectionBase + index * 10000 + 10}
-                        highlightType={highlightForPath?.(`experience[${index}].company`, undefined)}
+                        highlightType={highlightForPath?.(`experience[${index}].company`)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].company`)?.before}
                         previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].company`)?.after}
                         onChange={(t) => onInlineChange?.({ path: `experience[${index}].company`, value: t })}
@@ -83,7 +84,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                         text={job.period}
                         inlineEditable
                         navOrder={sectionBase + index * 10000 + 20}
-                        highlightType={highlightForPath?.(`experience[${index}].period`, undefined)}
+                        highlightType={highlightForPath?.(`experience[${index}].period`)}
                         previewOriginal={getPreviewValueForPath?.(`experience[${index}].period`)?.before}
                         previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].period`)?.after}
                         onChange={(t) => onInlineChange?.({ path: `experience[${index}].period`, value: t })}
@@ -175,7 +176,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       text={job.company}
                       inlineEditable
                       navOrder={sectionBase + index * 10000 + 10}
-                      highlightType={highlightForPath?.(`experience[${index}].company`, undefined)}
+                      highlightType={highlightForPath?.(`experience[${index}].company`)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].company`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].company`)?.after}
                       onChange={(t) => onInlineChange?.({ path: `experience[${index}].company`, value: t })}
@@ -190,7 +191,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       text={job.period}
                       inlineEditable
                       navOrder={sectionBase + index * 10000 + 20}
-                      highlightType={highlightForPath?.(`experience[${index}].period`, undefined)}
+                      highlightType={highlightForPath?.(`experience[${index}].period`)}
                       previewOriginal={getPreviewValueForPath?.(`experience[${index}].period`)?.before}
                       previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].period`)?.after}
                       onChange={(t) => onInlineChange?.({ path: `experience[${index}].period`, value: t })}
@@ -206,7 +207,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     text={job.title}
                     inlineEditable
                     navOrder={sectionBase + index * 10000 + 30}
-                    highlightType={highlightForPath?.(`experience[${index}].title`, undefined)}
+                    highlightType={highlightForPath?.(`experience[${index}].title`)}
                     previewOriginal={getPreviewValueForPath?.(`experience[${index}].title`)?.before}
                     previewReplaceWith={getPreviewValueForPath?.(`experience[${index}].title`)?.after}
                     onChange={(t) => onInlineChange?.({ path: `experience[${index}].title`, value: t })}

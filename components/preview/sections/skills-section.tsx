@@ -1,5 +1,6 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
+import type { InlineChangeHandler } from '@/lib/types/inline-edit';
 import { OptimizedResume } from '@/lib/types/resume';
 import { cn } from '@/lib/utils';
 import { Code } from 'lucide-react';
@@ -11,8 +12,8 @@ interface SkillsSectionProps {
   template: ResumeTemplate;
   onEdit?: () => void;
   inlineEditable?: boolean;
-  onInlineChange?: (payload: { path: string; value: string }) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  onInlineChange?: InlineChangeHandler;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
   getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 

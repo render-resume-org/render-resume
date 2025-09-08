@@ -1,4 +1,5 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
+import type { InlineChangeHandler } from '@/lib/types/inline-edit';
 import { OptimizedResume } from '@/lib/types/resume';
 import { memo } from 'react';
 import AchievementsSection from './sections/achievements-section';
@@ -15,8 +16,8 @@ interface SectionProps<T = unknown> {
   template: ResumeTemplate;
   onEdit?: () => void;
   inlineEditable?: boolean;
-  onInlineChange?: (next: unknown) => void;
-  highlightForPath?: (path: string, index?: number) => 'set' | undefined;
+  onInlineChange?: InlineChangeHandler;
+  highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined;
   getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined;
 }
 
@@ -51,7 +52,7 @@ interface SectionRendererProps {
  * 優化的區段渲染器
  * 使用記憶化組件和數據驗證來提升性能
  */
-export function renderSection({ sectionName, resumeData, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SectionRendererProps & { inlineEditable?: boolean; onInlineChange?: (next: unknown) => void; highlightForPath?: (path: string) => 'set' | undefined; getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined; }) {
+export function renderSection({ sectionName, resumeData, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SectionRendererProps & { inlineEditable?: boolean; onInlineChange?: InlineChangeHandler; highlightForPath?: (path: string, index?: number) => 'set' | 'insert' | undefined; getPreviewValueForPath?: (path: string) => { before?: string; after?: string } | undefined; }) {
   const SectionComponent = SECTION_REGISTRY[sectionName];
   
   if (!SectionComponent) {
@@ -76,7 +77,7 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
         highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
@@ -91,7 +92,7 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
         highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
@@ -106,7 +107,8 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
+        highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
     );
@@ -120,7 +122,8 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
+        highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
     );
@@ -134,7 +137,8 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
+        highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
     );
@@ -148,13 +152,14 @@ export function renderSection({ sectionName, resumeData, template, onEdit, inlin
         template={template}
         onEdit={onEdit}
         inlineEditable={inlineEditable}
-        onInlineChange={(next: unknown) => onInlineChange?.(next)}
+        onInlineChange={onInlineChange}
+        highlightForPath={highlightForPath}
         getPreviewValueForPath={getPreviewValueForPath}
       />
     );
   }
 
-  return <SectionComponent data={sectionData} template={template} onEdit={onEdit} inlineEditable={inlineEditable} onInlineChange={(next: unknown) => onInlineChange?.(next)} getPreviewValueForPath={getPreviewValueForPath} />;
+  return <SectionComponent data={sectionData} template={template} onEdit={onEdit} inlineEditable={inlineEditable} onInlineChange={onInlineChange} highlightForPath={highlightForPath} getPreviewValueForPath={getPreviewValueForPath} />;
 }
 
 /**
