@@ -50,7 +50,11 @@ export default function ResultsPage() {
             <ResumeGrade grade={analysisResult.grade} />
           </div>
           <div className="lg:flex-1">
-            <ResumeComment comment={analysisResult.comment} />
+            <ResumeComment 
+              comment={analysisResult.comment} 
+              highlightsCount={analysisResult.highlights?.length || 0}
+              issuesCount={analysisResult.issues?.length || 0}
+            />
           </div>
         </section>
 
