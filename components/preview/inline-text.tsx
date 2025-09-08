@@ -28,6 +28,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const [isEditing, setIsEditing] = useState(false);
   const [localText, setLocalText] = useState(text);
   const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
+  const [isComposing, setIsComposing] = useState(false);
   const ignoreNextBlurRef = useRef(false);
 
   // Update local text when prop changes (but not during editing)
@@ -282,8 +283,21 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
+  const handleCompositionStart = () => {
+    setIsComposing(true);
+  };
+
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
+
+    // Don't handle Enter key during Chinese composition
+    if (isComposing && e.key === 'Enter') {
+      return;
+    }
 
     if (e.key === 'ArrowUp' && isCaretAtStart()) {
       e.preventDefault();
@@ -355,6 +369,8 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
           onFocus: handleFocus as unknown as React.FocusEventHandler<HTMLSpanElement>,
           onBlur: handleBlur as unknown as React.FocusEventHandler<HTMLSpanElement>,
           onKeyDown: handleKeyDown as unknown as React.KeyboardEventHandler<HTMLSpanElement>,
+          onCompositionStart: handleCompositionStart as unknown as React.CompositionEventHandler<HTMLSpanElement>,
+          onCompositionEnd: handleCompositionEnd as unknown as React.CompositionEventHandler<HTMLSpanElement>,
           title: 'Click to edit',
           'data-inline-group': groupId,
           'data-inline-order': navOrder !== undefined ? String(navOrder) : undefined,
@@ -372,6 +388,8 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       onFocus={handleFocus}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       data-inline-group={groupId}
       data-inline-order={navOrder !== undefined ? String(navOrder) : undefined}
       className={cn(
