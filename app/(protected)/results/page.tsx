@@ -2,11 +2,10 @@
 
 import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/components/results";
 import ResumePreview from '@/components/preview/resume-preview';
-import { Button } from "@/components/ui/button";
+import { NavigationButton } from "@/components/navigation-button";
 import { getTemplateById } from '@/lib/config/resume-templates';
 import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -72,21 +71,8 @@ export default function ResultsPage() {
 
         {/* Navigation */}
         <div className="mt-12 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
-          <Button
-            variant="outline"
-            onClick={() => router.push('/analyze')}
-            className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>上一步</span>
-          </Button>
-          <Button
-            onClick={() => router.push('/smart-chat')}
-            className="flex items-center space-x-2 bg-cyan-600 hover:bg-cyan-700 text-white disabled:bg-gray-300 disabled:text-gray-500"
-          >
-            <span>下一步</span>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <NavigationButton direction="left" route="/analyze" text="返回重新分析" />
+          <NavigationButton direction="right" route="/smart-chat" text="開始優化履歷" />
         </div>
       </div>
     </div>
