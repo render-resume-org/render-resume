@@ -141,16 +141,31 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   useEffect(() => {
     const handler = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ groupId: string; index: number; position?: 'start' | 'end' }>).detail;
+      const detail = (ev as CustomEvent<{ groupId: string; index: number; position?: 'start' | 'end'; bulletId?: string }>).detail;
       if (!detail) return;
       if (detail.groupId !== groupId) return;
       const el = ref.current;
       if (!el) return;
-      // Find my index within siblings of same group
-      const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
-      const idx = nodes.indexOf(el);
-      if (idx === detail.index) {
-        // focus this element
+      
+      // Check if this element should be focused
+      let shouldFocus = false;
+      
+      if (detail.bulletId) {
+        // Use bulletId matching (preferred for stable identification)
+        const containerEl = el.closest('[data-inline-group]') as HTMLElement;
+        if (containerEl && containerEl.dataset.inlineOrder !== undefined) {
+          const order = Number(containerEl.dataset.inlineOrder);
+          const targetOrder = detail.index;
+          shouldFocus = order === targetOrder;
+        }
+      } else {
+        // Fallback to index-based matching
+        const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
+        const idx = nodes.indexOf(el);
+        shouldFocus = idx === detail.index;
+      }
+      
+      if (shouldFocus) {
         focusElement(el, detail.position || 'start');
       }
     };
@@ -305,6 +320,19 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       return;
     }
     if (e.key === 'ArrowDown' && isCaretAtEnd()) {
+      e.preventDefault();
+      moveToSibling('next');
+      return;
+    }
+
+    // Left arrow at beginning of line - move to previous line
+    if (e.key === 'ArrowLeft' && isCaretAtStart()) {
+      e.preventDefault();
+      moveToSibling('prev');
+      return;
+    }
+    // Right arrow at end of line - move to next line
+    if (e.key === 'ArrowRight' && isCaretAtEnd()) {
       e.preventDefault();
       moveToSibling('next');
       return;

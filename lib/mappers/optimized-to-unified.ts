@@ -38,7 +38,6 @@ export function mapOptimizedToUnified(optimized: OptimizedResume): UnifiedResume
       school: ed.school,
       period: ed.period,
       gpa: ed.gpa,
-      relevant_courses: [],
       outcomes: ed.outcomes || [],
     })),
   };

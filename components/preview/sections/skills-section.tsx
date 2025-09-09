@@ -55,7 +55,7 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
                 )}
               </span>
               {': '}
-              {skillGroup.items.map((item, itemIdx) => (
+              {(skillGroup.items || []).map((item, itemIdx) => (
                 <span key={itemIdx}>
                   {inlineEditable ? (
                     <InlineText

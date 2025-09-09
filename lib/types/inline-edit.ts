@@ -4,6 +4,6 @@
 
 export type InlineEditPayload = 
   | { path: string; value: string }
-  | { action: 'addBullet' | 'removeBullet'; path: string; index: number };
+  | { action: 'addBullet' | 'removeBullet'; path: string; index?: number; bulletId?: string };
 
 export type InlineChangeHandler = (payload: InlineEditPayload) => void;

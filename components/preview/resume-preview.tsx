@@ -70,7 +70,7 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
     }
   };
 
-  const highlightForPath = (path: string, _index?: number): 'set' | 'insert' | undefined => {
+  const highlightForPath = (path: string): 'set' | 'insert' | undefined => {
     // direct match first
     if (highlightMap[path]) return highlightMap[path];
     // inherit from ancestors (e.g., experience[0] -> experience[0].title)

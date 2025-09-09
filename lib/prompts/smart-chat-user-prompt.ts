@@ -110,6 +110,8 @@ export function generateSmartChatUserPrompt(options: SmartChatUserPromptOptions)
 You are receiving a comprehensive user context for Smart Chat resume optimization. This context includes conversation history, issue tracking, resume changes, and current resume state. Please process this information to provide relevant resume optimization guidance.
 Always reference the conversation history to understand the current discussion context, prioritize in-progress issues, and consider any resume modifications the user has made.
 
+IMPORTANT: When providing patchOps for resume modifications, ensure the language and content in the patchOps matches the language of the current resume. If the resume is in Chinese, all patchOps content should be in Chinese. If the resume is in English, all patchOps content should be in English. Maintain consistency with the existing resume language throughout all suggested modifications.
+
 <conversation_history>
 ${conversationHistory}
 

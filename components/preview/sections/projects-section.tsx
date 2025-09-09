@@ -1,3 +1,4 @@
+import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
@@ -21,6 +22,9 @@ interface ProjectsSectionProps {
 }
 
 export default function ProjectsSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: ProjectsSectionProps) {
+  const resumeEditor = useResumeEditor();
+  const getInlineIds = resumeEditor?.getInlineIds || ((groupId: string, length: number) => Array.from({ length }, (_, i) => `fallback-${groupId}-${i}`));
+
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getProjectStyle(template);
@@ -79,7 +83,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
               </div>
               {project.outcomes && project.outcomes.length > 0 && (
                 <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'mt-1 list-disc list-inside')}>
-                   {project.outcomes.map((achievement, achievementIndex) => (
+                   {(project.outcomes || []).map((achievement, achievementIndex) => (
                      <li key={achievementIndex}>
                        {inlineEditable ? (
                          <InlineText
@@ -157,27 +161,31 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
             </div>
                {project.outcomes && project.outcomes.length > 0 && (
                <ul className={styles.achievementList}>
-                 {project.outcomes.map((achievement, achIndex) => (
-                   <li key={achIndex} className={styles.achievement}>
+                {(() => {
+                  const groupId = `projects-${index}-outcomes`;
+                  const ids = getInlineIds(groupId, (project.outcomes || []).length);
+                  return (project.outcomes || []).map((achievement, achIndex) => (
+                  <li key={ids[achIndex] ?? achIndex} className={styles.achievement} data-inline-group={groupId} data-inline-order={achIndex}>
                      {inlineEditable ? (
                        <InlineText
                          text={achievement}
                          inlineEditable
                          isBullet
-                         groupId={`projects-${index}-outcomes`}
+                         groupId={groupId}
                          navOrder={sectionBase + index * 10000 + 100 + achIndex}
                          highlightType={highlightForPath?.(`projects[${index}].outcomes[${achIndex}]`)}
                          previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.before}
                          previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achIndex}]`)?.after}
                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].outcomes`, index: achIndex })}
-                         onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, index: achIndex })}
+                         onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, bulletId: ids[achIndex] })}
                          onChange={(t) => onInlineChange?.({ path: `projects[${index}].outcomes[${achIndex}]`, value: t })}
                        />
                      ) : (
                        highlightText(achievement, annotations)
                      )}
                    </li>
-                 ))}
+                ))
+                })()}
                </ul>
              )}
           </div>

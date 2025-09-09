@@ -4,7 +4,7 @@ import ResumePreview from '@/components/preview/resume-preview';
 import ZoomToolbar from '@/components/smart-chat/zoom-toolbar';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ResumeEditorProvider, useResumeEditor } from './context/resume-editor-context';
+import { ResumeEditorProvider, useResumeEditorRequired } from './context/resume-editor-context';
 
 interface ResumeEditorPreviewProps {
   template: ResumeTemplate;
@@ -12,7 +12,7 @@ interface ResumeEditorPreviewProps {
 }
 
 function ResumeEditorPreviewInner({ template }: ResumeEditorPreviewProps) {
-  const { optimized, isPreviewing, previewOps, previewDiffs, getPreviewedResume, handleInlineChange, handleUpdateOptimized } = useResumeEditor();
+  const { optimized, isPreviewing, previewOps, previewDiffs, getPreviewedResume, handleInlineChange, handleUpdateOptimized } = useResumeEditorRequired();
   const [scale, setScale] = useState<number>(1);
   const [translate, setTranslate] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
