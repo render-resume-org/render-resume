@@ -20,9 +20,11 @@ interface InlineTextProps {
   groupId?: string;
   // Global navigation order across resume; smaller first. When omitted, DOM order is used
   navOrder?: number;
+  // Custom key down handler
+  onKeyDown?: (e: React.KeyboardEvent<HTMLSpanElement>) => void;
 }
 
-export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline', navOrder }: InlineTextProps) {
+export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline', navOrder, onKeyDown: customOnKeyDown }: InlineTextProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLSpanElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -308,6 +310,12 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
+
+    // Call custom key down handler first
+    if (customOnKeyDown) {
+      customOnKeyDown(e);
+      if (e.defaultPrevented) return;
+    }
 
     // Don't handle Enter key during Chinese composition
     if (isComposing && e.key === 'Enter') {

@@ -45,6 +45,11 @@ interface ResumeEditorContextValue {
   // Focus management API
   focusInlineElement: (target: FocusTarget) => void;
   focusAfterRemove: (groupId: string, removedIndex: number) => void;
+  // Skills management API
+  addSkillCategory: () => void;
+  addSkillItem: (categoryIndex: number) => void;
+  removeSkillItem: (categoryIndex: number, itemIndex: number) => void;
+  removeSkillCategory: (categoryIndex: number) => void;
 }
 
 const ResumeEditorContext = createContext<ResumeEditorContextValue | null>(null);
@@ -145,6 +150,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     }, 10);
   }, []);
 
+
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('resume');
@@ -163,6 +169,98 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     setUnified(nextUnified);
     try { sessionStorage.setItem('resume', JSON.stringify(nextUnified)); } catch {}
   }, []);
+
+  // Skills management API
+  const addSkillCategory = useCallback(() => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    updated.skills.push({ category: '', items: [''] });
+    persist(updated);
+    // Focus the new category name (not the colon)
+    requestAnimationFrame(() => {
+      const newIndex = updated.skills.length - 1;
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+        detail: { 
+          groupId: `skills-${newIndex}-category`, 
+          index: 0, 
+          position: 'start' 
+        } 
+      }));
+    });
+  }, [optimized, persist]);
+
+  const addSkillItem = useCallback((categoryIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    if (!updated.skills[categoryIndex]) return;
+    if (!updated.skills[categoryIndex].items) {
+      updated.skills[categoryIndex].items = [];
+    }
+    updated.skills[categoryIndex].items.push('');
+    persist(updated);
+    // Focus the new item (immediately after DOM commit)
+    requestAnimationFrame(() => {
+      const newItemIndex = updated.skills[categoryIndex].items.length - 1;
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+        detail: { 
+          groupId: `skills-${categoryIndex}-items`, 
+          index: newItemIndex, 
+          position: 'start' 
+        } 
+      }));
+    });
+  }, [optimized, persist]);
+
+  const removeSkillItem = useCallback((categoryIndex: number, itemIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    if (!updated.skills[categoryIndex]?.items) return;
+    updated.skills[categoryIndex].items.splice(itemIndex, 1);
+    persist(updated);
+    // Focus the previous item or category if no items left
+    requestAnimationFrame(() => {
+      const remainingItems = updated.skills[categoryIndex].items.length;
+      if (remainingItems > 0) {
+        const focusIndex = Math.max(0, itemIndex - 1);
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${categoryIndex}-items`, 
+            index: focusIndex, 
+            position: 'end' 
+          } 
+        }));
+      } else {
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${categoryIndex}-category`, 
+            index: 0, 
+            position: 'end' 
+          } 
+        }));
+      }
+    });
+  }, [optimized, persist]);
+
+  const removeSkillCategory = useCallback((categoryIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    updated.skills.splice(categoryIndex, 1);
+    persist(updated);
+    // Focus the previous category
+    requestAnimationFrame(() => {
+      const remainingCategories = updated.skills.length;
+      if (remainingCategories > 0) {
+        const focusIndex = Math.max(0, categoryIndex - 1);
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${focusIndex}-category`, 
+            index: 0, 
+            position: 'end' 
+          } 
+        }));
+      }
+    });
+  }, [optimized, persist]);
 
   const getDefaultInsertValue = useCallback((containerName: string, value: unknown): unknown => {
     if (containerName === 'experience') {
@@ -996,7 +1094,11 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     resolveIndexById,
     focusInlineElement,
     focusAfterRemove,
-  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview, getInlineIds, resolveIndexById, focusInlineElement, focusAfterRemove]);
+    addSkillCategory,
+    addSkillItem,
+    removeSkillItem,
+    removeSkillCategory,
+  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview, getInlineIds, resolveIndexById, focusInlineElement, focusAfterRemove, addSkillCategory, addSkillItem, removeSkillItem, removeSkillCategory]);
 
   return (
     <ResumeEditorContext.Provider value={value}>
