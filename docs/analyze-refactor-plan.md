@@ -30,7 +30,7 @@
     summary: string,
     achievements: Array<{ title, organization, period, description, outcomes }>,
     experience: Array<{ title, company, period, description, outcomes }>,
-    education: Array<{ degree, school, period, gpa, relevant_courses, outcomes }>,
+    education: Array<{ degree, school, period, gpa, outcomes }>,
     projects: Array<{ name, description, technologies, outcomes }>,
     skills: Array<{ category: string, items: string[] }>
   },

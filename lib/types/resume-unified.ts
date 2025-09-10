@@ -36,7 +36,6 @@ export const UnifiedResumeBlockSchemas = {
     school: z.string(),
     period: z.string().optional(),
     gpa: z.string().optional(),
-    relevant_courses: z.array(z.string()).optional(),
     outcomes: z.array(z.string()).optional()
   }),
   project: z.object({

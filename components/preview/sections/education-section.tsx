@@ -1,3 +1,4 @@
+import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import type { InlineChangeHandler } from '@/lib/types/inline-edit';
@@ -20,6 +21,8 @@ interface EducationSectionProps {
 }
 
 export default function EducationSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: EducationSectionProps) {
+  const resumeEditor = useResumeEditor();
+  const getInlineIds = resumeEditor?.getInlineIds || ((groupId: string, length: number) => Array.from({ length }, (_, i) => `fallback-${groupId}-${i}`));
   const { font, spacing, styles } = template;
 
   if (!data || data.length === 0) return null;
@@ -105,30 +108,34 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                  </span>
               </div>
               {education.outcomes && education.outcomes.length > 0 && (
-                <ul className={cn(font.sizes.caption, 'text-black mt-1 list-disc list-inside')}>
-                  {education.outcomes.map((outcome, outcomeIndex) => (
-                    <li key={outcomeIndex}>
-                      {inlineEditable ? (
-                        <InlineText 
-                          text={outcome} 
-                          inlineEditable 
-                          isBullet
-                          groupId={`education-${index}-outcomes`}
-                          navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
-                          highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
-                          previewOriginal={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.before}
-                          previewReplaceWith={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.after}
-                          onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
-                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
-                          onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
-                        />
-                      ) : (
-                        highlightText(outcome, annotations)
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                <ul className={cn(font.sizes.caption, 'text-black mt-1 space-y-1')}>
+                {(() => {
+                  const groupId = `education-${index}-outcomes`;
+                  const ids = getInlineIds(groupId, (education.outcomes || []).length);
+                  return (education.outcomes || []).map((outcome, outcomeIndex) => (
+                  <li key={ids[outcomeIndex] ?? outcomeIndex} className={cn(font.sizes.caption, 'text-black list-disc list-outside ml-4')} data-inline-group={groupId} data-inline-order={outcomeIndex}>
+                    {inlineEditable ? (
+                      <InlineText 
+                        text={outcome} 
+                        inlineEditable 
+                        isBullet
+                        groupId={groupId}
+                        navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
+                        highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
+                        previewOriginal={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.before}
+                        previewReplaceWith={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.after}
+                        onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
+                        onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `education[${index}].outcomes`, bulletId: ids[outcomeIndex] })}
+                        onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
+                      />
+                    ) : (
+                      highlightText(outcome, annotations)
+                    )}
+                  </li>
+                ))
+                })()}
+              </ul>
+            )}
             </div>
           ))}
         </div>
@@ -222,6 +229,35 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                   education.honor
                 )}
               </p>
+            )}
+            {education.outcomes && education.outcomes.length > 0 && (
+              <ul className={cn(font.sizes.caption, 'text-black mt-1 space-y-1')}>
+                {(() => {
+                  const groupId = `education-${index}-outcomes`;
+                  const ids = getInlineIds(groupId, (education.outcomes || []).length);
+                  return (education.outcomes || []).map((outcome, outcomeIndex) => (
+                  <li key={ids[outcomeIndex] ?? outcomeIndex} className={cn(font.sizes.caption, 'text-black list-disc list-outside ml-4')} data-inline-group={groupId} data-inline-order={outcomeIndex}>
+                    {inlineEditable ? (
+                      <InlineText 
+                        text={outcome} 
+                        inlineEditable 
+                        isBullet
+                        groupId={groupId}
+                        navOrder={sectionBase + index * 10000 + 200 + outcomeIndex}
+                        highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
+                        previewOriginal={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.before}
+                        previewReplaceWith={getPreviewValueForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)?.after}
+                        onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `education[${index}].outcomes`, index: outcomeIndex })}
+                        onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `education[${index}].outcomes`, bulletId: ids[outcomeIndex] })}
+                        onChange={(t) => onInlineChange?.({ path: `education[${index}].outcomes[${outcomeIndex}]`, value: t })} 
+                      />
+                    ) : (
+                      highlightText(outcome, annotations)
+                    )}
+                  </li>
+                ))
+                })()}
+              </ul>
             )}
           </div>
         ))}

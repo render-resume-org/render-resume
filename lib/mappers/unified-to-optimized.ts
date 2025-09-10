@@ -36,7 +36,7 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       major: '',
       school: e.school || '',
       period: e.period || '',
-      outcomes: (e.relevant_courses || []).concat(e.outcomes || []),
+      outcomes: e.outcomes || [],
       gpa: e.gpa,
       honor: undefined,
     })),

@@ -365,7 +365,13 @@ function parseAIResponse(completion: string): ChatResponse {
       console.log('🔍 [Parser] PatchOps before:', parsed.suggestion.patchOps);
       // Normalize ops and coerce common mistakes (e.g., using set on array paths)
       const normalized = parsed.suggestion.patchOps
-        .filter(op => op && typeof op.path === 'string' && (op.op === 'set' || op.op === 'insert' || op.op === 'remove'))
+        .filter(op => {
+          const isValid = op && typeof op.path === 'string' && (op.op === 'set' || op.op === 'insert' || op.op === 'remove');
+          if (!isValid) {
+            console.log('❌ [Parser] Invalid op filtered out:', op);
+          }
+          return isValid;
+        })
         .map(op => {
           // Helper: path predicates
           const isArrayContainerPath = (p: string) => /(outcomes|items)$/.test(p) || /^(experience|projects|achievements|education|skills)$/.test(p);
@@ -382,6 +388,7 @@ function parseAIResponse(completion: string): ChatResponse {
           }
           // Ensure insert keeps object values as-is; strings remain strings
           if (op.op === 'insert') {
+            console.log('🔍 [Parser] Processing insert op:', { path: op.path, value: op.value, valueType: typeof op.value });
             return {
               op: 'insert' as const,
               path: op.path,
@@ -398,6 +405,8 @@ function parseAIResponse(completion: string): ChatResponse {
           }
           return op as PatchOp | InsertOp | RemoveOp;
         });
+
+      console.log('🔍 [Parser] PatchOps after normalization:', normalized);
 
       // Additional coercion: set on section arrays with string/object → insert section object
       parsed.suggestion.patchOps = normalized.map(op => {

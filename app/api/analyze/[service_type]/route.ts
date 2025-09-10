@@ -52,7 +52,7 @@ function normalizeUnifiedOutput(result: unknown): unknown {
       };
     });
   };
-  const normalizeEducation = (arr: unknown): Array<{ degree: string; school: string; period?: string; gpa?: string; relevant_courses: string[]; outcomes: string[] }> => {
+  const normalizeEducation = (arr: unknown): Array<{ degree: string; school: string; period?: string; gpa?: string; outcomes: string[] }> => {
     if (!Array.isArray(arr)) return [];
     return arr.map((e) => {
       const v = asObject(e);
@@ -61,7 +61,6 @@ function normalizeUnifiedOutput(result: unknown): unknown {
         school: String(v.school ?? v.institution ?? ''),
         period: v.period ? String(v.period) : (v.duration ? String(v.duration) : undefined),
         gpa: v.gpa ? String(v.gpa) : undefined,
-        relevant_courses: toStringArray(v.relevant_courses ?? v.courses),
         outcomes: toStringArray(v.outcomes),
       };
     });

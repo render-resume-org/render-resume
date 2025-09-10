@@ -6,7 +6,7 @@ import { calculateStringSimilarity } from '@/lib/similarity';
 import type { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResume } from '@/lib/types/resume-unified';
 import { setByPath } from '@/lib/utils/set-by-path';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 // Local types copied from original file to avoid deep import
 export type ArrayContainer = unknown[];
@@ -16,6 +16,14 @@ export type PathNavigationResult = { container: ArrayContainer | null; lastKey: 
 export type PatchOp = { op: 'set'; path: string; value: string };
 export type InsertOp = { op: 'insert'; path: string; value: unknown; index?: number };
 export type RemoveOp = { op: 'remove'; path: string; index?: number };
+
+// Focus management types
+export type FocusTarget = {
+  groupId: string;
+  index: number;
+  position: 'start' | 'end';
+  bulletId?: string;
+};
 
 interface ResumeEditorContextValue {
   unified: UnifiedResume | null;
@@ -32,11 +40,26 @@ interface ResumeEditorContextValue {
   handleUpdateOptimized: (next: OptimizedResume) => void;
   acceptPreview: () => void;
   rejectPreview: () => void;
+  getInlineIds: (groupId: string, length: number) => string[];
+  resolveIndexById: (groupId: string, id: string) => number;
+  // Focus management API
+  focusInlineElement: (target: FocusTarget) => void;
+  focusAfterRemove: (groupId: string, removedIndex: number) => void;
+  // Skills management API
+  addSkillCategory: () => void;
+  addSkillItem: (categoryIndex: number) => void;
+  removeSkillItem: (categoryIndex: number, itemIndex: number) => void;
+  removeSkillCategory: (categoryIndex: number) => void;
 }
 
 const ResumeEditorContext = createContext<ResumeEditorContextValue | null>(null);
 
-export function useResumeEditor(): ResumeEditorContextValue {
+export function useResumeEditor(): ResumeEditorContextValue | null {
+  const ctx = useContext(ResumeEditorContext);
+  return ctx;
+}
+
+export function useResumeEditorRequired(): ResumeEditorContextValue {
   const ctx = useContext(ResumeEditorContext);
   if (!ctx) throw new Error('useResumeEditor must be used within ResumeEditorProvider');
   return ctx;
@@ -68,6 +91,65 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
   const [previewOps, setPreviewOps] = useState<Array<PatchOp | InsertOp | RemoveOp> | null>(null);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewDiffs, setPreviewDiffs] = useState<Record<string, { before?: string; after?: string }>>({});
+  const [, setInlineIds] = useState<Record<string, string[]>>({});
+  const inlineIdsRef = useRef<Record<string, string[]>>({});
+  const pendingUpdatesRef = useRef<Record<string, string[]>>({});
+
+  const generateUuid = useCallback((): string => {
+    try { return (globalThis as unknown as { crypto?: { randomUUID?: () => string } }).crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2); } catch { return Math.random().toString(36).slice(2); }
+  }, []);
+
+  // Effect to handle pending inline ID updates
+  useEffect(() => {
+    const pending = pendingUpdatesRef.current;
+    if (Object.keys(pending).length > 0) {
+      setInlineIds(prev => ({ ...prev, ...pending }));
+      pendingUpdatesRef.current = {};
+    }
+  }, []);
+
+  const getInlineIds = useCallback((groupId: string, length: number): string[] => {
+    let current = inlineIdsRef.current[groupId];
+    if (!current || current.length !== length) {
+      const nextArr: string[] = Array.from({ length }, (_, i) => (current && current[i]) ? current[i] : generateUuid());
+      // Update ref immediately for synchronous access
+      inlineIdsRef.current = { ...inlineIdsRef.current, [groupId]: nextArr };
+      // Queue state update for next effect cycle
+      pendingUpdatesRef.current = { ...pendingUpdatesRef.current, [groupId]: nextArr };
+      current = nextArr;
+    }
+    return current;
+  }, [generateUuid]);
+
+  const resolveIndexById = useCallback((groupId: string, id: string): number => {
+    const arr = inlineIdsRef.current[groupId];
+    if (!arr) return -1;
+    return arr.indexOf(id);
+  }, []);
+
+  // Focus management API
+  const focusInlineElement = useCallback((target: FocusTarget) => {
+    setTimeout(() => {
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: target }));
+    }, 50);
+  }, []);
+
+  const focusAfterRemove = useCallback((groupId: string, removedIndex: number) => {
+    setTimeout(() => {
+      const focusIndex = Math.max(0, removedIndex - 1);
+      const focusIds = inlineIdsRef.current[groupId] || [];
+      const focusBulletId = focusIds[focusIndex];
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+        detail: { 
+          groupId, 
+          index: focusIndex, 
+          position: 'end',
+          bulletId: focusBulletId 
+        } 
+      }));
+    }, 10);
+  }, []);
+
 
   useEffect(() => {
     try {
@@ -87,6 +169,98 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     setUnified(nextUnified);
     try { sessionStorage.setItem('resume', JSON.stringify(nextUnified)); } catch {}
   }, []);
+
+  // Skills management API
+  const addSkillCategory = useCallback(() => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    updated.skills.push({ category: '', items: [''] });
+    persist(updated);
+    // Focus the new category name (not the colon)
+    requestAnimationFrame(() => {
+      const newIndex = updated.skills.length - 1;
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+        detail: { 
+          groupId: `skills-${newIndex}-category`, 
+          index: 0, 
+          position: 'start' 
+        } 
+      }));
+    });
+  }, [optimized, persist]);
+
+  const addSkillItem = useCallback((categoryIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    if (!updated.skills[categoryIndex]) return;
+    if (!updated.skills[categoryIndex].items) {
+      updated.skills[categoryIndex].items = [];
+    }
+    updated.skills[categoryIndex].items.push('');
+    persist(updated);
+    // Focus the new item (immediately after DOM commit)
+    requestAnimationFrame(() => {
+      const newItemIndex = updated.skills[categoryIndex].items.length - 1;
+      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+        detail: { 
+          groupId: `skills-${categoryIndex}-items`, 
+          index: newItemIndex, 
+          position: 'start' 
+        } 
+      }));
+    });
+  }, [optimized, persist]);
+
+  const removeSkillItem = useCallback((categoryIndex: number, itemIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    if (!updated.skills[categoryIndex]?.items) return;
+    updated.skills[categoryIndex].items.splice(itemIndex, 1);
+    persist(updated);
+    // Focus the previous item or category if no items left
+    requestAnimationFrame(() => {
+      const remainingItems = updated.skills[categoryIndex].items.length;
+      if (remainingItems > 0) {
+        const focusIndex = Math.max(0, itemIndex - 1);
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${categoryIndex}-items`, 
+            index: focusIndex, 
+            position: 'end' 
+          } 
+        }));
+      } else {
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${categoryIndex}-category`, 
+            index: 0, 
+            position: 'end' 
+          } 
+        }));
+      }
+    });
+  }, [optimized, persist]);
+
+  const removeSkillCategory = useCallback((categoryIndex: number) => {
+    if (!optimized) return;
+    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    updated.skills.splice(categoryIndex, 1);
+    persist(updated);
+    // Focus the previous category
+    requestAnimationFrame(() => {
+      const remainingCategories = updated.skills.length;
+      if (remainingCategories > 0) {
+        const focusIndex = Math.max(0, categoryIndex - 1);
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${focusIndex}-category`, 
+            index: 0, 
+            position: 'end' 
+          } 
+        }));
+      }
+    });
+  }, [optimized, persist]);
 
   const getDefaultInsertValue = useCallback((containerName: string, value: unknown): unknown => {
     if (containerName === 'experience') {
@@ -162,11 +336,40 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
   const handleInlineChange = useCallback((path: string, next: unknown) => {
     if (!optimized) return;
     const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
+    type BulletPayload = { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number; bulletId?: string };
+    const getGroupIdForPath = (p: string): string | null => {
+      const m = p.match(/^(experience|projects|education|achievements)\[(\d+)\]\.outcomes$/);
+      if (m) return `${m[1]}-${Number(m[2])}-outcomes`;
+      const s = p.match(/^skills\[(\d+)\]\.items$/);
+      if (s) return `skills-${Number(s[1])}-items`;
+      return null;
+    };
+    const updateIdsOnInsert = (groupId: string, at: number) => {
+      const arr = inlineIdsRef.current[groupId] ? [...inlineIdsRef.current[groupId]] : [];
+      if (at < 0 || at > arr.length) arr.length = Math.max(arr.length, at);
+      arr.splice(at, 0, generateUuid());
+      inlineIdsRef.current = { ...inlineIdsRef.current, [groupId]: arr };
+      pendingUpdatesRef.current = { ...pendingUpdatesRef.current, [groupId]: arr };
+    };
+    const updateIdsOnRemove = (groupId: string, at: number) => {
+      const arr = inlineIdsRef.current[groupId] ? [...inlineIdsRef.current[groupId]] : [];
+      if (at >= 0 && at < arr.length) arr.splice(at, 1);
+      inlineIdsRef.current = { ...inlineIdsRef.current, [groupId]: arr };
+      pendingUpdatesRef.current = { ...pendingUpdatesRef.current, [groupId]: arr };
+    };
     
     // Helper: detect whether a path is inside an inserted preview (so base data may not exist yet)
     const isPathUnderInsert = (p: string): boolean => {
       if (!isPreviewing || !previewOps?.length) return false;
       return previewOps.some(op => op.op === 'insert' && (p === op.path || p.startsWith(op.path + '.')));
+    };
+    // New helper: detect whether an array container is affected by any preview insert
+    const isContainerUnderInsert = (containerPath: string): boolean => {
+      if (!isPreviewing || !previewOps?.length) return false;
+      return previewOps.some(op => {
+        if (op.op !== 'insert') return false;
+        return op.path.startsWith(containerPath + '[') || containerPath.startsWith(op.path + '.') || op.path === containerPath;
+      });
     };
     // Helper: when editing preview-only content, store edits in previewDiffs instead of mutating base
     const writePreviewOnlyEdit = (p: string, value: string) => {
@@ -179,7 +382,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     if (path === 'summary') {
       updated.summary = String(next ?? '');
     } else if (path === 'experience') {
-      const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      const payload = next as BulletPayload;
       // Redirect edits to preview store if they target preview-only inserted content
       if (payload?.path && isPathUnderInsert(payload.path) && payload.value !== undefined) {
         writePreviewOnlyEdit(payload.path, String(payload.value ?? ''));
@@ -190,25 +393,39 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
-          updated.experience[idx].outcomes!.splice(insertAt, 0, '');
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 50);
+          const gid = getGroupIdForPath(payload.path);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'insert', path: `${payload.path}[${insertAt}]`, value: '' }]));
+          } else {
+            if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
+            updated.experience[idx].outcomes!.splice(insertAt, 0, '');
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            persist(updated);
+          }
+          focusInlineElement({ groupId: `experience-${idx}-outcomes`, index: insertAt, position: 'start' });
           return;
         }
-      } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
+      } else if (payload?.action === 'removeBullet' && payload.path) {
         const m = payload.path.match(/^experience\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
-          const removeAt = payload.index;
-          if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
-          updated.experience[idx].outcomes!.splice(removeAt, 1);
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `experience-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
-          }, 10);
+          let removeAt = typeof payload.index === 'number' ? payload.index : -1;
+          const gid = getGroupIdForPath(payload.path);
+          if (gid && payload.bulletId) {
+            const resolved = resolveIndexById(gid, payload.bulletId);
+            if (resolved >= 0) removeAt = resolved;
+          }
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'remove', path: `${payload.path}[${removeAt}]` }]));
+          } else {
+            if (!updated.experience[idx].outcomes) updated.experience[idx].outcomes = [];
+            updated.experience[idx].outcomes!.splice(removeAt, 1);
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            persist(updated);
+          }
+          focusAfterRemove(`experience-${idx}-outcomes`, removeAt);
           return;
         }
       } else if (payload?.path) {
@@ -235,31 +452,45 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         }
       }
     } else if (path === 'projects') {
-      const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      const payload = next as BulletPayload;
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
         const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
-          updated.projects[idx].outcomes!.splice(insertAt, 0, '');
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 50);
+          const gid = getGroupIdForPath(payload.path);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'insert', path: `${payload.path}[${insertAt}]`, value: '' }]));
+          } else {
+            if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
+            updated.projects[idx].outcomes!.splice(insertAt, 0, '');
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            persist(updated);
+          }
+          focusInlineElement({ groupId: `projects-${idx}-outcomes`, index: insertAt, position: 'start' });
           return;
         }
-      } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
+      } else if (payload?.action === 'removeBullet' && payload.path) {
         const m = payload.path.match(/^projects\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
-          const removeAt = payload.index;
-          if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
-          updated.projects[idx].outcomes!.splice(removeAt, 1);
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `projects-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
-          }, 10);
+          let removeAt = typeof payload.index === 'number' ? payload.index : -1;
+          const gid = getGroupIdForPath(payload.path);
+          if (gid && payload.bulletId) {
+            const resolved = resolveIndexById(gid, payload.bulletId);
+            if (resolved >= 0) removeAt = resolved;
+          }
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'remove', path: `${payload.path}[${removeAt}]` }]));
+          } else {
+            if (!updated.projects[idx].outcomes) updated.projects[idx].outcomes = [];
+            updated.projects[idx].outcomes!.splice(removeAt, 1);
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            persist(updated);
+          }
+          focusAfterRemove(`projects-${idx}-outcomes`, removeAt);
           return;
         }
       } else if (payload?.path) {
@@ -284,35 +515,49 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         }
       }
     } else if (path === 'education') {
-      const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      const payload = next as BulletPayload;
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
         const m = payload.path.match(/^education\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
-          updated.education[idx].outcomes!.splice(insertAt, 0, '');
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `education-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 50);
+          const gid = getGroupIdForPath(payload.path);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'insert', path: `${payload.path}[${insertAt}]`, value: '' }]));
+          } else {
+            if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
+            updated.education[idx].outcomes!.splice(insertAt, 0, '');
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            persist(updated);
+          }
+          focusInlineElement({ groupId: `education-${idx}-outcomes`, index: insertAt, position: 'start' });
           return;
         }
-      } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
+      } else if (payload?.action === 'removeBullet' && payload.path) {
         const m = payload.path.match(/^education\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
-          const removeAt = payload.index;
-          if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
-          if (updated.education[idx].outcomes!.length <= 1) {
-            updated.education[idx].outcomes![0] = '';
-          } else {
-            updated.education[idx].outcomes!.splice(removeAt, 1);
+          let removeAt = typeof payload.index === 'number' ? payload.index : -1;
+          const gid = getGroupIdForPath(payload.path);
+          if (gid && payload.bulletId) {
+            const resolved = resolveIndexById(gid, payload.bulletId);
+            if (resolved >= 0) removeAt = resolved;
           }
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `education-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
-          }, 10);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'remove', path: `${payload.path}[${removeAt}]` }]));
+          } else {
+            if (!updated.education[idx].outcomes) updated.education[idx].outcomes = [];
+            if (updated.education[idx].outcomes!.length <= 1) {
+              updated.education[idx].outcomes![0] = '';
+            } else {
+              updated.education[idx].outcomes!.splice(removeAt, 1);
+            }
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            persist(updated);
+          }
+          focusAfterRemove(`education-${idx}-outcomes`, removeAt);
           return;
         }
       } else if (payload?.path) {
@@ -340,35 +585,49 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         }
       }
     } else if (path === 'achievements') {
-      const payload = next as { path?: string; value?: string; action?: 'addBullet' | 'removeBullet'; index?: number };
+      const payload = next as BulletPayload;
       if (payload?.action === 'addBullet' && typeof payload.index === 'number' && payload.path) {
         const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
           const insertAt = payload.index + 1;
-          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
-          updated.achievements![idx].outcomes!.splice(insertAt, 0, '');
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: insertAt, position: 'start' } }));
-          }, 50);
+          const gid = getGroupIdForPath(payload.path);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'insert', path: `${payload.path}[${insertAt}]`, value: '' }]));
+          } else {
+            if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+            updated.achievements![idx].outcomes!.splice(insertAt, 0, '');
+            if (gid) updateIdsOnInsert(gid, insertAt);
+            persist(updated);
+          }
+          focusInlineElement({ groupId: `achievements-${idx}-outcomes`, index: insertAt, position: 'start' });
           return;
         }
-      } else if (payload?.action === 'removeBullet' && typeof payload.index === 'number' && payload.path) {
+      } else if (payload?.action === 'removeBullet' && payload.path) {
         const m = payload.path.match(/^achievements\[(\d+)\]\.outcomes$/);
         if (m) {
           const idx = Number(m[1]);
-          const removeAt = payload.index;
-          if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
-          if (updated.achievements![idx].outcomes!.length <= 1) {
-            updated.achievements![idx].outcomes![0] = '';
-          } else {
-            updated.achievements![idx].outcomes!.splice(removeAt, 1);
+          let removeAt = typeof payload.index === 'number' ? payload.index : -1;
+          const gid = getGroupIdForPath(payload.path);
+          if (gid && payload.bulletId) {
+            const resolved = resolveIndexById(gid, payload.bulletId);
+            if (resolved >= 0) removeAt = resolved;
           }
-          persist(updated);
-          setTimeout(() => {
-            document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: `achievements-${idx}-outcomes`, index: Math.max(0, removeAt - 1), position: 'end' } }));
-          }, 10);
+          if (isContainerUnderInsert(payload.path)) {
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            setPreviewOps(prev => ([...(prev || []), { op: 'remove', path: `${payload.path}[${removeAt}]` }]));
+          } else {
+            if (!updated.achievements![idx].outcomes) updated.achievements![idx].outcomes = [];
+            if (updated.achievements![idx].outcomes!.length <= 1) {
+              updated.achievements![idx].outcomes![0] = '';
+            } else {
+              updated.achievements![idx].outcomes!.splice(removeAt, 1);
+            }
+            if (gid) updateIdsOnRemove(gid, removeAt);
+            persist(updated);
+          }
+          focusAfterRemove(`achievements-${idx}-outcomes`, removeAt);
           return;
         }
       } else if (payload?.path) {
@@ -418,7 +677,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
       }
     }
     persist(updated);
-  }, [optimized, persist, isPreviewing, previewOps, setPreviewDiffs]);
+  }, [optimized, persist, isPreviewing, previewOps, setPreviewDiffs, setPreviewOps, focusInlineElement, focusAfterRemove]);
 
   // Patch operations handling
   useEffect(() => {
@@ -544,27 +803,61 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         return null;
       };
 
-      // Normalize and resolve paths (including neighbor resolution for set/insert)
-      const normalizedPatchOps = detail.patchOps.map(op => {
-        if (op.op === 'set') {
-          return {
-            ...op,
-            path: resolveNeighborIndexIfNeeded(optimized, op.path, String(op.value ?? '')),
-          } as typeof op;
+      // Helper: compute base path and start index for inserts into array containers
+      const computeInsertBaseAndStart = (op: { path: string; index?: number }) => {
+        const normPath = normalizePath(op.path);
+        // If op.path already ends with [index], use that as start
+        const idxMatch = normPath.match(/\[(\d+)\]$/);
+        if (idxMatch) {
+          const base = normPath.replace(/\[(\d+)\]$/, '');
+          const start = typeof op.index === 'number' ? op.index : Number(idxMatch[1]);
+          return { base, start };
         }
-        if (op.op === 'insert') {
-          const targetPath = computeInsertTargetPath(op);
-          return {
-            ...op,
-            path: resolveNeighborIndexIfNeeded(optimized, targetPath, typeof op.value === 'string' ? op.value : ''),
-          } as typeof op;
+        // Otherwise, use container length or provided index
+        const { container } = getArrayInfo(optimized, normPath);
+        const start = typeof op.index === 'number' ? op.index : (container ? container.length : 0);
+        return { base: normPath, start };
+      };
+
+      // Normalize and resolve paths (including neighbor resolution for set/insert),
+      // and expand array-valued inserts for outcomes/items into multiple scalar inserts
+      const normalizedPatchOps: Array<PatchOp | InsertOp | RemoveOp> = [];
+      for (const rawOp of detail.patchOps) {
+        if (!rawOp || typeof rawOp.path !== 'string') continue;
+        if (rawOp.op === 'set') {
+          normalizedPatchOps.push({
+            ...rawOp,
+            path: resolveNeighborIndexIfNeeded(optimized, rawOp.path, String((rawOp as PatchOp).value ?? '')),
+          } as PatchOp);
+          continue;
         }
-        if (op.op === 'remove') {
-          const targetPath = computeRemoveTargetPath(op);
-          return targetPath ? { ...op, path: targetPath } as typeof op : op;
+        if (rawOp.op === 'insert') {
+          const isContainerPath = /(outcomes|items)$/.test(rawOp.path);
+          const isArrayValue = Array.isArray((rawOp as InsertOp).value);
+          if (isContainerPath && isArrayValue) {
+            const { base, start } = computeInsertBaseAndStart(rawOp);
+            const values = (rawOp as InsertOp).value as unknown[];
+            values.forEach((v, i) => {
+              const targetPath = `${base}[${start + i}]`;
+              const resolvedPath = resolveNeighborIndexIfNeeded(optimized, targetPath, typeof v === 'string' ? v : '');
+              normalizedPatchOps.push({ op: 'insert', path: resolvedPath, value: typeof v === 'string' ? v : String(v ?? '') } as InsertOp);
+            });
+          } else {
+            const targetPath = computeInsertTargetPath(rawOp);
+            normalizedPatchOps.push({
+              ...rawOp,
+              path: resolveNeighborIndexIfNeeded(optimized, targetPath, typeof (rawOp as InsertOp).value === 'string' ? (rawOp as InsertOp).value as string : ''),
+            } as InsertOp);
+          }
+          continue;
         }
-        return op;
-      });
+        if (rawOp.op === 'remove') {
+          const targetPath = computeRemoveTargetPath(rawOp);
+          normalizedPatchOps.push(targetPath ? { ...rawOp, path: targetPath } as RemoveOp : rawOp);
+          continue;
+        }
+        normalizedPatchOps.push(rawOp as PatchOp | InsertOp | RemoveOp);
+      }
 
       setPreviewOps(normalizedPatchOps);
       // Build preview diffs (before/after) from current optimized state
@@ -589,7 +882,17 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
               }
             } else if (op.op === 'insert') {
               // For insert, show added value as after; before is empty
-              diffs[op.path] = { before: '', after: typeof op.value === 'string' ? op.value : '[新增段落]' };
+              if (Array.isArray(op.value)) {
+                // If array of bullet lines is provided, join as multi-line preview for the same path
+                const afterValue = (op.value as unknown[]).map(v => String(v ?? '')).join('\n');
+                diffs[op.path] = { before: '', after: afterValue };
+              } else {
+                let afterValue = '[新增段落]';
+                if (typeof op.value === 'string' && op.value.trim() !== '') {
+                  afterValue = op.value;
+                }
+                diffs[op.path] = { before: '', after: afterValue };
+              }
             } else if (op.op === 'remove') {
               // For remove, show current content as before; after empty
               const currentVal = getByPath(optimized, op.path);
@@ -663,11 +966,17 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
           const arrayItems = cursor as unknown[];
           const parentKey = segments[segments.length - 2] || '';
           const isBulletArray = /outcomes$/.test(parentKey) || /items$/.test(parentKey);
-          const valueToInsert = isBulletArray
-            ? String(op.value as string ?? '')
-            : withDefaults(parentKey, op.value);
-          const boundedIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
-          arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
+          if (isBulletArray && Array.isArray(op.value)) {
+            const insertValues = (op.value as unknown[]).map(v => String(v ?? ''));
+            const start = Math.max(0, Math.min(numericIndex, arrayItems.length));
+            arrayItems.splice(start, 0, ...insertValues);
+          } else {
+            const valueToInsert = isBulletArray
+              ? String(op.value as string ?? '')
+              : withDefaults(parentKey, op.value);
+            const boundedIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
+            arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
+          }
         } else if (typeof cursor === 'object' && cursor !== null && lastKey in cursor) {
           // Case 2: op.path ends with an array key (fallback)
           const lastValue = (cursor as Record<string, unknown>)[lastKey];
@@ -679,11 +988,17 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
             const idxMatch = op.path.match(/\[(\d+)\]$/);
             const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayItems.length;
             const isBulletArray = /outcomes$/.test(String(lastKey)) || /items$/.test(String(lastKey));
-            const valueToInsert = isBulletArray
-              ? String(op.value as string ?? '')
-              : withDefaults(String(lastKey), op.value);
-            const boundedIndex = Math.max(0, Math.min(insertIndex, arrayItems.length));
-            arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
+            if (isBulletArray && Array.isArray(op.value)) {
+              const insertValues = (op.value as unknown[]).map(v => String(v ?? ''));
+              const start = Math.max(0, Math.min(insertIndex, arrayItems.length));
+              arrayItems.splice(start, 0, ...insertValues);
+            } else {
+              const valueToInsert = isBulletArray
+                ? String(op.value as string ?? '')
+                : withDefaults(String(lastKey), op.value);
+              const boundedIndex = Math.max(0, Math.min(insertIndex, arrayItems.length));
+              arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
+            }
           }
         }
       } else if (op.op === 'remove') {
@@ -709,6 +1024,12 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
               const removeIndex = typeof op.index === 'number' ? op.index : (idxMatch ? Number(idxMatch[1]) : -1);
               if (removeIndex >= 0 && removeIndex < (arrayContainer?.length ?? 0)) {
                 arrayContainer?.splice(removeIndex, 1);
+              }
+            } else {
+              // If removing an entire array field (e.g., experience[5].outcomes), set it to empty array
+              const isArrayField = /outcomes$/.test(lastKey) || /items$/.test(lastKey);
+              if (isArrayField) {
+                (cursor as Record<string, unknown>)[lastKey] = [];
               }
             }
           }
@@ -769,7 +1090,15 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     handleUpdateOptimized,
     acceptPreview,
     rejectPreview,
-  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview]);
+    getInlineIds,
+    resolveIndexById,
+    focusInlineElement,
+    focusAfterRemove,
+    addSkillCategory,
+    addSkillItem,
+    removeSkillItem,
+    removeSkillCategory,
+  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview, getInlineIds, resolveIndexById, focusInlineElement, focusAfterRemove, addSkillCategory, addSkillItem, removeSkillItem, removeSkillCategory]);
 
   return (
     <ResumeEditorContext.Provider value={value}>

@@ -16,7 +16,7 @@ ${note || '無'}
     "summary": string?,
     "achievements": Array<{ "title": string, "organization"?: string, "period"?: string, "description"?: string, "outcomes"?: string[] }>,
     "experience": Array<{ "title": string, "company"?: string, "period"?: string, "description"?: string, "outcomes"?: string[] }>,
-    "education": Array<{ "degree": string, "school": string, "period"?: string, "gpa"?: string, "relevant_courses"?: string[], "outcomes"?: string[] }>,
+    "education": Array<{ "degree": string, "school": string, "period"?: string, "gpa"?: string, "outcomes"?: string[] }>,
     "projects": Array<{ "name": string, "period"?: string, "description"?: string, "technologies"?: string[], "outcomes"?: string[] }>,
     "skills": Array<{ "category": string, "items": string[] }>
   }
