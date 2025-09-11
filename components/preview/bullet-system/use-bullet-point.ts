@@ -114,8 +114,34 @@ export function useBulletPoint({
       if (moved) {
         onRemoveBullet?.();
       }
+      return;
     }
-  }, [groupId, index, isCaretAtEnd, isEmpty, onAddBullet, onRemoveBullet]);
+    
+    // 箭頭鍵導航
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      BulletManager.focusPrevious(groupId, index);
+      return;
+    }
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      BulletManager.focusNext(groupId, index);
+      return;
+    }
+    
+    if (e.key === 'ArrowLeft' && isCaretAtStart()) {
+      e.preventDefault();
+      BulletManager.focusPrevious(groupId, index);
+      return;
+    }
+    
+    if (e.key === 'ArrowRight' && isCaretAtEnd()) {
+      e.preventDefault();
+      BulletManager.focusNext(groupId, index);
+      return;
+    }
+  }, [groupId, index, isCaretAtStart, isCaretAtEnd, isEmpty, onAddBullet, onRemoveBullet]);
   
   // 註冊到 BulletManager
   useEffect(() => {

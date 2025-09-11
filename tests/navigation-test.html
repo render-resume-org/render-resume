@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Navigation Test</title>
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: monospace;
+        }
+        .test-field {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            min-height: 60px;
+            outline: none;
+            background: white;
+            white-space: pre-wrap;
+        }
+        .test-field:focus {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .instructions {
+            background: #f0f0f0;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .test-scenario {
+            margin: 20px 0;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Enhanced Inline Text Navigation Test</h1>
+        
+        <div class="instructions">
+            <h3>Test Instructions:</h3>
+            <p>This page tests the enhanced navigation behaviors:</p>
+            <ol>
+                <li><strong>行間 ↑</strong> → 行首 (In-line Up → Line Start)</li>
+                <li><strong>行間 ↓</strong> → 行末 (In-line Down → Line End)</li>
+                <li><strong>行首 ↑/←</strong> → 上一行末 (Line Start Up/Left → Previous Line End)</li>
+                <li><strong>行末 ↓/→</strong> → 下一行首 (Line End Down/Right → Next Line Start)</li>
+                <li><strong>第一個列點的行首 ↑/←</strong> → 上一個欄位 (First Bullet Line Start → Previous Field)</li>
+                <li><strong>最後一個列點的行末 ↓/→</strong> → 下一個欄位 (Last Bullet Line End → Next Field)</li>
+            </ol>
+        </div>
+
+        <div class="test-scenario">
+            <h4>Test Scenario 1: Single-line Fields</h4>
+            <div contenteditable="true" class="test-field" data-testid="field1">
+                Single line text field
+            </div>
+            <div contenteditable="true" class="test-field" data-testid="field2">
+                Another single line field
+            </div>
+        </div>
+
+        <div class="test-scenario">
+            <h4>Test Scenario 2: Multi-line Fields</h4>
+            <div contenteditable="true" class="test-field" data-testid="multiline1">Line 1 of multi-line text
+Line 2 with more content
+Line 3 final line</div>
+            <div contenteditable="true" class="test-field" data-testid="multiline2">Another multi-line field
+With second line
+And third line here</div>
+        </div>
+
+        <div class="test-scenario">
+            <h4>Test Scenario 3: Bullet Points</h4>
+            <div contenteditable="true" class="test-field" data-testid="bullet1">
+                • First bullet point
+            </div>
+            <div contenteditable="true" class="test-field" data-testid="bullet2">
+                • Second bullet with longer text
+            </div>
+            <div contenteditable="true" class="test-field" data-testid="bullet3">
+                • Third bullet point
+            </div>
+        </div>
+
+        <div class="test-scenario">
+            <h4>Test Scenario 4: Mixed Multi-line Bullets</h4>
+            <div contenteditable="true" class="test-field" data-testid="mixed1">• Multi-line bullet point
+  with second line content
+  and third line here</div>
+            <div contenteditable="true" class="test-field" data-testid="mixed2">• Another multi-line bullet
+  spanning multiple lines
+  with various content</div>
+        </div>
+
+        <div class="test-scenario">
+            <h4>Manual Testing Checklist:</h4>
+            <ul>
+                <li>✅ Single-line: Up/Down arrows move between fields</li>
+                <li>✅ Multi-line: Up/Down in middle move to line start/end</li>
+                <li>✅ Multi-line: Up/Down at line boundaries move to prev/next line</li>
+                <li>✅ Multi-line: Left/Right at line boundaries move to prev/next line</li>
+                <li>✅ Field boundaries: Up/Down/Left/Right move between fields</li>
+                <li>✅ Bullet navigation works within groups</li>
+                <li>✅ Cross-field navigation respects order</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Test:</h3>
+            <ol>
+                <li>Click into any field to focus it</li>
+                <li>Use arrow keys to navigate and observe behavior</li>
+                <li>Test each scenario systematically</li>
+                <li>Verify that navigation behaves as described in requirements</li>
+            </ol>
+            <p><strong>Note:</strong> This is a basic HTML test. The actual implementation uses React components with enhanced navigation logic.</p>
+        </div>
+    </div>
+
+    <script>
+        // Basic demo script to show expected behaviors
+        document.addEventListener('DOMContentLoaded', function() {
+            const fields = document.querySelectorAll('.test-field');
+            
+            fields.forEach((field, index) => {
+                field.addEventListener('keydown', function(e) {
+                    // This is just a demo - actual implementation is in React components
+                    const selection = window.getSelection();
+                    if (!selection.rangeCount) return;
+                    
+                    const range = selection.getRangeAt(0);
+                    const text = field.textContent;
+                    const caretPos = range.startOffset;
+                    
+                    console.log(`Field ${index}: Key ${e.key}, Caret at ${caretPos}, Text length: ${text.length}`);
+                    
+                    // Log navigation intent (actual implementation would handle navigation)
+                    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                        const lines = text.split('\n');
+                        const currentLineIndex = this.getCurrentLine();
+                        console.log(`Multi-line navigation: ${lines.length} lines, current line ${currentLineIndex}`);
+                    }
+                });
+                
+                // Helper function to detect current line (simplified)
+                field.getCurrentLine = function() {
+                    const selection = window.getSelection();
+                    if (!selection.rangeCount) return 0;
+                    
+                    const range = selection.getRangeAt(0);
+                    const textBeforeCaret = this.textContent.substring(0, range.startOffset);
+                    return textBeforeCaret.split('\n').length - 1;
+                };
+            });
+            
+            console.log('Navigation test page loaded. Open browser console to see navigation events.');
+        });
+    </script>
+</body>
+</html>

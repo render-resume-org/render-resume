@@ -677,7 +677,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
       }
     }
     persist(updated);
-  }, [optimized, persist, isPreviewing, previewOps, setPreviewDiffs, setPreviewOps, focusInlineElement, focusAfterRemove]);
+  }, [optimized, persist, isPreviewing, previewOps, setPreviewDiffs, setPreviewOps, focusInlineElement, focusAfterRemove, generateUuid, resolveIndexById]);
 
   // Patch operations handling
   useEffect(() => {

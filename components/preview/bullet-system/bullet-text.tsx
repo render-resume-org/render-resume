@@ -43,8 +43,7 @@ export default function BulletText({
   const {
     elementRef,
     handleKeyDown,
-    handleInput,
-    focusElement
+    handleInput
   } = useBulletPoint({
     groupId,
     index,
@@ -92,7 +91,7 @@ export default function BulletText({
     if (element && !isEditing && element.innerText !== displayText) {
       element.innerText = displayText;
     }
-  }, [displayText, isEditing]);
+  }, [displayText, isEditing, elementRef]);
   
   return (
     <span
