@@ -239,7 +239,7 @@ function PdfSkillsSection({ data, template }: { data: OptimizedResume['skills'],
           <div key={index}>
             <p className={cnPdf(font.sizes.body, colors.text)}>
               <span className={cnPdf(font.sizes.body, colors.text, 'font-bold')}>{skillGroup.category}:</span>{' '}
-              {skillGroup.items.join(', ')}
+              {skillGroup.items}
             </p>
           </div>
         ))}
