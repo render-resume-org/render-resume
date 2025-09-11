@@ -1,4 +1,3 @@
-import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
@@ -7,6 +6,7 @@ import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import { Briefcase } from 'lucide-react';
+import { BulletText } from '../bullet-system';
 import InlineText from '../inline-text';
 import ResumeSection from '../resume-section';
 
@@ -22,9 +22,6 @@ interface ExperienceSectionProps {
 }
 
 export default function ExperienceSection({ data, template, onEdit, analysisResult, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: ExperienceSectionProps) {
-  const resumeEditor = useResumeEditor();
-  const getInlineIds = resumeEditor?.getInlineIds || ((groupId: string, length: number) => Array.from({ length }, (_, i) => `fallback-${groupId}-${i}`));
-
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getExperienceStyle(template);
@@ -100,17 +97,13 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                 </span>
               </div>
                <ul className={styles.achievementList}>
-                 {(() => {
-                   const groupId = `experience-${index}-outcomes`;
-                   const ids = getInlineIds(groupId, (job.outcomes || []).length);
-                   return (job.outcomes || []).map((achievement, achIndex) => (
-                   <li key={ids[achIndex] ?? achIndex} className={styles.achievement} data-inline-group={groupId} data-inline-order={achIndex}>
+                 {(job.outcomes || []).map((achievement, achIndex) => (
+                   <li key={achIndex} className={styles.achievement}>
                      {inlineEditable ? (
-                       <InlineText
+                       <BulletText
                          text={achievement}
-                         inlineEditable
-                         isBullet
-                         navOrder={sectionBase + index * 10000 + 100 + achIndex}
+                         groupId={`experience-${index}-outcomes`}
+                         index={achIndex}
                          highlightType={
                            highlightForPath?.(
                              `experience[${index}].outcomes[${achIndex}]`,
@@ -138,7 +131,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                            onInlineChange?.({
                              action: 'removeBullet',
                              path: `experience[${index}].outcomes`,
-                             bulletId: ids[achIndex],
+                             index: achIndex,
                            })
                          }
                          onChange={(t) =>
@@ -152,8 +145,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                        highlightText(achievement, annotations)
                      )}
                    </li>
-                 ))
-                 })()}
+                 ))}
                </ul>
             </div>
           ))}
@@ -226,17 +218,13 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                </p>
             </div>
             <ul className={styles.achievementList}>
-              {(() => {
-                const groupId = `experience-${index}-outcomes`;
-                const ids = getInlineIds(groupId, (job.outcomes || []).length);
-                return (job.outcomes || []).map((achievement, achIndex) => (
-                <li key={ids[achIndex] ?? achIndex} className={styles.achievement} data-inline-group={groupId} data-inline-order={achIndex}>
+              {(job.outcomes || []).map((achievement, achIndex) => (
+                <li key={achIndex} className={styles.achievement}>
                   {inlineEditable ? (
-                    <InlineText
+                    <BulletText
                       text={achievement}
-                      inlineEditable
-                      isBullet
-                      navOrder={sectionBase + index * 10000 + 100 + achIndex}
+                      groupId={`experience-${index}-outcomes`}
+                      index={achIndex}
                       highlightType={
                         highlightForPath?.(
                           `experience[${index}].outcomes[${achIndex}]`,
@@ -264,7 +252,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                         onInlineChange?.({
                           action: 'removeBullet',
                           path: `experience[${index}].outcomes`,
-                          bulletId: ids[achIndex],
+                          index: achIndex,
                         })
                       }
                       onChange={(t) =>
@@ -278,8 +266,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                     highlightText(achievement, annotations)
                   )}
                 </li>
-              ))
-              })()}
+              ))}
             </ul>
           </div>
         ))}
