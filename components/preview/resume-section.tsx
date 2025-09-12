@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import React, { useRef } from 'react';
+import { Button } from '../ui/button';
 
 interface ResumeSectionProps {
   title: string;
@@ -41,14 +42,15 @@ const ResumeSection = ({
           'flex gap-2 bg-white/80 backdrop-blur px-2 py-1 rounded shadow'
         )}>
           {onEdit && (
-            <button
+            <Button
               type="button"
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className={cn('text-xs px-2 py-0.5 rounded border border-gray-300 hover:bg-gray-50')}
+              className={cn('text-xs px-2 py-0 rounded border border-gray-300 hover:bg-gray-50')}
               title="Edit section"
+              variant="outline"
             >
-              Edit
-            </button>
+              編輯
+            </Button>
           )}
         </span>
       </h3>

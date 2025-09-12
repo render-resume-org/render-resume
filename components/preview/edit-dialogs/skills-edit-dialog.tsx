@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { OptimizedResume } from '@/lib/types/resume';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import BaseEditDialog from './base-edit-dialog';
 
@@ -23,40 +23,28 @@ export default function SkillsEditDialog({
   const [skills, setSkills] = useState(currentSkills || []);
 
   const addSkillGroup = () => {
-    setSkills([...skills, { category: '', items: [] }]);
+    setSkills([...skills, { category: '', items: '' }]);
   };
 
   const removeSkillGroup = (index: number) => {
     setSkills(skills.filter((_, i) => i !== index));
   };
 
-  const updateSkillGroup = (index: number, category: string, items: string[]) => {
+  const updateSkillGroup = (index: number, category: string, items: string) => {
     const updatedSkills = [...skills];
     updatedSkills[index] = { category, items };
     setSkills(updatedSkills);
   };
 
-  const addSkillItem = (groupIndex: number) => {
+  const updateSkillItems = (groupIndex: number, value: string) => {
     const updatedSkills = [...skills];
-    updatedSkills[groupIndex].items.push('');
-    setSkills(updatedSkills);
-  };
-
-  const removeSkillItem = (groupIndex: number, itemIndex: number) => {
-    const updatedSkills = [...skills];
-    updatedSkills[groupIndex].items.splice(itemIndex, 1);
-    setSkills(updatedSkills);
-  };
-
-  const updateSkillItem = (groupIndex: number, itemIndex: number, value: string) => {
-    const updatedSkills = [...skills];
-    updatedSkills[groupIndex].items[itemIndex] = value;
+    updatedSkills[groupIndex].items = value;
     setSkills(updatedSkills);
   };
 
   const handleSave = () => {
     const filteredSkills = skills.filter(group => 
-      group.category.trim() && group.items.some(item => item.trim())
+      group.category.trim() && group.items.trim()
     );
     
     onSave(filteredSkills);
@@ -97,36 +85,16 @@ export default function SkillsEditDialog({
               </div>
               
               <div>
-                <Label>技能項目</Label>
-                <div className="space-y-2">
-                  {skillGroup.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-center space-x-2">
-                      <Input
-                        value={item}
-                        onChange={(e) => updateSkillItem(groupIndex, itemIndex, e.target.value)}
-                        placeholder="輸入技能名稱"
-                        className="flex-1"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeSkillItem(groupIndex, itemIndex)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => addSkillItem(groupIndex)}
-                    className="w-full"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    新增技能項目
-                  </Button>
-                </div>
+                <Label htmlFor={`items-${groupIndex}`}>技能項目</Label>
+                <Input
+                  id={`items-${groupIndex}`}
+                  value={skillGroup.items}
+                  onChange={(e) => updateSkillItems(groupIndex, e.target.value)}
+                  placeholder="例如：JavaScript, TypeScript, React, Node.js"
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  請用逗號分隔多個技能項目
+                </p>
               </div>
             </CardContent>
           </Card>

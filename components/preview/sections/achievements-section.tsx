@@ -1,4 +1,3 @@
-import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
 import type { InlineChangeHandler } from '@/lib/types/inline-edit';
@@ -6,6 +5,7 @@ import { OptimizedResume } from '@/lib/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
 import { cn } from '@/lib/utils';
 import { Award } from 'lucide-react';
+import { BulletText } from '../bullet-system';
 import InlineText from '../inline-text';
 import ResumeSection from '../resume-section';
 
@@ -21,9 +21,6 @@ interface AchievementsSectionProps {
 }
 
 export default function AchievementsSection({ data, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: AchievementsSectionProps) {
-  const resumeEditor = useResumeEditor();
-  const getInlineIds = resumeEditor?.getInlineIds || ((groupId: string, length: number) => Array.from({ length }, (_, i) => `fallback-${groupId}-${i}`));
-
   if (!data || data.length === 0) return null;
 
   const styles = TemplateStylingService.getProjectStyle(template);
@@ -103,12 +100,10 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                   {(a.outcomes || []).map((d, idx) => (
                     <li key={idx}>
                       {inlineEditable ? (
-                        <InlineText 
+                        <BulletText 
                           text={d} 
-                          inlineEditable 
-                          isBullet 
                           groupId={`achievements-${i}-outcomes`} 
-                          navOrder={sectionBase + i * 10000 + 100 + idx}
+                          index={idx}
                           highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`)}
                           previewOriginal={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.before}
                           previewReplaceWith={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.after}
@@ -196,31 +191,25 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
             )}
             {a.outcomes && a.outcomes.length > 0 && (
               <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'list-disc list-inside mt-1')}>
-                {(() => {
-                  const groupId = `achievements-${i}-outcomes`;
-                  const ids = getInlineIds(groupId, (a.outcomes || []).length);
-                  return (a.outcomes || []).map((d, idx) => (
-                  <li key={ids[idx] ?? idx} data-inline-group={groupId} data-inline-order={idx}>
+                {(a.outcomes || []).map((d, idx) => (
+                  <li key={idx}>
                     {inlineEditable ? (
-                      <InlineText 
+                      <BulletText 
                         text={d} 
-                        inlineEditable 
-                        isBullet 
-                        groupId={groupId} 
-                        navOrder={sectionBase + i * 10000 + 100 + idx}
+                        groupId={`achievements-${i}-outcomes`} 
+                        index={idx}
                         highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`)}
                         previewOriginal={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.before}
                         previewReplaceWith={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.after}
                         onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} 
-                        onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, bulletId: ids[idx] })} 
+                        onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} 
                         onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} 
                       />
                     ) : (
                       d
                     )}
                   </li>
-                ))
-                })()}
+                ))}
               </ul>
             )}
           </div>

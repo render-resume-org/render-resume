@@ -20,7 +20,7 @@ interface SkillsSectionProps {
 
 export default function SkillsSection({ data, template, onEdit, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: SkillsSectionProps) {
   const resumeEditor = useResumeEditor();
-  const { addSkillCategory, addSkillItem, removeSkillItem, removeSkillCategory } = resumeEditor || {};
+  const { addSkillCategory, removeSkillCategory } = resumeEditor || {};
 
   if (!data || data.length === 0) return null;
 
@@ -33,13 +33,10 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
     const skillGroup = data[categoryIndex];
     if (!skillGroup) return false;
     
-    // Category is empty
-    if (!skillGroup.category || skillGroup.category.trim() === '') {
-      // No items or only one empty item
-      if (!skillGroup.items || skillGroup.items.length === 0 || 
-          (skillGroup.items.length === 1 && (!skillGroup.items[0] || skillGroup.items[0].trim() === ''))) {
-        return true;
-      }
+    // Category is empty and items is empty
+    if ((!skillGroup.category || skillGroup.category.trim() === '') && 
+        (!skillGroup.items || skillGroup.items.trim() === '')) {
+      return true;
     }
     return false;
   };
@@ -49,45 +46,37 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
       e.preventDefault();
       addSkillCategory?.();
     }
-    // Right arrow at end of category - focus to first item or create one
+    // Right arrow at end of category - focus to items field
     if (e.key === 'ArrowRight' && isCaretAtEnd(e)) {
       e.preventDefault();
-      const skillGroup = data[categoryIndex];
-      if (!skillGroup.items || skillGroup.items.length === 0) {
-        // Create first item if none exists
-        addSkillItem?.(categoryIndex);
-      } else {
-        // Focus first item
-        setTimeout(() => {
-          document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
-            detail: { 
-              groupId: `skills-${categoryIndex}-items`, 
-              index: 0, 
-              position: 'start' 
-            } 
-          }));
-        }, 10);
-      }
+      setTimeout(() => {
+        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
+          detail: { 
+            groupId: `skills-${categoryIndex}-items`, 
+            index: 0, 
+            position: 'start' 
+          } 
+        }));
+      }, 10);
     }
     // Handle backspace at start of category
     if (e.key === 'Backspace' && isCaretAtStart(e)) {
       e.preventDefault();
-      // If category should be deleted (empty category with no/empty items), delete it
+      // If category should be deleted (empty category with empty items), delete it
       if (shouldDeleteCategory(categoryIndex)) {
         removeSkillCategory?.(categoryIndex);
       }
     }
   };
 
-  const handleItemKeyDown = (e: React.KeyboardEvent, categoryIndex: number, itemIndex: number) => {
-    if (e.key === ',') {
+  const handleItemsKeyDown = (e: React.KeyboardEvent, categoryIndex: number) => {
+    // Enter at end of items - add new skill category
+    if (e.key === 'Enter' && isCaretAtEnd(e)) {
       e.preventDefault();
-      // Only add item if we're at the end of the current item
-      if (isCaretAtEnd(e)) {
-        addSkillItem?.(categoryIndex);
-      }
-    } else if (e.key === 'ArrowLeft' && isCaretAtStart(e) && itemIndex === 0) {
-      // Left arrow at start of first item - focus back to category
+      addSkillCategory?.();
+    }
+    // Left arrow at start of items - focus back to category
+    if (e.key === 'ArrowLeft' && isCaretAtStart(e)) {
       e.preventDefault();
       setTimeout(() => {
         document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
@@ -98,19 +87,14 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
           } 
         }));
       }, 10);
-    } else if (e.key === 'Backspace' && isCaretAtStart(e)) {
-      const currentText = (e.target as HTMLElement).innerText;
-      if (currentText.trim() === '') {
-        e.preventDefault();
-        removeSkillItem?.(categoryIndex, itemIndex);
-        
-        // After removing item, check if category should be deleted
-        setTimeout(() => {
-          if (shouldDeleteCategory(categoryIndex)) {
-            removeSkillCategory?.(categoryIndex);
-          }
-        }, 50);
-      }
+    }
+    // Handle backspace - if items becomes empty, check if category should be deleted
+    if (e.key === 'Backspace') {
+      setTimeout(() => {
+        if (shouldDeleteCategory(categoryIndex)) {
+          removeSkillCategory?.(categoryIndex);
+        }
+      }, 50);
     }
   };
 
@@ -170,26 +154,21 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
                 )}
               </span>
               <span className="select-none" contentEditable={false}>: </span>
-              {(skillGroup.items || []).map((item, itemIdx) => (
-                <span key={itemIdx}>
-                  {inlineEditable ? (
-                    <InlineText
-                      text={item}
-                      inlineEditable
-                      groupId={`skills-${index}-items`}
-                      navOrder={sectionBase + index * 10000 + 100 + itemIdx}
-                      highlightType={highlightForPath?.(`skills[${index}].items[${itemIdx}]`)}
-                      previewOriginal={getPreviewValueForPath?.(`skills[${index}].items[${itemIdx}]`)?.before}
-                      previewReplaceWith={getPreviewValueForPath?.(`skills[${index}].items[${itemIdx}]`)?.after}
-                      onChange={(t) => onInlineChange?.({ path: `skills[${index}].items[${itemIdx}]`, value: t })}
-                      onKeyDown={(e) => handleItemKeyDown(e, index, itemIdx)}
-                    />
-                  ) : (
-                    item
-                  )}
-                  {itemIdx < skillGroup.items.length - 1 ? ', ' : ''}
-                </span>
-              ))}
+              {inlineEditable ? (
+                <InlineText
+                  text={skillGroup.items || ''}
+                  inlineEditable
+                  groupId={`skills-${index}-items`}
+                  navOrder={sectionBase + index * 10000 + 100}
+                  highlightType={highlightForPath?.(`skills[${index}].items`)}
+                  previewOriginal={getPreviewValueForPath?.(`skills[${index}].items`)?.before}
+                  previewReplaceWith={getPreviewValueForPath?.(`skills[${index}].items`)?.after}
+                  onChange={(t) => onInlineChange?.({ path: `skills[${index}].items`, value: t })}
+                  onKeyDown={(e) => handleItemsKeyDown(e, index)}
+                />
+              ) : (
+                skillGroup.items
+              )}
             </p>
           </div>
         ))}

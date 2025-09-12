@@ -15,7 +15,7 @@ export function mapOptimizedToUnified(optimized: OptimizedResume): UnifiedResume
       },
     },
     summary: optimized.summary,
-    skills: (optimized.skills || []).map(s => ({ category: s.category, items: s.items })),
+    skills: (optimized.skills || []).map(s => ({ category: s.category, items: s.items ? s.items.split(',').map(item => item.trim()).filter(item => item) : [] })),
     achievements: (optimized.achievements || []).map(a => ({
       title: a.title,
       organization: a.organization,

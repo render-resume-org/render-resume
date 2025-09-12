@@ -13,7 +13,7 @@ export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
       github: unified.personalInfo?.links?.github,
     },
     summary: unified.summary || '',
-    skills: (unified.skills || []).map(s => ({ category: s.category || '', items: s.items || [] })),
+    skills: (unified.skills || []).map(s => ({ category: s.category || '', items: (s.items || []).join(', ') })),
     achievements: (unified.achievements || []).map(a => ({
       title: a.title || '',
       organization: a.organization,

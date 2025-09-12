@@ -1,25 +1,10 @@
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import InlineHighlightPreview from './highlights/inline-highlight-preview';
+import { useInlineKeyboard } from '../hooks/use-inline-keyboard';
+import type { BulletEditableProps, CaretPositionType } from '../../types/inline-editor';
 
-interface InlineTextProps {
-  text: string;
-  className?: string;
-  inlineEditable?: boolean;
-  onChange?: (next: string) => void;
-  // Highlight for preview/diff
-  highlightType?: 'set' | 'insert';
-  // Optional git-like diff rendering when previewing a replacement
-  previewOriginal?: string;
-  previewReplaceWith?: string;
-  // Bullet behavior (only for list items)
-  isBullet?: boolean;
-  onAddBullet?: () => void;
-  onRemoveBullet?: () => void;
-  // Navigation grouping
-  groupId?: string;
-  // Global navigation order across resume; smaller first. When omitted, DOM order is used
-  navOrder?: number;
+interface InlineTextProps extends BulletEditableProps {
   // Custom key down handler
   onKeyDown?: (e: React.KeyboardEvent<HTMLSpanElement>) => void;
 }
@@ -32,6 +17,18 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const [previewEditableText, setPreviewEditableText] = useState(previewReplaceWith || '');
   const [isComposing, setIsComposing] = useState(false);
   const ignoreNextBlurRef = useRef(false);
+
+  const { handleKeyDown: handleInlineKeyDown } = useInlineKeyboard(ref, {
+    groupId,
+    isBullet,
+    isComposing,
+    localText,
+    navOrder,
+    onAddBullet,
+    onRemoveBullet,
+    customOnKeyDown,
+    enableEnhancedNavigation: false  // Using direct implementation in useInlineKeyboard
+  });
 
   // Update local text when prop changes (but not during editing)
   useEffect(() => {
@@ -143,31 +140,16 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   useEffect(() => {
     const handler = (ev: Event) => {
-      const detail = (ev as CustomEvent<{ groupId: string; index: number; position?: 'start' | 'end'; bulletId?: string }>).detail;
+      const detail = (ev as CustomEvent<{ groupId: string; index: number; position?: 'start' | 'end' }>).detail;
       if (!detail) return;
       if (detail.groupId !== groupId) return;
       const el = ref.current;
       if (!el) return;
-      
-      // Check if this element should be focused
-      let shouldFocus = false;
-      
-      if (detail.bulletId) {
-        // Use bulletId matching (preferred for stable identification)
-        const containerEl = el.closest('[data-inline-group]') as HTMLElement;
-        if (containerEl && containerEl.dataset.inlineOrder !== undefined) {
-          const order = Number(containerEl.dataset.inlineOrder);
-          const targetOrder = detail.index;
-          shouldFocus = order === targetOrder;
-        }
-      } else {
-        // Fallback to index-based matching
-        const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
-        const idx = nodes.indexOf(el);
-        shouldFocus = idx === detail.index;
-      }
-      
-      if (shouldFocus) {
+      // Find my index within siblings of same group
+      const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
+      const idx = nodes.indexOf(el);
+      if (idx === detail.index) {
+        // focus this element
         focusElement(el, detail.position || 'start');
       }
     };
@@ -217,33 +199,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
-  const isCaretAtStart = (): boolean => {
-    const el = ref.current;
-    if (!el) return false;
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return false;
-    const range = sel.getRangeAt(0);
-    if (!el.contains(range.startContainer)) return false;
-    const pre = range.cloneRange();
-    pre.selectNodeContents(el);
-    pre.setEnd(range.startContainer, range.startOffset);
-    return pre.toString().length === 0;
-  };
-
-  const isCaretAtEnd = (): boolean => {
-    const el = ref.current;
-    if (!el) return false;
-    const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return false;
-    const range = sel.getRangeAt(0);
-    if (!el.contains(range.endContainer)) return false;
-    const post = range.cloneRange();
-    post.selectNodeContents(el);
-    post.setStart(range.endContainer, range.endOffset);
-    return post.toString().length === 0;
-  };
-
-  const focusElement = (el: HTMLElement, position: 'start' | 'end') => {
+  const focusElement = (el: HTMLElement, position: CaretPositionType) => {
     el.focus();
     const range = document.createRange();
     range.selectNodeContents(el);
@@ -255,50 +211,6 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     }
   };
 
-  const moveToSibling = (direction: 'prev' | 'next') => {
-    const el = ref.current;
-    if (!el) return;
-    // Global navigation across all inline nodes respecting explicit navOrder
-    const allNodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group]`))
-      .filter((node) => node.dataset.inlineOrder !== undefined);
-    const nodes = allNodes
-      .map((node, i) => ({
-        node,
-        i,
-        order: Number(node.dataset.inlineOrder)
-      }))
-      .sort((a, b) => (a.order - b.order) || (a.i - b.i))
-      .map(n => n.node);
-    const idx = nodes.indexOf(el);
-    const target = direction === 'prev' ? nodes[idx - 1] : nodes[idx + 1];
-    if (target) {
-      focusElement(target, direction === 'prev' ? 'end' : 'start');
-    }
-  };
-
-  const dispatchFocusEvent = (targetGroupId: string, index: number, position: 'start' | 'end') => {
-    document.dispatchEvent(new CustomEvent('resume-inline-focus', { detail: { groupId: targetGroupId, index, position } }));
-  };
-
-  const focusAfterMutation = (deltaIndex: number, position: 'start' | 'end') => {
-    const el = ref.current;
-    if (!el) return;
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>(`[data-inline-group="${groupId}"]`));
-    const idx = nodes.indexOf(el);
-    const targetIndex = idx + deltaIndex;
-    // Use longer delay to ensure React state update and DOM insertion/removal are complete
-    setTimeout(() => dispatchFocusEvent(groupId, targetIndex, position), 50);
-  };
-
-  const triggerRemoveBullet = () => {
-    ignoreNextBlurRef.current = true;
-    try {
-      onRemoveBullet?.();
-    } finally {
-      // Reset after the DOM/react updates have occurred
-      setTimeout(() => { ignoreNextBlurRef.current = false; }, 0);
-    }
-  };
 
   const handleCompositionStart = () => {
     setIsComposing(true);
@@ -310,75 +222,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLSpanElement>) => {
     if (!inlineEditable) return;
-
-    // Call custom key down handler first
-    if (customOnKeyDown) {
-      customOnKeyDown(e);
-      if (e.defaultPrevented) return;
-    }
-
-    // Don't handle Enter key during Chinese composition
-    if (isComposing && e.key === 'Enter') {
-      return;
-    }
-
-    if (e.key === 'ArrowUp' && isCaretAtStart()) {
-      e.preventDefault();
-      moveToSibling('prev');
-      return;
-    }
-    if (e.key === 'ArrowDown' && isCaretAtEnd()) {
-      e.preventDefault();
-      moveToSibling('next');
-      return;
-    }
-
-    // Left arrow at beginning of line - move to previous line
-    if (e.key === 'ArrowLeft' && isCaretAtStart()) {
-      e.preventDefault();
-      moveToSibling('prev');
-      return;
-    }
-    // Right arrow at end of line - move to next line
-    if (e.key === 'ArrowRight' && isCaretAtEnd()) {
-      e.preventDefault();
-      moveToSibling('next');
-      return;
-    }
-
-    if (isBullet && e.key === 'Enter') {
-      if (isCaretAtEnd()) {
-        e.preventDefault();
-        onAddBullet?.();
-        // Move caret to the newly added bullet line (next index)
-        focusAfterMutation(1, 'start');
-        return;
-      }
-      // Insert a line break without resetting contenteditable state
-      e.preventDefault();
-      const el = ref.current;
-      if (!el) return;
-      const sel = window.getSelection();
-      if (!sel || sel.rangeCount === 0) return;
-      const range = sel.getRangeAt(0);
-      const br = document.createElement('br');
-      range.insertNode(br);
-      range.setStartAfter(br);
-      range.setEndAfter(br);
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-
-    if (isBullet && e.key === 'Backspace') {
-      // Remove bullet when empty regardless of caret position to avoid cross-line deletion
-      const isEmpty = (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '');
-      if (isEmpty) {
-        e.preventDefault();
-        triggerRemoveBullet();
-        setTimeout(() => focusAfterMutation(-1, 'end'), 10);
-        return;
-      }
-    }
+    handleInlineKeyDown(e);
   };
 
   const isPreview = (highlightType === 'set' || highlightType === 'insert') && previewOriginal !== undefined && previewReplaceWith !== undefined;
@@ -404,7 +248,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
           onInput: handleInput as unknown as React.FormEventHandler<HTMLSpanElement>,
           onFocus: handleFocus as unknown as React.FocusEventHandler<HTMLSpanElement>,
           onBlur: handleBlur as unknown as React.FocusEventHandler<HTMLSpanElement>,
-          onKeyDown: handleKeyDown as unknown as React.KeyboardEventHandler<HTMLSpanElement>,
+          onKeyDown: handleInlineKeyDown as unknown as React.KeyboardEventHandler<HTMLSpanElement>,
           onCompositionStart: handleCompositionStart as unknown as React.CompositionEventHandler<HTMLSpanElement>,
           onCompositionEnd: handleCompositionEnd as unknown as React.CompositionEventHandler<HTMLSpanElement>,
           title: 'Click to edit',

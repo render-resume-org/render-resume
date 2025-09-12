@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Navigation Requirements Validation Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .test-container {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        .test-field {
+            border: 2px solid #ccc;
+            padding: 12px;
+            margin: 10px 0;
+            min-height: 40px;
+            outline: none;
+            background: white;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        .test-field:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+        .requirement {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+        }
+        .requirement.failed {
+            border-left-color: #dc3545;
+        }
+        .requirement h4 {
+            margin: 0 0 8px 0;
+            color: #333;
+        }
+        .requirement p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            float: right;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        .status.pass { background: #28a745; }
+        .status.fail { background: #dc3545; }
+        .status.test { background: #ffc107; color: black; }
+        h1 { color: #333; }
+        h3 { color: #555; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <h1>✅ Enhanced Inline Text Navigation - Requirements Validation</h1>
+    
+    <div class="instructions">
+        <h3>Test Instructions:</h3>
+        <p>This page validates the implementation of all 6 navigation requirements:</p>
+        <ol>
+            <li><strong>行間 ↑</strong> → <strong>行首</strong> (In-line Up → Line Start)</li>
+            <li><strong>行間 ↓</strong> → <strong>行末</strong> (In-line Down → Line End)</li>
+            <li><strong>行首 ↑/←</strong> → <strong>上一行末</strong> (Line Start Up/Left → Previous Line End)</li>
+            <li><strong>行末 ↓/→</strong> → <strong>下一行首</strong> (Line End Down/Right → Next Line Start)</li>
+            <li><strong>第一個列點的行首 ↑/←</strong> → <strong>上一個欄位</strong> (First Bullet Line Start → Previous Field)</li>
+            <li><strong>最後一個列點的行末 ↓/→</strong> → <strong>下一個欄位</strong> (Last Bullet Line End → Next Field)</li>
+        </ol>
+        <p><strong>How to test:</strong> Click into any field and use arrow keys. The behavior should match the requirements above.</p>
+    </div>
+
+    <h3>Requirement 1 & 2: In-line Navigation</h3>
+    <div class="test-container">
+        <div class="requirement">
+            <h4>Requirement 1: 行間 ↑ → 行首 <span class="status test">TEST</span></h4>
+            <p>Place cursor in middle of any line below, press ↑ arrow, cursor should move to start of that line.</p>
+        </div>
+        <div class="requirement">
+            <h4>Requirement 2: 行間 ↓ → 行末 <span class="status test">TEST</span></h4>
+            <p>Place cursor in middle of any line below, press ↓ arrow, cursor should move to end of that line.</p>
+        </div>
+        
+        <div contenteditable="true" class="test-field" data-testid="multiline1">This is line one with some text content
+This is line two with more text here
+This is line three, the final line</div>
+        
+        <div contenteditable="true" class="test-field" data-testid="multiline2">Another multi-line field for testing
+Second line with different content
+Third line to test navigation</div>
+    </div>
+
+    <h3>Requirement 3 & 4: Cross-line Navigation</h3>
+    <div class="test-container">
+        <div class="requirement">
+            <h4>Requirement 3: 行首 ↑/← → 上一行末 <span class="status test">TEST</span></h4>
+            <p>Place cursor at start of line 2 or 3, press ↑ or ← arrow, cursor should move to end of previous line.</p>
+        </div>
+        <div class="requirement">
+            <h4>Requirement 4: 行末 ↓/→ → 下一行首 <span class="status test">TEST</span></h4>
+            <p>Place cursor at end of line 1 or 2, press ↓ or → arrow, cursor should move to start of next line.</p>
+        </div>
+        
+        <div contenteditable="true" class="test-field" data-testid="crossline1">Line 1: Test cross-line navigation here
+Line 2: Middle line for testing arrows
+Line 3: Final line for complete testing</div>
+        
+        <div contenteditable="true" class="test-field" data-testid="crossline2">First line with content for navigation
+Second line for arrow key testing
+Third and final line here</div>
+    </div>
+
+    <h3>Requirement 5 & 6: Cross-field Navigation</h3>
+    <div class="test-container">
+        <div class="requirement">
+            <h4>Requirement 5: 第一個列點的行首 ↑/← → 上一個欄位 <span class="status test">TEST</span></h4>
+            <p>Place cursor at start of first field, press ↑ or ← arrow, cursor should move to end of previous field.</p>
+        </div>
+        <div class="requirement">
+            <h4>Requirement 6: 最後一個列點的行末 ↓/→ → 下一個欄位 <span class="status test">TEST</span></h4>
+            <p>Place cursor at end of last field, press ↓ or → arrow, cursor should move to start of next field.</p>
+        </div>
+        
+        <div contenteditable="true" class="test-field" data-testid="field1" data-inline-order="1000">First field - test ↑/← at start</div>
+        <div contenteditable="true" class="test-field" data-testid="field2" data-inline-order="1010">Second field - middle navigation</div>
+        <div contenteditable="true" class="test-field" data-testid="field3" data-inline-order="1020">Third field - test ↓/→ at end</div>
+        
+        <h4>Multi-line Cross-field Test:</h4>
+        <div contenteditable="true" class="test-field" data-testid="multifield1" data-inline-order="2000">Multi-line field one
+Second line content here
+Third line for testing</div>
+        <div contenteditable="true" class="test-field" data-testid="multifield2" data-inline-order="2010">Multi-line field two
+Another second line here
+Final line content</div>
+    </div>
+
+    <h3>Bullet Point Navigation (Simulation)</h3>
+    <div class="test-container">
+        <div class="requirement">
+            <h4>Bullet Navigation Integration <span class="status test">TEST</span></h4>
+            <p>These simulate bullet points. Within a group, navigation should work normally. At group boundaries, should move to other fields.</p>
+        </div>
+        
+        <div contenteditable="true" class="test-field" data-testid="bullet1" data-inline-group="bullets" data-inline-order="3000">• First bullet point in group</div>
+        <div contenteditable="true" class="test-field" data-testid="bullet2" data-inline-group="bullets" data-inline-order="3010">• Second bullet point in group</div>
+        <div contenteditable="true" class="test-field" data-testid="bullet3" data-inline-group="bullets" data-inline-order="3020">• Third bullet point in group</div>
+        
+        <div contenteditable="true" class="test-field" data-testid="nextfield" data-inline-order="4000">Next field after bullets</div>
+    </div>
+
+    <div class="test-container">
+        <h3>Manual Testing Checklist:</h3>
+        <div style="background: white; padding: 15px; border-radius: 4px;">
+            <label><input type="checkbox"> ✅ Requirement 1: In-line Up → Line Start works</label><br>
+            <label><input type="checkbox"> ✅ Requirement 2: In-line Down → Line End works</label><br>
+            <label><input type="checkbox"> ✅ Requirement 3: Line Start Up/Left → Previous Line End works</label><br>
+            <label><input type="checkbox"> ✅ Requirement 4: Line End Down/Right → Next Line Start works</label><br>
+            <label><input type="checkbox"> ✅ Requirement 5: First Field Start Up/Left → Previous Field works</label><br>
+            <label><input type="checkbox"> ✅ Requirement 6: Last Field End Down/Right → Next Field works</label><br>
+            <label><input type="checkbox"> ✅ Multi-line navigation works within same element</label><br>
+            <label><input type="checkbox"> ✅ Cross-field navigation respects data-inline-order</label><br>
+            <label><input type="checkbox"> ✅ No broken behaviors or unexpected jumps</label><br>
+            <label><input type="checkbox"> ✅ Smooth transitions between all navigation modes</label><br>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>Expected Results:</h3>
+        <ul>
+            <li><strong>All 6 requirements</strong> should work as specified</li>
+            <li><strong>Navigation should be predictable</strong> and match user expectations</li>
+            <li><strong>No unexpected behavior</strong> like cursor jumping or getting stuck</li>
+            <li><strong>Smooth transitions</strong> between different navigation modes</li>
+            <li><strong>Proper field ordering</strong> following data-inline-order values</li>
+        </ul>
+        <p><strong>Note:</strong> This HTML page uses basic contentEditable for demonstration. The actual React implementation provides the enhanced navigation through the useInlineKeyboard hook and navigation helpers.</p>
+    </div>
+
+    <script>
+        // Add visual feedback for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            const fields = document.querySelectorAll('.test-field');
+            
+            fields.forEach((field, index) => {
+                field.addEventListener('focus', function() {
+                    console.log(`Focused field ${index}: ${this.dataset.testid || 'unnamed'}`);
+                });
+                
+                field.addEventListener('keydown', function(e) {
+                    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                        const selection = window.getSelection();
+                        const text = this.textContent;
+                        const caretPos = selection.rangeCount > 0 ? selection.getRangeAt(0).startOffset : 0;
+                        
+                        console.log(`Key: ${e.key}, Field: ${this.dataset.testid || index}, Caret: ${caretPos}/${text.length}, Text: "${text}"`);
+                        
+                        // Basic position detection for demo
+                        const isAtStart = caretPos === 0;
+                        const isAtEnd = caretPos === text.length;
+                        const lines = text.split('\n');
+                        
+                        console.log(`  Position: start=${isAtStart}, end=${isAtEnd}, lines=${lines.length}`);
+                    }
+                });
+            });
+            
+            console.log('Navigation Requirements Test loaded. Use arrow keys in the text fields above to test all 6 requirements.');
+            console.log('Check console for navigation events and cursor positions.');
+        });
+    </script>
+</body>
+</html>
