@@ -63,7 +63,7 @@ Grade mapping:
 Provide a concise overall assessment of the resume:
 
 - Start with 1-sentence summary of the candidate's background or experience.
-- Follow with 2-4 critical, concise comments on overall Completeness, Structure, Relevance, or Content.
+- Follow with 2-4 critical, concise comments on overall completeness, structure, relevance, and content.
 </comment_spec>
 
 <highlights_spec>
