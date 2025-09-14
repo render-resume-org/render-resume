@@ -37,7 +37,7 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
 
   // Enhanced bullet focus management
   const bulletFocusContext = useOptionalBulletFocus();
-  const pendingFocusActionRef = useRef<{ type: 'next' | 'prev'; bulletId: string } | null>(null);
+  const pendingFocusActionRef = useRef<{ type: 'next'; bulletId: string } | null>(null);
 
   // Update local text when prop changes (but not during editing)
   useEffect(() => {
@@ -65,8 +65,6 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
     const timer = setTimeout(() => {
       if (action.type === 'next') {
         bulletFocusContext.focusNextBullet(groupId, action.bulletId);
-      } else {
-        bulletFocusContext.focusPrevBullet(groupId, action.bulletId);
       }
       pendingFocusActionRef.current = null;
     }, 50);
@@ -413,12 +411,15 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       const isEmpty = (localText.trim() === '' || (ref.current?.innerText?.trim() ?? '') === '');
       if (isEmpty) {
         e.preventDefault();
-        triggerRemoveBullet();
-        // Enhanced: Schedule focus to previous bullet after DOM update
-        if (bulletId && bulletFocusContext) {
-          pendingFocusActionRef.current = { type: 'prev', bulletId };
+
+        // Enhanced: Use coordinated removal and focus
+        if (bulletId && bulletFocusContext && bulletFocusContext.removeAndFocusPrevious) {
+          bulletFocusContext.removeAndFocusPrevious(groupId, bulletId, () => {
+            triggerRemoveBullet();
+          });
         } else {
-          // Fallback to old method if no bulletId
+          // Fallback to old method if no bulletId or context
+          triggerRemoveBullet();
           setTimeout(() => focusAfterMutation(-1, 'end'), 10);
         }
         return;
