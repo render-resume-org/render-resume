@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import InlineHighlightPreview from './highlights/inline-highlight-preview';
+import { useOptionalBulletFocus } from './bullet-focus-provider';
 
 interface InlineTextProps {
   text: string;
@@ -14,6 +15,7 @@ interface InlineTextProps {
   previewReplaceWith?: string;
   // Bullet behavior (only for list items)
   isBullet?: boolean;
+  bulletId?: string; // Stable ID for bullet identification
   onAddBullet?: () => void;
   onRemoveBullet?: () => void;
   // Navigation grouping
@@ -24,7 +26,7 @@ interface InlineTextProps {
   onKeyDown?: (e: React.KeyboardEvent<HTMLSpanElement>) => void;
 }
 
-export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, onAddBullet, onRemoveBullet, groupId = 'resume-inline', navOrder, onKeyDown: customOnKeyDown }: InlineTextProps) {
+export default function InlineText({ text, className, inlineEditable, onChange, highlightType, previewOriginal, previewReplaceWith, isBullet, bulletId, onAddBullet, onRemoveBullet, groupId = 'resume-inline', navOrder, onKeyDown: customOnKeyDown }: InlineTextProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const containerRef = useRef<HTMLSpanElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -33,12 +35,44 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
   const [isComposing, setIsComposing] = useState(false);
   const ignoreNextBlurRef = useRef(false);
 
+  // Enhanced bullet focus management
+  const bulletFocusContext = useOptionalBulletFocus();
+  const pendingFocusActionRef = useRef<{ type: 'next' | 'prev'; bulletId: string } | null>(null);
+
   // Update local text when prop changes (but not during editing)
   useEffect(() => {
     if (!isEditing && localText !== text) {
       setLocalText(text);
     }
   }, [text, isEditing, localText]);
+
+  // Register bullet with context
+  useEffect(() => {
+    const element = ref.current;
+    if (isBullet && bulletFocusContext && element && bulletId) {
+      bulletFocusContext.registerBulletRef(groupId, bulletId, element);
+      return () => {
+        bulletFocusContext.unregisterBulletRef(groupId, bulletId);
+      };
+    }
+  }, [isBullet, bulletFocusContext, groupId, bulletId]);
+
+  // Handle pending focus actions after DOM updates
+  useEffect(() => {
+    const action = pendingFocusActionRef.current;
+    if (!action || !isBullet || !bulletFocusContext) return;
+
+    const timer = setTimeout(() => {
+      if (action.type === 'next') {
+        bulletFocusContext.focusNextBullet(groupId, action.bulletId);
+      } else {
+        bulletFocusContext.focusPrevBullet(groupId, action.bulletId);
+      }
+      pendingFocusActionRef.current = null;
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [localText, isBullet, bulletFocusContext, groupId]); // Re-run when text changes (indicating DOM update)
 
   // Update preview editable text when previewReplaceWith changes
   useEffect(() => {
@@ -350,8 +384,13 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       if (isCaretAtEnd()) {
         e.preventDefault();
         onAddBullet?.();
-        // Move caret to the newly added bullet line (next index)
-        focusAfterMutation(1, 'start');
+        // Enhanced: Schedule focus to next bullet after DOM update
+        if (bulletId && bulletFocusContext) {
+          pendingFocusActionRef.current = { type: 'next', bulletId };
+        } else {
+          // Fallback to old method if no bulletId
+          focusAfterMutation(1, 'start');
+        }
         return;
       }
       // Insert a line break without resetting contenteditable state
@@ -375,7 +414,13 @@ export default function InlineText({ text, className, inlineEditable, onChange, 
       if (isEmpty) {
         e.preventDefault();
         triggerRemoveBullet();
-        setTimeout(() => focusAfterMutation(-1, 'end'), 10);
+        // Enhanced: Schedule focus to previous bullet after DOM update
+        if (bulletId && bulletFocusContext) {
+          pendingFocusActionRef.current = { type: 'prev', bulletId };
+        } else {
+          // Fallback to old method if no bulletId
+          setTimeout(() => focusAfterMutation(-1, 'end'), 10);
+        }
         return;
       }
     }

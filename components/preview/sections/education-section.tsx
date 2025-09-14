@@ -119,6 +119,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                         text={outcome} 
                         inlineEditable 
                         isBullet
+                        bulletId={ids[outcomeIndex]}
                         groupId={groupId}
                         navOrder={sectionBase + index * 10000 + 100 + outcomeIndex}
                         highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}
@@ -242,6 +243,7 @@ export default function EducationSection({ data, template, onEdit, analysisResul
                         text={outcome} 
                         inlineEditable 
                         isBullet
+                        bulletId={ids[outcomeIndex]}
                         groupId={groupId}
                         navOrder={sectionBase + index * 10000 + 200 + outcomeIndex}
                         highlightType={highlightForPath?.(`education[${index}].outcomes[${outcomeIndex}]`)}

@@ -110,6 +110,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                          text={achievement}
                          inlineEditable
                          isBullet
+                         bulletId={ids[achIndex]}
                          navOrder={sectionBase + index * 10000 + 100 + achIndex}
                          highlightType={
                            highlightForPath?.(
@@ -236,6 +237,7 @@ export default function ExperienceSection({ data, template, onEdit, analysisResu
                       text={achievement}
                       inlineEditable
                       isBullet
+                      bulletId={ids[achIndex]}
                       navOrder={sectionBase + index * 10000 + 100 + achIndex}
                       highlightType={
                         highlightForPath?.(

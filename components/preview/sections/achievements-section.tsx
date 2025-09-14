@@ -100,27 +100,32 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
               )}
               {a.outcomes && a.outcomes.length > 0 && (
                 <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'list-disc list-inside mt-1')}>
-                  {(a.outcomes || []).map((d, idx) => (
-                    <li key={idx}>
+                  {(() => {
+                    const groupId = `achievements-${i}-outcomes`;
+                    const ids = getInlineIds(groupId, (a.outcomes || []).length);
+                    return (a.outcomes || []).map((d, idx) => (
+                    <li key={ids[idx] ?? idx} data-inline-group={groupId} data-inline-order={idx}>
                       {inlineEditable ? (
                         <InlineText 
                           text={d} 
                           inlineEditable 
-                          isBullet 
-                          groupId={`achievements-${i}-outcomes`} 
+                          isBullet
+                          bulletId={ids[idx]}
+                          groupId={groupId} 
                           navOrder={sectionBase + i * 10000 + 100 + idx}
                           highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`)}
                           previewOriginal={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.before}
                           previewReplaceWith={getPreviewValueForPath?.(`achievements[${i}].outcomes[${idx}]`)?.after}
                           onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `achievements[${i}].outcomes`, index: idx })} 
-                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, index: idx })} 
+                          onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `achievements[${i}].outcomes`, bulletId: ids[idx] })} 
                           onChange={(t) => onInlineChange?.({ path: `achievements[${i}].outcomes[${idx}]`, value: t })} 
                         />
                       ) : (
                         d
                       )}
                     </li>
-                  ))}
+                  ));
+                  })()}
                 </ul>
               )}
             </div>
@@ -205,7 +210,8 @@ export default function AchievementsSection({ data, template, onEdit, inlineEdit
                       <InlineText 
                         text={d} 
                         inlineEditable 
-                        isBullet 
+                        isBullet
+                        bulletId={ids[idx]}
                         groupId={groupId} 
                         navOrder={sectionBase + i * 10000 + 100 + idx}
                         highlightType={highlightForPath?.(`achievements[${i}].outcomes[${idx}]`)}

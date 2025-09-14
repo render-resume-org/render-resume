@@ -83,26 +83,31 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
               </div>
               {project.outcomes && project.outcomes.length > 0 && (
                 <ul className={cn(TemplateStylingService.getCaptionStyle(template), 'mt-1 list-disc list-inside')}>
-                   {(project.outcomes || []).map((achievement, achievementIndex) => (
-                     <li key={achievementIndex}>
+                   {(() => {
+                     const groupId = `projects-${index}-outcomes`;
+                     const ids = getInlineIds(groupId, (project.outcomes || []).length);
+                     return (project.outcomes || []).map((achievement, achievementIndex) => (
+                     <li key={ids[achievementIndex] ?? achievementIndex} data-inline-group={groupId} data-inline-order={achievementIndex}>
                        {inlineEditable ? (
                          <InlineText
                            text={achievement}
                            inlineEditable
                            isBullet
+                           bulletId={ids[achievementIndex]}
                            navOrder={sectionBase + index * 10000 + 100 + achievementIndex}
                            highlightType={highlightForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)}
                            previewOriginal={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.before}
                            previewReplaceWith={getPreviewValueForPath?.(`projects[${index}].outcomes[${achievementIndex}]`)?.after}
                            onAddBullet={() => onInlineChange?.({ action: 'addBullet', path: `projects[${index}].outcomes`, index: achievementIndex })}
-                           onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, index: achievementIndex })}
+                           onRemoveBullet={() => onInlineChange?.({ action: 'removeBullet', path: `projects[${index}].outcomes`, bulletId: ids[achievementIndex] })}
                            onChange={(t) => onInlineChange?.({ path: `projects[${index}].outcomes[${achievementIndex}]`, value: t })}
                          />
                        ) : (
                          highlightText(achievement, annotations)
                        )}
                      </li>
-                   ))}
+                   ));
+                   })()}
                 </ul>
               )}
             </div>
@@ -171,6 +176,7 @@ export default function ProjectsSection({ data, template, onEdit, analysisResult
                          text={achievement}
                          inlineEditable
                          isBullet
+                         bulletId={ids[achIndex]}
                          groupId={groupId}
                          navOrder={sectionBase + index * 10000 + 100 + achIndex}
                          highlightType={highlightForPath?.(`projects[${index}].outcomes[${achIndex}]`)}

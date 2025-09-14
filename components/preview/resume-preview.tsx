@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useEditDialogManager } from './edit-dialogs';
 import ResumeHeader from './resume-header';
 import { renderSection } from './section-registry';
+import { BulletFocusProvider } from './bullet-focus-provider';
 
 interface ResumePreviewProps {
   resumeData: OptimizedResume;
@@ -122,18 +123,19 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
   return (
     <>
       <div className="resume-preview-container">
-        <div 
-          className={cn('resume-content', font.family, colors.background)} 
-          id="resume-content"
-          style={{ 
-            backgroundColor: 'white',
-            color: '#000000',
-            WebkitTextSizeAdjust: 'none',
-            textSizeAdjust: 'none',
-            fontSize: '16px',
-            lineHeight: '1.5', 
-          }}
-        >
+        <BulletFocusProvider>
+          <div
+            className={cn('resume-content', font.family, colors.background)}
+            id="resume-content"
+            style={{
+              backgroundColor: 'white',
+              color: '#000000',
+              WebkitTextSizeAdjust: 'none',
+              textSizeAdjust: 'none',
+              fontSize: '16px',
+              lineHeight: '1.5',
+            }}
+          >
           <ResumeHeader
             personalInfo={resumeData.personalInfo}
             template={template}
@@ -181,7 +183,8 @@ export default function ResumePreview({ resumeData, template, onUpdateResume, ed
               <p className={cn('font-semibold text-black')}>www.render-resume.com</p>
             </Link>
           </footer>
-        </div>
+          </div>
+        </BulletFocusProvider>
       </div>
 
       {renderEditDialog()}
