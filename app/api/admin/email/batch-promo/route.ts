@@ -8,10 +8,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface BatchPromoEmailRequest {
   title: string;
+  subtitle: string;
   body: string;
   recipients: Array<{
     email: string;
-    username: string;
   }>;
   promoConfig: {
     plan_id: number;
@@ -48,18 +48,34 @@ function generatePromoCode(): string {
 // Replace user variables in template
 function replaceUserVariables(template: string, user: UserData, promoCode: string): string {
   return template
-    .replace(/\{\{user\.email\}\}/g, user.email || '')
-    .replace(/\{\{user\.display_name\}\}/g, user.display_name || user.email?.split('@')[0] || '')
+    .replace(/\{\{user\.email\}\}/g, user.email)
+    .replace(/\{\{user\.display_name\}\}/g, user.display_name || user.email.split('@')[0])
     .replace(/\{\{user\.id\}\}/g, user.id)
-    .replace(/\{\{user\.created_at\}\}/g, new Date(user.created_at).toLocaleDateString('zh-TW'))
+    .replace(/\{\{user\.created_at\}\}/g, new Date().toLocaleDateString('zh-TW'))
     .replace(/\{\{user\.avatar_url\}\}/g, user.avatar_url || '')
     .replace(/\{\{promo_code\}\}/g, promoCode);
 }
 
+// Brand colors matching RenderResume system
+const BRAND_COLORS = {
+  primary: '#0891b2', // cyan-600 from the system
+  secondary: '#0e7490', // cyan-700
+  accent: '#06b6d4', // cyan-500
+  success: '#059669', // emerald-600
+  warning: '#d97706', // amber-600
+  error: '#dc2626', // red-600
+  danger: '#dc2626',
+  text: '#111827', // gray-900
+  textLight: '#6b7280', // gray-500
+  background: '#ffffff',
+  backgroundLight: '#f9fafb', // gray-50
+  border: '#e5e7eb', // gray-200
+  muted: '#f3f4f6', // gray-100
+};
+
 // Generate email HTML template
-function generateEmailHtml(title: string, body: string, user: UserData, promoCode: string): string {
+function generateEmailHtml(title: string, subtitle: string, body: string, user: UserData, promoCode: string): string {
   const processedBody = replaceUserVariables(body, user, promoCode);
-  const userName = user.display_name || user.email?.split('@')[0] || '';
   
   return `
     <!DOCTYPE html>
@@ -75,8 +91,8 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
         body {
           font-family: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           line-height: 1.6;
-          color: #111827;
-          background-color: #f9fafb;
+          color: ${BRAND_COLORS.text};
+          background-color: ${BRAND_COLORS.backgroundLight};
           margin: 0;
           padding: 0;
         }
@@ -84,12 +100,12 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
         .email-container {
           max-width: 600px;
           margin: 0 auto;
-          background-color: #ffffff;
+          background-color: ${BRAND_COLORS.background};
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
         
         .header {
-          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.secondary} 100%);
           color: white;
           padding: 40px 30px;
           text-align: center;
@@ -115,11 +131,26 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
         
         .content {
           padding: 40px 30px;
+          color: ${BRAND_COLORS.text};
+        }
+        
+        .content p {
+          color: ${BRAND_COLORS.text};
+          margin: 0 0 16px 0;
+        }
+        
+        .content a {
+          color: ${BRAND_COLORS.primary};
+          text-decoration: none;
+        }
+        
+        .content a:hover {
+          text-decoration: underline;
         }
         
         .promo-box {
-          background-color: #f0fdf4;
-          border: 2px dashed #059669;
+          background-color: #ecfeff;
+          border: 2px dashed ${BRAND_COLORS.primary};
           border-radius: 12px;
           padding: 24px;
           margin: 24px 0;
@@ -129,19 +160,19 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
         .promo-code {
           font-size: 24px;
           font-weight: 700;
-          color: #059669;
+          color: ${BRAND_COLORS.primary};
           background-color: white;
           padding: 12px 24px;
           border-radius: 8px;
           display: inline-block;
           margin: 12px 0;
           letter-spacing: 2px;
-          border: 2px solid #059669;
+          border: 2px solid ${BRAND_COLORS.primary};
         }
         
         .cta-button {
           display: inline-block;
-          background-color: #059669;
+          background-color: ${BRAND_COLORS.primary};
           color: white !important;
           padding: 16px 32px;
           text-decoration: none;
@@ -151,16 +182,12 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
           margin: 20px 0;
         }
         
-        .cta-button:hover {
-          background-color: #047857;
-        }
-        
         .footer {
-          background-color: #f9fafb;
+          background-color: ${BRAND_COLORS.backgroundLight};
           padding: 30px;
-          border-top: 1px solid #e5e7eb;
+          border-top: 1px solid ${BRAND_COLORS.border};
           text-align: center;
-          color: #6b7280;
+          color: ${BRAND_COLORS.textLight};
           font-size: 14px;
         }
       </style>
@@ -168,22 +195,21 @@ function generateEmailHtml(title: string, body: string, user: UserData, promoCod
     <body>
       <div class="email-container">
         <div class="header">
-          <div class="logo">🎉 Render Resume</div>
+          <div class="logo">Render Resume</div>
           <h1>${title}</h1>
-          <p>專屬優惠代碼</p>
+          <p>${subtitle}</p>
         </div>
         <div class="content">
-          <p>親愛的 ${userName}，您好！</p>
           ${processedBody}
           <div class="promo-box">
-            <h3 style="color: #059669; margin: 0 0 12px 0;">🎁 您的專屬優惠代碼</h3>
+            <h3 style="color: ${BRAND_COLORS.primary}; margin: 0 0 12px 0;">🎁 您的專屬優惠代碼</h3>
             <div class="promo-code">${promoCode}</div>
-            <p style="margin: 12px 0 0 0; color: #6b7280; font-size: 14px;">
+            <p style="margin: 12px 0 0 0; color: ${BRAND_COLORS.textLight}; font-size: 14px;">
               請複製此代碼並在結帳時使用
             </p>
           </div>
           <div style="text-align: center; margin-top: 30px;">
-            <a href="https://www.render-resume.com/settings" class="cta-button">立即使用優惠</a>
+            <a href="https://www.render-resume.com/account-settings" class="cta-button">立即體驗 AI 履歷編輯器！</a>
           </div>
         </div>
         <div class="footer">
@@ -234,8 +260,9 @@ async function sendSingleEmail(
 // Main batch sending function with promo code generation
 async function sendBatchPromoEmails(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  recipients: Array<{ email: string; username: string }>,
+  recipients: Array<{ email: string }>,
   title: string,
+  subtitle: string,
   body: string,
   promoConfig: BatchPromoEmailRequest['promoConfig']
 ): Promise<{ successCount: number; failedCount: number; details: EmailResult[] }> {
@@ -301,7 +328,7 @@ async function sendBatchPromoEmails(
         }
 
         // Generate email HTML
-        const html = generateEmailHtml(title, body, userData, promoCode!);
+        const html = generateEmailHtml(title, subtitle, body, userData, promoCode!);
 
         // Send email
         const emailResult = await sendSingleEmail(recipient.email, title, html);
@@ -349,12 +376,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body: BatchPromoEmailRequest = await request.json();
-    const { title, body: emailBody, recipients, promoConfig } = body;
+    const { title, subtitle, body: emailBody, recipients, promoConfig } = body;
 
     // Validate required parameters
     if (!title?.trim()) {
       return NextResponse.json(
         { error: '請輸入郵件標題' },
+        { status: 400 }
+      );
+    }
+
+    if (!subtitle?.trim()) {
+      return NextResponse.json(
+        { error: '請輸入郵件副標題' },
         { status: 400 }
       );
     }
@@ -402,6 +436,7 @@ export async function POST(request: NextRequest) {
       authResult.supabase,
       recipients,
       title,
+      subtitle,
       emailBody,
       promoConfig
     );

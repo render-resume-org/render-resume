@@ -14,6 +14,23 @@ import { AlertCircle, Calendar, Eye, Gift, Loader2, Mail, Send, Users, X } from 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+// Brand colors matching RenderResume system
+const BRAND_COLORS = {
+  primary: '#0891b2', // cyan-600 from the system
+  secondary: '#0e7490', // cyan-700
+  accent: '#06b6d4', // cyan-500
+  success: '#059669', // emerald-600
+  warning: '#d97706', // amber-600
+  error: '#dc2626', // red-600
+  danger: '#dc2626',
+  text: '#111827', // gray-900
+  textLight: '#6b7280', // gray-500
+  background: '#ffffff',
+  backgroundLight: '#f9fafb', // gray-50
+  border: '#e5e7eb', // gray-200
+  muted: '#f3f4f6', // gray-100
+};
+
 interface User {
   id: string;
   display_name: string | null;
@@ -62,6 +79,7 @@ export default function BatchPromoEmailPage() {
   
   // Email content
   const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [body, setBody] = useState("");
   
   // Promo configuration
@@ -141,8 +159,8 @@ export default function BatchPromoEmailPage() {
   };
 
   const handlePreview = async () => {
-    if (!title || !body) {
-      toast.error("請填寫標題和內容");
+    if (!title || !subtitle || !body) {
+      toast.error("請填寫標題、副標題和內容");
       return;
     }
 
@@ -167,8 +185,6 @@ export default function BatchPromoEmailPage() {
         .replace(/\{\{user\.avatar_url\}\}/g, sampleUser.avatar_url || '')
         .replace(/\{\{promo_code\}\}/g, mockPromoCode);
 
-      const userName = sampleUser.display_name || sampleUser.email?.split('@')[0] || '';
-      
       const html = `
         <!DOCTYPE html>
         <html lang="zh-TW">
@@ -183,8 +199,8 @@ export default function BatchPromoEmailPage() {
             body {
               font-family: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
               line-height: 1.6;
-              color: #111827;
-              background-color: #f9fafb;
+              color: ${BRAND_COLORS.text};
+              background-color: ${BRAND_COLORS.backgroundLight};
               margin: 0;
               padding: 0;
             }
@@ -192,12 +208,12 @@ export default function BatchPromoEmailPage() {
             .email-container {
               max-width: 600px;
               margin: 0 auto;
-              background-color: #ffffff;
+              background-color: ${BRAND_COLORS.background};
               box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             }
             
             .header {
-              background: linear-gradient(135deg, #059669 0%, #047857 100%);
+              background: linear-gradient(135deg, ${BRAND_COLORS.primary} 0%, ${BRAND_COLORS.secondary} 100%);
               color: white;
               padding: 40px 30px;
               text-align: center;
@@ -223,11 +239,26 @@ export default function BatchPromoEmailPage() {
             
             .content {
               padding: 40px 30px;
+              color: ${BRAND_COLORS.text};
+            }
+            
+            .content p {
+              color: ${BRAND_COLORS.text};
+              margin: 0 0 16px 0;
+            }
+            
+            .content a {
+              color: ${BRAND_COLORS.primary};
+              text-decoration: none;
+            }
+            
+            .content a:hover {
+              text-decoration: underline;
             }
             
             .promo-box {
-              background-color: #f0fdf4;
-              border: 2px dashed #059669;
+              background-color: #ecfeff;
+              border: 2px dashed ${BRAND_COLORS.primary};
               border-radius: 12px;
               padding: 24px;
               margin: 24px 0;
@@ -237,19 +268,19 @@ export default function BatchPromoEmailPage() {
             .promo-code {
               font-size: 24px;
               font-weight: 700;
-              color: #059669;
+              color: ${BRAND_COLORS.primary};
               background-color: white;
               padding: 12px 24px;
               border-radius: 8px;
               display: inline-block;
               margin: 12px 0;
               letter-spacing: 2px;
-              border: 2px solid #059669;
+              border: 2px solid ${BRAND_COLORS.primary};
             }
             
             .cta-button {
               display: inline-block;
-              background-color: #059669;
+              background-color: ${BRAND_COLORS.primary};
               color: white !important;
               padding: 16px 32px;
               text-decoration: none;
@@ -260,11 +291,11 @@ export default function BatchPromoEmailPage() {
             }
             
             .footer {
-              background-color: #f9fafb;
+              background-color: ${BRAND_COLORS.backgroundLight};
               padding: 30px;
-              border-top: 1px solid #e5e7eb;
+              border-top: 1px solid ${BRAND_COLORS.border};
               text-align: center;
-              color: #6b7280;
+              color: ${BRAND_COLORS.textLight};
               font-size: 14px;
             }
           </style>
@@ -272,22 +303,21 @@ export default function BatchPromoEmailPage() {
         <body>
           <div class="email-container">
             <div class="header">
-              <div class="logo">🎉 Render Resume</div>
+              <div class="logo">Render Resume</div>
               <h1>${title}</h1>
-              <p>專屬優惠代碼</p>
+              <p>${subtitle}</p>
             </div>
             <div class="content">
-              <p>親愛的 ${userName}，您好！</p>
               ${previewBody}
               <div class="promo-box">
-                <h3 style="color: #059669; margin: 0 0 12px 0;">🎁 您的專屬優惠代碼</h3>
+                <h3 style="color: ${BRAND_COLORS.primary}; margin: 0 0 12px 0;">🎁 您的專屬優惠代碼</h3>
                 <div class="promo-code">${mockPromoCode}</div>
-                <p style="margin: 12px 0 0 0; color: #6b7280; font-size: 14px;">
+                <p style="margin: 12px 0 0 0; color: ${BRAND_COLORS.textLight}; font-size: 14px;">
                   請複製此代碼並在結帳時使用
                 </p>
               </div>
               <div style="text-align: center; margin-top: 30px;">
-                <a href="https://www.render-resume.com/settings" class="cta-button">立即使用優惠</a>
+                <a href="https://www.render-resume.com/account-settings" class="cta-button">立即體驗 AI 履歷編輯器！</a>
               </div>
             </div>
             <div class="footer">
@@ -318,6 +348,11 @@ export default function BatchPromoEmailPage() {
       return;
     }
 
+    if (!subtitle.trim()) {
+      toast.error("請輸入郵件副標題");
+      return;
+    }
+
     if (!body.trim()) {
       toast.error("請輸入郵件內容");
       return;
@@ -343,10 +378,10 @@ export default function BatchPromoEmailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
+          subtitle,
           body,
           recipients: selectedUserData.map(user => ({
-            email: user.email,
-            username: user.display_name || user.email.split('@')[0]
+            email: user.email
           })),
           promoConfig
         })
@@ -373,6 +408,7 @@ export default function BatchPromoEmailPage() {
       // Clear selections
       setSelectedUsers([]);
       setTitle("");
+      setSubtitle("");
       setBody("");
       
     } catch (error) {
@@ -553,6 +589,16 @@ export default function BatchPromoEmailPage() {
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="subtitle">郵件副標題</Label>
+                <Input
+                  id="subtitle"
+                  value={subtitle}
+                  onChange={(e) => setSubtitle(e.target.value)}
+                  placeholder="輸入郵件副標題"
+                />
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="body">
                   郵件內容
                   <span className="text-sm text-gray-500 ml-2">
@@ -670,7 +716,7 @@ export default function BatchPromoEmailPage() {
             <Button
               variant="outline"
               onClick={handlePreview}
-              disabled={!title || !body}
+              disabled={!title || !subtitle || !body}
             >
               <Eye className="mr-2 w-4 h-4" />
               預覽郵件
@@ -681,6 +727,7 @@ export default function BatchPromoEmailPage() {
                 sending ||
                 selectedUsers.length === 0 ||
                 !title ||
+                !subtitle ||
                 !body ||
                 !promoConfig.plan_id
               }
