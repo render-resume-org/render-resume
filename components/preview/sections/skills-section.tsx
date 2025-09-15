@@ -86,6 +86,19 @@ export default function SkillsSection({ data, template, onEdit, inlineEditable, 
       if (isCaretAtEnd(e)) {
         addSkillItem?.(categoryIndex);
       }
+    } else if (e.key === 'Enter' && isCaretAtEnd(e)) {
+      e.preventDefault();
+      const skillGroup = data[categoryIndex];
+      const isLastCategory = categoryIndex === data.length - 1;
+      const isLastItem = itemIndex === (skillGroup.items?.length || 0) - 1;
+      
+      // If this is the last item in the last category, create a new category
+      if (isLastCategory && isLastItem) {
+        addSkillCategory?.();
+      } else {
+        // Otherwise, add a new item to the current category
+        addSkillItem?.(categoryIndex);
+      }
     } else if (e.key === 'ArrowLeft' && isCaretAtStart(e) && itemIndex === 0) {
       // Left arrow at start of first item - focus back to category
       e.preventDefault();
