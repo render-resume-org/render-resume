@@ -77,7 +77,7 @@ const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps)
               variant="outline"
               size="sm"
               onClick={() => onCannedMessage(option)}
-              className="text-sm text-gray-800 dark:text-gray-100 hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors px-4 py-2"
+              className="text-sm hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 dark:hover:border-cyan-700 transition-colors px-4 py-2"
               asChild
             >
               <motion.button
