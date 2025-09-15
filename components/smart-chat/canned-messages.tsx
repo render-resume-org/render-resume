@@ -77,7 +77,7 @@ const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps)
               variant="outline"
               size="sm"
               onClick={() => onCannedMessage(option)}
-              className="text-sm text-gray-800 hover:bg-cyan-50 hover:border-cyan-300 dark:hover:bg-cyan-900/20 transition-colors px-4 py-2"
+              className="text-sm text-foreground hover:bg-cyan-50 hover:border-cyan-300 hover:text-cyan-900 dark:hover:bg-cyan-900/20 dark:hover:border-cyan-600 dark:hover:text-cyan-100 transition-colors px-4 py-2"
               asChild
             >
               <motion.button
@@ -99,7 +99,7 @@ const CannedMessages = ({ cannedOptions, onCannedMessage }: CannedMessagesProps)
         {isDesktop && isOverflow && !showAll && (
           <Badge
             variant="secondary"
-            className="cursor-pointer ml-2"
+            className="cursor-pointer ml-2 hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/80 transition-colors"
             onClick={() => setShowAll(true)}
           >
             +{cannedOptions.length - visibleCount}
