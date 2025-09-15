@@ -15,8 +15,7 @@ interface ResumeHeaderProps {
 
 export default function ResumeHeader({ personalInfo, template, inlineEditable, onInlineChange, highlightForPath, getPreviewValueForPath }: ResumeHeaderProps) {
   const { font, styles } = template;
-  // Global navigation ordering base for personalInfo (always first, before summary)
-  const sectionBase = -1000000; // Negative to ensure it comes before summary
+  const sectionBase = -1000000; 
 
   if (template.id === 'latex') {
     return (
