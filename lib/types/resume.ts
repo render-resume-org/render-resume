@@ -11,7 +11,7 @@ export interface OptimizedResume {
   summary: string;
   skills: Array<{
     category: string;
-    items: string[];
+    items: string;
   }>;
   achievements?: Array<{
     title: string;

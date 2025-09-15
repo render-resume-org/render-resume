@@ -47,8 +47,6 @@ interface ResumeEditorContextValue {
   focusAfterRemove: (groupId: string, removedIndex: number) => void;
   // Skills management API
   addSkillCategory: () => void;
-  addSkillItem: (categoryIndex: number) => void;
-  removeSkillItem: (categoryIndex: number, itemIndex: number) => void;
   removeSkillCategory: (categoryIndex: number) => void;
 }
 
@@ -174,7 +172,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
   const addSkillCategory = useCallback(() => {
     if (!optimized) return;
     const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
-    updated.skills.push({ category: '', items: [''] });
+    updated.skills.push({ category: '', items: '' });
     persist(updated);
     // Focus the new category name (not the colon)
     requestAnimationFrame(() => {
@@ -189,57 +187,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     });
   }, [optimized, persist]);
 
-  const addSkillItem = useCallback((categoryIndex: number) => {
-    if (!optimized) return;
-    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
-    if (!updated.skills[categoryIndex]) return;
-    if (!updated.skills[categoryIndex].items) {
-      updated.skills[categoryIndex].items = [];
-    }
-    updated.skills[categoryIndex].items.push('');
-    persist(updated);
-    // Focus the new item (immediately after DOM commit)
-    requestAnimationFrame(() => {
-      const newItemIndex = updated.skills[categoryIndex].items.length - 1;
-      document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
-        detail: { 
-          groupId: `skills-${categoryIndex}-items`, 
-          index: newItemIndex, 
-          position: 'start' 
-        } 
-      }));
-    });
-  }, [optimized, persist]);
-
-  const removeSkillItem = useCallback((categoryIndex: number, itemIndex: number) => {
-    if (!optimized) return;
-    const updated: OptimizedResume = JSON.parse(JSON.stringify(optimized));
-    if (!updated.skills[categoryIndex]?.items) return;
-    updated.skills[categoryIndex].items.splice(itemIndex, 1);
-    persist(updated);
-    // Focus the previous item or category if no items left
-    requestAnimationFrame(() => {
-      const remainingItems = updated.skills[categoryIndex].items.length;
-      if (remainingItems > 0) {
-        const focusIndex = Math.max(0, itemIndex - 1);
-        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
-          detail: { 
-            groupId: `skills-${categoryIndex}-items`, 
-            index: focusIndex, 
-            position: 'end' 
-          } 
-        }));
-      } else {
-        document.dispatchEvent(new CustomEvent('resume-inline-focus', { 
-          detail: { 
-            groupId: `skills-${categoryIndex}-category`, 
-            index: 0, 
-            position: 'end' 
-          } 
-        }));
-      }
-    });
-  }, [optimized, persist]);
+  
 
   const removeSkillCategory = useCallback((categoryIndex: number) => {
     if (!optimized) return;
@@ -280,8 +228,8 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
       return { degree: String(v.degree ?? ''), major: String(v.major ?? ''), school: String(v.school ?? ''), period: String(v.period ?? ''), outcomes: Array.isArray(v.outcomes) ? v.outcomes.map(s => String(s ?? '')) : [], gpa: typeof v.gpa === 'string' ? v.gpa : undefined, honor: typeof v.honor === 'string' ? v.honor : undefined };
     }
     if (containerName === 'skills') {
-      const v = (typeof value === 'object' && value !== null ? value : { category: String(value ?? ''), items: [] }) as Record<string, unknown>;
-      return { category: String(v.category ?? ''), items: Array.isArray(v.items) ? v.items.map(s => String(s ?? '')) : [] };
+      const v = (typeof value === 'object' && value !== null ? value : { category: String(value ?? ''), items: '' }) as Record<string, unknown>;
+      return { category: String(v.category ?? ''), items: typeof v.items === 'string' ? String(v.items) : '' };
     }
     return value;
   }, []);
@@ -311,7 +259,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
         if (numericIndex !== null && Array.isArray(cursor)) {
           const arrayItems = cursor as unknown[];
           const parentKey = segments[segments.length - 2] || '';
-          const isBulletArray = /outcomes$/.test(parentKey) || /items$/.test(parentKey);
+          const isBulletArray = /outcomes$/.test(parentKey);
           const valueToInsert = isBulletArray ? String(op.value as string ?? '') : getDefaultInsertValue(parentKey, op.value);
           const boundedIndex = Math.max(0, Math.min(numericIndex, arrayItems.length));
           arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
@@ -323,7 +271,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
           const arrayItems = (cursor as Record<string, unknown>)[lastKey] as unknown[];
           const idxMatch = op.path.match(/\[(\d+)\]$/);
           const insertIndex = idxMatch ? Number(idxMatch[1]) : arrayItems.length;
-          const isBulletArray = /outcomes$/.test(String(lastKey)) || /items$/.test(String(lastKey));
+          const isBulletArray = /outcomes$/.test(String(lastKey));
           const valueToInsert = isBulletArray ? String(op.value as string ?? '') : getDefaultInsertValue(String(lastKey), op.value);
           const boundedIndex = Math.max(0, Math.min(insertIndex, arrayItems.length));
           arrayItems.splice(boundedIndex, 0, valueToInsert as unknown);
@@ -340,8 +288,6 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     const getGroupIdForPath = (p: string): string | null => {
       const m = p.match(/^(experience|projects|education|achievements)\[(\d+)\]\.outcomes$/);
       if (m) return `${m[1]}-${Number(m[2])}-outcomes`;
-      const s = p.match(/^skills\[(\d+)\]\.items$/);
-      if (s) return `skills-${Number(s[1])}-items`;
       return null;
     };
     const updateIdsOnInsert = (groupId: string, at: number) => {
@@ -663,13 +609,12 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     } else if (path === 'skills') {
       const payload = next as { path?: string; value?: string };
       if (payload?.path) {
-        const m = payload.path.match(/^skills\[(\d+)\]\.(category|items\[(\d+)\]|items)$/);
+        const m = payload.path.match(/^skills\[(\d+)\]\.(category|items)$/);
         if (m) {
           const idx = Number(m[1]);
           const field = m[2];
-          const itemIdx = m[3] ? Number(m[3]) : undefined;
-          if (field.startsWith('items') && itemIdx != null) {
-            updated.skills[idx].items[itemIdx] = String(payload.value ?? '');
+          if (field === 'items') {
+            updated.skills[idx].items = String(payload.value ?? '');
           } else if (field === 'category') {
             updated.skills[idx].category = String(payload.value ?? '');
           }
@@ -832,7 +777,7 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
           continue;
         }
         if (rawOp.op === 'insert') {
-          const isContainerPath = /(outcomes|items)$/.test(rawOp.path);
+          const isContainerPath = /(outcomes)$/.test(rawOp.path);
           const isArrayValue = Array.isArray((rawOp as InsertOp).value);
           if (isContainerPath && isArrayValue) {
             const { base, start } = computeInsertBaseAndStart(rawOp);
@@ -1095,10 +1040,8 @@ export function ResumeEditorProvider({ children }: { children: React.ReactNode }
     focusInlineElement,
     focusAfterRemove,
     addSkillCategory,
-    addSkillItem,
-    removeSkillItem,
     removeSkillCategory,
-  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview, getInlineIds, resolveIndexById, focusInlineElement, focusAfterRemove, addSkillCategory, addSkillItem, removeSkillItem, removeSkillCategory]);
+  }), [unified, optimized, isPreviewing, previewOps, previewDiffs, persist, getPreviewedResume, handleInlineChange, handleUpdateOptimized, acceptPreview, rejectPreview, getInlineIds, resolveIndexById, focusInlineElement, focusAfterRemove, addSkillCategory, removeSkillCategory]);
 
   return (
     <ResumeEditorContext.Provider value={value}>
