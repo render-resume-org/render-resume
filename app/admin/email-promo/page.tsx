@@ -313,7 +313,7 @@ export default function BatchPromoEmailPage() {
                 <h3 style="color: ${BRAND_COLORS.primary}; margin: 0 0 12px 0;">🎁 您的專屬優惠代碼</h3>
                 <div class="promo-code">${mockPromoCode}</div>
                 <p style="margin: 12px 0 0 0; color: ${BRAND_COLORS.textLight}; font-size: 14px;">
-                  請複製此代碼並在結帳時使用
+                  請複製此代碼並在帳號設定頁面兌換
                 </p>
               </div>
               <div style="text-align: center; margin-top: 30px;">
