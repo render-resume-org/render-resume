@@ -1,4 +1,5 @@
 import { AnnouncementTable } from "@/lib/types";
+import { parseContentWithLinks } from "@/lib/utils/parse-content-with-links";
 import { formatSmartTime } from "@/lib/utils/time";
 import { Eye } from "lucide-react";
 import Link from "next/link";
@@ -17,7 +18,7 @@ export function AnnouncementPreviewCard({ announcement }: AnnouncementPreviewCar
           </h3>
           <div className="text-gray-600 dark:text-gray-300">
             <div className="whitespace-pre-wrap break-words leading-relaxed mb-4 line-clamp-3">
-              {announcement.content}
+              {parseContentWithLinks(announcement.content || '')}
             </div>
           </div>
         </div>

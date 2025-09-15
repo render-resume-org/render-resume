@@ -1,6 +1,7 @@
 'use client';
 
 import { AnnouncementTable } from "@/lib/types";
+import { parseContentWithLinks } from "@/lib/utils/parse-content-with-links";
 import { formatSmartTime } from "@/lib/utils/time";
 import { Eye } from "lucide-react";
 
@@ -22,7 +23,7 @@ export function AnnouncementDetailCard({ announcement }: AnnouncementDetailCardP
       <div className="px-8 py-8">
         <div className="prose prose-lg max-w-none dark:prose-invert">
           <div className="whitespace-pre-wrap break-words leading-relaxed text-gray-700 dark:text-gray-300 text-base">
-            {announcement.content}
+            {parseContentWithLinks(announcement.content || '')}
           </div>
         </div>
       </div>

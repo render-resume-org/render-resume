@@ -4,6 +4,7 @@ import { typeIcons, typeStyles } from "@/components/announcements/config";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { AnnouncementTable } from "@/lib/types";
+import { parseContentWithLinks } from "@/lib/utils/parse-content-with-links";
 import { ChevronRight, Megaphone } from "lucide-react";
 import Link from "next/link";
 
@@ -47,7 +48,7 @@ export function Announcements({ announcements }: AnnouncementsProps) {
         <AlertDescription className="mt-2">
           <div>
             <div className="break-words word-wrap overflow-wrap-anywhere leading-relaxed">
-              {firstAnnouncement.content}
+              {parseContentWithLinks(firstAnnouncement.content || '')}
             </div>
           </div>
         </AlertDescription>
