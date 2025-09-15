@@ -1,10 +1,3 @@
-
-import {
-    DEFAULT_AI_CONFIG,
-    generateSystemPrompt
-} from './config/resume-analysis-config';
-
-
 // 重新導出 AIConfig，保持向後兼容
 export interface AIConfig {
     modelName?: string;
@@ -32,7 +25,12 @@ interface InternalAIConfig {
 }
 
 
-
+// 預設 AI 配置
+export const DEFAULT_AI_CONFIG: AIConfig = {
+    modelName: "gpt-4.1-mini",
+    temperature: 0.2,
+    maxConcurrency: 3
+};
 
 
 // 支援的文檔類型
@@ -44,13 +42,6 @@ export const SUPPORTED_FILE_TYPES = {
 
 export type SupportedFileType = keyof typeof SUPPORTED_FILE_TYPES;
 
-// 使用動態配置
-export const DEFAULT_CONFIG: AIConfig = {
-    modelName: DEFAULT_AI_CONFIG.modelName,
-    temperature: DEFAULT_AI_CONFIG.temperature ?? 0.2,
-    systemPrompt: generateSystemPrompt(),
-    maxConcurrency: DEFAULT_AI_CONFIG.maxConcurrency
-};
 
 
 
@@ -168,10 +159,10 @@ export class NativeOpenAIClient {
         this.baseURL = options.baseURL || 'https://api.openai.com/v1';
         
         // 使用提供的配置或預設配置，並確保必要欄位存在
-        const systemPrompt = options.config?.systemPrompt || generateSystemPrompt();
+        const systemPrompt = options.config?.systemPrompt || '';
         
         this.config = {
-            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName,
+            modelName: options.config?.modelName || DEFAULT_AI_CONFIG.modelName || "gpt-4.1-mini",
             temperature: options.config?.temperature ?? DEFAULT_AI_CONFIG.temperature ?? 0.2,
             systemPrompt: systemPrompt,
             maxConcurrency: options.config?.maxConcurrency ?? DEFAULT_AI_CONFIG.maxConcurrency,

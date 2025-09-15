@@ -68,8 +68,8 @@ export const SignupEmailTemplate: React.FC<SignupEmailTemplateProps> = ({
         </Text>
         <Text style={{ ...emailStyles.footerText, marginTop: '20px' }}>
           需要協助？回覆此電子郵件或造訪我們的{' '}
-                          <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/resume-builder`} style={emailStyles.link}>
-            支援中心
+          <Link href={`${process.env.NEXT_PUBLIC_APP_URL}/faq`} style={emailStyles.link}>
+            常見問題
           </Link>。
         </Text>
       </Section>

@@ -3,12 +3,12 @@
 import SmartChat from "@/components/smart-chat";
 import PreviewActionPanel from "@/components/smart-chat/preview-action-panel";
 import ResumeEditorPreview from "@/components/smart-chat/resume-editor-preview";
+import { NavigationButton } from "@/components/navigation-button";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useResumeTemplate } from "@/hooks/use-resume-optimization";
 import { getTemplateById } from "@/lib/config/resume-templates";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -124,26 +124,13 @@ export default function SmartChatPage() {
                   onReject={handleRejectPreview}
                 />
               )}
-              {/* Right-panel action bar */}
+              {/* Right-panel navigation */}
               <div className="pointer-events-none absolute bottom-3 left-3 right-3 flex justify-between items-end z-10">
                 <div className="pointer-events-auto">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/results')}
-                    className="text-sm px-3 py-2 rounded-md flex items-center gap-2 border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 backdrop-blur-sm bg-white/70 dark:bg-gray-900/60 shadow-lg border-gray-200/60 dark:border-gray-700/60"
-                  >
-                    <ArrowLeft className="h-4 w-4" />
-                    <span>回到分析結果</span>
-                  </Button>
+                  <NavigationButton direction="left" route="/results" text="返回分析結果" />
                 </div>
                 <div className="pointer-events-auto">
-                  <Button
-                    onClick={() => router.push('/download')}
-                    className="text-sm px-3 py-2 rounded-md bg-cyan-600 hover:bg-cyan-700 text-white flex items-center gap-2 backdrop-blur-sm shadow-lg"
-                  >
-                    <span>完成履歷編輯</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
+                  <NavigationButton direction="right" route="/download" text="完成履歷編輯" />
                 </div>
               </div>
             </div>

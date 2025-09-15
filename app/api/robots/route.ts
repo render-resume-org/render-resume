@@ -10,7 +10,6 @@ Allow: /
 Allow: /auth/login
 Allow: /auth/sign-up
 Allow: /faq
-Allow: /resume-builder
 Allow: /privacy
 Allow: /terms
 
@@ -32,27 +31,22 @@ Disallow: /node_modules/
 User-agent: GPTBot
 Allow: /
 Allow: /faq
-Allow: /resume-builder
 
 User-agent: ChatGPT-User
 Allow: /
 Allow: /faq
-Allow: /resume-builder
 
 User-agent: CCBot
 Allow: /
 Allow: /faq
-Allow: /resume-builder
 
 User-agent: Claude-Web
 Allow: /
 Allow: /faq
-Allow: /resume-builder
 
 User-agent: anthropic-ai
 Allow: /
 Allow: /faq
-Allow: /resume-builder
 
 # Sitemap location
 Sitemap: ${baseUrl}/sitemap.xml

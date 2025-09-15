@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import InlineHighlightPreview from './highlights/inline-highlight-preview';
 import { useOptionalBulletFocus } from './bullet-focus-provider';
+import InlineHighlightPreview from './highlights/inline-highlight-preview';
 
 interface InlineTextProps {
   text: string;

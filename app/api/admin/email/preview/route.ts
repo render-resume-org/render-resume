@@ -140,7 +140,7 @@ function generateEmailHtml(
         </div>
         <div class="footer">
           <p>此為系統自動發送的郵件，請勿直接回覆</p>
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
       break;
@@ -173,7 +173,7 @@ function generateEmailHtml(
         </div>
         <div class="footer">
           <p>有任何問題嗎？歡迎聯絡我們的支援團隊</p>
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
       break;
@@ -207,7 +207,7 @@ function generateEmailHtml(
         </div>
         <div class="footer">
           <p>優惠條款與細則請參考網站說明</p>
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
       break;
@@ -235,12 +235,12 @@ function generateEmailHtml(
           <p>希望這些內容對您的職涯發展有所幫助！</p>
           `}
           <div style="text-align: center; margin-top: 30px;">
-                            <a href="https://www.render-resume.com/resume-builder" class="cta-button" style="background-color: #7c3aed;">閱讀更多</a>
+            <a href="https://www.render-resume.com/faq" class="cta-button" style="background-color: #7c3aed;">查看常見問題</a>
           </div>
         </div>
         <div class="footer">
           <p>不想再收到電子報？您可以在設定中取消訂閱</p>
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
       break;
@@ -256,7 +256,7 @@ function generateEmailHtml(
           ${content}
         </div>
         <div class="footer">
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
       break;
@@ -271,7 +271,7 @@ function generateEmailHtml(
           ${content}
         </div>
         <div class="footer">
-          <p>© 2024 Render Resume. All rights reserved.</p>
+          <p>© 2025 Render Resume. All rights reserved.</p>
         </div>
       `;
   }

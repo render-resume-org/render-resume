@@ -468,9 +468,8 @@ export const emailTemplates = {
           <p style="margin: 20px 0; color: ${BRAND_COLORS.textLight};">
             想了解更多？探索我們的功能介紹：
           </p>
-          
-                          <a href="https://www.render-resume.com/resume-builder" class="cta-button">
-            🔍 探索更多功能
+          <a href="https://www.render-resume.com/faq" class="cta-button">
+            🔍 查看常見問題
           </a>
         </div>
 

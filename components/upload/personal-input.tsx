@@ -27,16 +27,28 @@ const PersonalInputComponent: React.FC<Props> = ({ value, onChange }) => {
             <span className="text-xl font-bold text-gray-900 dark:text-white">個人資訊</span>
           </div>
           
-          {/* Address */}
-          <div className="mb-4">
-            <label className={labelClass}>地址 <span className="text-red-500">*</span></label>
-            <input
-              className={fieldClass}
-              value={value.address}
-              onChange={e => handleFieldChange("address", e.target.value)}
-              placeholder="請輸入您的地址"
-              required
-            />
+          {/* Name and Address row */}
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="flex-1 min-w-0">
+              <label className={labelClass}>姓名 <span className="text-red-500">*</span></label>
+              <input
+                className={fieldClass}
+                value={value.name}
+                onChange={e => handleFieldChange("name", e.target.value)}
+                placeholder="請輸入您的姓名"
+                required
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <label className={labelClass}>地址 <span className="text-red-500">*</span></label>
+              <input
+                className={fieldClass}
+                value={value.address}
+                onChange={e => handleFieldChange("address", e.target.value)}
+                placeholder="請輸入您的地址"
+                required
+              />
+            </div>
           </div>
 
           {/* Phone and Email row */}

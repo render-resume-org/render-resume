@@ -23,12 +23,6 @@ const staticPages = [
     priority: 0.7,
   },
   {
-    url: '/resume-builder',
-    lastModified: new Date('2025-06-26'),
-    changeFrequency: 'weekly' as const,
-    priority: 0.9,
-  },
-  {
     url: '/faq',
     lastModified: new Date('2025-06-26'),
     changeFrequency: 'weekly' as const,

@@ -1,11 +1,5 @@
-import { GRADING_CRITERIA, SCORE_GRADES } from "@/lib/config/resume-analysis-config";
-
 export function generateEvaluateSystemPrompt(opts?: { locale?: string }): string {
   const locale = (opts?.locale || 'zh-tw').toLowerCase();
-  const grades = SCORE_GRADES.join(', ');
-  const gradeDescriptions = Object.entries(GRADING_CRITERIA)
-    .map(([grade, info]) => `- ${grade}: Percentile rank above ${info.pr}. ${info.description}`)
-    .join('\n');
 
   const systemPrompt = `
 You are an AI resume evaluation assistant, powered by GPT-4.1-mini.
@@ -26,21 +20,50 @@ The USER will always provide the resume in JSON format.
 </context_spec>
 
 <score_spec>
-The score represents the overall evaluation of the resume, based on:
-- Clarity (how clearly information is communicated)
-- Structure (organization and readability)
-- Impact (strength of achievements, use of metrics, demonstrated results)
-- Relevance (alignment with target role or industry)
+The score represents a weighted evaluation of the resume based on the following dimensions:
 
-The grade must be chosen from ${grades}, according to the definitions in ${gradeDescriptions}.
+- Completeness (15%)
+  - Includes essential fields: name, phone, email, work experience, education, skills (10%)
+  - Provides necessary time information (start and end dates) (5%)
+
+- Structure (20%)
+  - Uses logical section order (Experience→Education→Skills, or Education→Experience→Skills for new graduates) (5%)
+  - Lists experiences in reverse chronological order (5%)
+  - Uses bullet points effectively (most under 25 words in English or 40 in Chinese, 2-4 bullets per role) (10%)
+
+- Skills & Relevance (20%)
+  - Provides concrete examples of skill application (20%)
+
+- Content (45%)
+  - Starts bullets with action verbs and emphasizes achievements, not just responsibilities (5%)
+  - Avoids vague or generic wording (5%)
+  - Contains no spelling or grammar errors (5%)
+  - Demonstrates quantified results in most experiences (20%)
+  - Shows highly competitive experiences (10%)
+
+Scoring:
+- Each criterion is scored from 0 to its maximum weight.
+- Award points very strictly: full points only for flawless fulfillment; even strong but not perfect cases should earn at most 60-70% of the weight; moderate fulfillment earns around 40-50%; weak or missing evidence earns near zero.
+- Sum all points to determine total score (0-100), then map to grade.
+
+Grade mapping:
+- 98-100: A+
+- 95-97: A
+- 90-94: A-
+- 85-89: B+
+- 80-84: B
+- 75-79: B-
+- 70-74: C+
+- 65-69: C
+- 60-64: C-
+- 0-59: F
 </score_spec>
 
 <comment_spec>
 Provide a concise overall assessment of the resume:
 
 - Start with 1-sentence summary of the candidate's background or experience.
-- Follow with 2-4 specific, critical comments on clarity, structure, impact, or relevance.
-- Focus on actionable feedback; do not fabricate content.
+- Follow with 2-4 critical, concise comments on overall completeness, structure, relevance, and content.
 </comment_spec>
 
 <highlights_spec>

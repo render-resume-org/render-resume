@@ -10,6 +10,7 @@
 import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NavigationButton } from "@/components/navigation-button";
 import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -178,7 +179,7 @@ export default function AnalyzePage() {
         const experience: Experience[] = storedExperience ? JSON.parse(storedExperience) : [];
         const projects: Project[] = storedProjects ? JSON.parse(storedProjects) : [];
         const skills: string = storedSkills || '';
-        const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { address: '', phone: '', email: '' };
+        const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { name: '', address: '', phone: '', email: '' };
         const links: Links = storedLinks ? JSON.parse(storedLinks) : { linkedin: '', github: '', portfolio: '' };
         const serviceType: 'create' | 'optimize' = (storedServiceType as 'create' | 'optimize') || 'create';
         startAnalysis(files, additionalText, education, experience, projects, skills, personalInfo, links, serviceType);
@@ -222,7 +223,7 @@ export default function AnalyzePage() {
       const education: Education[] = storedEducation ? JSON.parse(storedEducation) : [];
       const experience: Experience[] = storedExperience ? JSON.parse(storedExperience) : [];
       const projects: Project[] = storedProjects ? JSON.parse(storedProjects) : [];
-      const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { address: '', phone: '', email: '' };
+      const personalInfo: PersonalInfo = storedPersonalInfo ? JSON.parse(storedPersonalInfo) : { name: '', address: '', phone: '', email: '' };
       const links: Links = storedLinks ? JSON.parse(storedLinks) : { linkedin: '', github: '', portfolio: '' };
       setCurrentStep(0);
       setAnalysisComplete(false);
@@ -401,23 +402,20 @@ export default function AnalyzePage() {
           </Card>
         )}
 
-        {/* 底部操作列：返回上傳、查看詳細結果 */}
+        {/* Navigation */}
         <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-          <Button 
-            variant="outline" 
-            onClick={() => router.push('/service-selection')}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition-all duration-300"
-          >
-            返回上傳
-          </Button>
-          <Button 
-            onClick={handleViewResults}
+          <NavigationButton 
+            direction="left" 
+            route="/service-selection" 
+            text="返回上傳" 
+          />
+          <NavigationButton 
+            direction="right" 
+            route="/results" 
+            text="查看分析結果" 
             disabled={!analysisComplete || !analysisResult}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            查看詳細結果
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+            beforeNavigate={handleViewResults}
+          />
         </div>
       </div>
     </div>

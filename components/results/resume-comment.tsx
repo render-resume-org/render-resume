@@ -1,13 +1,15 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquareTextIcon } from "lucide-react";
+import { MessageSquareTextIcon, Lightbulb, AlertTriangle } from "lucide-react";
 
 interface ResumeCommentProps {
   comment: string;
+  highlightsCount: number;
+  issuesCount: number;
 }
 
-export function ResumeComment({ comment }: ResumeCommentProps) {
+export function ResumeComment({ comment, highlightsCount, issuesCount }: ResumeCommentProps) {
   return (
     <Card className="w-full h-full flex flex-col bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
       <CardHeader>
@@ -20,17 +22,24 @@ export function ResumeComment({ comment }: ResumeCommentProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 flex-1">
-        {/* 評語 */}
-        <div className="relative">
-          {/* 左邊的藍色垂直線 */}
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-full"></div>
-          <div className="pl-6">
-            {/* 評語內容 */}
-            <div>
-              <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                {comment}
-              </p>
-            </div>
+        <div>
+          {/* 評語內容 */}
+          <div>
+            <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+              {comment}
+            </p>
+          </div>
+          
+          {/* 統計信息 */}
+          <div className="mt-4 space-y-2">
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-yellow-500" />
+              偵測到 {highlightsCount} 個履歷亮點
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              偵測到 {issuesCount} 個履歷問題
+            </p>
           </div>
         </div>
       </CardContent>

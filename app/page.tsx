@@ -2,31 +2,28 @@
 
 import Footer from "@/components/footer";
 import {
-  AfterSection,
-  BeforeSection,
-  CTASection,
+  ResumeDemoSection,
+  PainPointsSection,
+  FAQSection,
   FeaturesSection,
   HeroSection,
-  stats,
   StructuredData
 } from "@/components/landing";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen">
       <StructuredData />
 
-      <HeroSection stats={stats} />
+      <HeroSection />
       
-      {/* <ScoringSystem scoreCategories={scoreCategories} /> */}
-      
-      <BeforeSection />
+      <PainPointsSection />
       
       <FeaturesSection />
       
-      <AfterSection />
+      <ResumeDemoSection />
       
-      <CTASection />
+      <FAQSection />
 
       <Footer />
     </div>

@@ -24,6 +24,7 @@ export default function SkillsEditDialog({
 
   const addSkillGroup = () => {
     setSkills([...skills, { category: '', items: '' }]);
+    setSkills([...skills, { category: '', items: '' }]);
   };
 
   const removeSkillGroup = (index: number) => {

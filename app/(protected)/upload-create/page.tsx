@@ -1,8 +1,8 @@
 "use client";
 
 import { useFileUpload } from "@/components/hooks/use-file-upload";
+import { NavigationButton } from "@/components/navigation-button";
 import { UploadIllustration } from "@/components/svg-icon";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdditionalTextInput } from "@/components/upload/additional-text-input";
 import { EducationInput } from "@/components/upload/education-input";
@@ -13,12 +13,9 @@ import { ProjectInput } from "@/components/upload/project-input";
 import { SkillsInput } from "@/components/upload/skills-input";
 import { UploadDropzone } from "@/components/upload/upload-dropzone";
 import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
-import { ArrowRight } from "lucide-react";
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function UploadCreatePage() {
-  const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   
   const {
@@ -49,15 +46,9 @@ export default function UploadCreatePage() {
     setTimeout(() => setIsVisible(true), 100);
   }, []);
 
-  const handleNext = async () => {
-    try {
-      await prepareForAnalysis();
-      console.log('🧑‍💻 [Upload Create Page] Navigating to analyze page');
-      router.push('/analyze');
-    } catch (error) {
-      console.error('❌ [Upload Create Page] Error in handleNext:', error);
-      alert(error instanceof Error ? error.message : '準備文件時發生錯誤，請重試');
-    }
+  const handleBeforeNavigate = async () => {
+    await prepareForAnalysis();
+    console.log('🧑‍💻 [Upload Create Page] Preparing for analysis');
   };
 
   // Dynamic content based on service type
@@ -140,35 +131,25 @@ export default function UploadCreatePage() {
           onChange={setAdditionalText}
         />
 
-        {/* Action Buttons */}
+        {/* Navigation */}
         <div className={`flex justify-between items-center transition-all duration-700 delay-900 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
-          <Button 
-            variant="outline" 
-            onClick={() => router.push('/service-selection')}
-            className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800 transition-all duration-300"
-          >
-            返回選擇
-          </Button>
+          <NavigationButton
+            direction="left"
+            route="/service-selection"
+            text="返回選擇"
+            className="transition-all duration-300"
+          />
           
-          <Button 
-            onClick={handleNext}
+          <NavigationButton
+            direction="right"
+            route="/analyze"
+            text="開始分析"
             disabled={!canProceed || isProcessing}
-            className={`${pageContent.color.button} text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {isProcessing ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                準備中...
-              </>
-            ) : (
-              <>
-                開始分析
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </>
-            )}
-          </Button>
+            beforeNavigate={handleBeforeNavigate}
+            className={`${pageContent.color.button} text-white shadow-lg hover:shadow-xl transition-all duration-300`}
+          />
         </div>
       </div>
     </div>

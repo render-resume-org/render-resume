@@ -3,7 +3,9 @@
 import {
   BarChart3,
   Bell,
+  Gift,
   Mail,
+  Package,
   Settings,
   Users
 } from "lucide-react";
@@ -37,6 +39,18 @@ const adminNavItems = [
     href: "/admin/email",
     icon: Mail,
     description: "發送郵件給使用者"
+  },
+  {
+    title: "促銷郵件",
+    href: "/admin/email-promo",
+    icon: Gift,
+    description: "發送附優惠碼的促銷郵件"
+  },
+  {
+    title: "方案管理",
+    href: "/admin/plans",
+    icon: Package,
+    description: "管理訂閱方案和價格設定"
   },
   {
     title: "系統設定",

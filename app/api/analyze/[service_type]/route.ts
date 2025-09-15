@@ -152,7 +152,7 @@ function buildFormDataText(
     }).join('\n\n')}\n\n`;
   }
   if (skills) text += `技能列表：\n${skills}\n\n`;
-  if (personalInfo) text += `個人基本資料：\n地址：${personalInfo.address}\n電話：${personalInfo.phone}\n郵箱：${personalInfo.email}\n\n`;
+  if (personalInfo) text += `個人基本資料：\n姓名：${personalInfo.name}\n地址：${personalInfo.address}\n電話：${personalInfo.phone}\n郵箱：${personalInfo.email}\n\n`;
   if (links) text += `連結：\nLinkedIn：${links.linkedin}\nGitHub：${links.github}\n作品集：${links.portfolio}\n\n`;
   return text;
 }
