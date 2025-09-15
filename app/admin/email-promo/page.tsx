@@ -303,7 +303,7 @@ export default function BatchPromoEmailPage() {
         <body>
           <div class="email-container">
             <div class="header">
-              <div class="logo">Render Resume</div>
+              <div class="logo">RenderResume</div>
               <h1>${title}</h1>
               <p>${subtitle}</p>
             </div>
