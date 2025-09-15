@@ -53,7 +53,7 @@ export default function InlineHighlightPreview({
         {/* Inline red highlight */}
         <span
           className={cn(
-            'cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2 text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md',
+            'cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2 text-red-700 p-1 px-2',
             beforeClassName
           )}
         >
@@ -66,7 +66,7 @@ export default function InlineHighlightPreview({
             suppressContentEditableWarning
             contentEditable={true}
             className={cn(
-              'cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none block',
+              'cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 p-1 px-2 outline-none block',
               afterClassName,
               afterProps?.className
             )}
@@ -87,7 +87,7 @@ export default function InlineHighlightPreview({
       {showBefore && (
         <span
           className={cn(
-            'cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2  text-red-700 dark:text-red-300 dark:bg-red-900/20 p-1 px-2 rounded-md',
+            'cursor-text bg-red-50 decoration-red-400 decoration-2 underline-offset-2 text-red-700 p-1 px-2',
             beforeClassName
           )}
         >
@@ -100,7 +100,7 @@ export default function InlineHighlightPreview({
           suppressContentEditableWarning
           contentEditable={true}
           className={cn(
-            'cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 dark:text-green-200 dark:bg-green-900/20 p-1 px-2 rounded-md outline-none',
+            'cursor-text bg-green-50 decoration-green-500 decoration-2 underline-offset-2 text-green-800 p-1 px-2 outline-none',
             afterClassName,
             afterProps?.className
           )}

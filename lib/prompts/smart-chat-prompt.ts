@@ -350,18 +350,18 @@ export function generateSmartChatUserPrompt(
     pendingIssues.forEach((issue, index) => {
       userPrompt += `${index + 1}. **${issue.title}**\n`;
       userPrompt += `   - 描述：${issue.description}\n`;
-      userPrompt += `   - 狀態：⏳ 待處理\n`;
+      userPrompt += `   - 狀態：待處理\n`;
       userPrompt += `   - ID：${issue.id}\n\n`;
     });
   }
 
   // 已完成的 issues
   if (completedIssues.length > 0) {
-    userPrompt += `✅ **已完成的履歷問題**：\n\n`;
+    userPrompt += `已完成的履歷問題：\n\n`;
     completedIssues.forEach((issue, index) => {
       userPrompt += `${index + 1}. **${issue.title}**\n`;
       userPrompt += `   - 描述：${issue.description}\n`;
-      userPrompt += `   - 狀態：✅ 已完成\n`;
+      userPrompt += `   - 狀態：已完成\n`;
       userPrompt += '\n';
     });
   }
