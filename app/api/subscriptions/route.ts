@@ -5,14 +5,35 @@ export async function GET() {
   try {
     const supabase = await createClient();
     
-    // 獲取當前用戶
+    // 獲取當前用戶（允許未登入用戶）
     const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser();
     
-    if (authError || !currentUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // 獲取所有默認方案（未登入用戶也可以看到）
+    const { data: allPlans, error: plansError } = await supabase
+      .from('plans')
+      .select('*')
+      .eq('default', true)
+      .order('daily_usage', { ascending: true });
+
+    if (plansError) {
+      console.error('Error fetching plans:', plansError);
+      return NextResponse.json(
+        { error: '獲取方案信息失敗' },
+        { status: 500 }
+      );
     }
 
-    // 獲取用戶的所有訂閱
+    // 如果用戶未登入，只返回方案信息
+    if (authError || !currentUser) {
+      return NextResponse.json({
+        subscriptions: [],
+        currentPlan: null,
+        allPlans,
+        isAuthenticated: false
+      });
+    }
+
+    // 如果用戶已登入，獲取用戶的所有訂閱
     const { data: subscriptions, error: subscriptionsError } = await supabase
       .from('subscriptions')
       .select(`
@@ -27,21 +48,6 @@ export async function GET() {
       console.error('Error fetching subscriptions:', subscriptionsError);
       return NextResponse.json(
         { error: '獲取訂閱信息失敗' },
-        { status: 500 }
-      );
-    }
-
-    // 獲取所有默認方案
-    const { data: allPlans, error: plansError } = await supabase
-      .from('plans')
-      .select('*')
-      .eq('default', true)
-      .order('daily_usage', { ascending: true });
-
-    if (plansError) {
-      console.error('Error fetching plans:', plansError);
-      return NextResponse.json(
-        { error: '獲取方案信息失敗' },
         { status: 500 }
       );
     }
@@ -82,6 +88,7 @@ export async function GET() {
       subscriptions: activeSubscriptions,
       currentPlan,
       allPlans,
+      isAuthenticated: true
     });
 
   } catch (error) {

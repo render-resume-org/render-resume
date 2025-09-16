@@ -7,11 +7,14 @@ import { Plan } from "@/types/user";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Footer from "@/components/footer";
+import { useRouter } from "next/navigation";
 
 export default function PricingPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isUpgrading, setIsUpgrading] = useState<number | null>(null);
   const [allPlans, setAllPlans] = useState<Plan[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const fetchPlans = async () => {
     try {
@@ -24,6 +27,7 @@ export default function PricingPage() {
       
       const data = await response.json();
       setAllPlans(data.allPlans || []);
+      setIsAuthenticated(data.isAuthenticated || false);
     } catch (error) {
       console.error('Error fetching plans:', error);
       toast.error('獲取方案信息失敗');
@@ -39,6 +43,12 @@ export default function PricingPage() {
   const handleUpgrade = async (planId: number) => {
     try {
       setIsUpgrading(planId);
+
+      // 如果用戶未登入，導向登入頁面
+      if (!isAuthenticated) {
+        router.push('/auth/login');
+        return;
+      }
 
       // Beta 版暫時不開放付費
       toast.info('Beta 版尚未開放付費！感謝您的支持！')
@@ -131,7 +141,7 @@ export default function PricingPage() {
               canUpgrade={true}
               onUpgrade={handleUpgrade}
               isUpgrading={isUpgrading === plan.id}
-              currentPlanType={'FREE'}
+              currentPlanType={isAuthenticated ? 'FREE' : 'GUEST'}
               freePlanId={freePlan?.id || 0}
             />
           ))}
