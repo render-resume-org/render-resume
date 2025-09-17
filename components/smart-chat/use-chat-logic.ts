@@ -1,6 +1,6 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { logSmartChatAttachment } from "@/lib/actions/activity";
-import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import type { UploadedFile } from '@/lib/upload-utils';
 import { computeResumeDiffSummary } from '@/lib/utils/json-diff';
 import { useCallback, useEffect, useState } from 'react';

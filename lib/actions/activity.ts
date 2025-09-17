@@ -2,7 +2,7 @@
 
 import { getAuthenticatedUser } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
-import { Database } from "@/lib/types/database";
+import { Database } from "@/types/database";
 
 type ActionType = Database['public']['Enums']['action-type'];
 

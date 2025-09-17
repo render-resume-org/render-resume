@@ -3,7 +3,7 @@
 import { typeIcons, typeStyles } from "@/components/announcements/config";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { AnnouncementTable } from "@/lib/types";
+import { AnnouncementTable } from "@/types";
 import { parseContentWithLinks } from "@/lib/utils/parse-content-with-links";
 import { ChevronRight, Megaphone } from "lucide-react";
 import Link from "next/link";

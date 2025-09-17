@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { OptimizedResume } from '@/lib/types/resume';
+import { OptimizedResume } from '@/types/resume';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import BaseEditDialog from './base-edit-dialog';

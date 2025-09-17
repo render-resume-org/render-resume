@@ -1,7 +1,7 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
-import type { InlineChangeHandler } from '@/lib/types/inline-edit';
-import { OptimizedResume } from '@/lib/types/resume';
+import type { InlineChangeHandler } from '@/types/inline-edit';
+import { OptimizedResume } from '@/types/resume';
 import { cn } from '@/lib/utils';
 import { Code } from 'lucide-react';
 import { useResumeEditor } from '../../smart-chat/context/resume-editor-context';

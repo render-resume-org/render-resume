@@ -3,7 +3,7 @@ import { logSmartChatMessage } from '@/lib/actions/activity';
 import { requireAuthentication } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from '@/lib/prompts';
-import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
+import { ResumeAnalysisResult } from '@/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface ChatMessage {

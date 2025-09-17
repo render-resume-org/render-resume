@@ -11,7 +11,7 @@ import { UploadIllustration } from "@/components/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationButton } from "@/components/navigation-button";
-import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
+import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {

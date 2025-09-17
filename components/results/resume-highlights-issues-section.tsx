@@ -1,5 +1,5 @@
 // Removed card components in redesign
-import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
+import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
 import { AlertTriangle, Lightbulb } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 

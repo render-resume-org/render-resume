@@ -8,7 +8,7 @@ import {
   logSmartChatMessage,
   logUserAction
 } from '@/lib/actions/activity';
-import { Database } from '@/lib/types/database';
+import { Database } from '@/types/database';
 import { useCallback } from 'react';
 
 type ActionType = Database['public']['Enums']['action-type'];

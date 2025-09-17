@@ -1,4 +1,4 @@
-import { ResumeAnalysisResult } from '../types/resume-analysis';
+import { ResumeAnalysisResult } from '@/types/resume-analysis';
 
 export function generateSmartChatSystemPrompt(
   analysisResult: ResumeAnalysisResult, 

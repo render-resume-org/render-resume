@@ -19,7 +19,7 @@
 - New prompts:
   - `generateExtractResumeUserPrompt` → returns only the `resume` object.
   - `generateEvaluateResumeUserPrompt` → inputs `resume` + optional context; returns `{ resume?, highlights, issues, scores }`.
-- New Zod schema `UnifiedResumeAnalysisSchema` under `lib/types/resume-unified.ts`.
+- New Zod schema `UnifiedResumeAnalysisSchema` under `types/resume-unified.ts`.
 - OpenAI client updated to support JSON object mode and validate against the unified schema.
 
 ## Data Model (Unified)

@@ -1,4 +1,4 @@
-import { TablesInsert, TablesUpdate } from "@/lib/types/database";
+import { TablesInsert, TablesUpdate } from "@/types/database";
 import { checkAdminAuth } from "@/lib/utils/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 

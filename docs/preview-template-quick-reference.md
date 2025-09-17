@@ -323,7 +323,7 @@ const template = useMemo(() =>
 - **Template Config**: `lib/config/resume-templates.ts`
 - **Section Registry**: `components/preview/section-registry.tsx`
 - **Main Preview**: `components/preview/resume-preview.tsx`
-- **Resume Types**: `lib/types/resume.ts`
+- **Resume Types**: `types/resume.ts`
 - **Preview Page**: `app/(protected)/download/page.tsx`
 
 ## 📚 Additional Resources

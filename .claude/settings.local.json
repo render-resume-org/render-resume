@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(pnpm build:*)",
-      "Bash(pnpm lint:*)"
+      "Bash(pnpm lint:*)",
+      "Bash(mv:*)",
+      "Bash(xargs sed:*)"
     ],
     "deny": [],
     "ask": []

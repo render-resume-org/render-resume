@@ -1,4 +1,4 @@
-import { OptimizedResume } from "@/lib/types/resume";
+import { OptimizedResume } from "@/types/resume";
 import { useState } from "react";
 import { toast } from "sonner";
 import EducationEditDialog from "./education-edit-dialog";

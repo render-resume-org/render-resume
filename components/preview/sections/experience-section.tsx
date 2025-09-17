@@ -2,9 +2,9 @@ import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-c
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/lib/template-styling';
-import type { InlineChangeHandler } from '@/lib/types/inline-edit';
-import { OptimizedResume } from '@/lib/types/resume';
-import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
+import type { InlineChangeHandler } from '@/types/inline-edit';
+import { OptimizedResume } from '@/types/resume';
+import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import { cn } from '@/lib/utils';
 import { Briefcase } from 'lucide-react';
 import InlineText from '../inline-text';

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { AnnouncementTable } from "@/lib/types";
+import { AnnouncementTable } from "@/types";
 import { formatSmartTime } from "@/lib/utils/time";
 import { ChevronRight, Megaphone } from "lucide-react";
 import Link from "next/link";

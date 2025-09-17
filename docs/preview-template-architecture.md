@@ -308,7 +308,7 @@ export default function SkillsSection({ data, template }: SkillsSectionProps) {
 ### 1. Update Type Definitions
 
 ```typescript
-// In lib/types/resume.ts
+// In types/resume.ts
 export interface OptimizedResume {
   // ... existing properties ...
   certifications: Array<{

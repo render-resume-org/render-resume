@@ -1,4 +1,4 @@
-import type { UnifiedResumeAnalysisResult } from '@/lib/types/resume-unified';
+import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import React from 'react';
 
 export type AnnotationKind = 'highlight' | 'issue';

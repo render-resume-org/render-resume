@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import type { ResumeAnalysisResult } from "@/types/resume-analysis";
 import { Award, Briefcase, Code, FileText, Folder, Github, Globe, GraduationCap, Linkedin, Mail, MapPin, Phone, User, UserCircle } from "lucide-react";
 
 interface ResultsDetailedSectionsProps {

@@ -6,8 +6,8 @@ import {
     getTextVector,
     logExcerptVsTemplateContentSimilarity
 } from "@/lib/similarity";
-import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
-import type { UnifiedResumeAnalysisResult } from "@/lib/types/resume-unified";
+import { ResumeAnalysisResult } from "@/types/resume-analysis";
+import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import { ChatMessage, SuggestionRecord } from './types';

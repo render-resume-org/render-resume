@@ -1,5 +1,5 @@
 import { getTemplateById, ResumeTemplate } from '@/lib/config/resume-templates';
-import { OptimizedResume } from '@/lib/types/resume';
+import { OptimizedResume } from '@/types/resume';
 import { cnPdf } from '@/lib/utils';
 import React from 'react';
 

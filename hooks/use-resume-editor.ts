@@ -1,4 +1,4 @@
-import { UnifiedResume } from '@/lib/types/resume-unified';
+import { UnifiedResume } from '@/types/resume-unified';
 import { useCallback, useEffect, useState } from 'react';
 
 /**

@@ -1,4 +1,4 @@
-import { AnalysisScore, LetterGrade } from "@/lib/types/resume-analysis";
+import { AnalysisScore, LetterGrade } from "@/types/resume-analysis";
 
 export interface User {
   user_metadata?: {
