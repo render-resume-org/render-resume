@@ -1,4 +1,4 @@
-import { checkUsageLimit } from '@/lib/utils/usage-check';
+import { checkUsageLimit } from '@/utils/usage-check';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

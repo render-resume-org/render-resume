@@ -2,7 +2,7 @@
 
 import { ServiceCard } from "@/components/service-selection/service-card";
 import { CreateResumeIcon, OptimizeResumeIcon } from "@/components/svg-icon";
-import { clearSessionData } from "@/lib/utils";
+import { clearSessionData } from "@/utils";
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

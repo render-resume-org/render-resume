@@ -5,7 +5,7 @@ import { TemplateStylingService } from '@/lib/template-styling';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 import { FolderOpen } from 'lucide-react';
 import InlineText from '../inline-text';
 import ResumeSection from '../resume-section';

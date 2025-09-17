@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import type { LegalDoc, LegalBlock } from "./legal-types";
 
 function renderBlock(block: LegalBlock, idx: number) {

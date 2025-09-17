@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/lib/utils/admin-auth";
+import { checkAdminAuth } from "@/utils/admin-auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {

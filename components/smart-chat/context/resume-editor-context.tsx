@@ -5,7 +5,7 @@ import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
 import { calculateStringSimilarity } from '@/lib/similarity';
 import type { OptimizedResume } from '@/types/resume';
 import type { UnifiedResume } from '@/types/resume-unified';
-import { setByPath } from '@/lib/utils/set-by-path';
+import { setByPath } from '@/utils/set-by-path';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 // Local types copied from original file to avoid deep import

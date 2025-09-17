@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react';
-import { CaretDetector } from '../utils/caret-detection';
-import { NavigationResolver, NavigationAction, type NavigationContext } from '../utils/navigation-resolver';
+import { CaretDetector } from '@/utils/caret-detection';
+import { NavigationResolver, NavigationAction, type NavigationContext } from '@/utils/navigation-resolver';
 import type { InlineGroupId, EnhancedCaretPosition } from '@/types/inline-editor';
 
 export interface NavigationManagerOptions {

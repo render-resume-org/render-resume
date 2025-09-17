@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { formatFileSize, UploadedFile } from "@/lib/upload-utils";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { AlertCircle, FileText, X } from "lucide-react";
 import Image from 'next/image';
 import React, { useState } from "react";

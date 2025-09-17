@@ -1,7 +1,7 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 import Link from 'next/link';
 import { useEditDialogManager } from './edit-dialogs';
 import ResumeHeader from './resume-header';

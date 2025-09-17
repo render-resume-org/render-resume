@@ -1,8 +1,8 @@
 'use client';
 
 import { AnnouncementTable } from "@/types";
-import { parseContentWithLinks } from "@/lib/utils/parse-content-with-links";
-import { formatSmartTime } from "@/lib/utils/time";
+import { parseContentWithLinks } from "@/utils/parse-content-with-links";
+import { formatSmartTime } from "@/utils/time";
 import { Eye } from "lucide-react";
 
 interface AnnouncementDetailCardProps {

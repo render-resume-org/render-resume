@@ -8,7 +8,7 @@ import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt
 import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
 import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
-import { checkUsageLimit } from '@/lib/utils/usage-check';
+import { checkUsageLimit } from '@/utils/usage-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface AnyObject { [key: string]: unknown }

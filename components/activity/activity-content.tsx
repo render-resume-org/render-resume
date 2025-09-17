@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ActivityLog, getUserActivityLogs } from "@/lib/actions/activity";
-import { getTimeRangeDates } from "@/lib/utils/time-filters";
+import { getTimeRangeDates } from "@/utils/time-filters";
 import { Activity, ChevronRight, ExternalLink, Home } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";

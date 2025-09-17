@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { LogoutRedirectHandler } from "@/components/logout-redirect-handler";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { clearSessionData, cn } from "@/lib/utils";
+import { clearSessionData, cn } from "@/utils";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

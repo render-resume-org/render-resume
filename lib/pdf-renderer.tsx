@@ -1,6 +1,6 @@
 import { getTemplateById, ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/types/resume';
-import { cnPdf } from '@/lib/utils';
+import { cnPdf } from '@/utils';
 import React from 'react';
 
 // 動態導入 renderToStaticMarkup 以避免客戶端錯誤

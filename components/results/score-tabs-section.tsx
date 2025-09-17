@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { motion } from "framer-motion";
 import { Briefcase, GraduationCap, HelpCircle, Laptop, Rocket, Sparkles, Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";

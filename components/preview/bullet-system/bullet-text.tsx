@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 import { useEffect, useState } from 'react';
 import { useBulletPoint } from './use-bullet-point';
 

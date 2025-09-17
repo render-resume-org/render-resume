@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { availableTemplates } from "@/lib/config/resume-templates";
 import { PdfGenerator } from "@/lib/pdf-generator";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

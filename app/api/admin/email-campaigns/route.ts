@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/lib/utils/admin-auth";
+import { checkAdminAuth } from "@/utils/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // 獲取所有郵件活動

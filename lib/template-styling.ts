@@ -1,5 +1,5 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
-import { cn } from '@/lib/utils';
+import { cn } from '@/utils';
 
 /**
  * 模板樣式服務 - 統一管理模板相關的樣式邏輯

@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import Image from "next/image";
 import { ChatMessage } from "../smart-chat";
 import ExcerptCard from "./excerpt-card";
