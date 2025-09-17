@@ -1,6 +1,6 @@
 import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/components/smart-chat/types';
 import { logSmartChatMessage } from '@/lib/actions/activity';
-import { requireProUser } from '@/lib/auth/server';
+import { requireAuthentication } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/lib/openai-client-native';
 import { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from '@/lib/prompts';
 import { ResumeAnalysisResult } from '@/lib/types/resume-analysis';
@@ -516,18 +516,17 @@ interface FileMessage {
 export async function POST(request: NextRequest) {
   console.log('🚀 [API] POST /api/smart-chat - Request received');
   
-  // 驗證用戶是否為 Pro 用戶
-  const authResult = await requireProUser();
+  // 驗證用戶是否已登入
+  const authResult = await requireAuthentication();
   
-  if (!authResult.isAuthenticated || !authResult.isProUser) {
+  if (!authResult.isAuthenticated) {
     console.error('❌ [API] Access denied:', authResult.error);
     return NextResponse.json(
       { 
-        error: authResult.error || '此功能僅限 Pro 用戶使用',
-        requiresProPlan: !authResult.isProUser,
-        requiresAuth: !authResult.isAuthenticated
+        error: authResult.error || '需要登入才能使用此功能',
+        requiresAuth: true
       },
-      { status: authResult.isAuthenticated ? 403 : 401 }
+      { status: 401 }
     );
   }
 
