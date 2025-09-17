@@ -14,6 +14,7 @@ import { UserDropdown } from "./user-dropdown";
 
 const NAVIGATIONS = [
   { name: "儀表板", href: "/dashboard" },
+  { name: "論壇", href: "/threads" },
 ];
 
 const AppHeader = () => {
