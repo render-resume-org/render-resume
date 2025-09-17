@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generatePdfHtml } from '@/lib/pdf-renderer';
+import { generatePdfHtml } from '@/services/pdf-renderer';
 import { OptimizedResume } from '@/types/resume';
 
 export async function POST(request: NextRequest) {

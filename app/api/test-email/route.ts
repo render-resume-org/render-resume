@@ -1,4 +1,4 @@
-import { getEmailTemplate } from '@/lib/email-templates';
+import { getEmailTemplate } from '@/services/email-templates';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 

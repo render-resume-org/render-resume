@@ -1,5 +1,5 @@
 // API 請求和回應的型別定義
-import { Education, Experience, Project, PersonalInfo, Links } from '@/lib/upload-utils';
+import { Education, Experience, Project, PersonalInfo, Links } from '@/utils/upload-utils';
 
 export interface AnalysisProject {
     name: string;

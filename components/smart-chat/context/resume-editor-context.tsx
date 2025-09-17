@@ -1,8 +1,8 @@
 "use client";
 
-import { mapOptimizedToUnified } from '@/lib/mappers/optimized-to-unified';
-import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
-import { calculateStringSimilarity } from '@/lib/similarity';
+import { mapOptimizedToUnified } from '@/utils/optimized-to-unified';
+import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';
+import { calculateStringSimilarity } from '@/utils/similarity';
 import type { OptimizedResume } from '@/types/resume';
 import type { UnifiedResume } from '@/types/resume-unified';
 import { setByPath } from '@/utils/set-by-path';

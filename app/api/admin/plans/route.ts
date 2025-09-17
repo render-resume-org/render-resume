@@ -1,5 +1,5 @@
 import { TablesInsert, TablesUpdate } from "@/types/database";
-import { checkAdminAuth } from "@/utils/admin-auth";
+import { checkAdminAuth } from "@/services/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // 獲取所有方案

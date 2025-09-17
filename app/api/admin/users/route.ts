@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/utils/admin-auth";
+import { checkAdminAuth } from "@/services/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // 用戶類型定義

@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/utils/admin-auth";
+import { checkAdminAuth } from "@/services/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 // 郵件模板生成函數

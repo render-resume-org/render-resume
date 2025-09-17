@@ -1,4 +1,4 @@
-import { generatePdfHtmlTemplate } from '@/lib/pdf-styles';
+import { generatePdfHtmlTemplate } from '@/utils/pdf-styles';
 import { toast } from 'sonner';
 
 export interface PdfGenerationOptions {

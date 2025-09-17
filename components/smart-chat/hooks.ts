@@ -5,7 +5,7 @@ import {
     getSuggestionText,
     getTextVector,
     logExcerptVsTemplateContentSimilarity
-} from "@/lib/similarity";
+} from "@/utils/similarity";
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
 import { useCallback, useEffect, useRef, useState } from 'react';

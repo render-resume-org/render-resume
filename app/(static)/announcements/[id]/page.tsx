@@ -4,8 +4,8 @@ import { AnnouncementDetailCard } from "@/components/announcements/announcement-
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { logAnnouncementView } from "@/lib/actions/activity";
-import { getAnnouncementById, incrementAnnouncementViews } from "@/lib/actions/announcements";
+import { logAnnouncementView } from "@/services/actions/activity";
+import { getAnnouncementById, incrementAnnouncementViews } from "@/services/actions/announcements";
 import { AnnouncementTable } from "@/types";
 import { ChevronRight, Home, XCircle } from "lucide-react";
 import Link from "next/link";

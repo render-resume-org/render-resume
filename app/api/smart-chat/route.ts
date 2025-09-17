@@ -1,7 +1,7 @@
 import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/components/smart-chat/types';
-import { logSmartChatMessage } from '@/lib/actions/activity';
+import { logSmartChatMessage } from '@/services/actions/activity';
 import { requireAuthentication } from '@/lib/auth/server';
-import { createNativeOpenAIClient } from '@/lib/openai-client-native';
+import { createNativeOpenAIClient } from '@/services/openai-client-native';
 import { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from '@/lib/prompts';
 import { ResumeAnalysisResult } from '@/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';

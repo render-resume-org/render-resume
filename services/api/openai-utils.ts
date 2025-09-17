@@ -1,4 +1,4 @@
-import { createNativeOpenAIClient } from '@/lib/openai-client-native';
+import { createNativeOpenAIClient } from '@/services/openai-client-native';
 
 export interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';

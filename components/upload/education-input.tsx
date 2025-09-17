@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Education } from "@/lib/upload-utils";
+import { Education } from "@/utils/upload-utils";
 import { cn } from "@/utils";
 import { Plus, X } from "lucide-react";
 import React, { useCallback, useState } from "react";

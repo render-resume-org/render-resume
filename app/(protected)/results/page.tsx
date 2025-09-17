@@ -4,7 +4,7 @@ import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/com
 import ResumePreview from '@/components/preview/resume-preview';
 import { NavigationButton } from "@/components/navigation-button";
 import { getTemplateById } from '@/lib/config/resume-templates';
-import { mapUnifiedToOptimized } from '@/lib/mappers/unified-to-optimized';
+import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

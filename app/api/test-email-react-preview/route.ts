@@ -1,4 +1,4 @@
-import { getReactEmailTemplate } from '@/lib/email-templates';
+import { getReactEmailTemplate } from '@/services/email-templates';
 import { NextRequest, NextResponse } from 'next/server';
 import { render } from '@react-email/render';
 

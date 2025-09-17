@@ -1,7 +1,7 @@
 import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
-import { TemplateStylingService } from '@/lib/template-styling';
+import { TemplateStylingService } from '@/utils/template-styling';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';

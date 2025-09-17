@@ -1,7 +1,7 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { logSmartChatAttachment } from "@/lib/actions/activity";
+import { logSmartChatAttachment } from "@/services/actions/activity";
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
-import type { UploadedFile } from '@/lib/upload-utils';
+import type { UploadedFile } from '@/utils/upload-utils';
 import { computeResumeDiffSummary } from '@/utils/json-diff';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "./ai-suggestions-sidebar";

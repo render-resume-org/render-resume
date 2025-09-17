@@ -1,5 +1,5 @@
 import { ResumeTemplate } from '@/lib/config/resume-templates';
-import { TemplateStylingService } from '@/lib/template-styling';
+import { TemplateStylingService } from '@/utils/template-styling';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import { cn } from '@/utils';

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationButton } from "@/components/navigation-button";
 import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
-import { Education, Experience, Links, PersonalInfo, Project } from "@/lib/upload-utils";
+import { Education, Experience, Links, PersonalInfo, Project } from "@/utils/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import {
     ArrowRight,

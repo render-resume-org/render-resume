@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Links } from "@/lib/upload-utils";
+import { Links } from "@/utils/upload-utils";
 import React, { useCallback } from "react";
 
 type Props = {

@@ -7,15 +7,11 @@
 ## todos
 
 - [] 重構 app/api/
-
 - [] 重構 hooks/
-
 - [] 重構 types/
-
 - [] 重構 lib/
   - [] 新增 utils/
   - [] 新增 services/
-
 - [] 重構 components/
 
 晚點做：
@@ -114,73 +110,73 @@ render-resume/
 ├── features/                     # 功能模組（核心業務邏輯）
 │   ├── auth/                     # 使用者認證與授權
 │   │   ├── components/           # 登入、註冊、密碼重置組件
-│   │   ├── hooks/               # 認證相關 hooks
-│   │   ├── services/            # 認證 API 服務
-│   │   ├── types/               # 認證相關類型
-│   │   └── utils/               # 認證工具函數
+│   │   ├── hooks/                # 認證相關 hooks
+│   │   ├── services/             # 認證 API 服務
+│   │   ├── types/                # 認證相關類型
+│   │   └── utils/                # 認證工具函數
 │   │
 │   ├── resume/                   # 履歷分析與生成（核心功能）
 │   │   ├── components/           # 分析結果、履歷預覽、編輯組件
-│   │   ├── services/            # AI 分析、PDF 生成服務
-│   │   ├── hooks/               # 履歷處理相關 hooks
-│   │   ├── types/               # 履歷相關類型定義
-│   │   └── utils/               # 履歷處理工具函數
+│   │   ├── services/             # AI 分析、PDF 生成服務
+│   │   ├── hooks/                # 履歷處理相關 hooks
+│   │   ├── types/                # 履歷相關類型定義
+│   │   └── utils/                # 履歷處理工具函數
 │   │
-│   ├── smart-chat/              # 智能問答系統
+│   ├── smart-chat/               # 智能問答系統
 │   │   ├── components/           # 聊天界面、訊息組件
-│   │   ├── hooks/               # 聊天狀態管理 hooks
-│   │   ├── services/            # 聊天 API 服務
-│   │   ├── types/               # 聊天相關類型
-│   │   └── utils/               # 聊天工具函數
+│   │   ├── hooks/                # 聊天狀態管理 hooks
+│   │   ├── services/             # 聊天 API 服務
+│   │   ├── types/                # 聊天相關類型
+│   │   └── utils/                # 聊天工具函數
 │   │
-│   ├── files/                   # 檔案管理系統
+│   ├── files/                    # 檔案管理系統
 │   │   ├── components/           # 檔案上傳、下載、預覽組件
-│   │   ├── hooks/               # 檔案處理 hooks
-│   │   ├── services/            # 檔案處理、PDF 生成服務
-│   │   ├── types/               # 檔案相關類型
-│   │   └── utils/               # 檔案處理工具函數
+│   │   ├── hooks/                # 檔案處理 hooks
+│   │   ├── services/             # 檔案處理、PDF 生成服務
+│   │   ├── types/                # 檔案相關類型
+│   │   └── utils/                # 檔案處理工具函數
 │   │
-│   ├── payment/                 # 付款與訂閱管理
+│   ├── payment/                  # 付款與訂閱管理
 │   │   ├── components/           # 付款界面、訂閱計畫組件
-│   │   ├── hooks/               # 付款狀態管理 hooks
-│   │   ├── services/            # 付款 API、訂閱服務
-│   │   ├── types/               # 付款相關類型
-│   │   └── utils/               # 付款工具函數
+│   │   ├── hooks/                # 付款狀態管理 hooks
+│   │   ├── services/             # 付款 API、訂閱服務
+│   │   ├── types/                # 付款相關類型
+│   │   └── utils/                # 付款工具函數
 │   │
-│   ├── dashboard/               # 用戶儀表板與分析
+│   ├── dashboard/                # 用戶儀表板與分析
 │   │   ├── components/           # 儀表板組件、統計圖表
-│   │   ├── hooks/               # 儀表板數據 hooks
-│   │   ├── services/            # 用戶數據、活動日誌服務
-│   │   ├── types/               # 儀表板相關類型
-│   │   └── utils/               # 數據處理工具函數
+│   │   ├── hooks/                # 儀表板數據 hooks
+│   │   ├── services/             # 用戶數據、活動日誌服務
+│   │   ├── types/                # 儀表板相關類型
+│   │   └── utils/                # 數據處理工具函數
 │   │
-│   ├── user/                    # 用戶資料與帳戶管理
+│   ├── user/                     # 用戶資料與帳戶管理
 │   │   ├── components/           # 個人資料、帳戶設定組件
-│   │   ├── hooks/               # 用戶資料管理 hooks
-│   │   ├── services/            # 用戶 API 服務
-│   │   ├── types/               # 用戶相關類型
-│   │   └── utils/               # 用戶資料處理工具
+│   │   ├── hooks/                # 用戶資料管理 hooks
+│   │   ├── services/             # 用戶 API 服務
+│   │   ├── types/                # 用戶相關類型
+│   │   └── utils/                # 用戶資料處理工具
 │   │
-│   ├── admin/                   # 後台管理系統
+│   ├── admin/                    # 後台管理系統
 │   │   ├── components/           # 後台管理組件
-│   │   ├── hooks/               # 管理功能 hooks
-│   │   ├── services/            # 管理 API 服務
-│   │   ├── types/               # 管理相關類型
-│   │   └── utils/               # 管理工具函數
+│   │   ├── hooks/                # 管理功能 hooks
+│   │   ├── services/             # 管理 API 服務
+│   │   ├── types/                # 管理相關類型
+│   │   └── utils/                # 管理工具函數
 │   │
-│   ├── content/                 # 內容管理系統
+│   ├── content/                  # 內容管理系統
 │   │   ├── components/           # 公告、FAQ、靜態頁面組件
-│   │   ├── hooks/               # 內容管理 hooks
-│   │   ├── services/            # 內容 API 服務
-│   │   ├── types/               # 內容相關類型
-│   │   └── utils/               # 內容處理工具函數
+│   │   ├── hooks/                # 內容管理 hooks
+│   │   ├── services/             # 內容 API 服務
+│   │   ├── types/                # 內容相關類型
+│   │   └── utils/                # 內容處理工具函數
 │   │
-│   └── communication/           # 通訊與通知系統
+│   └── communication/            # 通訊與通知系統
 │       ├── components/           # Email 模板、通知組件
-│       ├── hooks/               # 通訊相關 hooks
-│       ├── services/            # Email 服務、通知服務
-│       ├── types/               # 通訊相關類型
-│       └── utils/               # 通訊工具函數
+│       ├── hooks/                # 通訊相關 hooks
+│       ├── services/             # Email 服務、通知服務
+│       ├── types/                # 通訊相關類型
+│       └── utils/                # 通訊工具函數
 │
 ├── components/                   # 全域共用組件
 │   ├── ui/                       # shadcn/ui 基礎組件

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { availableTemplates } from "@/lib/config/resume-templates";
-import { PdfGenerator } from "@/lib/pdf-generator";
+import { PdfGenerator } from "@/services/pdf-generator";
 import { cn } from "@/utils";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";

@@ -1,14 +1,14 @@
-import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
-import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
+import { logResumeBuild, logResumeOptimize } from '@/services/actions/activity';
+import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/services/api/openai-utils';
 import { requireAuthentication } from '@/lib/auth/server';
-import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
+import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/services/openai-client-native';
 import { generateEvaluateSystemPrompt } from '@/lib/prompts/evaluate-system-prompt';
 import { generateEvaluateUserPrompt } from '@/lib/prompts/evaluate-user-prompt';
 import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt';
 import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
 import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/types/resume-unified';
-import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
-import { checkUsageLimit } from '@/utils/usage-check';
+import type { Education, Experience, Links, PersonalInfo, Project } from '@/utils/upload-utils';
+import { checkUsageLimit } from '@/services/usage-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface AnyObject { [key: string]: unknown }

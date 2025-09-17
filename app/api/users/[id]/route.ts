@@ -1,4 +1,4 @@
-import { logUserAction } from "@/lib/actions/activity";
+import { logUserAction } from "@/services/actions/activity";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from 'next/server';
 

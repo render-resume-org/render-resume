@@ -1,4 +1,4 @@
-import { getEmailTemplate, getReactEmailTemplate } from '@/lib/email-templates';
+import { getEmailTemplate, getReactEmailTemplate } from '@/services/email-templates';
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
