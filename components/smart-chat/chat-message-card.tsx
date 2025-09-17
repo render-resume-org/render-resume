@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { ChatMessage } from "../smart-chat";

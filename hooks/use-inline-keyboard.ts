@@ -1,6 +1,6 @@
 import { useCallback, useRef, useEffect } from 'react';
-import type { InlineGroupId, CaretPositionType, NavigationDirection, KeyboardNavigationHandlers } from '../../types/inline-editor';
-import { SimpleCaretNavigation } from '../../lib/caret-navigation-simple';
+import type { InlineGroupId, CaretPositionType, NavigationDirection, KeyboardNavigationHandlers } from '../types/inline-editor';
+import { SimpleCaretNavigation } from '../lib/caret-navigation-simple';
 
 export interface InlineKeyboardOptions {
   groupId: InlineGroupId;

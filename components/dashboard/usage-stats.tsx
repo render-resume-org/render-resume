@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from "@/components/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTodayActivityStats } from "@/lib/actions/activity";

@@ -6,15 +6,23 @@
 
 ## todos
 
-- [] 重構 api/
+- [] 重構 app/api/
+
+- [] 重構 hooks/
+
+- [] 重構 types/
+
+- [] 重構 lib/
+  - [] 新增 utils/
+  - [] 新增 services/
 
 - [] 重構 components/
 
 晚點做：
-- [] 調整 /admin 架構
+- [] 重構 app/admin/
 - [] 將 /auth 改成 /(auth)
 - [] 調整 metadata 位置（一併更新 public/）
-- [] 調整 /payment 架構
+- [] 重構 app/payment/ 架構
 
 待討論：
 - [] announcements 是否要放進 footer? 因為他也是 (static)

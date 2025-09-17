@@ -1,6 +1,6 @@
 "use client";
 
-import { useFileUpload } from "@/components/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { NavigationButton } from "@/components/navigation-button";
 import { UploadIllustration } from "@/components/svg-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

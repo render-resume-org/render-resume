@@ -1,4 +1,4 @@
-import { useFileUpload } from "@/components/hooks/use-file-upload";
+import { useFileUpload } from "@/hooks/use-file-upload";
 import { logSmartChatAttachment } from "@/lib/actions/activity";
 import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
 import type { UploadedFile } from '@/lib/upload-utils';
