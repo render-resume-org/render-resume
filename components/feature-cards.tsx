@@ -6,7 +6,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { clearSessionData, cn } from "@/lib/utils";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 // Types
 interface FeatureCard {
@@ -46,14 +47,16 @@ const FEATURE_CARDS: FeatureCard[] = [
 function FeatureCard({ 
   card, 
   isProUser, 
-  onAction 
+  onAction,
+  isLoading 
 }: { 
   card: FeatureCard; 
   isProUser: boolean; 
-  onAction: (cardId: string) => void;
+  onAction: (cardId: string) => Promise<void> | void;
+  isLoading?: boolean;
 }) {
   const { title, description, icon: Icon, isProOnly, isComingSoon } = card;
-  const isDisabled = isComingSoon || (isProOnly && !isProUser);
+  const isDisabled = isComingSoon || (isProOnly && !isProUser) || (isLoading && card.id === 'create-resume');
 
   // Get hover icon and tooltip text based on state
   const getHoverInfo = () => {
@@ -146,6 +149,7 @@ function FeatureCard({
 export function FeatureCards() {
   const { user } = useAuth();
   const router = useRouter();
+  const [isCheckingUsage, setIsCheckingUsage] = useState(false);
   
   const isProUser = user?.currentPlan?.type?.toLowerCase() === 'pro';
 
@@ -155,10 +159,35 @@ export function FeatureCards() {
   }, []);
 
   // Handle feature card actions
-  const handleCardAction = (cardId: string) => {
+  const handleCardAction = async (cardId: string) => {
     switch (cardId) {
       case 'create-resume':
-        router.push('/service-selection');
+        // 檢查用量是否已達上限
+        setIsCheckingUsage(true);
+        try {
+          const response = await fetch('/api/usage-check');
+          const usageResult = await response.json();
+          
+          if (!response.ok || !usageResult.canProceed) {
+            // 達到用量上限，顯示 toast 通知
+            toast.error("已達當前方案用量上限，請至帳戶設定升級方案", {
+              duration: 5000,
+              position: 'bottom-right',
+            });
+            return;
+          }
+          
+          // 用量檢查通過，可以進行跳轉
+          router.push('/service-selection');
+        } catch (error) {
+          console.error('用量檢查失敗:', error);
+          toast.error("系統錯誤，請稍後再試", {
+            duration: 3000,
+            position: 'bottom-right',
+          });
+        } finally {
+          setIsCheckingUsage(false);
+        }
         break;
       case 'my-resumes':
         // TODO: Implement my resumes functionality
@@ -184,6 +213,7 @@ export function FeatureCards() {
             card={card}
             isProUser={isProUser}
             onAction={handleCardAction}
+            isLoading={isCheckingUsage}
           />
         ))}
       </div>

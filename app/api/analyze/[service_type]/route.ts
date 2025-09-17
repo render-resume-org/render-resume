@@ -1,6 +1,6 @@
 import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
 import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
-import { requireProUser } from '@/lib/auth/server';
+import { requireAuthentication } from '@/lib/auth/server';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
 import { generateEvaluateSystemPrompt } from '@/lib/prompts/evaluate-system-prompt';
 import { generateEvaluateUserPrompt } from '@/lib/prompts/evaluate-user-prompt';
@@ -164,16 +164,15 @@ export async function POST(request: NextRequest) {
   if (!match) return NextResponse.json({ error: 'invalid service_type' }, { status: 400 });
   const serviceType: 'create' | 'optimize' = match[1] as 'create' | 'optimize';
 
-  // 權限：需為已登入且 Pro 用戶
-  const authResult = await requireProUser();
-  if (!authResult.isAuthenticated || !authResult.isProUser) {
+  // 權限：需為已登入用戶
+  const authResult = await requireAuthentication();
+  if (!authResult.isAuthenticated) {
     return NextResponse.json(
       {
-        error: authResult.error || '此功能僅限 Pro 用戶使用',
-        requiresProPlan: !authResult.isProUser,
-        requiresAuth: !authResult.isAuthenticated,
+        error: authResult.error || '需要登入才能使用此功能',
+        requiresAuth: true,
       },
-      { status: authResult.isAuthenticated ? 403 : 401 }
+      { status: 401 }
     );
   }
 
