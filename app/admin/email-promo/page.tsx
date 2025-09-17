@@ -449,7 +449,7 @@ export default function BatchPromoEmailPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
           </CardContent>
-        </Card>
+        </Card> 
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">已選擇</CardTitle>
