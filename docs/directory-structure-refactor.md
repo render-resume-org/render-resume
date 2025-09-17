@@ -200,24 +200,3 @@ render-resume/
 ├── public/                       # 靜態資源
 └── docs/                         # 專案文檔
 ```
-
-### Metadata 架構
-
-render-resume/
-├── app/
-│   ├── favicon.ico              # 網站圖標
-│   ├── manifest.json            # PWA manifest
-│   ├── apple-icon.png          # Apple 裝置圖標
-│   ├── icon.png                # 通用圖標
-│   ├── opengraph-image.png     # Open Graph 預設圖片
-│   ├── twitter-image.png       # Twitter 卡片圖片
-│   ├── robots.txt              # 爬蟲規則
-│   ├── sitemap.xml            # 網站地圖
-│   │
-│   ├── layout.tsx
-│   └── page.tsx
-│
-└── public/                     # 其他靜態資源
-    ├── images/                 # 一般圖片
-    ├── fonts/                  # 字型檔案
-    └── downloads/              # 可下載檔案

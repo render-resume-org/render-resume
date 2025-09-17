@@ -4,7 +4,9 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm lint:*)",
       "Bash(mv:*)",
-      "Bash(xargs sed:*)"
+      "Bash(xargs sed:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)"
     ],
     "deny": [],
     "ask": []
