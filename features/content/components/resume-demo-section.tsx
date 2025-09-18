@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import Image from "next/image";
-import { highlights } from "./data";
+import { highlights } from "../lib/landing-content";
 
 function ResumeOptimizedSection() {
   return (

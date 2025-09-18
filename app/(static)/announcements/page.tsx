@@ -1,6 +1,6 @@
 "use client";
 
-import { AnnouncementPreviewCard } from "@/features/content/components/announcements/announcement-preview-card";
+import { AnnouncementPreviewCard } from "@/features/content/components";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";

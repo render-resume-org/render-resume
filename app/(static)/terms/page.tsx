@@ -1,6 +1,6 @@
 import Footer from "@/components/layout/footer";
-import LegalDocument from "@/features/content/components/legal-document";
-import { termsDoc } from "./content";
+import { LegalDocument } from "@/features/content/components";
+import { termsDoc } from "@/features/content/lib/terms-content";
 
 export default function TermsPage() {
   return (

@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { Heart, MessageCircle, Repeat2, Share } from "lucide-react";
 import Image from "next/image";
-import { threadsPosts } from "./data";
+import { threadsPosts } from "../lib/landing-content";
 
 interface BubblePostProps {
   post: typeof threadsPosts[0];

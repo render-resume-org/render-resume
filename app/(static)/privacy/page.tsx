@@ -1,6 +1,6 @@
 import Footer from "@/components/layout/footer";
-import LegalDocument from "@/features/content/components/legal-document";
-import { privacyDoc } from "./content";
+import { LegalDocument } from "@/features/content/components";
+import { privacyDoc } from "@/features/content/lib/privacy-content";
 
 export default function PrivacyPage() {
   return (

@@ -8,7 +8,7 @@ import {
   FeaturesSection,
   HeroSection,
   StructuredData
-} from "@/features/content/components/landing";
+} from "@/features/content/components";
 
 export default function Home() {
   return (

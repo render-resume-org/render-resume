@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { faqs } from "./data";
+import { faqs } from "../lib/landing-content";
 
 export default function FAQSection() {
   return (

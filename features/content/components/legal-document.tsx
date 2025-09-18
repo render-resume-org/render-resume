@@ -46,8 +46,6 @@ export function LegalDocument({ doc }: { doc: LegalDoc }) {
         </div>
       )}
 
-      {/* 目錄已移除 */}
-
       <div className="space-y-8">
         {doc.sections.map((section) => (
           <section key={section.title}>

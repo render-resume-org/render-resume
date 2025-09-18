@@ -16,12 +16,10 @@
   - [] smart-chat/
   - [] files/
   - [] auth/
-  - [] user/
-  - [] dashboard/
+  - [] account/
   - [] payment/
   - [] admin/
   - [] content/
-  - [] communication/
 - [] 重構 app/api/
 - [] 重構 hooks/
 - [] 重構 types/
@@ -53,14 +51,12 @@
 
 用戶相關模組：
 - auth/ - 認證與授權
-- user/ - 用戶資料與帳戶管理
-- dashboard/ - 用戶儀表板與分析
+- account/ - 用戶資料與帳戶管理
 - payment/ - 付款與訂閱管理
 
 系統管理模組：
 - admin/ - 後台管理系統
 - content/ - 內容管理系統
-- communication/ - 通訊與通知系統
 
 ### 核心邏輯和工具函式的分類
 
@@ -162,14 +158,7 @@ render-resume/
 │   │   ├── types/                # 付款相關類型
 │   │   └── utils/                # 付款工具函數
 │   │
-│   ├── dashboard/                # 用戶儀表板與分析
-│   │   ├── components/           # 儀表板組件、統計圖表
-│   │   ├── hooks/                # 儀表板數據 hooks
-│   │   ├── services/             # 用戶數據、活動日誌服務
-│   │   ├── types/                # 儀表板相關類型
-│   │   └── utils/                # 數據處理工具函數
-│   │
-│   ├── user/                     # 用戶資料與帳戶管理
+│   ├── account/                  # 用戶資料與帳戶管理
 │   │   ├── components/           # 個人資料、帳戶設定組件
 │   │   ├── hooks/                # 用戶資料管理 hooks
 │   │   ├── services/             # 用戶 API 服務
@@ -183,28 +172,22 @@ render-resume/
 │   │   ├── types/                # 管理相關類型
 │   │   └── utils/                # 管理工具函數
 │   │
-│   ├── content/                  # 內容管理系統
-│   │   ├── components/           # 公告、FAQ、靜態頁面組件
-│   │   ├── hooks/                # 內容管理 hooks
-│   │   ├── services/             # 內容 API 服務
-│   │   ├── types/                # 內容相關類型
-│   │   └── utils/                # 內容處理工具函數
-│   │
-│   └── communication/            # 通訊與通知系統
-│       ├── components/           # Email 模板、通知組件
-│       ├── hooks/                # 通訊相關 hooks
-│       ├── services/             # Email 服務、通知服務
-│       ├── types/                # 通訊相關類型
-│       └── utils/                # 通訊工具函數
+│   └── content/                  # 內容管理系統
+│       ├── components/           # 公告、FAQ、靜態頁面組件
+│       ├── hooks/                # 內容管理 hooks
+│       ├── services/             # 內容 API 服務
+│       ├── types/                # 內容相關類型
+│       └── utils/                # 內容處理工具函數
 │
 ├── components/                   # 全域共用組件
 │   ├── ui/                       # shadcn/ui 基礎組件
+│   ├── svg-icon/                 # undraw svg 圖檔
 │   ├── layout/                   # 佈局相關組件
 │   └── common/                   # 通用業務組件
 │
 ├── lib/                          # 基礎設施和第三方服務配置
 │
-├── services/                     # 業務邏輯和資料存取層
+├── services/                     # 業務邏輯和資料存取
 │
 ├── utils/                        # 純函數工具（無副作用的輔助函數）
 │

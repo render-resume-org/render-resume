@@ -1,6 +1,6 @@
 "use client";
 
-import { AnnouncementDetailCard } from "@/features/content/components/announcements/announcement-detail-card";
+import { AnnouncementDetailCard } from "@/features/content/components";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
