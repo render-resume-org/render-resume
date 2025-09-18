@@ -1,5 +1,5 @@
 import { cn } from "@/utils";
-import type { LegalDoc, LegalBlock } from "./legal-types";
+import type { LegalDoc, LegalBlock } from "../types/legal-document";
 
 function renderBlock(block: LegalBlock, idx: number) {
   if (block.type === "p") {

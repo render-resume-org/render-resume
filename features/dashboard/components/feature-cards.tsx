@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
-import { LogoutRedirectHandler } from "@/components/common/logout-redirect-handler";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { clearSessionData, cn } from "@/utils";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";
@@ -203,10 +202,7 @@ export function FeatureCards() {
   };
 
   return (
-    <>
-      <LogoutRedirectHandler />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {FEATURE_CARDS.map((card) => (
           <FeatureCard
             key={card.id}
@@ -216,7 +212,6 @@ export function FeatureCards() {
             isLoading={isCheckingUsage}
           />
         ))}
-      </div>
-    </>
+    </div>
   );
 } 

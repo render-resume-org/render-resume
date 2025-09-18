@@ -1,11 +1,14 @@
-import { AuthRedirectHandler } from "@/components/auth-redirect-handler";
+"use client";
+
 import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import Link from "next/link";
 
 export default function Page() {
+  useAuthRedirect();
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <AuthRedirectHandler />
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">

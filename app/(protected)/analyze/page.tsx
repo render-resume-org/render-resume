@@ -7,10 +7,10 @@
   3. UI 顯示分析進度、成功摘要、錯誤提示與操作按鈕
 */
 
-import { UploadIllustration } from "@/components/common/svg-icon";
+import { UploadIcon } from "@/components/svg-icon/upload-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavigationButton } from "@/components/navigation-button";
+import { NavigationButton } from "@/components/common/navigation-button";
 import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
 import { Education, Experience, Links, PersonalInfo, Project } from "@/utils/upload-utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -255,7 +255,7 @@ export default function AnalyzePage() {
         <Card className={`mb-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}> 
           <CardHeader className="text-center">
             <div className="w-48 h-48 mx-auto mb-4 flex items-center justify-center transition-all duration-500 delay-300">
-              <UploadIllustration mainColor="#06b6d4" width={192} height={192} />
+              <UploadIcon mainColor="#06b6d4" width={192} height={192} />
             </div>
             <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
               AI 智能解析

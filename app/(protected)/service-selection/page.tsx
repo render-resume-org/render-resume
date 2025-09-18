@@ -1,7 +1,8 @@
 "use client";
 
 import { ServiceCard } from "@/features/resume/components/service-selection/service-card";
-import { CreateResumeIcon, OptimizeResumeIcon } from "@/components/common/svg-icon";
+import { CreateResumeIcon } from "@/components/svg-icon/create-resume-icon";
+import { OptimizeResumeIcon } from "@/components/svg-icon/optimize-resume-icon";
 import { clearSessionData } from "@/utils";
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';

@@ -1,11 +1,14 @@
-import { AuthRedirectHandler } from "@/components/auth-redirect-handler";
-import { LoginForm } from "@/components/login-form";
+"use client";
+
+import { LoginForm } from "@/features/auth/components/login-form";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import Link from "next/link";
 
 export default function LoginPage() {
+  useAuthRedirect();
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <AuthRedirectHandler />
       
       {/* Main Content */}
       <main className="container mx-auto px-4 py-16">

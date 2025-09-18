@@ -1,4 +1,4 @@
-import type { LegalDoc } from "@/components/common/legal-types";
+import type { LegalDoc } from "@/features/content/types/legal-document";
 
 export const privacyDoc: LegalDoc = {
   title: "隱私政策",
