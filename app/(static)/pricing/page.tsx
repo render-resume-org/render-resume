@@ -1,6 +1,6 @@
 "use client";
 
-import { PlanCard } from "@/features/payment/components/subscription/plan-card";
+import { PlanCard } from "@/features/payment/components";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plan } from "@/types/user";

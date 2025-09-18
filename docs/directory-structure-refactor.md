@@ -32,6 +32,8 @@
 - [] 調整 metadata 位置（一併更新 public/）
 - [] 重構 app/payment/ 架構
 - [] 適當調整檔案與資料夾的名稱
+- [] 簡化 README.md
+- [] 簡化 claude.md
 
 待討論：
 - [] announcements 是否要放進 footer? 因為他也是 (static)
