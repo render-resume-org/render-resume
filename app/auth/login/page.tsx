@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginForm } from "@/features/auth/components/login-form";
+import { LoginForm } from "@/features/auth/components";
 import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import Link from "next/link";
 

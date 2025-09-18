@@ -11,7 +11,13 @@
 - [x] 重構 lib/
   - [x] 新增 utils/
   - [x] 新增 services/
-- [] 將檔案分類到 features/
+- [] 重構 components/
+- [] 重構 lib/
+- [] 重構 services/
+- [] 重構 utils/
+- [] 重構 hooks/
+- [] 重構 types/
+- [] 確認 features/
   - [] resume/
   - [] smart-chat/
   - [] files/
@@ -21,9 +27,6 @@
   - [] admin/
   - [] content/
 - [] 重構 app/api/
-- [] 重構 hooks/
-- [] 重構 types/
-- [] 重構 components/
 
 晚點做：
 - [] 重構 app/admin/

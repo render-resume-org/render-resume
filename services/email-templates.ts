@@ -707,7 +707,7 @@ export async function getReactEmailTemplate(
   try {
     switch (emailActionType) {
       case 'signup': {
-        const { SignupEmailTemplate } = await import('@/features/content/components/emails/SignupEmailTemplate');
+        const { SignupEmailTemplate } = await import('@/features/content/components');
         return React.createElement(SignupEmailTemplate, {
           token,
           redirectTo: redirectTo || process.env.NEXT_PUBLIC_APP_URL || 'https://www.render-resume.com',
@@ -715,14 +715,14 @@ export async function getReactEmailTemplate(
         });
       }
       case 'waitlist_welcome': {
-        const { WaitlistWelcomeEmailTemplate } = await import('@/features/content/components/emails/WaitlistWelcomeEmailTemplate');
+        const { WaitlistWelcomeEmailTemplate } = await import('@/features/content/components');
         return React.createElement(WaitlistWelcomeEmailTemplate, {
           userName,
           userEmail
         });
       }
       case 'beta_release': {
-        const { BetaReleaseEmailTemplate } = await import('@/features/content/components/emails/BetaReleaseEmailTemplate');
+        const { BetaReleaseEmailTemplate } = await import('@/features/content/components');
         return React.createElement(BetaReleaseEmailTemplate, {
           userName,
           userEmail,
