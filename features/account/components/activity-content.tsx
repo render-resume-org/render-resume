@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { ActivityFilters as ActivityFiltersType } from "./activity-filters";
 import { ActivityFilters } from "./activity-filters";
-import { getActionDisplayInfo } from "./config";
+import { getActionDisplayInfo } from "../lib/activity-config";
 
 // Types
 interface ActivityContentState {

@@ -6,7 +6,7 @@ import { ActivityLog, getRecentActivityLogs } from "@/services/actions/activity"
 import { Activity, ChevronRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getActionDisplayInfo } from "../activity/config";
+import { getActionDisplayInfo } from "@/features/account/lib/activity-config";
 
 export function RecentActivity() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);

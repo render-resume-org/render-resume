@@ -1,4 +1,4 @@
-import { ActivityContent } from "@/features/dashboard/components/activity";
+import { ActivityContent } from "@/features/account/components";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 

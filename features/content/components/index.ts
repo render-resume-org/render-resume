@@ -18,3 +18,8 @@ export { WaitlistWelcomeEmailTemplate } from "./WaitlistWelcomeEmailTemplate";
 
 // Legal document components
 export { default as LegalDocument } from "./legal-document";
+
+// Dashboard components
+export { BannerCard } from "./banner-card";
+export { RecentAnnouncements } from "./recent-announcements";
+export { FeatureCards } from "./feature-cards";

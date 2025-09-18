@@ -20,6 +20,7 @@ features/content/
 - `/announcements` - 公告
 - `/terms` - 服務條款
 - `/privacy` - 隱私政策
+- `/dashboard` - 儀表板
 
 ## Components
 
@@ -39,16 +40,22 @@ features/content/
 - `announcement-preview-card.tsx` - 公告預覽卡片
 - `announcement-detail-card.tsx` - 公告詳情卡片
 
-### 電子郵件模板組件：
+### 電子郵件模板相關組件：
 
 - `BaseEmailTemplate.tsx` - 基礎郵件模板
 - `BetaReleaseEmailTemplate.tsx` - 測試版發布郵件模板
 - `SignupEmailTemplate.tsx` - 註冊郵件模板
 - `WaitlistWelcomeEmailTemplate.tsx` - 候補名單歡迎郵件模板
 
-### 法律文件組件：
+### 法律文件相關組件：
 
 - `legal-document.tsx` - 法律文件展示組件
+
+### 儀表板相關組件：
+
+- `banner-card.tsx` - 橫幅卡片組件
+- `recent-announcements.tsx` - 最新公告顯示組件
+- `feature-cards.tsx` - 功能卡片組件
 
 ## Lib
 

@@ -10,6 +10,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Lint**: `pnpm lint`
 - **Package manager**: Always use `pnpm` (not npm or yarn)
 
+## Task Completion Requirements
+
+**IMPORTANT**: After completing any coding task, you MUST automatically run the following commands to ensure code quality:
+
+1. `pnpm lint` - Check for linting errors and code style issues
+2. `pnpm build` - Verify the project builds successfully without errors
+
+Do not mark any task as completed until both commands pass successfully. If either command fails, fix the issues before proceeding.
+
 ## Architecture Overview
 
 RenderResume is a Next.js 15 application with App Router that provides AI-powered resume analysis and generation services. The application uses a multi-dimensional evaluation system based on Fortune 500 standards.
@@ -57,18 +66,6 @@ lib/
 - `/api/smart-chat` - Interactive Q&A for resume optimization
 - `/api/generate-pdf` - PDF generation from HTML content
 
-### AI Analysis System
-
-The core feature is a six-dimensional evaluation model:
-1. Technical Depth & Breadth (25%)
-2. Project Complexity & Impact (25%)
-3. Professional Experience Completeness (20%)
-4. Educational Background Relevance (15%)
-5. Achievements & Validation (10%)
-6. Overall Professional Image (5%)
-
-Results include A+ to F grades with detailed Chain of Thought reasoning and improvement suggestions.
-
 ### Development Guidelines
 
 - **Styling**: Use `cn()` function for conditional classNames (required by .cursor/rules)
@@ -80,10 +77,3 @@ Results include A+ to F grades with detailed Chain of Thought reasoning and impr
 ### Environment Configuration
 
 Required environment variables include OpenAI API keys, Supabase configuration, payment API settings, email service keys, and webhook secrets. See README.md for complete setup.
-
-### Testing & Quality
-
-- Admin email system supports template previews and batch sending
-- Payment integration includes callback simulation for testing
-- PDF generation maintains 1:1 visual consistency with browser previews
-- Resume analysis supports both single and batch processing modes

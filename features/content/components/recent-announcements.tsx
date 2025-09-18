@@ -6,7 +6,7 @@ import { formatSmartTime } from "@/utils/time";
 import { ChevronRight, Megaphone } from "lucide-react";
 import Link from "next/link";
 
-interface DashboardAnnouncementsProps {
+interface RecentAnnouncementsProps {
   announcements: AnnouncementTable[];
 }
 
@@ -38,7 +38,7 @@ function formatDashboardTime(date: Date | string): string {
   });
 }
 
-export function DashboardAnnouncements({ announcements }: DashboardAnnouncementsProps) {
+export function RecentAnnouncements({ announcements }: RecentAnnouncementsProps) {
   if (!announcements || announcements.length === 0) {
     return null;
   }
