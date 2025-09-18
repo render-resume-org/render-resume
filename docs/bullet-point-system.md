@@ -40,7 +40,7 @@ BulletText (React Component)
 ### Basic Implementation
 
 ```tsx
-import { BulletText } from '@/components/preview/bullet-system';
+import { BulletText } from '@/features/resume/components/preview/bullet-system';
 
 function OutcomesList({ outcomes, sectionIndex }) {
   return (
@@ -65,7 +65,7 @@ function OutcomesList({ outcomes, sectionIndex }) {
 ### Complete Example
 
 ```tsx
-import { BulletText } from '@/components/preview/bullet-system';
+import { BulletText } from '@/features/resume/components/preview/bullet-system';
 
 function ExperienceOutcomes({ job, jobIndex, onInlineChange }) {
   return (
@@ -151,7 +151,7 @@ const {
 ### BulletManager API
 
 ```tsx
-import { BulletManager } from '@/components/preview/bullet-system';
+import { BulletManager } from '@/features/resume/components/preview/bullet-system';
 
 // Focus navigation
 BulletManager.focusNext(groupId, currentIndex);
@@ -313,7 +313,7 @@ const handleAddBullet = (afterIndex) => {
 
 ```tsx
 // Debug current bullet state
-import { BulletManager } from '@/components/preview/bullet-system';
+import { BulletManager } from '@/features/resume/components/preview/bullet-system';
 
 // In component or browser console
 BulletManager.debug();

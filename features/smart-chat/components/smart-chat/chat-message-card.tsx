@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/utils";
 import Image from "next/image";
-import { ChatMessage } from "../smart-chat";
+import { ChatMessage } from "./types";
 import ExcerptCard from "./excerpt-card";
 import SuggestionCard from "./suggestion-card";
 import UserAvatar from "./user-avatar";

@@ -1,7 +1,7 @@
 "use client";
 
-import ResumePreview from '@/components/preview/resume-preview';
-import ZoomToolbar from '@/components/smart-chat/zoom-toolbar';
+import ResumePreview from '@/features/resume/components/preview/resume-preview';
+import ZoomToolbar from '@/features/smart-chat/components/smart-chat/zoom-toolbar';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResumeEditorProvider, useResumeEditorRequired } from './context/resume-editor-context';

@@ -1,7 +1,7 @@
 "use client";
 
-import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/components/results";
-import ResumePreview from '@/components/preview/resume-preview';
+import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/features/resume/components/results";
+import ResumePreview from '@/features/resume/components/preview/resume-preview';
 import { NavigationButton } from "@/components/navigation-button";
 import { getTemplateById } from '@/lib/config/resume-templates';
 import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';

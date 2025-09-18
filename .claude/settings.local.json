@@ -6,7 +6,9 @@
       "Bash(mv:*)",
       "Bash(xargs sed:*)",
       "Bash(find:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": [],
     "ask": []

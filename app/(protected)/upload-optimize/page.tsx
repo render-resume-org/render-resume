@@ -2,11 +2,11 @@
 
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { NavigationButton } from "@/components/navigation-button";
-import { UploadIllustration } from "@/components/svg-icon";
+import { UploadIllustration } from "@/components/common/svg-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdditionalTextInput } from "@/components/upload/additional-text-input";
-import { UploadDropzone } from "@/components/upload/upload-dropzone";
-import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
+import { AdditionalTextInput } from "@/features/resume/components/upload/additional-text-input";
+import { UploadDropzone } from "@/features/resume/components/upload/upload-dropzone";
+import { UploadedFilesList } from "@/features/resume/components/upload/uploaded-files-list";
 import { useEffect, useState } from 'react';
 
 export default function UploadOptimizePage() {

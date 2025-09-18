@@ -4,15 +4,15 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { SuggestionTemplate } from "./smart-chat/ai-suggestions-sidebar";
-import DesktopChatPanel from "./smart-chat/desktop-chat-panel";
-import MobileChatPanel from "./smart-chat/mobile-chat-panel";
-import type { ChatMessage, SuggestionRecord } from "./smart-chat/types";
-import { useChatLogic } from "./smart-chat/use-chat-logic";
-import { messageVariants } from "./smart-chat/utils";
+import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
+import DesktopChatPanel from "./desktop-chat-panel";
+import MobileChatPanel from "./mobile-chat-panel";
+import type { ChatMessage, SuggestionRecord } from "./types";
+import { useChatLogic } from "./use-chat-logic";
+import { messageVariants } from "./utils";
 
 // Re-export types for backwards compatibility
-export type { ChatMessage, SuggestionRecord } from "./smart-chat/types";
+export type { ChatMessage, SuggestionRecord } from "./types";
 
 interface SmartChatProps {
   analysisResult: ResumeAnalysisResult;
@@ -32,7 +32,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     isSidebarCollapsed,
     showSuggestionsDrawer,
     setShowSuggestionsDrawer,
-    
+
     // Refs
     scrollAreaRef,
     scrollAreaRefMobile,
@@ -41,7 +41,7 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
     messagesEndRefMobile,
     textareaRef,
     textareaRefMobile,
-    
+
     // 函數
     handleKeyPress,
     handleTextareaChange,
@@ -155,4 +155,4 @@ export default function SmartChat({ analysisResult, onComplete, onSkip }: SmartC
       </div>
     </div>
   );
-} 
+}

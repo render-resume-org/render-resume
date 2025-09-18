@@ -1,5 +1,5 @@
 import { AuthRedirectHandler } from "@/components/auth-redirect-handler";
-import { ForgotPasswordForm } from "@/components/forgot-password-form";
+import { ForgotPasswordForm } from "@/features/auth/components/forgot-password-form";
 import Link from "next/link";
 
 export default function Page() {

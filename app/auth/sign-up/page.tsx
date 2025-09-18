@@ -1,5 +1,5 @@
 import { AuthRedirectHandler } from "@/components/auth-redirect-handler";
-import { SignUpForm } from "@/components/sign-up-form";
+import { SignUpForm } from "@/features/auth/components/sign-up-form";
 import Link from "next/link";
 
 export default function SignUpPage() {

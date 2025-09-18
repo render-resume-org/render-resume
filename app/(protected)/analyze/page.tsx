@@ -7,7 +7,7 @@
   3. UI 顯示分析進度、成功摘要、錯誤提示與操作按鈕
 */
 
-import { UploadIllustration } from "@/components/svg-icon";
+import { UploadIllustration } from "@/components/common/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { NavigationButton } from "@/components/navigation-button";

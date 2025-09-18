@@ -10,7 +10,7 @@ import {
   Zap
 } from "lucide-react";
 import { useState } from "react";
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/footer";
 import {
   Accordion,
   AccordionContent,

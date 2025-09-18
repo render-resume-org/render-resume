@@ -1,6 +1,6 @@
 import { cn } from '@/utils';
 import React, { useRef } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 
 interface ResumeSectionProps {
   title: string;

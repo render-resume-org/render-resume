@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/use-auth";
-import { LogoutRedirectHandler } from "@/components/logout-redirect-handler";
+import { LogoutRedirectHandler } from "@/components/common/logout-redirect-handler";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { clearSessionData, cn } from "@/utils";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";

@@ -1,6 +1,6 @@
 "use client";
 
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/footer";
 import {
   ResumeDemoSection,
   PainPointsSection,
@@ -8,7 +8,7 @@ import {
   FeaturesSection,
   HeroSection,
   StructuredData
-} from "@/components/landing";
+} from "@/features/content/components/landing";
 
 export default function Home() {
   return (

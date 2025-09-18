@@ -2,17 +2,17 @@
 
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { NavigationButton } from "@/components/navigation-button";
-import { UploadIllustration } from "@/components/svg-icon";
+import { UploadIllustration } from "@/components/common/svg-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdditionalTextInput } from "@/components/upload/additional-text-input";
-import { EducationInput } from "@/components/upload/education-input";
-import { ExperienceInput } from "@/components/upload/experience-input";
-import { LinksInput } from "@/components/upload/links-input";
-import { PersonalInput } from "@/components/upload/personal-input";
-import { ProjectInput } from "@/components/upload/project-input";
-import { SkillsInput } from "@/components/upload/skills-input";
-import { UploadDropzone } from "@/components/upload/upload-dropzone";
-import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
+import { AdditionalTextInput } from "@/features/resume/components/upload/additional-text-input";
+import { EducationInput } from "@/features/resume/components/upload/education-input";
+import { ExperienceInput } from "@/features/resume/components/upload/experience-input";
+import { LinksInput } from "@/features/resume/components/upload/links-input";
+import { PersonalInput } from "@/features/resume/components/upload/personal-input";
+import { ProjectInput } from "@/features/resume/components/upload/project-input";
+import { SkillsInput } from "@/features/resume/components/upload/skills-input";
+import { UploadDropzone } from "@/features/resume/components/upload/upload-dropzone";
+import { UploadedFilesList } from "@/features/resume/components/upload/uploaded-files-list";
 import { useEffect, useState } from 'react';
 
 export default function UploadCreatePage() {

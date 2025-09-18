@@ -9,7 +9,7 @@ import {
   CurrentPlanCard,
   RedeemCodeCard,
   SubscriptionHistoryCard
-} from "@/components/account-settings";
+} from "@/features/user/components/account-settings";
 import { useAuth } from "@/hooks/use-auth";
 import { Subscription, UserProfile } from "@/types/user";
 import { useParams } from "next/navigation";

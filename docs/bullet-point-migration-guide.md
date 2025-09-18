@@ -18,7 +18,7 @@ The new system eliminates complexity while maintaining all functionality:
 
 ```tsx
 // ❌ Old complex implementation
-import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
+import { useResumeEditor } from '@/features/smart-chat/components/smart-chat/context/resume-editor-context';
 import InlineText from '../inline-text';
 
 export default function ExperienceSection({ data, /* ... */ }) {
@@ -117,7 +117,7 @@ export default function ExperienceSection({ data, /* ... */ }) {
 
 ```tsx
 // Remove old dependencies
-// ❌ import { useResumeEditor } from '@/components/smart-chat/context/resume-editor-context';
+// ❌ import { useResumeEditor } from '@/features/smart-chat/components/smart-chat/context/resume-editor-context';
 // ❌ import InlineText from '../inline-text';
 
 // Add new import

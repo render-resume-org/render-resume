@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { LegalDoc } from "@/components/legal-types";
+import type { LegalDoc } from "@/components/common/legal-types";
 
 export const termsDoc: LegalDoc = {
   title: "服務條款",

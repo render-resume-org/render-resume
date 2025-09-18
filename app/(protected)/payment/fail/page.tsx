@@ -1,6 +1,6 @@
 "use client";
 
-import { UploadIllustration } from "@/components/svg-icon";
+import { UploadIllustration } from "@/components/common/svg-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/utils";

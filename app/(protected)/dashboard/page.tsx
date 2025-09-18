@@ -1,5 +1,5 @@
-import { BannerCard, DashboardAnnouncements, RecentActivity, UsageStats } from "@/components/dashboard";
-import { FeatureCards } from "@/components/feature-cards";
+import { BannerCard, DashboardAnnouncements, RecentActivity, UsageStats } from "@/features/dashboard/components/dashboard";
+import { FeatureCards } from "@/components/common/feature-cards";
 import { getActiveAnnouncements } from "@/services/actions/announcements";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";

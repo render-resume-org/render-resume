@@ -1,4 +1,4 @@
-import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/components/smart-chat/types';
+import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/features/smart-chat/components/smart-chat/types';
 import { logSmartChatMessage } from '@/services/actions/activity';
 import { requireAuthentication } from '@/lib/auth/server';
 import { createNativeOpenAIClient } from '@/services/openai-client-native';

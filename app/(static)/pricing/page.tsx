@@ -1,12 +1,12 @@
 "use client";
 
-import { PlanCard } from "@/components/subscription/plan-card";
+import { PlanCard } from "@/features/payment/components/subscription/plan-card";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plan } from "@/types/user";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/footer";
 import { useRouter } from "next/navigation";
 
 export default function PricingPage() {

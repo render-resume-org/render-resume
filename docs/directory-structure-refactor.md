@@ -6,12 +6,23 @@
 
 ## todos
 
+- [x] 重構 lib/
+  - [x] 新增 utils/
+  - [x] 新增 services/
+- [] 將檔案分類到 features/
+  - [] resume/
+  - [] smart-chat/
+  - [] files/
+  - [] auth/
+  - [] user/
+  - [] dashboard/
+  - [] payment/
+  - [] admin/
+  - [] content/
+  - [] communication/
 - [] 重構 app/api/
 - [] 重構 hooks/
 - [] 重構 types/
-- [] 重構 lib/
-  - [] 新增 utils/
-  - [] 新增 services/
 - [] 重構 components/
 
 晚點做：
@@ -48,6 +59,12 @@
 - admin/ - 後台管理系統
 - content/ - 內容管理系統
 - communication/ - 通訊與通知系統
+
+### 核心邏輯和工具函式的分類
+
+- lib/ - 基礎設施和第三方服務配置
+- services/ - 業務邏輯和資料存取層
+- utils/ - 純函數工具（無副作用的輔助函數）
 
 ### Feature-Based 目錄架構
 
@@ -183,9 +200,9 @@ render-resume/
 │   ├── layout/                   # 佈局相關組件
 │   └── common/                   # 通用業務組件
 │
-├── lib/                          # 基礎設施層（底層工具、配置、初始化）
+├── lib/                          # 基礎設施和第三方服務配置
 │
-├── services/                     # 業務邏輯層（API 呼叫、資料處理、業務流程）
+├── services/                     # 業務邏輯和資料存取層
 │
 ├── utils/                        # 純函數工具（無副作用的輔助函數）
 │

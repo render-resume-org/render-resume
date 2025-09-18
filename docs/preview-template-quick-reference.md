@@ -15,7 +15,7 @@ console.log(availableTemplates.map(t => ({ id: t.id, name: t.name })));
 
 ### Render Resume
 ```typescript
-import ResumePreview from '@/components/preview/resume-preview';
+import ResumePreview from '@/features/resume/components/preview/resume-preview';
 
 <ResumePreview resumeData={resumeData} template={template} />
 ```
@@ -136,7 +136,7 @@ export default function MySection({ data, template }: SectionProps) {
 
 ### Register New Section
 ```typescript
-import { registerSection } from '@/components/preview/section-registry';
+import { registerSection } from '@/features/resume/components/preview/section-registry';
 import MySection from './sections/my-section';
 
 registerSection('my-section', MySection);

@@ -9,8 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ThemeSwitcher } from "./theme-switcher";
-import { UserDropdown } from "./user-dropdown";
+import { ThemeSwitcher } from "./common/theme-switcher";
+import { UserDropdown } from "./layout/user-dropdown";
 
 const NAVIGATIONS = [
   { name: "儀表板", href: "/dashboard" },
