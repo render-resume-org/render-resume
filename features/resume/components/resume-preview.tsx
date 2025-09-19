@@ -3,7 +3,7 @@ import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import { cn } from '@/utils';
 import Link from 'next/link';
-import { useEditDialogManager } from './edit-dialogs';
+import { useEditDialogManager } from './edit-dialog-manager';
 import ResumeHeader from './resume-header';
 import { renderSection } from './section-registry';
 import { BulletFocusProvider } from './bullet-focus-provider';

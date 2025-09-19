@@ -7,8 +7,8 @@ import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import { cn } from '@/utils';
 import { FolderOpen } from 'lucide-react';
-import InlineText from '../inline-text';
-import ResumeSection from '../resume-section';
+import InlineText from './inline-text';
+import ResumeSection from './resume-section';
 
 interface ProjectsSectionProps {
   data: OptimizedResume['projects'];

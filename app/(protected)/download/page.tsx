@@ -1,7 +1,7 @@
 "use client";
 
-import { ActionSidebar } from "@/features/resume/components/preview/action-sidebar";
-import ResumePreview from "@/features/resume/components/preview/resume-preview";
+import { ActionSidebar } from "@/features/resume/components/action-sidebar";
+import ResumePreview from "@/features/resume/components/resume-preview";
 import { Button } from "@/components/ui/button";
 import { useResumeCopy, useResumeTemplate } from "@/hooks/use-resume-optimization";
 import { getTemplateById } from "@/lib/config/resume-templates";

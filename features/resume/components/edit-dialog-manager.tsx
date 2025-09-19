@@ -7,9 +7,9 @@ import ProjectsEditDialog from "./projects-edit-dialog";
 import SkillsEditDialog from "./skills-edit-dialog";
 import SummaryEditDialog from "./summary-edit-dialog";
 
-type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education';
+export type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education';
 
-interface EditDialogManagerProps {
+export interface EditDialogManagerProps {
   resumeData: OptimizedResume;
   onUpdateResume: (updatedResume: OptimizedResume) => void;
 }
@@ -150,5 +150,3 @@ export function useEditDialogManager({ resumeData, onUpdateResume }: EditDialogM
     renderEditDialog,
   };
 }
-
-export { EducationEditDialog, ExperienceEditDialog, ProjectsEditDialog, SkillsEditDialog, SummaryEditDialog };

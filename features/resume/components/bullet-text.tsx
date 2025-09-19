@@ -1,6 +1,6 @@
 import { cn } from '@/utils';
 import { useEffect, useState } from 'react';
-import { useBulletPoint } from './use-bullet-point';
+import { useBulletPoint } from '../hooks/use-bullet-point';
 
 interface BulletTextProps {
   text: string;

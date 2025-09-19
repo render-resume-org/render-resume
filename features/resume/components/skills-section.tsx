@@ -5,8 +5,8 @@ import { OptimizedResume } from '@/types/resume';
 import { cn } from '@/utils';
 import { Code } from 'lucide-react';
 import { useResumeEditor } from '@/features/smart-chat/components/smart-chat/context/resume-editor-context';
-import InlineText from '../inline-text';
-import ResumeSection from '../resume-section';
+import InlineText from './inline-text';
+import ResumeSection from './resume-section';
 
 interface SkillsSectionProps {
   data: OptimizedResume['skills'];

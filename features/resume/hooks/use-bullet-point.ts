@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { BulletManager, type BulletPoint } from './bullet-manager';
+import { BulletManager, type BulletPoint } from '../lib/bullet-manager';
 
 interface UseBulletPointOptions {
   groupId: string;

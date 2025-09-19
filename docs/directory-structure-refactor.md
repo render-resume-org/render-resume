@@ -10,7 +10,7 @@
   - [x] 新增 utils/
   - [x] 新增 services/
 - [] 重構 components/
-  - [] resume/
+  - [x] resume/
   - [] smart-chat/
   - [] files/
   - [x] auth/

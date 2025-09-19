@@ -2,8 +2,8 @@ import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { OptimizedResume } from '@/types/resume';
 import { cn } from '@/utils';
 import { UserCircle } from 'lucide-react';
-import InlineText from '../inline-text';
-import ResumeSection from '../resume-section';
+import InlineText from './inline-text';
+import ResumeSection from './resume-section';
 
 interface SummarySectionProps {
   data: OptimizedResume['summary'];

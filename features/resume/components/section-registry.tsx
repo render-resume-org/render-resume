@@ -2,12 +2,12 @@ import { ResumeTemplate } from '@/lib/config/resume-templates';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import { memo } from 'react';
-import AchievementsSection from './sections/achievements-section';
-import EducationSection from './sections/education-section';
-import ExperienceSection from './sections/experience-section';
-import ProjectsSection from './sections/projects-section';
-import SkillsSection from './sections/skills-section';
-import SummarySection from './sections/summary-section';
+import AchievementsSection from './achievements-section';
+import EducationSection from './education-section';
+import ExperienceSection from './experience-section';
+import ProjectsSection from './projects-section';
+import SkillsSection from './skills-section';
+import SummarySection from './summary-section';
 
 type SectionName = 'summary' | 'skills' | 'experience' | 'projects' | 'education' | 'achievements';
 

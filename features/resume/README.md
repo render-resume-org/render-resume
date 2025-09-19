@@ -20,8 +20,10 @@ features/resume/
 - `/upload-create` - 資料上傳（從零打造新履歷）
 - `/upload-optimize` - 資料上傳（優化現有履歷）
 - `/results` - 分析結果
+- `/smart-chat` - 履歷編輯器
+- `/download` - 履歷下載
 
-## Components
+## Components （此區塊還需要根據以上相關頁面進一步分類整理）
 
 請統一透過 `index.ts` 來 import components
 
@@ -47,9 +49,49 @@ features/resume/
 - `resume-comment.tsx` - 履歷評語組件
 - `resume-highlights-issues-section.tsx` - 履歷亮點與問題展示組件
 
+### 履歷預覽相關組件：
+
+- `resume-preview.tsx` - 履歷預覽主組件
+- `resume-header.tsx` - 履歷標題組件
+- `resume-section.tsx` - 履歷區塊組件
+- `section-registry.tsx` - 區塊註冊器
+- `action-sidebar.tsx` - 操作側邊欄
+- `bullet-focus-provider.tsx` - 條目焦點提供者
+- `inline-text.tsx` - 內嵌文字組件
+
+### 履歷區塊組件：
+
+- `education-section.tsx` - 學歷區塊
+- `experience-section.tsx` - 工作經驗區塊
+- `projects-section.tsx` - 專案經驗區塊
+- `skills-section.tsx` - 技能區塊
+- `summary-section.tsx` - 摘要區塊
+- `achievements-section.tsx` - 成就區塊
+
+### 編輯對話框組件：
+
+- `base-edit-dialog.tsx` - 基礎編輯對話框
+- `editable-item-wrapper.tsx` - 可編輯項目包裝器
+- `education-edit-dialog.tsx` - 學歷編輯對話框
+- `experience-edit-dialog.tsx` - 工作經驗編輯對話框
+- `projects-edit-dialog.tsx` - 專案編輯對話框
+- `skills-edit-dialog.tsx` - 技能編輯對話框
+- `summary-edit-dialog.tsx` - 摘要編輯對話框
+- `form-tips.tsx` - 表單提示組件
+- `edit-dialog-manager.tsx` - 編輯對話框管理器
+
+### 條目系統組件：
+
+- `bullet-text.tsx` - 條目文字組件
+
+### 高亮預覽組件：
+
+- `inline-highlight-preview.tsx` - 內嵌高亮預覽組件
+
 ## Lib
 
 - `results-config.ts` - 結果相關配置（評分映射、動畫配置）
+- `bullet-manager.ts` - 條目管理器
 
 ## Services
 
@@ -60,6 +102,7 @@ features/resume/
 ## Hooks
 
 - `use-animated-score.ts` - 評分動畫效果 hook
+- `use-bullet-point.ts` - 條目系統 hook
 
 ## Types
 
