@@ -1,4 +1,4 @@
-import { ResumeTemplate } from '@/lib/config/resume-templates';
+import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import { OptimizedResume } from '@/types/resume';
 import { cn } from '@/utils';
 import { UserCircle } from 'lucide-react';

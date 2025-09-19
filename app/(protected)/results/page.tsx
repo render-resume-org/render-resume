@@ -3,7 +3,7 @@
 import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/features/resume/components";
 import ResumePreview from '@/features/resume/components/resume-preview';
 import { NavigationButton } from "@/components/common/navigation-button";
-import { getTemplateById } from '@/lib/config/resume-templates';
+import { getTemplateById } from '@/features/resume/lib/resume-templates';
 import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
 import { useRouter } from 'next/navigation';

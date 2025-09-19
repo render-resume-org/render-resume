@@ -1,6 +1,6 @@
 'use server';
 
-import { getAuthenticatedUser } from "@/lib/auth/server";
+import { getAuthenticatedUser } from "@/features/auth/services/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Database } from "@/types/database";
 

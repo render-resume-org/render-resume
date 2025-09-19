@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { availableTemplates } from "@/lib/config/resume-templates";
+import { availableTemplates } from "@/features/resume/lib/resume-templates";
 import { PdfGenerator } from "@/services/pdf-generator";
 import { cn } from "@/utils";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";

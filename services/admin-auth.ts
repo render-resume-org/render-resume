@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/config/admin-config";
+import { isAdmin } from "@/features/admin/lib/admin-config";
 
 export interface AdminAuthResult {
   success: true;

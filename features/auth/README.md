@@ -36,6 +36,8 @@ features/auth/
 
 ## Services
 
+- `auth.ts` - 身份驗證相關的服務層邏輯，包含用戶驗證、權限檢查等功能
+
 ## Utils
 
 ## Hooks

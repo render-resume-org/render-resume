@@ -72,6 +72,8 @@ features/smart-chat/
 ## Lib
 
 - `resume-editor-config.ts` - 履歷編輯器配置（對話限制、罐頭訊息、相似度閾值、動畫設定等）
+- `smart-chat-prompt.ts` - 智慧聊天系統提示生成器
+- `smart-chat-user-prompt.ts` - 智慧聊天用戶提示生成器與相關類型定義
 
 ## Types
 

@@ -92,12 +92,18 @@ features/resume/
 
 - `results-config.ts` - 結果相關配置（評分映射、動畫配置）
 - `bullet-manager.ts` - 條目管理器
+- `resume-templates.ts` - 履歷模板配置（模板樣式、字體、顏色、間距設定）
+- `evaluate-user-prompt.ts` - 履歷評估用戶提示詞
+- `evaluate-system-prompt.ts` - 履歷評估系統提示詞
+- `extract-user-prompt.ts` - 履歷抽取用戶提示詞
+- `extract-system-prompt.ts` - 履歷抽取系統提示詞
 
 ## Services
 
 ## Utils
 
 - `number-grade-mapping.ts` - 數字評分轉換與等級顏色配置
+- `resume-annotations.ts` - 履歷文字註解與高亮功能
 
 ## Hooks
 

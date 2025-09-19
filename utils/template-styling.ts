@@ -1,4 +1,4 @@
-import { ResumeTemplate } from '@/lib/config/resume-templates';
+import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import { cn } from '@/utils';
 
 /**

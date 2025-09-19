@@ -1,8 +1,9 @@
 import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/features/smart-chat/types/resume-editor';
 import { logSmartChatMessage } from '@/services/actions/activity';
-import { requireAuthentication } from '@/lib/auth/server';
+import { requireAuthentication } from '@/features/auth/services/auth';
 import { createNativeOpenAIClient } from '@/services/openai-client-native';
-import { generateSmartChatSystemPrompt, generateSmartChatUserPrompt } from '@/lib/prompts';
+import { generateSmartChatSystemPrompt } from '@/features/smart-chat/lib/smart-chat-prompt';
+import { generateSmartChatUserPrompt } from '@/features/smart-chat/lib/smart-chat-user-prompt';
 import { ResumeAnalysisResult } from '@/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 

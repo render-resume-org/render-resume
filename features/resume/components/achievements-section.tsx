@@ -1,5 +1,5 @@
 import { useResumeEditor } from '@/features/smart-chat/components/resume-editor-context';
-import { ResumeTemplate } from '@/lib/config/resume-templates';
+import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import { TemplateStylingService } from '@/utils/template-styling';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';

@@ -7,7 +7,7 @@ import { NavigationButton } from "@/components/common/navigation-button";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useResumeTemplate } from "@/hooks/use-resume-optimization";
-import { getTemplateById } from "@/lib/config/resume-templates";
+import { getTemplateById } from "@/features/resume/lib/resume-templates";
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
