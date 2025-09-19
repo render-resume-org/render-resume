@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import SuggestionCard from "./suggestion-card";
-import { PatchOp, SuggestionRecord } from "./types";
+import { PatchOp, SuggestionRecord } from "../types/resume-editor";
 
 export interface SuggestionTemplate {
   id: string;

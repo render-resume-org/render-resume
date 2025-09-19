@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
-import { CHAT_MESSAGE_LIMIT } from "./utils";
+import { CHAT_MESSAGE_LIMIT } from "../lib/resume-editor-config";
 
 interface ChatLimitAlertProps {
   messageCount: number;

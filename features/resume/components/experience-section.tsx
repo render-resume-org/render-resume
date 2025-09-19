@@ -1,4 +1,4 @@
-import { useResumeEditor } from '@/features/smart-chat/components/smart-chat/context/resume-editor-context';
+import { useResumeEditor } from '@/features/smart-chat/components/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '@/lib/client/annotations';
 import { ResumeTemplate } from '@/lib/config/resume-templates';
 import { TemplateStylingService } from '@/utils/template-styling';

@@ -7,12 +7,12 @@ import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import DesktopChatPanel from "./desktop-chat-panel";
 import MobileChatPanel from "./mobile-chat-panel";
-import type { ChatMessage, SuggestionRecord } from "./types";
-import { useChatLogic } from "./use-chat-logic";
-import { messageVariants } from "./utils";
+import type { ChatMessage, SuggestionRecord } from "../types/resume-editor";
+import { useChatLogic } from "../hooks/use-chat-logic";
+import { messageVariants } from "../lib/resume-editor-config";
 
 // Re-export types for backwards compatibility
-export type { ChatMessage, SuggestionRecord } from "./types";
+export type { ChatMessage, SuggestionRecord } from "../types/resume-editor";
 
 interface SmartChatProps {
   analysisResult: ResumeAnalysisResult;

@@ -1,8 +1,8 @@
 "use client";
 
 import SmartChat from "@/features/smart-chat/components/smart-chat";
-import PreviewActionPanel from "@/features/smart-chat/components/smart-chat/preview-action-panel";
-import ResumeEditorPreview from "@/features/smart-chat/components/smart-chat/resume-editor-preview";
+import PreviewActionPanel from "@/features/smart-chat/components/preview-action-panel";
+import ResumeEditorPreview from "@/features/smart-chat/components/resume-editor-preview";
 import { NavigationButton } from "@/components/common/navigation-button";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";

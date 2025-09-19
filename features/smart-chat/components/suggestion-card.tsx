@@ -5,7 +5,7 @@ import { Copy, Trash2 } from "lucide-react";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { parsePatchOpsToHumanReadable } from "@/utils/patch-ops-parser";
-import { PatchOp, SuggestionRecord, SuggestionTemplate } from "./types";
+import { PatchOp, SuggestionRecord, SuggestionTemplate } from "../types/resume-editor";
 
 const getIndicatorBarColor = (status?: SuggestionTemplate['status']) => {
   if (!status) return 'bg-transparent';

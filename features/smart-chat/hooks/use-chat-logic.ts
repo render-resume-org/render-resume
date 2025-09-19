@@ -4,15 +4,13 @@ import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import type { UploadedFile } from '@/utils/upload-utils';
 import { computeResumeDiffSummary } from '@/utils/json-diff';
 import { useCallback, useEffect, useState } from 'react';
-import { SuggestionTemplate } from "./ai-suggestions-sidebar";
-import {
-  useCannedMessages,
-  useInputManager,
-  useScrollManager,
-  useTemplateManager
-} from './hooks';
-import { ChatMessage, SuggestionRecord } from './types';
-import { CHAT_MESSAGE_LIMIT } from "./utils";
+import { SuggestionTemplate } from "../components/ai-suggestions-sidebar";
+import { useCannedMessages } from './use-canned-messages';
+import { useInputManager } from './use-input-manager';
+import { useScrollManager } from './use-scroll-manager';
+import { useTemplateManager } from './use-template-manager';
+import { ChatMessage, SuggestionRecord } from '../types/resume-editor';
+import { CHAT_MESSAGE_LIMIT } from "../lib/resume-editor-config";
 
 interface UseChatLogicProps {
   analysisResult: ResumeAnalysisResult;

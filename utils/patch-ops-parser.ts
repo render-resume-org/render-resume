@@ -1,4 +1,4 @@
-import { PatchOpUnion } from '@/features/smart-chat/components/smart-chat/types';
+import { PatchOpUnion } from '@/features/smart-chat/types/resume-editor';
 
 /**
  * 将 patchOps 解析成人类可读的操作指示

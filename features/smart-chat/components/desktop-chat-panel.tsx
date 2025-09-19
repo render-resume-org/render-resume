@@ -12,8 +12,8 @@ import type { SuggestionTemplate } from "./ai-suggestions-sidebar";
 import ChatMessageCard from "./chat-message-card";
 import IssueBar from "./issue-bar";
 import LoadingMessage from "./loading-message";
-import type { ChatMessage, SuggestionRecord } from "./types";
-import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "./utils";
+import type { ChatMessage, SuggestionRecord } from "../types/resume-editor";
+import { CHAT_MESSAGE_LIMIT, MAX_FILES_PER_MESSAGE } from "../lib/resume-editor-config";
 
 interface DesktopChatPanelProps {
   suggestionTemplates: SuggestionTemplate[];

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Send } from "lucide-react";
 import React, { useRef } from "react";
-import { CHAT_MESSAGE_LIMIT } from "./utils";
+import { CHAT_MESSAGE_LIMIT } from "../lib/resume-editor-config";
 
 interface ChatInputProps {
   value: string;
