@@ -1,6 +1,6 @@
 "use client";
 
-import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/features/resume/components/results";
+import { ResumeGrade, ResumeComment, ResumeHighlightsIssuesSection } from "@/features/resume/components";
 import ResumePreview from '@/features/resume/components/preview/resume-preview';
 import { NavigationButton } from "@/components/common/navigation-button";
 import { getTemplateById } from '@/lib/config/resume-templates';

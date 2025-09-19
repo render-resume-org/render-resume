@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication Language
+
+Always respond in Traditional Chinese (繁體中文) when working with this codebase.
+
 ## Development Commands
 
 - **Development**: `pnpm dev` (uses turbopack for faster builds)
@@ -12,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Task Completion Requirements
 
-**IMPORTANT**: After completing any coding task, you MUST automatically run the following commands to ensure code quality:
+After completing any coding task, you MUST automatically run the following commands to ensure code quality:
 
 1. `pnpm lint` - Check for linting errors and code style issues
 2. `pnpm build` - Verify the project builds successfully without errors

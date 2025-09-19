@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ANIMATION_CONFIG, GRADE_MAPPING } from "./constants";
-import { LetterGrade } from "./types";
+import { ANIMATION_CONFIG, GRADE_MAPPING } from "../lib/results-config";
+import { LetterGrade } from "../types/grade";
 
 export function useAnimatedScores(grade: LetterGrade) {
   const [animatedScore, setAnimatedScore] = useState(0);

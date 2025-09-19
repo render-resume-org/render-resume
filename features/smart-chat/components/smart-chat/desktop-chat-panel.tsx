@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import CannedMessages from "./canned-messages";
 import ChatInput from "./chat-input";
 // import ChatLimitAlert from "./chat-limit-alert";
-import { FullscreenImagePreview, UploadedFileCard } from "@/features/resume/components/upload/uploaded-files-list";
+import { FullscreenImagePreview, UploadedFileCard } from "@/features/resume/components";
 import type { UploadedFile } from "@/utils/upload-utils";
 import type { Variants } from "framer-motion";
 import { memo, useEffect, useMemo, useRef, useState } from "react";

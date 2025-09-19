@@ -4,9 +4,11 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { NavigationButton } from "@/components/common/navigation-button";
 import { UploadIcon } from "@/components/svg-icon/upload-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdditionalTextInput } from "@/features/resume/components/upload/additional-text-input";
-import { UploadDropzone } from "@/features/resume/components/upload/upload-dropzone";
-import { UploadedFilesList } from "@/features/resume/components/upload/uploaded-files-list";
+import {
+  AdditionalTextInput,
+  UploadDropzone,
+  UploadedFilesList
+} from "@/features/resume/components";
 import { useEffect, useState } from 'react';
 
 export default function UploadOptimizePage() {

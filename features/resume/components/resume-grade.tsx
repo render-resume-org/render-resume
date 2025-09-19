@@ -2,10 +2,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/utils";
-import { useAnimatedScores } from "./hooks";
-import { GRADE_MAPPING } from "./constants";
-import { LetterGrade } from "./types";
-import { getGradeColors, numberToGrade } from "./utils";
+import { useAnimatedScores } from "../hooks/use-animated-score";
+import { GRADE_MAPPING } from "../lib/results-config";
+import { LetterGrade } from "../types/grade";
+import { getGradeColors, numberToGrade } from "../utils/number-grade-mapping";
 import { Award } from "lucide-react";
 
 export function ResumeGrade({ grade }: { grade: LetterGrade }) {
