@@ -23,7 +23,7 @@ function AuthCallbackContent() {
           
           if (error) {
             console.error('❌ [Auth Callback] Exchange error:', error);
-            router.push('/auth/login');
+            router.push('/login');
             return;
           }
 
@@ -48,7 +48,7 @@ function AuthCallbackContent() {
             }, 5000);
           } else {
             console.log('⚠️ [Auth Callback] No session in exchange response');
-            router.push('/auth/login');
+            router.push('/login');
           }
         } else {
           // 如果沒有代碼，檢查現有 session
@@ -56,7 +56,7 @@ function AuthCallbackContent() {
           
           if (error) {
             console.error('❌ [Auth Callback] Session error:', error);
-            router.push('/auth/login');
+            router.push('/login');
             return;
           }
 
@@ -81,12 +81,12 @@ function AuthCallbackContent() {
             }, 5000);
           } else {
             console.log('⚠️ [Auth Callback] No code and no session');
-            router.push('/auth/login');
+            router.push('/login');
           }
         }
       } catch (err) {
         console.error('❌ [Auth Callback] Unexpected error:', err);
-        router.push('/auth/login');
+        router.push('/login');
       }
     };
 

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   const action = searchParams.get('action') || 'signup';
   const token = searchParams.get('token') || '123456';
   const email = searchParams.get('email') || 'test@example.com';
-  const redirectTo = searchParams.get('redirect') || 'http://localhost:3000/auth/callback';
+  const redirectTo = searchParams.get('redirect') || 'http://localhost:3000/callback';
   const format = searchParams.get('format') || 'html'; // 'html' or 'text'
 
   try {
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       action = 'signup',
       token = '123456',
       email = 'test@example.com',
-      redirectTo = 'http://localhost:3000/auth/callback',
+      redirectTo = 'http://localhost:3000/callback',
       userName = 'Test User'
     } = body;
 

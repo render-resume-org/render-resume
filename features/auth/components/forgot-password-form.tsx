@@ -33,7 +33,7 @@ export function ForgotPasswordForm({
     try {
       // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/update-password`,
+        redirectTo: `${window.location.origin}/update-password`,
       });
       if (error) throw error;
       setSuccess(true);
@@ -59,7 +59,7 @@ export function ForgotPasswordForm({
               </p>
               <div className="text-center">
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="text-sm text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
                 >
                   返回登入
@@ -117,7 +117,7 @@ export function ForgotPasswordForm({
               <div className="mt-4 text-center text-sm">
                 已有帳戶？{" "}
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
                 >
                   立即登入

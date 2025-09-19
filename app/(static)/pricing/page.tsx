@@ -46,7 +46,7 @@ export default function PricingPage() {
 
       // 如果用戶未登入，導向登入頁面
       if (!isAuthenticated) {
-        router.push('/auth/login');
+        router.push('/login');
         return;
       }
 

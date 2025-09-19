@@ -9,7 +9,8 @@
       "Bash(rm:*)",
       "Bash(mkdir:*)",
       "Bash(pnpm dev:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

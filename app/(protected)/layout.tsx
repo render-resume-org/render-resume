@@ -16,7 +16,7 @@ export default function ProtectedLayout({ children }: ProtectedLayoutProps) {
   useEffect(() => {
     // 如果未登入且不在加載中，直接重定向到登入頁面
     if (!loading && !isAuthenticated) {
-      router.push('/auth/login');
+      router.push('/login');
     }
   }, [loading, isAuthenticated, router]);
 

@@ -206,7 +206,7 @@ export function LoginForm({
                 <div className="flex items-center">
                   <Label htmlFor="password">密碼</Label>
                   <Link
-                    href="/auth/forgot-password"
+                    href="/forgot-password"
                     className="ml-auto inline-block text-sm text-cyan-600 hover:text-cyan-700 underline-offset-4 hover:underline"
                   >
                     忘記密碼？
@@ -248,7 +248,7 @@ export function LoginForm({
           </form>
           <div className="mt-4 text-center text-sm">
             還沒有帳戶？{" "}
-            <Link href="/auth/sign-up" className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4">
+            <Link href="/sign-up" className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4">
               註冊
             </Link>
           </div>

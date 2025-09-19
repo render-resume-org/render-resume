@@ -7,8 +7,8 @@ export async function GET() {
 
   const robots = `User-agent: *
 Allow: /
-Allow: /auth/login
-Allow: /auth/sign-up
+Allow: /login
+Allow: /sign-up
 Allow: /faq
 Allow: /privacy
 Allow: /terms

@@ -98,7 +98,7 @@ export function AccountSettingsErrorState({ error, currentUserId }: AccountSetti
                 asChild 
                 className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-2"
               >
-                <Link href="/auth/login">
+                <Link href="/login">
                   立即登入
                 </Link>
               </Button>

@@ -144,7 +144,7 @@ export function SignUpForm({
                 我們已發送驗證郵件到您的信箱 <strong>{email}</strong>，請點擊郵件中的連結完成驗證。
               </p>
               <div className="pt-4">
-                <Link href="/auth/login">
+                <Link href="/login">
                   <Button variant="outline" size="sm">
                     返回登入頁面
                   </Button>
@@ -293,7 +293,7 @@ export function SignUpForm({
             <div className="mt-4 text-center text-sm">
               已有帳戶？{" "}
               <Link
-                href="/auth/login"
+                href="/login"
                 className="text-cyan-600 hover:text-cyan-700 underline underline-offset-4"
               >
                 立即登入

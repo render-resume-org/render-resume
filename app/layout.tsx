@@ -406,7 +406,7 @@ export default function RootLayout({
         {/* Performance hints */}
         <link rel="preload" href="/api/sitemap" as="document" />
         <link rel="prefetch" href="/faq" />
-        <link rel="prefetch" href="/auth/sign-up" />
+        <link rel="prefetch" href="/sign-up" />
       </head>
       <body className={`${geistSans.className} antialiased w-full overflow-x-hidden h-screen`}>
         <ThemeProvider

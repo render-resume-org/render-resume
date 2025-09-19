@@ -39,7 +39,7 @@ export default function HeroSection() {
 
         {/* Primary Button */}
         <div className="flex justify-center">
-          <Link href="/auth/sign-up">
+          <Link href="/sign-up">
               <Button size="lg" className="bg-white text-cyan-600 hover:bg-gray-100 px-6 py-6 text-lg font-semibold shadow-lg shadow-cyan-500/20 transition-all duration-300 hover:scale-105" itemProp="potentialAction" itemScope itemType="https://schema.org/Action">
               <span itemProp="name">立即建立履歷 - 免費！</span>
             </Button>

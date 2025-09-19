@@ -274,7 +274,7 @@ export function useAuth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/callback`,
         },
       });
       
@@ -304,7 +304,7 @@ export function useAuth() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/sign-up`,
+          emailRedirectTo: `${window.location.origin}/sign-up`,
         },
       });
       
@@ -447,7 +447,7 @@ export function useAuth() {
       console.log('👋 [Auth] Sign out successful');
       
       // 立即重定向到登入頁面
-      router.push('/auth/login');
+      router.push('/login');
       
     } catch (error) {
       const errorMessage = error instanceof AuthError 
@@ -469,7 +469,7 @@ export function useAuth() {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+        redirectTo: `${window.location.origin}/update-password`,
       });
       
       if (error) throw error;

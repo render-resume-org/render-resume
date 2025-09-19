@@ -139,10 +139,10 @@ const AppHeader = () => {
             ) : (
               <div className="flex items-center space-x-2 flex-shrink-0">
                 <Button asChild size="sm" variant="outline">
-                  <Link href="/auth/login">登入</Link>
+                  <Link href="/login">登入</Link>
                 </Button>
                 <Button asChild size="sm" className="bg-cyan-600 hover:bg-cyan-700">
-                  <Link href="/auth/sign-up">註冊</Link>
+                  <Link href="/sign-up">註冊</Link>
                 </Button>
               </div>
             )}
@@ -225,12 +225,12 @@ const AppHeader = () => {
             ) : (
               <div className="space-y-3">
                 <Button asChild size="sm" variant="outline" className="w-full">
-                  <Link href="/auth/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
                     登入
                   </Link>
                 </Button>
                 <Button asChild size="sm" className="w-full bg-cyan-600 hover:bg-cyan-700">
-                  <Link href="/auth/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Link href="/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
                     註冊
                   </Link>
                 </Button>

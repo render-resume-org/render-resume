@@ -9,14 +9,13 @@
 - [x] 重構 lib/
   - [x] 新增 utils/
   - [x] 新增 services/
-- [] 重構 components/
+- [x] 重構 components/
   - [x] resume/
-  - [] smart-chat/
-  - [] files/
+  - [x] smart-chat/
   - [x] auth/
   - [x] account/
   - [x] payment/
-  - [] admin/
+  - [] admin/ -> 邏輯似乎都寫在 page.tsx 需要再另外去做整理
   - [x] content/
 - [] 重構 lib/
 - [] 重構 services/
@@ -26,7 +25,6 @@
 - [] 確認 features/
   - [] resume/
   - [] smart-chat/
-  - [] files/
   - [] auth/
   - [] account/
   - [] payment/
@@ -58,7 +56,6 @@
 核心業務模組：
 - resume/ - 履歷分析與生成（核心功能）
 - smart-chat/ - 智能問答系統
-- files/ - 檔案管理系統
 
 用戶相關模組：
 - auth/ - 認證與授權
@@ -80,7 +77,7 @@
 ```
 render-resume/
 ├── app/                          # Next.js 15 App Router
-│   ├── auth/                     # 認證相關路由
+│   ├── (auth)/                   # 認證相關路由
 │   │   ├── callback/             # OAuth 回調處理
 │   │   ├── confirm/              # 郵件確認 (route.ts)
 │   │   ├── error/                # 認證錯誤頁面
@@ -154,13 +151,6 @@ render-resume/
 │   │   ├── services/             # 聊天 API 服務
 │   │   ├── types/                # 聊天相關類型
 │   │   └── utils/                # 聊天工具函數
-│   │
-│   ├── files/                    # 檔案管理系統
-│   │   ├── components/           # 檔案上傳、下載、預覽組件
-│   │   ├── hooks/                # 檔案處理 hooks
-│   │   ├── services/             # 檔案處理、PDF 生成服務
-│   │   ├── types/                # 檔案相關類型
-│   │   └── utils/                # 檔案處理工具函數
 │   │
 │   ├── payment/                  # 付款與訂閱管理
 │   │   ├── components/           # 付款界面、訂閱計畫組件
