@@ -1,6 +1,6 @@
 import { BannerCard, RecentAnnouncements, FeatureCards } from "@/features/content/components";
 import { RecentActivity, UsageStats } from "@/features/account/components";
-import { getActiveAnnouncements } from "@/services/actions/announcements";
+import { getActiveAnnouncements } from "@/features/content/services/announcements";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 

@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTodayActivityStats } from "@/services/actions/activity";
+import { getTodayActivityStats } from "@/features/account/services/action-logs";
 import { BarChart3, Calendar, Crown, FileText, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

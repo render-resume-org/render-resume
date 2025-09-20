@@ -53,7 +53,11 @@ features/account/
 
 ## Services
 
+- `action-logs.ts` - 活動記錄服務，處理用戶活動日誌的創建、查詢和統計
+
 ## Utils
+
+- `usage-check.ts` - 使用量檢查工具，檢查用戶今日使用量是否超過限制
 
 ## Hooks
 

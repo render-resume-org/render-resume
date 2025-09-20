@@ -1,4 +1,4 @@
-import { logResumeDownload } from '@/services/actions/activity';
+import { logResumeDownload } from '@/features/account/services/action-logs';
 import chromium from '@sparticuz/chromium-min';
 import { existsSync } from 'fs';
 import { NextRequest, NextResponse } from 'next/server';

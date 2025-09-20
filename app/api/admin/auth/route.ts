@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/services/admin-auth";
+import { checkAdminAuth } from "@/features/admin/services/admin-auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {

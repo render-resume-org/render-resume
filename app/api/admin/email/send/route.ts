@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/services/admin-auth";
+import { checkAdminAuth } from "@/features/admin/services/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from 'resend';
 

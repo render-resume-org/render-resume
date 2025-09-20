@@ -17,8 +17,8 @@
   - [x] payment/
   - [] admin/ -> 邏輯似乎都寫在 page.tsx 需要再另外去做整理
   - [x] content/
-- [] 重構 lib/
-- [] 重構 services/
+- [x] 重構 lib/
+- [x] 重構 services/
 - [] 重構 utils/
 - [] 重構 hooks/
 - [] 重構 types/

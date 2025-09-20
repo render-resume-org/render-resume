@@ -1,4 +1,4 @@
-import { getActivityStats, getRecentActivityLogs, getUserActivityLogs } from '@/services/actions/activity';
+import { getActivityStats, getRecentActivityLogs, getUserActivityLogs } from '@/features/account/services/action-logs';
 import { requireAuthentication } from '@/features/auth/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 

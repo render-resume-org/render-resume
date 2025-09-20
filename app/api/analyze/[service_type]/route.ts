@@ -1,5 +1,5 @@
-import { logResumeBuild, logResumeOptimize } from '@/services/actions/activity';
-import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/services/api/openai-utils';
+import { logResumeBuild, logResumeOptimize } from '@/features/account/services/action-logs';
+import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/openai';
 import { requireAuthentication } from '@/features/auth/services/auth';
 import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/services/openai-client-native';
 import { generateEvaluateSystemPrompt } from '@/features/resume/lib/evaluate-system-prompt';
@@ -8,7 +8,7 @@ import { generateExtractSystemPrompt } from '@/features/resume/lib/extract-syste
 import { generateExtractUserPrompt } from '@/features/resume/lib/extract-user-prompt';
 import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/utils/upload-utils';
-import { checkUsageLimit } from '@/services/usage-check';
+import { checkUsageLimit } from '@/features/account/utils/usage-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface AnyObject { [key: string]: unknown }

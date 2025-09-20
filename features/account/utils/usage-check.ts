@@ -1,4 +1,4 @@
-import { checkDailyUsageLimit } from '@/services/actions/activity';
+import { checkDailyUsageLimit } from '@/features/account/services/action-logs';
 import { NextResponse } from 'next/server';
 
 export interface UsageCheckResult {

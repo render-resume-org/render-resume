@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ActivityLog, getRecentActivityLogs } from "@/services/actions/activity";
+import { ActivityLog, getRecentActivityLogs } from "@/features/account/services/action-logs";
 import { Activity, ChevronRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

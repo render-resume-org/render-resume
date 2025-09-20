@@ -1,5 +1,5 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
-import { logSmartChatAttachment } from "@/services/actions/activity";
+import { logSmartChatAttachment } from "@/features/account/services/action-logs";
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
 import type { UploadedFile } from '@/utils/upload-utils';
 import { computeResumeDiffSummary } from '@/utils/json-diff';

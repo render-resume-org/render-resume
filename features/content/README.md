@@ -62,8 +62,11 @@ features/content/
 - `landing-content.ts` - 首頁相關數據（痛點貼文、特色亮點、FAQ 等）
 - `privacy-content.ts` - 隱私政策內容數據
 - `terms-content.ts` - 服務條款內容數據
+- `email-templates.ts` - 郵件模板
 
 ## Services
+
+- `announcements.ts` - 公告服務，處理公告的查詢、分頁和瀏覽次數統計
 
 ## Utils
 

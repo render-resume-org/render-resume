@@ -1,4 +1,4 @@
-import { logUserAction } from "@/services/actions/activity";
+import { logUserAction } from "@/features/account/services/action-logs";
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from 'next/server';
 
