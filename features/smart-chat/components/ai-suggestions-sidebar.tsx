@@ -1,7 +1,7 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Lightbulb } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";

@@ -1,4 +1,4 @@
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 

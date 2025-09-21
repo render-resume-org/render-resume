@@ -2,7 +2,8 @@
 
 import { useAuth } from "@/hooks/use-auth";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { clearSessionData, cn } from "@/utils";
+import { cn } from "@/utils/cn";
+import { clearSessionData } from "@/services/storage";
 import { ArrowRight, FileText, HardHat, Lock, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

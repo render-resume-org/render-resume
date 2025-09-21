@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { clearSessionData } from "@/utils";
+import { clearSessionData } from "@/services/storage";
 import { AuthError, User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

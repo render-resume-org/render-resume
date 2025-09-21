@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { Copy, ChevronDown as DownIcon, Trash2, ChevronUp as UpIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Education, Experience, Project, PersonalInfo, Links } from '@/utils/upload-utils';
+import { Education, Experience, Project, PersonalInfo, Links } from '@/features/resume/utils/upload-utils';
 import {
   UploadedFile,
     FileData,
@@ -9,7 +9,7 @@ import {
   getFileType,
   processFilesForAnalysis,
   saveToSession
-} from '@/utils/upload-utils';
+} from '@/features/resume/utils/upload-utils';
 import { pdfToImg } from 'pdftoimg-js/browser';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
-import { DROPZONE_CONFIG } from "@/utils/upload-utils";
+import { DROPZONE_CONFIG } from "@/features/resume/utils/upload-utils";
 import { Upload } from "lucide-react";
 import { useDropzone } from 'react-dropzone';
 

@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { availableTemplates } from "@/features/resume/lib/resume-templates";
 import { PdfGenerator } from "@/features/resume/services/pdf-generator";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { Copy, Download, Edit, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

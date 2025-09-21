@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 
 interface ZoomToolbarProps {

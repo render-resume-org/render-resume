@@ -1,11 +1,11 @@
 import { useResumeEditor } from '@/features/smart-chat/components/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '../utils/resume-annotations';
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
-import { TemplateStylingService } from '@/utils/template-styling';
+import { TemplateStylingService } from '@/features/resume/utils/template-styling';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import { FolderOpen } from 'lucide-react';
 import InlineText from './inline-text';
 import ResumeSection from './resume-section';

@@ -4,6 +4,19 @@
 
 遵循 Next.js 15 best practice，採用 Feature-Based 架構進行專案目錄重構。
 
+## utils 位置調整
+
+/utils/parse-content-with-links.tsx -> features/content/utils/
+
+/utils/patch-ops-parser.ts -> features/smart-chat/utils/
+/utils/set-by-path.ts -> features/smart-chat/utils/
+/utils/silimarity.ts -> features/smart-chat/utils/
+
+/utils/pdf-styles.ts -> features/resume/utils/
+/utils/template-styling.ts -> features/resume/utils/
+/utils/upload-utils.ts -> features/resume/utils/
+
+
 ## todos
 
 - [x] 重構 lib/
@@ -34,7 +47,7 @@
 
 晚點做：
 - [] 重構 app/admin/
-- [] 將 /auth 改成 /(auth)
+- [x] 將 /auth 改成 /(auth)
 - [] 調整 metadata 位置（一併更新 public/）
 - [] 重構 app/payment/ 架構
 - [] 適當調整檔案與資料夾的名稱
@@ -43,13 +56,6 @@
 
 待討論：
 - [] announcements 是否要放進 footer? 因為他也是 (static)
-
-### 遷移策略
-
-1. **按頁面遷移**：一次遷移一個頁面的相關組件
-2. **保持功能完整**：確保每次遷移後對應頁面功能正常
-3. **更新引用路徑**：同步更新所有import路徑
-4. **測試驗證**：每個遷移步驟都要進行功能測試
 
 ### Feature 模組
 
@@ -69,7 +75,7 @@
 ### 核心邏輯和工具函式的分類
 
 - lib/ - 基礎設施和第三方服務配置
-- services/ - 業務邏輯和資料存取層
+- services/ - 業務邏輯和資料存取
 - utils/ - 純函數工具（無副作用的輔助函數）
 
 ### Feature-Based 目錄架構
@@ -197,5 +203,6 @@ render-resume/
 ├── types/                        # 全域類型定義
 │
 ├── public/                       # 靜態資源
+│
 └── docs/                         # 專案文檔
 ```

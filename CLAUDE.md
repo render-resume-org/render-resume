@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Communication Language
 
-Always respond in Traditional Chinese (繁體中文) when working with this codebase.
+Always respond in Traditional Chinese (繁體中文).
 
 ## Development Commands
 
@@ -25,17 +25,15 @@ Do not mark any task as completed until both commands pass successfully. If eith
 
 ## Architecture Overview
 
-RenderResume is a Next.js 15 application with App Router that provides AI-powered resume analysis and generation services. The application uses a multi-dimensional evaluation system based on Fortune 500 standards.
+RenderResume is a Next.js 15 application with App Router that provides AI-powered resume analysis and generation services.
 
 ### Core Technologies
 
 - **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS
 - **UI Components**: Radix UI with shadcn/ui components
-- **AI/ML**: LangChain, OpenAI GPT (including GPT-4 Vision)
 - **Database/Auth**: Supabase (PostgreSQL + Auth)
 - **Email**: Resend with React Email templates
 - **Payment**: Third-party payment API integration
-- **File Processing**: PDF, image, text processing with batch support
 - **PDF Generation**: Puppeteer with Chromium for server-side rendering
 
 ### Project Structure
@@ -74,10 +72,4 @@ lib/
 
 - **Styling**: Use `cn()` function for conditional classNames (required by .cursor/rules)
 - **UI Components**: Check `@/components/ui` for shadcn components before creating new ones
-- **Typography**: Resume content uses serif fonts (Times New Roman) for PDF consistency
-- **Responsive Design**: A4-sized resume previews with precise PDF matching
-- **File Processing**: Supports PDF, images, text files with batch analysis capabilities
-
-### Environment Configuration
-
-Required environment variables include OpenAI API keys, Supabase configuration, payment API settings, email service keys, and webhook secrets. See README.md for complete setup.
+- **Feature Documentation**: When making changes to files under `features/`, MUST update the corresponding README.md in that feature folder to document the changes

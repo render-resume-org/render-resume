@@ -82,5 +82,9 @@ features/smart-chat/
 ## Utils
 
 - `issue-mapper.ts` - 問題對映工具，將統一問題格式轉換為建議模板
+- `resume-diff.ts` - 履歷差異比較工具，提供物件差異計算與格式化功能
+- `patch-ops-parser.ts` - 修補操作解析器，將修補操作轉換為人類可讀的說明
+- `set-by-path.ts` - 路徑設置工具，根據路徑字串設置物件屬性值
+- `similarity.ts` - 相似度計算工具，提供文字和向量相似度比較功能
 
 ## Services

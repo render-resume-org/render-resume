@@ -1,7 +1,7 @@
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import InlineText from './inline-text';
 
 interface ResumeHeaderProps {

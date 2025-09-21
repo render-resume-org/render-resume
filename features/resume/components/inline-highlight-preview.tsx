@@ -1,4 +1,4 @@
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import type React from 'react';
 
 export type InlineHighlightMode = 'set' | 'insert' | 'remove';

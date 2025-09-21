@@ -70,6 +70,8 @@ features/content/
 
 ## Utils
 
+- `parse-content-with-links.tsx` - 解析內容並轉換連結為可點擊元素
+
 ## Hooks
 
 ## Types

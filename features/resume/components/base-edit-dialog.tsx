@@ -7,7 +7,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import React from "react";
 
 interface BaseEditDialogProps {

@@ -1,8 +1,8 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { logSmartChatAttachment } from "@/features/account/services/action-logs";
 import { ResumeAnalysisResult } from "@/types/resume-analysis";
-import type { UploadedFile } from '@/utils/upload-utils';
-import { computeResumeDiffSummary } from '@/utils/json-diff';
+import type { UploadedFile } from '@/features/resume/utils/upload-utils';
+import { computeResumeDiffSummary } from '@/features/smart-chat/utils/resume-diff';
 import { useCallback, useEffect, useState } from 'react';
 import { SuggestionTemplate } from "../components/ai-suggestions-sidebar";
 import { useCannedMessages } from './use-canned-messages';

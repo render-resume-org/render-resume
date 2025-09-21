@@ -5,7 +5,7 @@ import {
     getSuggestionText,
     getTextVector,
     logExcerptVsTemplateContentSimilarity
-} from "@/utils/similarity";
+} from "@/features/smart-chat/utils/similarity";
 import { ChatMessage, SuggestionRecord } from '../types/resume-editor';
 import { SuggestionTemplate } from "../components/ai-suggestions-sidebar";
 import { SIMILARITY_THRESHOLDS } from '../lib/resume-editor-config';

@@ -1,4 +1,4 @@
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOptionalBulletFocus } from './bullet-focus-provider';
 import InlineHighlightPreview from './inline-highlight-preview';

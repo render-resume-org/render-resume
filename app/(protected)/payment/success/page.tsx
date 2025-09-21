@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { User } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";

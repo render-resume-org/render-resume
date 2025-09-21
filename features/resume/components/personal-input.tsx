@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { PersonalInfo } from "@/utils/upload-utils";
+import { PersonalInfo } from "@/features/resume/utils/upload-utils";
 import React, { useCallback } from "react";
 
 type Props = {

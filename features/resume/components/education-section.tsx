@@ -4,7 +4,7 @@ import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import type { InlineChangeHandler } from '@/types/inline-edit';
 import { OptimizedResume } from '@/types/resume';
 import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import { GraduationCap } from 'lucide-react';
 import InlineText from './inline-text';
 import ResumeSection from './resume-section';

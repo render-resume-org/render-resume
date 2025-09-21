@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { getExcerptKey } from "@/utils/similarity";
+import { getExcerptKey } from "@/features/smart-chat/utils/similarity";
 import { ChatMessage } from '../types/resume-editor';
 
 export function useExcerptProcessor(

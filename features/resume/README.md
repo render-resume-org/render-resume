@@ -104,6 +104,11 @@ features/resume/
 
 - `number-grade-mapping.ts` - 數字評分轉換與等級顏色配置
 - `resume-annotations.ts` - 履歷文字註解與高亮功能
+- `pdf-cn.ts` - PDF 專用的 className 處理
+- `optimized-to-unified.ts` - OptimizedResume 到 UnifiedResume 格式轉換
+- `pdf-styles.ts` - PDF 樣式生成工具，提供 HTML 模板和樣式配置
+- `template-styling.ts` - 履歷模板樣式服務，處理模板樣式應用和管理
+- `upload-utils.ts` - 檔案上傳相關工具函數和類型定義
 
 ## Hooks
 

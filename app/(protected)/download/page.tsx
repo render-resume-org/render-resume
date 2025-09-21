@@ -5,7 +5,7 @@ import ResumePreview from "@/features/resume/components/resume-preview";
 import { Button } from "@/components/ui/button";
 import { useResumeCopy, useResumeTemplate } from "@/hooks/use-resume-optimization";
 import { getTemplateById } from "@/features/resume/lib/resume-templates";
-import { mapOptimizedToUnified } from "@/utils/optimized-to-unified";
+import { mapOptimizedToUnified } from "@/features/resume/utils/optimized-to-unified";
 import { mapUnifiedToOptimized } from "@/utils/unified-to-optimized";
 import type { OptimizedResume } from "@/types/resume";
 import type { UnifiedResume } from "@/types/resume-unified";

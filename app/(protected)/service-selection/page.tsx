@@ -3,7 +3,7 @@
 import { ServiceCard } from "@/features/resume/components";
 import { CreateResumeIcon } from "@/components/svg-icon/create-resume-icon";
 import { OptimizeResumeIcon } from "@/components/svg-icon/optimize-resume-icon";
-import { clearSessionData } from "@/utils";
+import { clearSessionData } from "@/services/storage";
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

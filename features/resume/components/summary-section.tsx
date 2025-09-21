@@ -1,6 +1,6 @@
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
 import { OptimizedResume } from '@/types/resume';
-import { cn } from '@/utils';
+import { cn } from '@/utils/cn';
 import { UserCircle } from 'lucide-react';
 import InlineText from './inline-text';
 import ResumeSection from './resume-section';

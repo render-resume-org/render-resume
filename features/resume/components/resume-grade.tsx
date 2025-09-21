@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/utils";
+import { cn } from "@/utils/cn";
 import { useAnimatedScores } from "../hooks/use-animated-score";
 import { GRADE_MAPPING } from "../lib/results-config";
 import { LetterGrade } from "../types/grade";
