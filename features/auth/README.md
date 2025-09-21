@@ -42,4 +42,7 @@ features/auth/
 
 ## Hooks
 
+- `use-auth.ts` - 身份驗證核心 hook，處理登入、登出、用戶狀態管理等功能
+- `use-auth-redirect.ts` - 身份驗證重定向 hook，處理已認證用戶的自動重定向邏輯
+
 ## Types

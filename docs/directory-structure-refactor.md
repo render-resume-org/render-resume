@@ -4,18 +4,16 @@
 
 遵循 Next.js 15 best practice，採用 Feature-Based 架構進行專案目錄重構。
 
-## utils 位置調整
+## hooks 位置調整
 
-/utils/parse-content-with-links.tsx -> features/content/utils/
+hooks/use-admin-data.ts -> features/admin/hooks
 
-/utils/patch-ops-parser.ts -> features/smart-chat/utils/
-/utils/set-by-path.ts -> features/smart-chat/utils/
-/utils/silimarity.ts -> features/smart-chat/utils/
+hooks/use-auth-redirect.ts -> features/auth/hooks
+hooks/use-auth.ts -> features/auth/hooks
 
-/utils/pdf-styles.ts -> features/resume/utils/
-/utils/template-styling.ts -> features/resume/utils/
-/utils/upload-utils.ts -> features/resume/utils/
-
+hooks/use-file-upload.ts
+hooks/use-mobile.ts
+hooks/use-resume-optimization.ts
 
 ## todos
 
@@ -32,8 +30,8 @@
   - [x] content/
 - [x] 重構 lib/
 - [x] 重構 services/
-- [] 重構 utils/
-- [] 重構 hooks/
+- [x] 重構 utils/
+- [x] 重構 hooks/
 - [] 重構 types/
 - [] 確認 features/
   - [] resume/

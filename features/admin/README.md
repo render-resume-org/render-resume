@@ -55,7 +55,7 @@ features/admin/
 
 ## Hooks
 
-- `use-admin-data.ts` - 管理員數據獲取，參考 `/hooks/use-admin-data.ts` 實作
+- `use-admin-data.ts` - 管理員數據獲取，負責獲取用戶數據、統計資訊等管理功能
 
 ## Types
 

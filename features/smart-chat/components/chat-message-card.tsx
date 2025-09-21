@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { cn } from "@/utils/cn";
 import Image from "next/image";
 import { ChatMessage } from "../types/resume-editor";

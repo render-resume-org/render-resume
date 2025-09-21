@@ -10,7 +10,7 @@ import {
   RedeemCodeCard,
   SubscriptionHistoryCard
 } from "@/features/account/components";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Subscription, UserProfile } from "@/types/user";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";

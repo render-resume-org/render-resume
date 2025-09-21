@@ -1,7 +1,7 @@
 "use client";
 
 import { ForgotPasswordForm } from "@/features/auth/components";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { useAuthRedirect } from "@/features/auth/hooks/use-auth-redirect";
 import Link from "next/link";
 
 export default function Page() {
