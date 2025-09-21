@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { ResumeAnalysisResult } from "@/types/resume-analysis";
+import { ResumeAnalysisResult } from "@/features/resume/types/resume-analysis";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { SuggestionTemplate } from "./ai-suggestions-sidebar";

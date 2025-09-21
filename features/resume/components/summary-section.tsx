@@ -1,5 +1,5 @@
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
-import { OptimizedResume } from '@/types/resume';
+import { OptimizedResume } from '@/features/resume/types/resume';
 import { cn } from '@/utils/cn';
 import { UserCircle } from 'lucide-react';
 import InlineText from './inline-text';

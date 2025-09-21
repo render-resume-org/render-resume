@@ -11,7 +11,7 @@ import {
   SubscriptionHistoryCard
 } from "@/features/account/components";
 import { useAuth } from "@/features/auth/hooks/use-auth";
-import { Subscription, UserProfile } from "@/types/user";
+import { Subscription, UserProfile } from "@/features/account/types/user";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";

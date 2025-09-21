@@ -3,8 +3,8 @@
 import { mapOptimizedToUnified } from '@/features/resume/utils/optimized-to-unified';
 import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';
 import { calculateStringSimilarity } from '@/features/smart-chat/utils/similarity';
-import type { OptimizedResume } from '@/types/resume';
-import type { UnifiedResume } from '@/types/resume-unified';
+import type { OptimizedResume } from '@/features/resume/types/resume';
+import type { UnifiedResume } from '@/features/resume/types/resume-unified';
 import { setByPath } from '@/features/smart-chat/utils/set-by-path';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 

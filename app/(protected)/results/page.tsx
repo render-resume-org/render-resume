@@ -5,7 +5,7 @@ import ResumePreview from '@/features/resume/components/resume-preview';
 import { NavigationButton } from "@/components/common/navigation-button";
 import { getTemplateById } from '@/features/resume/lib/resume-templates';
 import { mapUnifiedToOptimized } from '@/utils/unified-to-optimized';
-import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
+import type { UnifiedResumeAnalysisResult } from '@/features/resume/types/resume-unified';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

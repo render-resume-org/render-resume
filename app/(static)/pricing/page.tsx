@@ -3,7 +3,7 @@
 import { PlanCard } from "@/features/payment/components";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plan } from "@/types/user";
+import { Plan } from "@/features/account/types/user";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Footer from "@/components/layout/footer";

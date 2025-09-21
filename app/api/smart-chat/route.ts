@@ -4,7 +4,7 @@ import { requireAuthentication } from '@/features/auth/services/auth';
 import { createNativeOpenAIClient } from '@/services/openai-client-native';
 import { generateSmartChatSystemPrompt } from '@/features/smart-chat/lib/smart-chat-prompt';
 import { generateSmartChatUserPrompt } from '@/features/smart-chat/lib/smart-chat-user-prompt';
-import { ResumeAnalysisResult } from '@/types/resume-analysis';
+import { ResumeAnalysisResult } from '@/features/resume/types/resume-analysis';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface ChatMessage {

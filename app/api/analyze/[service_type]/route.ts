@@ -6,7 +6,7 @@ import { generateEvaluateSystemPrompt } from '@/features/resume/lib/evaluate-sys
 import { generateEvaluateUserPrompt } from '@/features/resume/lib/evaluate-user-prompt';
 import { generateExtractSystemPrompt } from '@/features/resume/lib/extract-system-prompt';
 import { generateExtractUserPrompt } from '@/features/resume/lib/extract-user-prompt';
-import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/types/resume-unified';
+import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/features/resume/types/resume-unified';
 import type { Education, Experience, Links, PersonalInfo, Project } from '@/features/resume/utils/upload-utils';
 import { checkUsageLimit } from '@/features/account/utils/usage-check';
 import { NextRequest, NextResponse } from 'next/server';

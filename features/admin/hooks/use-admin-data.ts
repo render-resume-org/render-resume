@@ -1,6 +1,6 @@
 "use client";
 
-import { Database } from "@/types";
+import { Database } from "@/types/database";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 

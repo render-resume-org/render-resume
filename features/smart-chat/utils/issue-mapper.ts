@@ -1,4 +1,4 @@
-import type { UnifiedIssue } from '@/types/resume-unified';
+import type { UnifiedIssue } from '@/features/resume/types/resume-unified';
 import type { SuggestionTemplate } from '../components/ai-suggestions-sidebar';
 
 export function issuesToTemplates(issues: UnifiedIssue[], genId: (p: string) => string): SuggestionTemplate[] {

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserProfile } from "@/types/user";
+import { UserProfile } from "@/features/account/types/user";
 import { Edit3, Save, User, X } from "lucide-react";
 
 interface AccountSettingsInfoCardProps {

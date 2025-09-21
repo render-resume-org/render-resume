@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProBadge } from "@/components/ui/pro-badge";
-import { Plan } from "@/types/user";
+import { Plan } from "@/features/account/types/user";
 import { Calendar, CreditCard, Lock, Zap } from "lucide-react";
 
 interface PlanCardProps {

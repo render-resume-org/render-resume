@@ -1,7 +1,7 @@
 'use server';
 
 import { createClient } from "@/lib/supabase/server";
-import { AnnouncementTable } from "@/types";
+import { AnnouncementTable } from "@/types/database";
 
 export async function getActiveAnnouncements(): Promise<AnnouncementTable[]> {
   const supabase = await createClient();

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ResumeAnalysisResult } from "@/types/resume-analysis";
-import type { UnifiedResumeAnalysisResult } from "@/types/resume-unified";
+import { ResumeAnalysisResult } from "@/features/resume/types/resume-analysis";
+import type { UnifiedResumeAnalysisResult } from "@/features/resume/types/resume-unified";
 import { SuggestionTemplate } from "../components/ai-suggestions-sidebar";
 import { SuggestionRecord } from '../types/resume-editor';
 

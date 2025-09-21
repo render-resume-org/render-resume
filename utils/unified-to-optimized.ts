@@ -1,5 +1,5 @@
-import type { OptimizedResume } from '@/types/resume';
-import type { UnifiedResume } from '@/types/resume-unified';
+import type { OptimizedResume } from '@/features/resume/types/resume';
+import type { UnifiedResume } from '@/features/resume/types/resume-unified';
 
 export function mapUnifiedToOptimized(unified: UnifiedResume): OptimizedResume {
   return {

@@ -1,9 +1,9 @@
 import { useResumeEditor } from '@/features/smart-chat/components/resume-editor-context';
 import { buildAnnotationsFromAnalysis, highlightText } from '../utils/resume-annotations';
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
-import type { InlineChangeHandler } from '@/types/inline-edit';
-import { OptimizedResume } from '@/types/resume';
-import type { UnifiedResumeAnalysisResult } from '@/types/resume-unified';
+import type { InlineChangeHandler } from '@/features/resume/types/inline-edit';
+import { OptimizedResume } from '@/features/resume/types/resume';
+import type { UnifiedResumeAnalysisResult } from '@/features/resume/types/resume-unified';
 import { cn } from '@/utils/cn';
 import { GraduationCap } from 'lucide-react';
 import InlineText from './inline-text';

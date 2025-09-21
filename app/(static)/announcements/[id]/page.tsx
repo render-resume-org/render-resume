@@ -6,7 +6,7 @@ import { CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { logAnnouncementView } from "@/features/account/services/action-logs";
 import { getAnnouncementById, incrementAnnouncementViews } from "@/features/content/services/announcements";
-import { AnnouncementTable } from "@/types";
+import { AnnouncementTable } from "@/types/database";
 import { ChevronRight, Home, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";

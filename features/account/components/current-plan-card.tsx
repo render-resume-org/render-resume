@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProBadge } from "@/components/ui/pro-badge";
-import { Subscription } from "@/types/user";
+import { Subscription } from "@/features/account/types/user";
 import { Crown, ExternalLink, Zap } from "lucide-react";
 import Link from "next/link";
 

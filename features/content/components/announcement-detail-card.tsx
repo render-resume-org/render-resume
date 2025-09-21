@@ -1,6 +1,6 @@
 'use client';
 
-import { AnnouncementTable } from "@/types";
+import { AnnouncementTable } from "@/types/database";
 import { parseContentWithLinks } from "@/features/content/utils/parse-content-with-links";
 import { formatSmartTime } from "@/utils/time";
 import { Eye } from "lucide-react";

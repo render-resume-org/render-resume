@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProBadge } from "@/components/ui/pro-badge";
-import { Subscription } from "@/types/user";
+import { Subscription } from "@/features/account/types/user";
 import { ScrollText } from "lucide-react";
 
 interface SubscriptionHistoryCardProps {

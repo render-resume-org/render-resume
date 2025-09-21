@@ -118,3 +118,7 @@ features/resume/
 ## Types
 
 - `grade.ts` - 評分相關類型定義
+- `inline-edit.ts` - 內嵌編輯相關類型定義
+- `resume-analysis.ts` - 履歷分析結果類型定義
+- `resume-unified.ts` - 統一履歷格式類型定義
+- `resume.ts` - 基礎履歷類型定義

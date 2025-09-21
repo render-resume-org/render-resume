@@ -1,6 +1,6 @@
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { logSmartChatAttachment } from "@/features/account/services/action-logs";
-import { ResumeAnalysisResult } from "@/types/resume-analysis";
+import { ResumeAnalysisResult } from "@/features/resume/types/resume-analysis";
 import type { UploadedFile } from '@/features/resume/utils/upload-utils';
 import { computeResumeDiffSummary } from '@/features/smart-chat/utils/resume-diff';
 import { useCallback, useEffect, useState } from 'react';

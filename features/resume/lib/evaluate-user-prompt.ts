@@ -1,4 +1,4 @@
-import { UnifiedResume } from '@/types/resume-unified';
+import { UnifiedResume } from '@/features/resume/types/resume-unified';
 
 export function generateEvaluateUserPrompt(resume: UnifiedResume): string {
   const resumeJson = JSON.stringify({ resume }, null, 2);

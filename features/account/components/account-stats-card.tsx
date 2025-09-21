@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserProfile } from "@/types/user";
+import { UserProfile } from "@/features/account/types/user";
 import { ChartColumn } from 'lucide-react';
 
 interface AccountStatsCardProps {

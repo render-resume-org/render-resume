@@ -62,3 +62,5 @@ features/account/
 ## Hooks
 
 ## Types
+
+- `user.ts` - 用戶相關類型定義（包含 UserProfile、Subscription、Plan 等）

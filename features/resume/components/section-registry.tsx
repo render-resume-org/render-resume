@@ -1,6 +1,6 @@
 import { ResumeTemplate } from '@/features/resume/lib/resume-templates';
-import type { InlineChangeHandler } from '@/types/inline-edit';
-import { OptimizedResume } from '@/types/resume';
+import type { InlineChangeHandler } from '@/features/resume/types/inline-edit';
+import { OptimizedResume } from '@/features/resume/types/resume';
 import { memo } from 'react';
 import AchievementsSection from './achievements-section';
 import EducationSection from './education-section';

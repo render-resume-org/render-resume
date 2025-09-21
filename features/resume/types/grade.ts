@@ -1,4 +1,4 @@
-import { AnalysisScore, LetterGrade } from "@/types/resume-analysis";
+import { AnalysisScore, LetterGrade } from "@/features/resume/types/resume-analysis";
 
 export interface GradeColors {
   stroke: string;

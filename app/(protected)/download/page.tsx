@@ -7,8 +7,8 @@ import { useResumeCopy, useResumeTemplate } from "@/hooks/use-resume-optimizatio
 import { getTemplateById } from "@/features/resume/lib/resume-templates";
 import { mapOptimizedToUnified } from "@/features/resume/utils/optimized-to-unified";
 import { mapUnifiedToOptimized } from "@/utils/unified-to-optimized";
-import type { OptimizedResume } from "@/types/resume";
-import type { UnifiedResume } from "@/types/resume-unified";
+import type { OptimizedResume } from "@/features/resume/types/resume";
+import type { UnifiedResume } from "@/features/resume/types/resume-unified";
 import { FileText } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
