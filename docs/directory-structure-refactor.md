@@ -6,7 +6,7 @@
 
 ## app/api 重構
 
-
+api routes 宜重新分類，設計得更加精簡，將複雜邏輯移至 features/[feature_name]/services/。
 
 ## todos
 
@@ -128,54 +128,47 @@ render-resume/
 │   └── page.tsx
 │
 ├── features/                     # 功能模組（核心業務邏輯）
-│   ├── auth/                     # 使用者認證與授權
-│   │   ├── components/           # 登入、註冊、密碼重置組件
-│   │   ├── hooks/                # 認證相關 hooks
-│   │   ├── services/             # 認證 API 服務
-│   │   ├── types/                # 認證相關類型
-│   │   └── utils/                # 認證工具函數
-│   │
-│   ├── resume/                   # 履歷分析與生成（核心功能）
-│   │   ├── components/           # 分析結果、履歷預覽、編輯組件
-│   │   ├── services/             # AI 分析、PDF 生成服務
-│   │   ├── hooks/                # 履歷處理相關 hooks
-│   │   ├── types/                # 履歷相關類型定義
-│   │   └── utils/                # 履歷處理工具函數
-│   │
-│   ├── smart-chat/               # 智能問答系統
-│   │   ├── components/           # 聊天界面、訊息組件
-│   │   ├── hooks/                # 聊天狀態管理 hooks
-│   │   ├── services/             # 聊天 API 服務
-│   │   ├── types/                # 聊天相關類型
-│   │   └── utils/                # 聊天工具函數
-│   │
-│   ├── payment/                  # 付款與訂閱管理
-│   │   ├── components/           # 付款界面、訂閱計畫組件
-│   │   ├── hooks/                # 付款狀態管理 hooks
-│   │   ├── services/             # 付款 API、訂閱服務
-│   │   ├── types/                # 付款相關類型
-│   │   └── utils/                # 付款工具函數
-│   │
 │   ├── account/                  # 用戶資料與帳戶管理
-│   │   ├── components/           # 個人資料、帳戶設定組件
-│   │   ├── hooks/                # 用戶資料管理 hooks
-│   │   ├── services/             # 用戶 API 服務
-│   │   ├── types/                # 用戶相關類型
-│   │   └── utils/                # 用戶資料處理工具
+│   │   ├── components/
+│   │   ├── lib/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── utils/
 │   │
 │   ├── admin/                    # 後台管理系統
-│   │   ├── components/           # 後台管理組件
-│   │   ├── hooks/                # 管理功能 hooks
-│   │   ├── services/             # 管理 API 服務
-│   │   ├── types/                # 管理相關類型
-│   │   └── utils/                # 管理工具函數
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   └── services/
 │   │
-│   └── content/                  # 內容管理系統
-│       ├── components/           # 公告、FAQ、靜態頁面組件
-│       ├── hooks/                # 內容管理 hooks
-│       ├── services/             # 內容 API 服務
-│       ├── types/                # 內容相關類型
-│       └── utils/                # 內容處理工具函數
+│   ├── auth/                     # 使用者認證與授權
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   └── services/
+│   │
+│   ├── content/                  # 內容管理系統
+│   │   ├── components/
+│   │   ├── lib/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── utils/
+│   │
+│   ├── payment/                  # 付款與訂閱管理
+│   │   └── components/
+│   │
+│   ├── resume/                   # 履歷分析與生成（核心功能）
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── lib/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── utils/
+│   │
+│   └── smart-chat/               # 智能問答系統
+│       ├── components/
+│       ├── hooks/
+│       ├── lib/
+│       ├── types/
+│       └── utils/
 │
 ├── components/                   # 全域共用組件
 │   ├── ui/                       # shadcn/ui 基礎組件
