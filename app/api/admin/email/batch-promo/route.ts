@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { TablesInsert } from "@/lib/types/database";
-import { checkAdminAuth } from "@/lib/utils/admin-auth";
+import { TablesInsert } from "@/types/database";
+import { checkAdminAuth } from "@/features/admin/services/admin-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from 'resend';
 

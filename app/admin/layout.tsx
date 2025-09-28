@@ -88,14 +88,14 @@ export default function AdminLayout({
       const data = await response.json();
       
       if (!response.ok || !data.isAdmin) {
-        router.push('/auth/login');
+        router.push('/login');
         return;
       }
       
       setAdminUser(data.user);
     } catch (error) {
       console.error('Admin auth check failed:', error);
-      router.push('/auth/login');
+      router.push('/login');
     } finally {
       setLoading(false);
     }

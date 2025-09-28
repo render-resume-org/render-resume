@@ -1,4 +1,4 @@
-import { AppHeader } from "@/components/app-header";
+import { AppHeader } from "@/components/layout/app-header";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import { Geist } from "next/font/google";
@@ -406,7 +406,7 @@ export default function RootLayout({
         {/* Performance hints */}
         <link rel="preload" href="/api/sitemap" as="document" />
         <link rel="prefetch" href="/faq" />
-        <link rel="prefetch" href="/auth/sign-up" />
+        <link rel="prefetch" href="/sign-up" />
       </head>
       <body className={`${geistSans.className} antialiased w-full overflow-x-hidden h-screen`}>
         <ThemeProvider

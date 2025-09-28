@@ -1,9 +1,9 @@
 "use client";
 
-import { UploadIllustration } from "@/components/svg-icon";
+import { UploadIcon } from "@/components/svg-icon/upload-icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -98,7 +98,7 @@ export default function PaymentFailPage() {
   return (
     <PaymentContainer>
       <div className="flex justify-center mb-8">
-        <UploadIllustration className="w-full max-w-xl h-auto opacity-40 grayscale" />
+        <UploadIcon className="w-full max-w-xl h-auto opacity-40 grayscale" />
       </div>
       <Card className={cn(
         "shadow-lg border",

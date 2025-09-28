@@ -1,12 +1,12 @@
 "use client";
 
-import { PlanCard } from "@/components/subscription/plan-card";
+import { PlanCard } from "@/features/payment/components";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plan } from "@/types/user";
+import { Plan } from "@/features/account/types/user";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import Footer from "@/components/footer";
+import Footer from "@/components/layout/footer";
 import { useRouter } from "next/navigation";
 
 export default function PricingPage() {
@@ -46,7 +46,7 @@ export default function PricingPage() {
 
       // 如果用戶未登入，導向登入頁面
       if (!isAuthenticated) {
-        router.push('/auth/login');
+        router.push('/login');
         return;
       }
 

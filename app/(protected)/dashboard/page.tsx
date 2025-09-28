@@ -1,6 +1,6 @@
-import { BannerCard, DashboardAnnouncements, RecentActivity, UsageStats } from "@/components/dashboard";
-import { FeatureCards } from "@/components/feature-cards";
-import { getActiveAnnouncements } from "@/lib/actions/announcements";
+import { BannerCard, RecentAnnouncements, FeatureCards } from "@/features/content/components";
+import { RecentActivity, UsageStats } from "@/features/account/components";
+import { getActiveAnnouncements } from "@/features/content/services/announcements";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/auth/login');
+    redirect('/login');
   }
 
   // 获取公告数据
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             {/* Announcements Section - 1 column */}
             <div className="lg:col-span-1 order-2 lg:order-1">
-              <DashboardAnnouncements announcements={announcements} />
+              <RecentAnnouncements announcements={announcements} />
             </div>
             
             {/* Banner Card - 2 columns */}

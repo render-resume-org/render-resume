@@ -1,14 +1,14 @@
-import { logResumeBuild, logResumeOptimize } from '@/lib/actions/activity';
-import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/api/openai-utils';
-import { requireAuthentication } from '@/lib/auth/server';
-import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/lib/openai-client-native';
-import { generateEvaluateSystemPrompt } from '@/lib/prompts/evaluate-system-prompt';
-import { generateEvaluateUserPrompt } from '@/lib/prompts/evaluate-user-prompt';
-import { generateExtractSystemPrompt } from '@/lib/prompts/extract-system-prompt';
-import { generateExtractUserPrompt } from '@/lib/prompts/extract-user-prompt';
-import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/lib/types/resume-unified';
-import type { Education, Experience, Links, PersonalInfo, Project } from '@/lib/upload-utils';
-import { checkUsageLimit } from '@/lib/utils/usage-check';
+import { logResumeBuild, logResumeOptimize } from '@/features/account/services/action-logs';
+import { callOpenAIJson, callOpenAIJsonWithVision, fileToBase64, VisionContentItem } from '@/lib/openai';
+import { requireAuthentication } from '@/features/auth/services/auth';
+import { createNativeOpenAIClient, processTextFile, SUPPORTED_FILE_TYPES } from '@/services/openai-client-native';
+import { generateEvaluateSystemPrompt } from '@/features/resume/lib/evaluate-system-prompt';
+import { generateEvaluateUserPrompt } from '@/features/resume/lib/evaluate-user-prompt';
+import { generateExtractSystemPrompt } from '@/features/resume/lib/extract-system-prompt';
+import { generateExtractUserPrompt } from '@/features/resume/lib/extract-user-prompt';
+import { UnifiedResume, UnifiedResumeAnalysisResult, UnifiedResumeAnalysisSchema } from '@/features/resume/types/resume-unified';
+import type { Education, Experience, Links, PersonalInfo, Project } from '@/features/resume/utils/upload-utils';
+import { checkUsageLimit } from '@/features/account/utils/usage-check';
 import { NextRequest, NextResponse } from 'next/server';
 
 interface AnyObject { [key: string]: unknown }

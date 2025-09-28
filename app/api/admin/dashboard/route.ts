@@ -1,4 +1,4 @@
-import { checkAdminAuth } from "@/lib/utils/admin-auth";
+import { checkAdminAuth } from "@/features/admin/services/admin-auth";
 import { NextResponse } from "next/server";
 
 interface SubscriptionWithPlan {
