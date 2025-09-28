@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { UserInsert, UserTable } from "@/lib/types";
+import { UserInsert, UserTable } from "@/types/database";
 import { NextResponse } from "next/server";
 
 export async function POST() {

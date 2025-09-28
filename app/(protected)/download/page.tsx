@@ -1,14 +1,14 @@
 "use client";
 
-import { ActionSidebar } from "@/components/preview/action-sidebar";
-import ResumePreview from "@/components/preview/resume-preview";
+import { ActionSidebar } from "@/features/resume/components/action-sidebar";
+import ResumePreview from "@/features/resume/components/resume-preview";
 import { Button } from "@/components/ui/button";
 import { useResumeCopy, useResumeTemplate } from "@/hooks/use-resume-optimization";
-import { getTemplateById } from "@/lib/config/resume-templates";
-import { mapOptimizedToUnified } from "@/lib/mappers/optimized-to-unified";
-import { mapUnifiedToOptimized } from "@/lib/mappers/unified-to-optimized";
-import type { OptimizedResume } from "@/lib/types/resume";
-import type { UnifiedResume } from "@/lib/types/resume-unified";
+import { getTemplateById } from "@/features/resume/lib/resume-templates";
+import { mapOptimizedToUnified } from "@/features/resume/utils/optimized-to-unified";
+import { mapUnifiedToOptimized } from "@/utils/unified-to-optimized";
+import type { OptimizedResume } from "@/features/resume/types/resume";
+import type { UnifiedResume } from "@/features/resume/types/resume-unified";
 import { FileText } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';

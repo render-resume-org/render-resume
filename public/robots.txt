@@ -11,7 +11,7 @@ Disallow: /admin/
 Disallow: /_next/
 Disallow: /private/
 Disallow: /.well-known/
-Disallow: /auth/callback*
+Disallow: /callback*
 Disallow: /dashboard/private*
 
 # Block access to development and testing files
@@ -21,8 +21,8 @@ Disallow: /.env*
 Disallow: /config/
 
 # Allow important pages for SEO
-Allow: /auth/sign-up
-Allow: /auth/sign-in
+Allow: /sign-up
+Allow: /login
 Allow: /features
 Allow: /pricing
 Allow: /faq

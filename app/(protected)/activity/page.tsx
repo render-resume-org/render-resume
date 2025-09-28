@@ -1,4 +1,4 @@
-import { ActivityContent } from "@/components/activity";
+import { ActivityContent } from "@/features/account/components";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -10,7 +10,7 @@ export default async function ActivityPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/auth/login');
+    redirect('/login');
   }
 
   return (

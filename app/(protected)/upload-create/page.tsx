@@ -1,18 +1,20 @@
 "use client";
 
-import { useFileUpload } from "@/components/hooks/use-file-upload";
-import { NavigationButton } from "@/components/navigation-button";
-import { UploadIllustration } from "@/components/svg-icon";
+import { useFileUpload } from "@/hooks/use-file-upload";
+import { NavigationButton } from "@/components/common/navigation-button";
+import { UploadIcon } from "@/components/svg-icon/upload-icon";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdditionalTextInput } from "@/components/upload/additional-text-input";
-import { EducationInput } from "@/components/upload/education-input";
-import { ExperienceInput } from "@/components/upload/experience-input";
-import { LinksInput } from "@/components/upload/links-input";
-import { PersonalInput } from "@/components/upload/personal-input";
-import { ProjectInput } from "@/components/upload/project-input";
-import { SkillsInput } from "@/components/upload/skills-input";
-import { UploadDropzone } from "@/components/upload/upload-dropzone";
-import { UploadedFilesList } from "@/components/upload/uploaded-files-list";
+import {
+  AdditionalTextInput,
+  EducationInput,
+  ExperienceInput,
+  LinksInput,
+  PersonalInput,
+  ProjectInput,
+  SkillsInput,
+  UploadDropzone,
+  UploadedFilesList
+} from "@/features/resume/components";
 import { useEffect, useState } from 'react';
 
 export default function UploadCreatePage() {
@@ -77,7 +79,7 @@ export default function UploadCreatePage() {
         } $`}>
           <CardHeader className="text-center">
             <div className={`w-48 h-48 mx-auto mb-4 flex items-center justify-center transition-all duration-500 delay-300`}>
-              <UploadIllustration mainColor={'#06b6d4'} width={256} height={256} />
+              <UploadIcon mainColor={'#06b6d4'} width={256} height={256} />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               {pageContent.title}

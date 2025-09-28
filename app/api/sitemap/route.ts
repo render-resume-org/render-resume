@@ -11,13 +11,13 @@ const staticPages = [
     priority: 1.0,
   },
   {
-    url: '/auth/sign-up',
+    url: '/sign-up',
     lastModified: new Date('2025-06-26'),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   },
   {
-    url: '/auth/login',
+    url: '/login',
     lastModified: new Date('2025-06-26'),
     changeFrequency: 'monthly' as const,
     priority: 0.7,

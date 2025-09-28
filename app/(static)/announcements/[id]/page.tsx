@@ -1,12 +1,12 @@
 "use client";
 
-import { AnnouncementDetailCard } from "@/components/announcements/announcement-detail-card";
+import { AnnouncementDetailCard } from "@/features/content/components";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { logAnnouncementView } from "@/lib/actions/activity";
-import { getAnnouncementById, incrementAnnouncementViews } from "@/lib/actions/announcements";
-import { AnnouncementTable } from "@/lib/types";
+import { logAnnouncementView } from "@/features/account/services/action-logs";
+import { getAnnouncementById, incrementAnnouncementViews } from "@/features/content/services/announcements";
+import { AnnouncementTable } from "@/types/database";
 import { ChevronRight, Home, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";

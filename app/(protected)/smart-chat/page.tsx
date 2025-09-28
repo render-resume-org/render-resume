@@ -1,14 +1,14 @@
 "use client";
 
-import SmartChat from "@/components/smart-chat";
-import PreviewActionPanel from "@/components/smart-chat/preview-action-panel";
-import ResumeEditorPreview from "@/components/smart-chat/resume-editor-preview";
-import { NavigationButton } from "@/components/navigation-button";
+import SmartChat from "@/features/smart-chat/components/smart-chat";
+import PreviewActionPanel from "@/features/smart-chat/components/preview-action-panel";
+import ResumeEditorPreview from "@/features/smart-chat/components/resume-editor-preview";
+import { NavigationButton } from "@/components/common/navigation-button";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useResumeTemplate } from "@/hooks/use-resume-optimization";
-import { getTemplateById } from "@/lib/config/resume-templates";
-import { ResumeAnalysisResult } from "@/lib/types/resume-analysis";
+import { getTemplateById } from "@/features/resume/lib/resume-templates";
+import { ResumeAnalysisResult } from "@/features/resume/types/resume-analysis";
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 

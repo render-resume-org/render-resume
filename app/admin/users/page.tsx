@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdminData, type UserWithSubscription } from "@/components/hooks/use-admin-data";
+import { useAdminData, type UserWithSubscription } from "@/features/admin/hooks/use-admin-data";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

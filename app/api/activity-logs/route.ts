@@ -1,5 +1,5 @@
-import { getActivityStats, getRecentActivityLogs, getUserActivityLogs } from '@/lib/actions/activity';
-import { requireAuthentication } from '@/lib/auth/server';
+import { getActivityStats, getRecentActivityLogs, getUserActivityLogs } from '@/features/account/services/action-logs';
+import { requireAuthentication } from '@/features/auth/services/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {

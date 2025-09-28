@@ -1,10 +1,10 @@
 "use client";
 
-import { AnnouncementPreviewCard } from "@/components/announcements/announcement-preview-card";
+import { AnnouncementPreviewCard } from "@/features/content/components";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAnnouncementsPaginated, PaginatedAnnouncements } from "@/lib/actions/announcements";
+import { getAnnouncementsPaginated, PaginatedAnnouncements } from "@/features/content/services/announcements";
 import { ChevronLeft, ChevronRight, Home, Info, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
