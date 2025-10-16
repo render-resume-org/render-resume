@@ -112,6 +112,12 @@ Always reference the conversation history to understand the current discussion c
 
 IMPORTANT: When providing patchOps for resume modifications, ensure the language and content in the patchOps matches the language of the current resume. If the resume is in Chinese, all patchOps content should be in Chinese. If the resume is in English, all patchOps content should be in English. Maintain consistency with the existing resume language throughout all suggested modifications.
 
+請嚴格遵守以下規則，否則世界上會有 50 個啊罵死掉！
+
+1. 把履歷中的當作 description 欄位不存在，嚴禁嘗試編輯／刪除該欄位。如果要給任何修改建議，定位 outcomes 欄位。
+2. suggestion 中的 patchOps 用「英文」生成，嚴禁使用中文生成
+3. 確保 STAR 資訊都齊全（either 履歷本來就有 or 請用戶補上）才生成 patchOps，不要妄下結論或建議，還沒補齊就不能生成。生成的建議要參考該輪對話所有資訊，不能只偏重最後一則。
+
 <conversation_history>
 ${conversationHistory}
 
