@@ -12,27 +12,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '需要提供 DOM 快照' }, { status: 400 });
     }
 
-    let executablePath = '';
-    let launchArgs: string[] = [];
-    let headless: boolean | 'shell' = true;
+    let browser;
 
-    // @sparticuz/chromium-min 只能在 Vercel (Linux x64) 運行，本地（macOS/Windows）要用系統的 Chrome/Chromium。
+    // 根據環境使用不同的 Chromium 配置
     if (process.env.NODE_ENV === 'production') {
-      // Vercel 環境
-      // executablePath() 可以接受以下參數：
-      // 1. undefined：使用內建預設路徑（最簡單，推薦）
-      // 2. 本地路徑：例如 "/opt/chromium"（需要自行上傳 Brotli 檔案到 Lambda Layer）
-      // 3. 遠端 URL：例如 "https://example.com/chromiumPack.tar"（從遠端下載 Chromium）
-      const REMOTE_PATH = process.env.CHROMIUM_REMOTE_EXEC_PATH; // 可選：可以留空使用預設值
-      executablePath = await chromium.executablePath(REMOTE_PATH);
-      launchArgs = [
-        ...chromium.args,
-        '--font-render-hinting=none',
-        '--disable-font-subpixel-positioning',
-      ];
-      headless = true;
+      // Vercel 環境：使用 @sparticuz/chromium-min
+      // 從 GitHub CDN 下載 Chromium binary（第一次啟動會自動下載並快取到 /tmp）
+      const executablePath = await chromium.executablePath(
+        'https://github.com/Sparticuz/chromium/releases/download/v133.0.0/chromium-v133.0.0-pack.tar'
+      );
+
+      browser = await puppeteer.launch({
+        args: [
+          ...chromium.args,
+          '--font-render-hinting=none',
+          '--disable-font-subpixel-positioning',
+        ],
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
+        headless: chromium.headless,
+      });
     } else {
-      // 本地環境 (macOS/Linux)
+      // 本地開發環境：使用系統安裝的 Chrome/Chromium
       const possiblePaths = [
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         '/Applications/Chromium.app/Contents/MacOS/Chromium',
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
         '/usr/bin/google-chrome',
       ];
 
+      let executablePath = '';
       for (const path of possiblePaths) {
         if (existsSync(path)) {
           executablePath = path;
@@ -48,31 +50,36 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      launchArgs = [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--font-render-hinting=none',
-      ];
+      if (!executablePath) {
+        throw new Error('找不到 Chrome/Chromium 執行檔，請確認已安裝 Chrome 或 Chromium');
+      }
+
+      browser = await puppeteer.launch({
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--font-render-hinting=none',
+        ],
+        executablePath,
+        headless: true,
+      });
     }
 
-    const browser = await puppeteer.launch({
-      args: launchArgs,
-      executablePath,
-      headless,
-    });
-
     const page = await browser.newPage();
+
+    // 設置 HTML 內容並等待載入完成
     await page.setContent(domSnapshot, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'load', // 使用 'load' 而非 'networkidle0' 以提升效能
       timeout: 30000,
     });
 
-    // 等待額外時間確保字體完全載入和渲染
+    // 等待字體完全載入
     await page.evaluateHandle('document.fonts.ready');
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // 生成 PDF
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -82,6 +89,7 @@ export async function POST(request: NextRequest) {
 
     await browser.close();
 
+    // 記錄下載活動
     try {
       await logResumeDownload(`生成了 PDF 檔案：${filename}`);
     } catch (error) {
