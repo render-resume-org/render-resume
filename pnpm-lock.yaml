@@ -101,9 +101,9 @@ importers:
       '@react-email/text':
         specifier: ^0.1.5
         version: 0.1.5(react@19.1.0)
-      '@sparticuz/chromium':
-        specifier: ^138.0.2
-        version: 138.0.2
+      '@sparticuz/chromium-min':
+        specifier: ^133.0.0
+        version: 133.0.0
       '@supabase/ssr':
         specifier: latest
         version: 0.6.1(@supabase/supabase-js@2.50.5)
@@ -1244,9 +1244,9 @@ packages:
   '@selderee/plugin-htmlparser2@0.11.0':
     resolution: {integrity: sha512-P33hHGdldxGabLFjPPpaTxVolMrzrcegejx+0GxjrIb9Zv48D8yAIA/QTDR2dFl7Uz7urX8aX6+5bCZslr+gWQ==}
 
-  '@sparticuz/chromium@138.0.2':
-    resolution: {integrity: sha512-vs5qUiK6kFCzLCxZ2buWONcB6jdF3VWdYp6kH1tt56tZ78p51dMAxfWsfk9P62z/jAeqbVg4V6Rb3Ic4aAeOKQ==}
-    engines: {node: '>=20.11.0'}
+  '@sparticuz/chromium-min@133.0.0':
+    resolution: {integrity: sha512-7obk2CRitrlyxT4AKsCjSfE0QiHjDbi5GeOJirkerAZFV7o4VAsKzqoTQ/6rm3segZwfNFZzy8EdDelfV08aag==}
+    engines: {node: '>= 16'}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -4988,7 +4988,7 @@ snapshots:
       domhandler: 5.0.3
       selderee: 0.11.0
 
-  '@sparticuz/chromium@138.0.2':
+  '@sparticuz/chromium-min@133.0.0':
     dependencies:
       follow-redirects: 1.15.9
       tar-fs: 3.1.0

@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // External packages for Puppeteer and Chromium
+  serverExternalPackages: ["puppeteer-core", "@sparticuz/chromium-min"],
+
   // SEO and Performance optimizations
   compress: true,
   poweredByHeader: false,
