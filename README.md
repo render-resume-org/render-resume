@@ -64,7 +64,7 @@ pnpm install # 推薦
 ```env
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5-mini
 OPENAI_TEMPERATURE=0.3
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -203,7 +203,7 @@ pnpm install # recommended
 ```env
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5-mini
 OPENAI_TEMPERATURE=0.3
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url

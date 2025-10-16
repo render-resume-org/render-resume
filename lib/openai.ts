@@ -26,7 +26,7 @@ export async function callOpenAIJson<T>(
   temperature: number = (client as unknown as { config?: { temperature?: number } }).config?.temperature ?? 0.2,
 ): Promise<T> {
   const req = {
-    model: (client as unknown as { config?: { modelName?: string } }).config?.modelName || 'gpt-4o-mini',
+    model: (client as unknown as { config?: { modelName?: string } }).config?.modelName || 'gpt-5-mini',
     messages: [
       { role: 'system', content: system } as OpenAIMessage,
       { role: 'user', content: user } as OpenAIMessage
@@ -48,7 +48,7 @@ export async function callOpenAIJsonWithVision<T>(
   temperature: number = (client as unknown as { config?: { temperature?: number } }).config?.temperature ?? 0.1,
 ): Promise<T> {
   const req = {
-    model: (client as unknown as { config?: { modelName?: string } }).config?.modelName || 'gpt-4o-mini',
+    model: (client as unknown as { config?: { modelName?: string } }).config?.modelName || 'gpt-5-mini',
     messages: [
       { role: 'system', content: system } as VisionMessage,
       { role: 'user', content: [{ type: 'text', text: userText }, ...items] } as VisionMessage

@@ -1,10 +1,10 @@
-import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/features/smart-chat/types/resume-editor';
 import { logSmartChatMessage } from '@/features/account/services/action-logs';
 import { requireAuthentication } from '@/features/auth/services/auth';
-import { createNativeOpenAIClient } from '@/services/openai-client-native';
+import { ResumeAnalysisResult } from '@/features/resume/types/resume-analysis';
 import { generateSmartChatSystemPrompt } from '@/features/smart-chat/lib/smart-chat-prompt';
 import { generateSmartChatUserPrompt } from '@/features/smart-chat/lib/smart-chat-user-prompt';
-import { ResumeAnalysisResult } from '@/features/resume/types/resume-analysis';
+import { InsertOp, PatchOp, PatchOpUnion, RemoveOp } from '@/features/smart-chat/types/resume-editor';
+import { createNativeOpenAIClient } from '@/services/openai-client-native';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface ChatMessage {
@@ -621,7 +621,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🤖 [API] Creating OpenAI client for smart chat (vision)');
     const client = createNativeOpenAIClient(apiKey, {
-      modelName: 'gpt-4o-mini',
+      modelName: 'gpt-5-mini',
     });
 
     // 調用 customPromptWithFiles 方法

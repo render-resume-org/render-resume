@@ -32,7 +32,7 @@
 - **檔案存儲**: 本地文件處理
 
 ### 🤖 AI & 機器學習
-- **主要模型**: OpenAI GPT-4o-mini
+- **主要模型**: OpenAI gpt-5-mini
 - **AI 框架**: LangChain
 - **文件處理**: PDF.js, 圖片 OCR
 - **語義搜索**: 向量相似度計算
