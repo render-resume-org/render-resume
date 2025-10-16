@@ -8,6 +8,8 @@ export interface AIConfig {
     frequencyPenalty?: number;
     presencePenalty?: number;
     seed?: number;
+    service_tier?: string;
+    reasoning_effort?: string;
 }
 
 // 內部使用的完整配置接口，確保必要欄位存在
@@ -20,12 +22,16 @@ interface InternalAIConfig {
     frequencyPenalty?: number;
     presencePenalty?: number;
     seed?: number;
+    service_tier?: string;
+    reasoning_effort?: string;
 }
 
 // 預設 AI 配置
 export const DEFAULT_AI_CONFIG: AIConfig = {
     modelName: "gpt-4.1-mini",
-    temperature: 0.2
+    temperature: 1,
+    service_tier: "priority",
+    reasoning_effort: "low",
 };
 
 // 支援的文檔類型
@@ -68,6 +74,8 @@ interface OpenAIChatCompletionRequest {
     frequency_penalty?: number;
     presence_penalty?: number;
     user?: string;
+    service_tier?: string;
+    reasoning_effort?: string;
 }
 
 interface OpenAIChatCompletionChoice {
@@ -146,7 +154,9 @@ export class NativeOpenAIClient {
             topP: options.config?.topP,
             frequencyPenalty: options.config?.frequencyPenalty,
             presencePenalty: options.config?.presencePenalty,
-            seed: options.config?.seed
+            seed: options.config?.seed,
+            service_tier: options.config?.service_tier || DEFAULT_AI_CONFIG.service_tier,
+            reasoning_effort: options.config?.reasoning_effort || DEFAULT_AI_CONFIG.reasoning_effort,
         };
 
         console.log('📋 [Native OpenAI Client] Final config:', {
@@ -186,6 +196,7 @@ export class NativeOpenAIClient {
         }
 
         const data = await response.json() as OpenAIChatCompletionResponse;
+        console.log('raw response', data)
         console.log('✅ [Native OpenAI Client] API call successful:', {
             id: data.id,
             model: data.model,
@@ -214,7 +225,9 @@ export class NativeOpenAIClient {
             const request: OpenAIChatCompletionRequest = {
                 model: this.config.modelName,
                 messages,
-                temperature: this.config.temperature
+                temperature: this.config.temperature,
+                service_tier: this.config.service_tier,
+                reasoning_effort: this.config.reasoning_effort,
             };
 
             const response = await this.callOpenAI(request);
@@ -240,7 +253,9 @@ export class NativeOpenAIClient {
             const request = {
                 model: this.config.modelName,
                 messages,
-                temperature: this.config.temperature
+                temperature: this.config.temperature,
+                service_tier: this.config.service_tier,
+                reasoning_effort: this.config.reasoning_effort,
             };
             const response = await this.callOpenAI(request);
             const content = response.choices[0].message.content;

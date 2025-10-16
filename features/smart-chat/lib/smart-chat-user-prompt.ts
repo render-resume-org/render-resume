@@ -57,10 +57,6 @@ export function generateSmartChatUserPrompt(options: SmartChatUserPromptOptions)
         }
       }
       
-    //   if (msg.quickResponses && msg.quickResponses.length > 0) {
-    //     messageText += `\n[快速回覆] ${msg.quickResponses.join(', ')}`;
-    //   }
-      
       return messageText;
     })
     .join('\n\n');

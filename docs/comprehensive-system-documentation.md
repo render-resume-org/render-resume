@@ -55,7 +55,7 @@ RenderResume 是一個採用 AI 技術的專業履歷與作品集生成器，基
 - **檔案存儲**: 本地文件處理
 
 #### AI & 機器學習
-- **主要模型**: OpenAI GPT-4o-mini
+- **主要模型**: OpenAI gpt-5-mini
 - **AI 框架**: LangChain
 - **文件處理**: PDF.js, 圖片 OCR
 - **語義搜索**: 向量相似度計算
@@ -930,7 +930,7 @@ interface ErrorResponse {
 ```env
 # OpenAI 配置
 OPENAI_API_KEY=your_openai_api_key_here
-OPENAI_MODEL=gpt-4o-mini
+OPENAI_MODEL=gpt-5-mini
 OPENAI_TEMPERATURE=0.3
 
 # Supabase 配置
