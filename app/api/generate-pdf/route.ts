@@ -1,7 +1,7 @@
 import { logResumeDownload } from '@/features/account/services/action-logs';
 import { NextRequest, NextResponse } from 'next/server';
 import puppeteer from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from '@sparticuz/chromium-min';
 import { existsSync } from 'fs';
 
 export async function POST(request: NextRequest) {
@@ -13,13 +13,18 @@ export async function POST(request: NextRequest) {
     }
 
     let executablePath = '';
-    let launchArgs = [];
+    let launchArgs: string[] = [];
     let headless: boolean | 'shell' = true;
 
-    // @sparticuz/chromium 只能在 Vercel (Linux x64) 運行，本地（macOS/Windows）要用系統的 Chrome/Chromium。
+    // @sparticuz/chromium-min 只能在 Vercel (Linux x64) 運行，本地（macOS/Windows）要用系統的 Chrome/Chromium。
     if (process.env.NODE_ENV === 'production') {
-      // ✅ Vercel 環境
-      executablePath = await chromium.executablePath();
+      // Vercel 環境
+      // executablePath() 可以接受以下參數：
+      // 1. undefined：使用內建預設路徑（最簡單，推薦）
+      // 2. 本地路徑：例如 "/opt/chromium"（需要自行上傳 Brotli 檔案到 Lambda Layer）
+      // 3. 遠端 URL：例如 "https://example.com/chromiumPack.tar"（從遠端下載 Chromium）
+      const REMOTE_PATH = process.env.CHROMIUM_REMOTE_EXEC_PATH; // 可選：可以留空使用預設值
+      executablePath = await chromium.executablePath(REMOTE_PATH);
       launchArgs = [
         ...chromium.args,
         '--font-render-hinting=none',
@@ -27,7 +32,7 @@ export async function POST(request: NextRequest) {
       ];
       headless = true;
     } else {
-      // ✅ 本地環境 (macOS/Linux)
+      // 本地環境 (macOS/Linux)
       const possiblePaths = [
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         '/Applications/Chromium.app/Contents/MacOS/Chromium',

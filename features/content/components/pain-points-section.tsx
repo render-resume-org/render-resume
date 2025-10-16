@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Heart, MessageCircle, Repeat2, Share } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { threadsPosts } from "../lib/landing-content";
 
 interface PostCardProps {
