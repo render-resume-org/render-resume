@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { Heart, MessageCircle, Repeat2, Share } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { threadsPosts } from "../lib/landing-content";
 
 interface BubblePostProps {
@@ -12,7 +12,6 @@ interface BubblePostProps {
 }
 
 function BubblePost({ post, index }: BubblePostProps) {
-  // 使用資料中的位置資訊
   const position = post.position || { top: '50%', left: '50%', rotate: 0 };
 
   return (
