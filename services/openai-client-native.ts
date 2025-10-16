@@ -28,7 +28,7 @@ interface InternalAIConfig {
 
 // 預設 AI 配置
 export const DEFAULT_AI_CONFIG: AIConfig = {
-    modelName: "gpt-4.1-mini",
+    modelName: "gpt-5-mini",
     temperature: 1,
     service_tier: "priority",
     reasoning_effort: "low",
