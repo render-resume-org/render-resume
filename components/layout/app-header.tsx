@@ -1,9 +1,9 @@
 "use client";
 
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { ProBadge } from "@/components/ui/pro-badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Menu, TestTubeDiagonal, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

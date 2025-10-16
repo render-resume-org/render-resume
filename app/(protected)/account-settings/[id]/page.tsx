@@ -10,16 +10,18 @@ import {
   RedeemCodeCard,
   SubscriptionHistoryCard
 } from "@/features/account/components";
-import { useAuth } from "@/features/auth/hooks/use-auth";
 import { Subscription, UserProfile } from "@/features/account/types/user";
+import { useAuth } from "@/features/auth/hooks/use-auth";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function AccountSettingsPage() {
   const params = useParams();
-  const userId = params.id as string;
   const { user: currentUser, loading: authLoading, updateProfile, refreshUserPlan } = useAuth();
+  const userId = params.id as string;
+  console.log('userId', userId)
+  console.log('currentUser', currentUser)
   
   // Local state
   const [profileUser, setProfileUser] = useState<UserProfile | null>(null);
