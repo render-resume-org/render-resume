@@ -46,25 +46,48 @@ export const PDF_FONT_STYLES = `
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500;600;700&display=swap');
 
 /* 確保中文字體正確顯示 */
-.font-inter { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
-.font-noto-tc { font-family: 'Noto Sans TC', sans-serif; }
-.font-serif { font-family: 'Times New Roman', Times, serif !important; }
+.font-inter { font-family: 'Inter', 'Noto Sans TC', sans-serif !important; }
+.font-noto-tc { font-family: 'Noto Sans TC', sans-serif !important; }
+.font-sans { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important; }
+.font-serif { font-family: 'Times New Roman', Times, Georgia, 'Noto Serif TC', serif !important; }
 
-/* 強制 serif 字體顯示 - 完全匹配預覽 */
+/* 強制 serif 字體顯示 - 完全匹配預覽 - 最高優先級 */
+div.font-serif,
+div.font-serif *,
 .font-serif,
 .font-serif * {
-  font-family: 'Times New Roman', Times, serif !important;
+  font-family: 'Times New Roman', Times, Georgia, 'Noto Serif TC', serif !important;
 }
 
-/* 確保履歷內容使用正確的字體 */
+/* 強制 sans-serif 字體顯示 - 最高優先級 */
+div.font-sans,
+div.font-sans *,
+.font-sans,
+.font-sans * {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* 確保履歷內容使用正確的字體 - 針對 #resume-content */
 #resume-content.font-serif,
-#resume-content.font-serif * {
-  font-family: 'Times New Roman', Times, serif !important;
+#resume-content.font-serif *,
+#resume-content.font-serif h1,
+#resume-content.font-serif h2,
+#resume-content.font-serif h3,
+#resume-content.font-serif p,
+#resume-content.font-serif span,
+#resume-content.font-serif div {
+  font-family: 'Times New Roman', Times, Georgia, 'Noto Serif TC', serif !important;
 }
 
-/* 強制覆蓋任何其他字體設定 */
-.font-serif * {
-  font-family: inherit !important;
+#resume-content.font-sans,
+#resume-content.font-sans *,
+#resume-content.font-sans h1,
+#resume-content.font-sans h2,
+#resume-content.font-sans h3,
+#resume-content.font-sans p,
+#resume-content.font-sans span,
+#resume-content.font-sans div {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 `;
 

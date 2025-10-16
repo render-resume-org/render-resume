@@ -29,7 +29,7 @@ export class PdfGenerator {
     const domSnapshot = generatePdfHtmlTemplate(resumeElement.outerHTML);
 
     // 調用 API 生成 PDF
-    const response = await fetch('/api/generate-pdf-from-dom', {
+    const response = await fetch('/api/generate-pdf', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
