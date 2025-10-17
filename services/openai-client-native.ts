@@ -28,10 +28,10 @@ interface InternalAIConfig {
 
 // 預設 AI 配置
 export const DEFAULT_AI_CONFIG: AIConfig = {
-    modelName: "gpt-5-mini",
-    temperature: 1,
+    modelName: "gpt-4o-mini",
+    temperature: .2,
     service_tier: "priority",
-    reasoning_effort: "low",
+    // reasoning_effort: "low",
 };
 
 // 支援的文檔類型
@@ -156,7 +156,7 @@ export class NativeOpenAIClient {
             presencePenalty: options.config?.presencePenalty,
             seed: options.config?.seed,
             service_tier: options.config?.service_tier || DEFAULT_AI_CONFIG.service_tier,
-            reasoning_effort: options.config?.reasoning_effort || DEFAULT_AI_CONFIG.reasoning_effort,
+            // reasoning_effort: options.config?.reasoning_effort || DEFAULT_AI_CONFIG.reasoning_effort,
         };
 
         console.log('📋 [Native OpenAI Client] Final config:', {

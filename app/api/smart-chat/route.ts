@@ -621,7 +621,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🤖 [API] Creating OpenAI client for smart chat (vision)');
     const client = createNativeOpenAIClient(apiKey, {
-      modelName: 'gpt-5-mini',
+      modelName: 'gpt-4o-mini',
     });
 
     // 調用 customPromptWithFiles 方法
