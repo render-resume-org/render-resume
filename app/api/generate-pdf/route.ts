@@ -28,9 +28,8 @@ export async function POST(request: NextRequest) {
           '--font-render-hinting=none',
           '--disable-font-subpixel-positioning',
         ],
-        defaultViewport: chromium.defaultViewport,
         executablePath,
-        headless: chromium.headless,
+        headless: true,
       });
     } else {
       // 本地開發環境：使用系統安裝的 Chrome/Chromium
